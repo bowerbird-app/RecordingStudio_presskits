@@ -10,6 +10,14 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
   end
 
+  test "dummy tailwind includes default layout and flatpack classes" do
+    css = Rails.root.join("app/assets/builds/tailwind.css").read
+
+    assert_includes css, "max-w-6xl"
+    assert_includes css, "button-ghost-background-color"
+    assert_includes css, "surface-subtle-background-color"
+  end
+
   test "dummy app validates recordable declarations" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_equal [ "Workspace" ], RecordingStudio.root_recordable_types

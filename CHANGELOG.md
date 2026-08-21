@@ -18,6 +18,8 @@ First product release of Recording Studio Press Kits. A press kit is the contain
 - Dummy host-only `FakeBlock` so add/remove is testable without a real section addon
 - Dummy seed for one press kit and one fake section
 - Dummy authenticated home shows that seeded outline (host sandbox, not a product editor)
+- Dummy Tailwind `@source` paths that actually find FlatPack and Recording Studio gems, so default layout CSS loads
+- Dummy `rake tailwind:bundle_sources` writes those gem paths before each Tailwind build
 - Gemspec dependencies `recording_studio`, `~> 4.2` and `recording_studio_accessible`, `~> 0.6`
 
 ### Changed

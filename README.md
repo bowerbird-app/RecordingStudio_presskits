@@ -110,6 +110,8 @@ Dummy kit pins:
 | Root Switchable | `v0.5.0` |
 | FlatPack | `v0.1.133` |
 
+Authenticated dummy screens use Recording Studio's default layout. Dummy Tailwind scans FlatPack and Recording Studio gem paths so that layout is not an unstyled box.
+
 ```bash
 cd test/dummy
 bin/rails db:setup

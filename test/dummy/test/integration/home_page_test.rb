@@ -38,6 +38,9 @@ class HomePageTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "body[data-recording-studio-default-layout='true']", count: 1
+    assert_select "body[data-theme='rounded']", count: 1
+    assert_includes response.body, "/assets/tailwind"
+    assert_includes response.body, "/assets/flat_pack/variables"
     assert_includes response.body, "Press kit: Spring launch"
     assert_includes response.body, "Fake block: Hero"
     assert_includes response.body, "Workspace: Outline Workspace"

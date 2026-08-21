@@ -38,3 +38,5 @@ Then open the app and sign in with:
 Use this app to verify press kits boot in a host. If a layout, route, asset source, or Recording Studio initializer change breaks here, the gem likely needs adjustment before reuse.
 
 Authenticated pages use Recording Studio's shared default layout. Devise sign-in keeps `layouts/application`.
+
+Dummy Tailwind must scan FlatPack components and Recording Studio's default layout, or the host looks unstyled. `bin/rails tailwindcss:build` writes gem `@source` paths first. After changing views or gems, run that build (or `bin/dev`) so CSS is not an empty shell.

@@ -93,11 +93,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
   def test_dummy_tailwind_keeps_flatpack_theme_selection_in_flatpack
     tailwind_source = File.read(File.expand_path("dummy/app/assets/tailwind/application.css", __dir__))
+    sources_task = File.read(File.expand_path("dummy/lib/tasks/tailwind_bundle_sources.rake", __dir__))
 
-    assert_includes tailwind_source, "../../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}"
-    assert_includes tailwind_source, "flatpack-*/app/components/**/*.{rb,erb}"
-    assert_includes tailwind_source, "../../../vendor/bundle/**/recording_studio/app/views/**/*.erb"
-    assert_includes tailwind_source, "recordingstudio-*/app/views/**/*.erb"
+    assert_includes tailwind_source, '@import "./bundle_sources.css"'
+    assert_includes tailwind_source, "vendor/bundle/**/bundler/gems/flatpack-*/app/components/**/*.rb"
+    assert_includes tailwind_source, "vendor/bundle/**/bundler/gems/RecordingStudio-*/app/views/**/*.erb"
+    assert_includes sources_task, '"flat_pack"'
+    assert_includes sources_task, '"recording_studio"'
     refute_includes tailwind_source, "@theme"
     refute_includes tailwind_source, ":root {"
     refute_includes tailwind_source, "--color-fp-primary"
