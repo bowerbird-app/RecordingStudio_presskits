@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-21
+
+Publish the kit, not each block. A live kit is readable without signing in. An owner can preview a kit that is not live yet. Admin shows live vs not-live work. Nothing is in production — this breaks in place.
+
+### Added
+- Publishable on `RecordingStudioPresskits::PressKit` via `.to` only (`public_controller: "recording_studio_presskits/public_press_kits"`, `public_action: :show`)
+- Public show that walks children in order and renders each type's public component. The container does not style the blocks
+- Owner preview of a kit that is not live, on Recording Studio's default layout
+- Admin widgets for live kits (`PressKit.indexable`) and kits that are not live yet. Still no vanity total
+- Dummy seed publishes **Spring launch** and leaves **Autumn recap** unpublished
+- Dummy mounts Publishable at `/` and registers `RecordingStudioPublishable::Publishable`
+
+### Changed
+- Version `0.6.0`
+- Gemspec adds `recording_studio_publishable`, `~> 0.2`
+- Dummy GitHub tag adds Publishable `v0.2.0`
+- Picker uses declared parent types so Publishable's capability child stays off the list
+- `KitQuery.live_children` skips the Publishable child
+
+### Upgrade notes
+- Add `recording_studio_publishable`, `~> 0.2` (dummy GitHub tag `v0.2.0`)
+- Run `bin/rails generate recording_studio_publishable:install` and `bin/rails generate recording_studio_publishable:migrations`
+- Register `"RecordingStudioPublishable::Publishable"` in `RecordingStudio.configure`
+- Mount `RecordingStudioPublishable::Engine` at `/` (or keep the path Publishable's README uses)
+- PressKit already includes Publishable via `.to` only. Do not use `.with`. Do not enable Publishable on FakeBlock or later section children
+- Use `PressKit.indexable` / `indexable?` for public lists. Publish and unpublish through Publishable's services
+- Replace any host list-only Admin widget with the live / not-live widgets this gem now registers
+- Publishable's child recordable uses Attachable for social cards. Dummy pins Attachable `0.4.0` so that child can boot. Do not enable Attachable on PressKit
+
 ## [0.5.0] - 2026-08-21
 
 Authenticated press kit screens and a staff list of live kits. This gem is still the container only — later addons are the sections. No public page and no publish.
@@ -155,7 +184,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.3.0

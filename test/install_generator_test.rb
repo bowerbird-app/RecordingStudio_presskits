@@ -226,6 +226,7 @@ class InstallGeneratorTest < Minitest::Test
     assert_includes install_guide, "recording_studio_orderable"
     assert_includes install_guide, "recording_studio_trashable"
     assert_includes install_guide, "recording_studio_duplicatable"
+    assert_includes install_guide, "recording_studio_publishable"
     assert_includes install_guide, "section :press_kits"
     refute_includes install_guide, "RecordingStudio v3"
   end

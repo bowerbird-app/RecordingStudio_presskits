@@ -1,0 +1,7 @@
+<% content_for :title, (@press_kit&.title.presence || "Press kit") %>
+
+<%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
+  press_kit_recording: @parent_recording || @press_kit_recording,
+  section_recordings: @section_recordings,
+  preview: false
+) %>

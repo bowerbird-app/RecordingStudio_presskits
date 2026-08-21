@@ -1,5 +1,41 @@
 # Upgrade notes
 
+## 0.6.0
+
+Publish the kit, not each block. A live kit has a public page. An owner can preview a kit that is not live yet.
+
+- Ruby 3.3 or newer
+- Rails 8.1 or newer
+- Recording Studio `~> 4.2` (dummy GitHub tag `v4.2.0`)
+- Accessible `~> 0.6` (dummy GitHub tag `v0.6.1`)
+- Admin `~> 2.0` (dummy GitHub tag `2.0.0`)
+- Orderable `~> 0.2` (dummy GitHub tag `0.2.0`)
+- Trashable `~> 0.4` (dummy GitHub tag `0.4.0`)
+- Duplicatable `~> 0.4` (dummy GitHub tag `0.4.0`)
+- Publishable `~> 0.2` (dummy GitHub tag `v0.2.0`)
+- FlatPack `>= 0.1.133` (dummy GitHub tag `v0.1.133`)
+- Root Switchable dummy tag `v0.5.0` when the dummy host uses it
+
+### Host app
+
+1. Add `recording_studio_publishable`, `~> 0.2`.
+2. Run `bin/rails generate recording_studio_publishable:install` and the Publishable migrations generator.
+3. Register `"RecordingStudioPublishable::Publishable"` next to `"RecordingStudioPresskits::PressKit"`.
+4. Mount Publishable at `/` so live kits use `/published/:uuid/:slug`. Keep Publishable's public chrome. Do not invent a press-kit public shell.
+5. PressKit already enables Publishable with `.to` only (`public_controller: "recording_studio_presskits/public_press_kits"`, `public_action: :show`). Do not use `.with`. Do not enable Publishable on section children.
+6. Publish and unpublish through `RecordingStudioPublishable::Services::Publishables::Update` (or Publishable's management screens). Prefer `publishable_public_path`, `currently_published?`, `current_publishable`, `published?`, and `indexable?`.
+7. Public lists use `PressKit.indexable`. Do not invent a second published query.
+8. Admin now has live vs not-live widgets. Remove any host list-only / vanity-total widgets for kits.
+9. Publishable's child uses Attachable for social cards. Add that gem in the host if Publishable cannot boot without it. Do not enable Attachable on PressKit.
+
+### Verify
+
+```bash
+bundle install
+BUNDLE_GEMFILE=test/dummy/Gemfile bundle install
+bundle exec rake test:all
+```
+
 ## 0.5.0
 
 Authenticated press kit screens and one Admin list of live kits. This gem is still the container only.

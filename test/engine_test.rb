@@ -176,6 +176,21 @@ class EngineTest < Minitest::Test
     assert_equal [true], registered
   end
 
+  def test_publishable_views_initializer_appends_engine_views
+    appended = []
+    controller = Class.new do
+      define_method(:append_view_path) { |path| appended << path }
+    end
+
+    ActiveSupport::Reloader.stub(:to_prepare, proc { |&block| block&.call }) do
+      find_initializer("recording_studio_presskits.publishable_views").block.call
+    end
+
+    ActiveSupport.run_load_hooks(:action_controller, controller.new)
+
+    assert(appended.any? { |path| path.to_s.end_with?("app/views") })
+  end
+
   def test_model_extension_initializer_skips_abstract_models
     to_prepare_blocks = []
     config_stub = Object.new

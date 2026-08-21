@@ -14,6 +14,10 @@ module RecordingStudioPresskits
       suffix: " (Copy)",
       exclude_children: []
     )
+    include RecordingStudio::Capabilities::Publishable.to(
+      public_controller: "recording_studio_presskits/public_press_kits",
+      public_action: :show
+    )
 
     validates :title, presence: true
   end

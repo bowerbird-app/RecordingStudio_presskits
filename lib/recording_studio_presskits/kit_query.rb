@@ -18,12 +18,24 @@ module RecordingStudioPresskits
                                   .includes(:recordable)
       end
 
+      def published_kits
+        live_kits.where(recordable_id: RecordingStudioPresskits::PressKit.indexable.select(:id))
+                 .includes(:recordable)
+                 .reorder(created_at: :desc)
+      end
+
+      def unpublished_kits
+        live_kits.where.not(recordable_id: RecordingStudioPresskits::PressKit.published.select(:id))
+                 .includes(:recordable)
+                 .reorder(created_at: :desc)
+      end
+
       def live_children(parent_recording)
         return RecordingStudio::Recording.none if parent_recording.blank?
 
         parent_recording.recording_studio_orderable_children.merge(
           RecordingStudio::Recording.recording_studio_trashable_active
-        )
+        ).where.not(recordable_type: "RecordingStudioPublishable::Publishable")
       end
 
       def live_child(parent_recording, id)

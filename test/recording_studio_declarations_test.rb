@@ -209,6 +209,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute_includes types, "Folder"
     refute_includes types, "Page"
     refute_includes types, "RecordingStudioPresskits::PressKit"
+    refute_includes types, "RecordingStudioPublishable::Publishable"
+    refute_includes types, "RecordingStudioAttachable::Attachment"
   end
 
   test "accessible is enabled on workspace and admin root" do
@@ -240,6 +242,18 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Page")
+  end
+
+  test "publishable is enabled on press kit only" do
+    assert RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "FakeBlock")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "Page")
+
+    options = RecordingStudio.capability_options(:publishable, for: "RecordingStudioPresskits::PressKit").to_h
+    assert_equal "recording_studio_presskits/public_press_kits", options[:public_controller]
+    assert_equal :show, options[:public_action]
   end
 
   test "duplicatable is enabled on press kit only" do

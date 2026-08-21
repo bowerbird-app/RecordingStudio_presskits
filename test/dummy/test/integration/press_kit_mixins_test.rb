@@ -203,6 +203,13 @@ class PressKitMixinsTest < ActiveSupport::TestCase
     assert(routes.any? { |path| path.start_with?("/recording_studio_orderable") })
     assert(routes.any? { |path| path.start_with?("/recording_studio_trashable") })
     assert(routes.any? { |path| path.start_with?("/recording_studio_duplicatable") })
+    publishable_routes = RecordingStudioPublishable::Engine.routes.routes.map { |route| route.path.spec.to_s }
+    assert(publishable_routes.any? { |path| path.include?("/published/:uuid/:slug") })
+  end
+
+  test "fake block does not enable publishable" do
+    refute RecordingStudio.capability_enabled?(:publishable, for: FakeBlock)
+    assert RecordingStudio.capability_enabled?(:publishable, for: RecordingStudioPresskits::PressKit)
   end
 
   private

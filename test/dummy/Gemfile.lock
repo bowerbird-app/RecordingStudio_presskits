@@ -26,6 +26,15 @@ GIT
       recording_studio_accessible (~> 0.6)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
+  revision: d0a845eb1ad1fea8a562b81ecf3bd8f8b08676ef
+  tag: 0.4.0
+  specs:
+    recording_studio_attachable (0.4.0)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_duplicatable.git
   revision: b6f421c193194b8126789ecf1ac1fb9fbf4ef05a
   tag: 0.4.0
@@ -44,6 +53,16 @@ GIT
       flat_pack (>= 0.1.74)
       rails (~> 8.1.0)
       recording_studio (~> 4.1)
+
+GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_publishable.git
+  revision: cba1087352609388549edaa24b15a0d2f8d19528
+  tag: v0.2.0
+  specs:
+    recording_studio_publishable (0.2.0)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+      view_component (>= 3.0, < 5.0)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_root_switchable.git
@@ -80,7 +99,7 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_presskits (0.5.0)
+    recording_studio_presskits (0.6.0)
       flat_pack (>= 0.1.133)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
@@ -88,6 +107,7 @@ PATH
       recording_studio_admin (~> 2.0)
       recording_studio_duplicatable (~> 0.4)
       recording_studio_orderable (~> 0.2)
+      recording_studio_publishable (~> 0.2)
       recording_studio_trashable (~> 0.4)
 
 GEM
@@ -513,9 +533,11 @@ DEPENDENCIES
   recording_studio!
   recording_studio_accessible!
   recording_studio_admin!
+  recording_studio_attachable!
   recording_studio_duplicatable!
   recording_studio_orderable!
   recording_studio_presskits!
+  recording_studio_publishable!
   recording_studio_root_switchable!
   recording_studio_trashable!
   rubocop-rails-omakase
@@ -645,9 +667,11 @@ CHECKSUMS
   recording_studio (4.2.0)
   recording_studio_accessible (0.6.1)
   recording_studio_admin (2.0.0)
+  recording_studio_attachable (0.4.0)
   recording_studio_duplicatable (0.4.0)
   recording_studio_orderable (0.2.0)
-  recording_studio_presskits (0.5.0)
+  recording_studio_presskits (0.6.0)
+  recording_studio_publishable (0.2.0)
   recording_studio_root_switchable (0.5.0)
   recording_studio_trashable (0.4.0)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4

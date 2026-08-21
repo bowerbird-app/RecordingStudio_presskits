@@ -6,10 +6,11 @@ module RecordingStudioPresskits
       key "press_kits"
       icon :folder
       title "Press kits"
-      subtitle "Kits people are filling right now"
+      subtitle "What's live, and what still needs a push"
       blast_radius :site
 
-      widget "widgets.press_kits.list"
+      widget "widgets.press_kits.published"
+      widget "widgets.press_kits.unpublished"
     end
   end
 end

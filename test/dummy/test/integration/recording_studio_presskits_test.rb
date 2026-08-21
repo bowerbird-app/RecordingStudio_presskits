@@ -44,6 +44,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.column_exists?(:recording_studio_recordings, :trashed_at)
     assert connection.column_exists?(:recording_studio_recordings, :trash_root)
     assert connection.table_exists?(:recording_studio_trashable_retention_settings)
+    assert connection.table_exists?(:recording_studio_publishable_publishables)
     refute connection.table_exists?(:recording_studio_access_boundaries)
     refute connection.table_exists?(:recording_studio_device_sessions)
   end
@@ -59,8 +60,10 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     folder = Folder.find_by!(name: "Product Docs")
     page = Page.find_by!(title: "Getting Started")
     press_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Spring launch")
+    unpublished_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Autumn recap")
     hero = FakeBlock.find_by!(title: "Hero")
     quotes = FakeBlock.find_by!(title: "Quotes")
+    notes = FakeBlock.find_by!(title: "Notes")
     admin_root = AdminRoot.find_by!(name: "Admin")
     root_recording = RecordingStudio::Recording.find_by!(recordable: workspace)
     accessible_root_recording = RecordingStudio::Recording.find_by!(recordable: accessible_workspace)
@@ -69,8 +72,10 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     folder_recording = RecordingStudio::Recording.find_by!(recordable: folder)
     page_recording = RecordingStudio::Recording.find_by!(recordable: page)
     press_kit_recording = RecordingStudio::Recording.find_by!(recordable: press_kit)
+    unpublished_kit_recording = RecordingStudio::Recording.find_by!(recordable: unpublished_kit)
     hero_recording = RecordingStudio::Recording.find_by!(recordable: hero)
     quotes_recording = RecordingStudio::Recording.find_by!(recordable: quotes)
+    notes_recording = RecordingStudio::Recording.find_by!(recordable: notes)
 
     assert_nil Current.actor
     assert_nil root_recording.parent_recording_id
@@ -92,9 +97,15 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal root_recording, hero_recording.root_recording
     assert_equal press_kit_recording, quotes_recording.parent_recording
     assert_equal root_recording, quotes_recording.root_recording
+    assert_equal unpublished_kit_recording, notes_recording.parent_recording
+    assert press_kit.published?
+    assert press_kit.indexable?
+    assert press_kit_recording.currently_published?
+    refute unpublished_kit.published?
+    refute unpublished_kit_recording.currently_published?
     assert_equal 3, Workspace.count
-    assert_operator RecordingStudioPresskits::PressKit.count, :>=, 1
-    assert_operator FakeBlock.count, :>=, 2
+    assert_operator RecordingStudioPresskits::PressKit.count, :>=, 2
+    assert_operator FakeBlock.count, :>=, 3
 
     assert_no_difference -> { User.count } do
       assert_no_difference -> { RecordingStudio::Recording.count } do
@@ -122,6 +133,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: RecordingStudioPresskits::PressKit)
     assert RecordingStudio.capability_enabled?(:trashable, for: FakeBlock)
     assert RecordingStudio.capability_enabled?(:duplicatable, for: RecordingStudioPresskits::PressKit)
+    assert RecordingStudio.capability_enabled?(:publishable, for: RecordingStudioPresskits::PressKit)
+    refute RecordingStudio.capability_enabled?(:publishable, for: FakeBlock)
     refute RecordingStudio.capability_enabled?(:accessible, for: Folder)
     refute RecordingStudio.capability_enabled?(:accessible, for: Page)
     refute RecordingStudio.capability_enabled?(:accessible, for: RecordingStudioPresskits::PressKit)
