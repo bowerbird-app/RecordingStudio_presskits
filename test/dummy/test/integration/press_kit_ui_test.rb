@@ -159,11 +159,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     sign_in @user
     switch_to_root(@root)
 
+    title = "Winter brief #{SecureRandom.hex(4)}"
     assert_difference -> { RecordingStudioPresskits::PressKit.count }, 1 do
-      post recording_studio_presskits.press_kits_path, params: { press_kit: { title: "Autumn recap" } }
+      post recording_studio_presskits.press_kits_path, params: { press_kit: { title: title } }
     end
 
-    kit = RecordingStudio::Recording.find_by!(recordable: RecordingStudioPresskits::PressKit.find_by!(title: "Autumn recap"))
+    press_kit = RecordingStudioPresskits::PressKit.where(title: title).order(:created_at).last
+    kit = RecordingStudioPresskits::KitQuery.for_root(@root).find { |recording| recording.recordable_id == press_kit.id }
     assert_redirected_to recording_studio_presskits.press_kit_path(kit)
     assert_equal @root, kit.parent_recording
   end
