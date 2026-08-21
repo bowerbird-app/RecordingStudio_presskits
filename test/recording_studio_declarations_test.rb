@@ -12,6 +12,12 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal ["Workspace"], RecordingStudio.root_recordable_types
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for("Folder")
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for(Page)
+    assert_equal ["Workspace"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
+    assert_equal ["RecordingStudioPresskits::PressKit"], RecordingStudio.allowed_parent_types_for("FakeBlock")
+    assert_equal "Press kit", RecordingStudio.recordable_type_label("RecordingStudioPresskits::PressKit")
+    assert_equal "RecordingStudioPresskits::PressKit", RecordingStudioPresskits.press_kit_type_name
+    refute RecordingStudio.root_allowed?("RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.root_allowed?("FakeBlock")
   end
 
   test "root recordable creates a root recording" do
@@ -82,15 +88,135 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "Page cannot be recorded under Page", error.message
   end
 
-  test "accessible is enabled on workspace and example mixin stays opt-in" do
+  test "press kit can be recorded under the host workspace root" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Press Workspace")))
+
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::PressKit",
+      parent_recording: root_recording
+    )
+
+    recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+
+    assert_equal root_recording, recording.parent_recording
+    assert_equal root_recording, recording.root_recording
+    assert_kind_of RecordingStudioPresskits::PressKit, recording.recordable
+    assert_equal "recording_studio_press_kits", recording.recordable.class.table_name
+  end
+
+  test "many press kits can live under one workspace root" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Many Kits Workspace")))
+
+    first = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+    second = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Autumn recap")
+    end
+
+    assert_equal root_recording, first.parent_recording
+    assert_equal root_recording, second.parent_recording
+    assert_not_equal first.id, second.id
+  end
+
+  test "press kit title is required" do
+    press_kit = RecordingStudioPresskits::PressKit.new
+
+    assert_not press_kit.valid?
+    assert_includes press_kit.errors[:title], "can't be blank"
+  end
+
+  test "press kit cannot be created as a root" do
+    press_kit = RecordingStudioPresskits::PressKit.create!(
+      title: unique_name("Root Rejected Press Kit")
+    )
+
+    assert_raises(RecordingStudio::RootNotAllowed) do
+      RecordingStudio.root_recording_for(press_kit)
+    end
+  end
+
+  test "press kit cannot be recorded under a folder" do
+    workspace = Workspace.create!(name: unique_name("Press Parent Workspace"))
+    root_recording = RecordingStudio.root_recording_for(workspace)
+    folder_recording = record_child(Folder.new(name: unique_name("Press Folder")), root_recording, root_recording)
+
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::PressKit",
+      parent_recording: folder_recording
+    )
+
+    error = assert_raises(RecordingStudio::InvalidParent) do
+      root_recording.record(
+        RecordingStudioPresskits::PressKit,
+        parent_recording: folder_recording
+      ) do |press_kit|
+        press_kit.title = unique_name("Nested Press Kit")
+      end
+    end
+
+    assert_equal "RecordingStudioPresskits::PressKit cannot be recorded under Folder", error.message
+  end
+
+  test "fake block is allowed under a press kit and rejected under the workspace" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Block Workspace")))
+    kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+
+    assert RecordingStudio.parent_allowed?(child_type: "FakeBlock", parent_recording: kit_recording)
+    refute RecordingStudio.parent_allowed?(child_type: "FakeBlock", parent_recording: root_recording)
+
+    block_recording = kit_recording.record(FakeBlock) do |fake_block|
+      fake_block.title = "Hero"
+    end
+
+    assert_equal kit_recording, block_recording.parent_recording
+    assert_equal root_recording, block_recording.root_recording
+    assert_kind_of FakeBlock, block_recording.recordable
+
+    error = assert_raises(RecordingStudio::InvalidParent) do
+      root_recording.record(FakeBlock) { |fake_block| fake_block.title = "Wrong parent" }
+    end
+    assert_equal "FakeBlock cannot be recorded under Workspace", error.message
+  end
+
+  test "press kit revise creates a new snapshot and log_event! appends history" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Revise Workspace")))
+    recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Office hours")
+    end
+    original_id = recording.recordable_id
+
+    recording.log_event!(action: "noted")
+    root_recording.revise(recording) do |press_kit|
+      press_kit.title = "Wednesday mornings."
+    end
+
+    recording.reload
+    assert_not_equal original_id, recording.recordable_id
+    assert_equal "Wednesday mornings.", recording.recordable.title
+    assert_equal 1, recording.events.where(action: "noted").count
+  end
+
+  test "picker types include fake block and exclude types that do not allow press kit" do
+    types = RecordingStudioPresskits.picker_types
+
+    assert_includes types, "FakeBlock"
+    refute_includes types, "Workspace"
+    refute_includes types, "Folder"
+    refute_includes types, "Page"
+    refute_includes types, "RecordingStudioPresskits::PressKit"
+  end
+
+  test "accessible is enabled on workspace only" do
     assert RecordingStudio.capability_enabled?(:accessible, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Folder")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Page")
-
-    assert RecordingStudio.capability_enabled?(:example, for: "Workspace")
-    refute RecordingStudio.capability_enabled?(:example, for: "Folder")
-    refute RecordingStudio.capability_enabled?(:example, for: "Page")
-    assert_equal({ label: "dummy workspace" }, RecordingStudio.capability_options(:example, for: "Workspace"))
+    refute RecordingStudio.capability_enabled?(:accessible, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.capability_enabled?(:accessible, for: "FakeBlock")
   end
 
   private
