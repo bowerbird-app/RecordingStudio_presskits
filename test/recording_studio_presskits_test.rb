@@ -147,7 +147,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     view_source = File.read(view_path)
 
     assert_includes view_source, 'title: "Dummy host"'
-    assert_includes view_source, "FlatPack::Card::Component"
+    assert_includes view_source, "FlatPack::Tree::Component"
     assert_includes view_source, "dummy_page_nav"
     refute_includes view_source, "Template Demo"
     refute_includes view_source, "FlatPack::Breadcrumb::Component"

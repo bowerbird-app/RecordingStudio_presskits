@@ -116,7 +116,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one kit and one host-only fake section so later add/remove work is not empty.
+Seeds one kit and one host-only fake section so later add/remove work is not empty. After sign-in, dummy home shows that outline under Studio Workspace. It is a host sandbox, not the product editor.
 
 ## Engine internals
 
