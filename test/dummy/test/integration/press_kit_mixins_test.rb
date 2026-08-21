@@ -150,12 +150,13 @@ class PressKitMixinsTest < ActiveSupport::TestCase
     kit = record_press_kit("Spring launch")
     record_fake_block(kit, "Hero")
 
+    original_title = kit.recordable.title
     duplicate = kit.duplicate_in_place!(actor: @user)
 
     assert_equal @root, duplicate.parent_recording
     assert_equal @root, duplicate.root_recording
     assert_kind_of RecordingStudioPresskits::PressKit, duplicate.recordable
-    assert_equal "Spring launch (Copy)", duplicate.recordable.title
+    assert_equal "#{original_title} (Copy)", duplicate.recordable.title
     refute_equal kit.id, duplicate.id
     assert_equal 1, duplicate.events.where(action: "duplicated").count
 
@@ -169,6 +170,7 @@ class PressKitMixinsTest < ActiveSupport::TestCase
   test "duplication service copies a press kit under the same workspace" do
     kit = record_press_kit("Office hours")
     record_fake_block(kit, "Quotes")
+    original_title = kit.recordable.title
 
     result = RecordingStudioDuplicatable::Services::DuplicationService.call(
       recording: kit,
@@ -177,7 +179,7 @@ class PressKitMixinsTest < ActiveSupport::TestCase
 
     assert_predicate result, :success?
     duplicate = result.value
-    assert_equal "Office hours (Copy)", duplicate.recordable.title
+    assert_equal "#{original_title} (Copy)", duplicate.recordable.title
     assert_equal ["Quotes (Copy)"], duplicate.child_recordings.map { |child| child.recordable.title }
   end
 
