@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-21
+
+Authenticated press kit screens and a staff list of live kits. This gem is still the container only — later addons are the sections. No public page and no publish.
+
+### Added
+- Mountable user slice: index of the current root's kits, kit editor, picker add, remove, and reorder
+- Cards and table views of the same kit list, switched with `FlatPack::SegmentedButtons::Component`
+- Reusable ViewComponents for index, kit show, child rows, and the section picker
+- Empty index and empty kit states
+- Admin section `press_kits` with one list widget of live kits (`recording_studio_admin`, `~> 2.0`)
+- Install generator writes `parent_root_type` and enables `section :press_kits` when an AdminRoot model exists
+- Dummy Admin root, Admin mount, and Accessible bootstrap so the seeded admin user can open the list
+- Dummy `FakeBlock::Component` so the kit page can render host children without styling them
+
+### Changed
+- Version `0.5.0`
+- Gemspec adds `recording_studio_admin`, `~> 2.0` and `flat_pack`, `>= 0.1.133`
+- Dummy GitHub tags add Recording Studio Admin `2.0.0`
+- PressKit `allowed_parent_types` uses `RecordingStudioPresskits.parent_root_type` (default `"Workspace"`)
+- Dummy `/` redirects to the mounted press kit index
+- Dummy app name is "Press kits"
+- Dummy overrides Recording Studio's default layout so `<html data-theme="rounded">` wraps index, kit show, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables`. Authenticated screens still use `UsesDefaultLayout`.
+
+### Removed
+- Dummy "Dummy host" landing page and workspace outline tree
+
+### Upgrade notes
+- Add `recording_studio_admin`, `~> 2.0` and FlatPack `>= 0.1.133`
+- Run `bin/rails generate recording_studio_presskits:install` again (or mount the engine and copy the new initializer keys)
+- Set `config.parent_root_type` to your host root class. Dummy stays `Workspace`
+- Mount the user slice and point `/` at it, or redirect there
+- Install Admin 2.0, create an admin root, enable `section :press_kits`, and grant Accessible access on that root
+- Register a component per child type with `register_section_component`. Dummy registers `FakeBlock::Component`
+- Do not enable Publishable, Attachable, or API in this slice
+
 ## [0.4.0] - 2026-08-21
 
 Press kits can be ordered, trashed, restored, and duplicated. This gem is still the container only — no editor, no public page, no publish.
@@ -119,7 +154,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.3.0
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.2.0

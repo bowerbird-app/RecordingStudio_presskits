@@ -1,5 +1,41 @@
 # Upgrade notes
 
+## 0.5.0
+
+Authenticated press kit screens and one Admin list of live kits. This gem is still the container only.
+
+- Ruby 3.3 or newer
+- Rails 8.1 or newer
+- Recording Studio `~> 4.2` (dummy GitHub tag `v4.2.0`)
+- Accessible `~> 0.6` (dummy GitHub tag `v0.6.1`)
+- Admin `~> 2.0` (dummy GitHub tag `2.0.0`)
+- Orderable `~> 0.2` (dummy GitHub tag `0.2.0`)
+- Trashable `~> 0.4` (dummy GitHub tag `0.4.0`)
+- Duplicatable `~> 0.4` (dummy GitHub tag `0.4.0`)
+- FlatPack `>= 0.1.133` (dummy GitHub tag `v0.1.133`)
+- Root Switchable dummy tag `v0.5.0` when the dummy host uses it
+
+### Host app
+
+1. Add `recording_studio_admin`, `~> 2.0` and FlatPack `>= 0.1.133`.
+2. Re-run `bin/rails generate recording_studio_presskits:install` (same generator, not a second identity).
+3. Set `config.parent_root_type` to your host root class. Dummy stays `Workspace`.
+4. Mount the user slice and point `/` at it, or redirect there.
+5. Install Admin 2.0, mount it under an admin root, enable `section :press_kits`, and grant Accessible access on that root. Do not use `user.admin?`.
+6. Register a component per child type with `register_section_component`. The container walks live children in order (`KitQuery.live_children`) and renders those components.
+7. Keep writes on `record` / `revise` / `log_event!`. Query live kits with `recording_studio_trashable_active`.
+8. Dummy puts Flatpack's built-in rounded theme on `<html data-theme="rounded">` via a host override of `recording_studio/default_layout`. Keep `UsesDefaultLayout`. Do not invent a custom theme.
+
+Do not add Publishable, Attachable, or API in this slice.
+
+### Verify
+
+```bash
+bundle install
+BUNDLE_GEMFILE=test/dummy/Gemfile bundle install
+bundle exec rake test:all
+```
+
 ## 0.4.0
 
 Press kits can be ordered, trashed, restored, and duplicated. This gem is still the container only.

@@ -6,7 +6,7 @@ module RecordingStudioPresskits
 
     recording_studio_recordable label: "Press kit",
                                 root: false,
-                                allowed_parent_types: ["Workspace"]
+                                allowed_parent_types: [RecordingStudioPresskits.parent_root_type]
 
     include RecordingStudio::Capabilities::Orderable.to
     include RecordingStudio::Capabilities::Trashable.to

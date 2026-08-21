@@ -19,7 +19,9 @@ Layout/LineLength:
 # Relax metrics for test files and generators
 Metrics/ClassLength:
   Exclude:
-    - 'test/**/*'
+    - "test/**/*"
+    - "lib/generators/**/*"
+    - "lib/recording_studio_presskits/engine.rb"
 
 Metrics/MethodLength:
   Exclude:

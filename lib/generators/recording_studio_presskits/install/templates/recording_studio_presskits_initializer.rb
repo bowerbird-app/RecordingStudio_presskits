@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
 RecordingStudioPresskits.configure do |config|
-  # Hosts can set options here. Press kits do not need extra config in this slice.
+  # Host names the parent root type. Dummy and the generator default stay Workspace.
+  config.parent_root_type = "<%= parent_root_type %>"
+  config.authentication_method = :authenticate_user!
+  config.current_actor_method = :current_user
 end

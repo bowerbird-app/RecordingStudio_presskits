@@ -5,11 +5,12 @@
 - This repository is Recording Studio Press Kits: a press kit is the container under a host root. Later addons supply the sections.
 - Preserve engine namespace isolation under `RecordingStudioPresskits`.
 - Treat `docs/gem_template/` as architectural reference material. The public README is the product. The dummy app is a host that proves the gem.
-- Keep changes small and scoped. This slice has no editor, public page, publish, or API.
+- Keep changes small and scoped. This slice ships the authenticated editor and one Admin list. It has no public page, publish, or API.
 
 ## UI Conventions
 
-- FlatPack is the default UI system for later screens. This slice does not add product UI.
+- FlatPack is the default UI system. Compose Card, Table, Grid, SegmentedButtons, EmptyState, Picker, PageTitle, PageNav, Button, and List. Do not invent a custom view-mode widget.
+- Dummy authenticated screens keep `UsesDefaultLayout` and put Flatpack's built-in rounded theme on `<html data-theme="rounded">`. Do not invent a custom theme.
 - The approved UI reference is the live FlatPack demo app at https://flatpack.bowerbird.io/ when you need to inspect current shared components and patterns.
 - When editing ERB views, prefer `render FlatPack::...` components over custom HTML when an equivalent component exists.
 
@@ -17,7 +18,7 @@
 
 - The standard root validation command is `bundle exec rake test:all` from the repository root.
 - If a change affects dummy app boot, assets, or migrations, also validate the dummy app setup the same way CI does.
-- Cover Press kit declaration, root rejection, parent rejection, picker types, Accessible grants on the workspace root, Orderable reorder, Trashable trash/restore, and Duplicatable in-place copy in Minitest.
+- Cover Press kit declaration, mount, index cards and table, empty states, kit show with children, picker add, remove, reorder, Admin list widget, and Accessible 401/403 gates in Minitest.
 
 ## Repo Conventions
 

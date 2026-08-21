@@ -2,21 +2,21 @@
 
 A press kit is the folder you fill. Later addons drop in the sections — bio, downloads, logos. This gem is the container only.
 
-Kits sit under your workspace. You can have many. When the time comes, you publish the kit, not each block.
-
-This slice does not ship an editor, a public page, or publish yet. Hosts register the type and write through Recording Studio.
+Kits sit under your workspace. You can have many. This slice ships the authenticated editor: an index of kits and a kit page for adding, removing, and reordering sections. Staff get one Admin list of live kits. Publish is still later.
 
 ## Install
 
-Add the gem next to Recording Studio 4.2, Accessible, and the three mixins PressKit opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.2, Accessible, Admin 2.0, and the three mixins PressKit opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
 gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.1"
+gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "2.0.0"
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "0.2.0"
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "0.4.0"
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "0.4.0"
+gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.133"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
 
@@ -24,9 +24,11 @@ gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presski
 # gemspec / host Gemfile constraints
 gem "recording_studio", "~> 4.2"
 gem "recording_studio_accessible", "~> 0.6"
+gem "recording_studio_admin", "~> 2.0"
 gem "recording_studio_orderable", "~> 0.2"
 gem "recording_studio_trashable", "~> 0.4"
 gem "recording_studio_duplicatable", "~> 0.4"
+gem "flat_pack", ">= 0.1.133"
 ```
 
 Then:
@@ -40,14 +42,17 @@ bin/rails generate recording_studio_orderable:migrations
 bin/rails generate recording_studio_trashable:install
 bin/rails generate recording_studio_trashable:migrations
 bin/rails generate recording_studio_duplicatable:install
+bin/rails generate recording_studio_admin:install
 bin/rails db:migrate
 ```
 
-Duplicatable has no engine-owned schema. Run its install generator so the host mounts the engine and gets the initializer.
+The install generator mounts the user slice, writes `parent_root_type`, and enables `section :press_kits` when an `AdminRoot` model is already there. Duplicatable has no engine-owned schema.
+
+Point the host root at the mounted slice, or redirect `/` there. Dummy redirects `/` to `/recording_studio_presskits`.
 
 ## Press kits
 
-Register the type next to your host root. Dummy uses `Workspace`.
+Register the type next to your host root. Dummy uses `Workspace`. Name that parent on install (`--parent-root-type`) or in the initializer. There is one declaration, not a second DSL.
 
 ```ruby
 RecordingStudio.configure do |config|
@@ -57,6 +62,12 @@ RecordingStudio.configure do |config|
   ]
   config.require_recordable_declarations = true
 end
+
+RecordingStudioPresskits.configure do |config|
+  config.parent_root_type = "Workspace"
+  config.authentication_method = :authenticate_user!
+  config.current_actor_method = :current_user
+end
 ```
 
 The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, and Duplicatable with the current `.to` API only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path for these mixins.
@@ -64,7 +75,7 @@ The kit declares itself as a nested type under that root, then opts into Orderab
 ```ruby
 recording_studio_recordable label: "Press kit",
                             root: false,
-                            allowed_parent_types: ["Workspace"]
+                            allowed_parent_types: [RecordingStudioPresskits.parent_root_type]
 
 include RecordingStudio::Capabilities::Orderable.to
 include RecordingStudio::Capabilities::Trashable.to
@@ -121,7 +132,6 @@ kit_recording.recording_studio_trashable_trash!(actor: current_user)
 kit_recording.recording_studio_trashable_restore!(actor: current_user)
 
 kit_recording.duplicate_in_place!(actor: current_user)
-# or RecordingStudioDuplicatable::Services::DuplicationService.call(...)
 ```
 
 Prefer `RecordingStudio::Recording.recording_studio_trashable_active` over a host `default_scope`, unless the host already needs one for queries.
@@ -133,7 +143,47 @@ RecordingStudioPresskits.picker_types
 # => types whose allowed_parent_types include RecordingStudioPresskits::PressKit
 ```
 
-Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible.
+The kit page walks children in order and renders each type's component. Register a host or addon component; the container does not style the blocks.
+
+```ruby
+RecordingStudioPresskits.register_section_component("FakeBlock", "FakeBlock::Component")
+```
+
+Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible. Missing access fails closed.
+
+## Screens
+
+The mounted user slice uses Recording Studio's default layout (back and close). Index and kit pages are ViewComponents you can reuse or replace.
+
+- Index: the current root's live kits. Same list as cards or a table, switched with `FlatPack::SegmentedButtons::Component`.
+- Empty index: what happened, and a way to make a kit.
+- Kit page: children in order, picker from `picker_types`, remove, reorder. Empty kit still shows the picker.
+
+One primary action per page: **New press kit** on the index, **Create** on the new form, **Add a section** on the kit page via the picker.
+
+## Admin
+
+This gem registers one Admin section, `press_kits`, with one list widget of live kits. Enable it on your admin root. Do not invent published counts or a vanity total.
+
+```ruby
+class AdminRoot < ApplicationRecord
+  include RecordingStudioAdmin::AllowsAdminSections
+
+  recording_studio_recordable label: "Admin", root: true, shared: false
+  RecordingStudio.enable_capability(:accessible, on: self)
+
+  recording_studio_admin_sections do
+    section :press_kits
+  end
+end
+```
+
+```ruby
+mount RecordingStudioAccessible::Engine, at: "/admin/access"
+recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits
+```
+
+Staff reach it through Accessible grants on the admin root, not `user.admin?`. Missing auth or access fails closed.
 
 ## Dummy host
 
@@ -150,13 +200,14 @@ Dummy kit pins:
 |-----|-----|
 | Recording Studio | `v4.2.0` |
 | Accessible | `v0.6.1` |
+| Admin | `2.0.0` |
 | Root Switchable | `v0.5.0` |
 | FlatPack | `v0.1.133` |
 | Orderable | `0.2.0` |
 | Trashable | `0.4.0` |
 | Duplicatable | `0.4.0` |
 
-Authenticated dummy screens use Recording Studio's default layout. Dummy Tailwind scans FlatPack and Recording Studio gem paths so that layout is not an unstyled box.
+Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, and this gem so that layout is not an unstyled box.
 
 ```bash
 cd test/dummy
@@ -164,7 +215,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one kit and two host-only fake sections so reorder is obvious. After sign-in, dummy home shows that outline under Studio Workspace. It is a host sandbox, not the product editor. Dummy Workspace also enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` enables Trashable so remove is testable without a real addon.
+Seeds one kit titled **Spring launch** and two host-only fake sections (**Hero**, **Quotes**) so reorder is obvious. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` enables Trashable so remove is testable without a real addon. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
 ## Engine internals
 

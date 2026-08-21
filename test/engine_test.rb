@@ -35,11 +35,11 @@ class EngineTest < Minitest::Test
       hook_payload = cfg
     end
 
-    xcfg = Struct.new(:recording_studio_presskits).new({ enable_feature_x: true })
+    xcfg = Struct.new(:recording_studio_presskits).new({ current_actor_method: :current_person })
     app_config = Struct.new(:x).new(xcfg)
     app = Struct.new(:config) do
       def config_for(_name)
-        { api_key: "from_yaml", timeout: 12 }
+        { parent_root_type: "Site", authentication_method: :sign_in }
       end
     end.new(app_config)
 
@@ -47,15 +47,15 @@ class EngineTest < Minitest::Test
 
     assert hook_called
     assert_equal RecordingStudioPresskits.configuration, hook_payload
-    assert_equal "from_yaml", RecordingStudioPresskits.configuration.api_key
-    assert_equal 12, RecordingStudioPresskits.configuration.timeout
-    assert_equal true, RecordingStudioPresskits.configuration.enable_feature_x
+    assert_equal "Site", RecordingStudioPresskits.configuration.parent_root_type
+    assert_equal :sign_in, RecordingStudioPresskits.configuration.authentication_method
+    assert_equal :current_person, RecordingStudioPresskits.configuration.current_actor_method
   end
 
   def test_load_config_handles_errors_and_each_pair_fallback
     pair_config = Class.new do
       def each_pair
-        yield(:timeout, 15)
+        yield(:parent_root_type, "Organisation")
       end
     end.new
 
@@ -70,7 +70,7 @@ class EngineTest < Minitest::Test
 
     find_initializer("recording_studio_presskits.load_config").block.call(app)
 
-    assert_equal 15, RecordingStudioPresskits.configuration.timeout
+    assert_equal "Organisation", RecordingStudioPresskits.configuration.parent_root_type
   end
 
   def test_load_config_swallow_each_pair_errors
@@ -84,14 +84,14 @@ class EngineTest < Minitest::Test
     app_config = Struct.new(:x).new(xcfg)
     app = Struct.new(:config) do
       def config_for(_name)
-        { api_key: "ok" }
+        { parent_root_type: "Site" }
       end
     end.new(app_config)
 
     # Should not raise even if xcfg.each_pair fails.
     find_initializer("recording_studio_presskits.load_config").block.call(app)
 
-    assert_equal "ok", RecordingStudioPresskits.configuration.api_key
+    assert_equal "Site", RecordingStudioPresskits.configuration.parent_root_type
   end
 
   def test_load_config_is_noop_without_config_sources
@@ -99,9 +99,9 @@ class EngineTest < Minitest::Test
 
     find_initializer("recording_studio_presskits.load_config").block.call(app)
 
-    assert_nil RecordingStudioPresskits.configuration.api_key
-    assert_equal 5, RecordingStudioPresskits.configuration.timeout
-    assert_equal false, RecordingStudioPresskits.configuration.enable_feature_x
+    assert_equal "Workspace", RecordingStudioPresskits.configuration.parent_root_type
+    assert_equal :authenticate_user!, RecordingStudioPresskits.configuration.authentication_method
+    assert_equal :current_user, RecordingStudioPresskits.configuration.current_actor_method
   end
 
   def test_load_config_ignores_non_enumerable_yaml_and_merge_errors
@@ -111,7 +111,7 @@ class EngineTest < Minitest::Test
       end
     end.new
 
-    xcfg = Struct.new(:recording_studio_presskits).new({ timeout: 22 })
+    xcfg = Struct.new(:recording_studio_presskits).new({ parent_root_type: "Account" })
     app_config = Struct.new(:x).new(xcfg)
     app = Struct.new(:config) do
       attr_accessor :yaml
@@ -124,7 +124,7 @@ class EngineTest < Minitest::Test
 
     find_initializer("recording_studio_presskits.load_config").block.call(app)
 
-    assert_equal 22, RecordingStudioPresskits.configuration.timeout
+    assert_equal "Account", RecordingStudioPresskits.configuration.parent_root_type
   end
 
   def test_apply_extension_initializers_register_active_support_on_load_callbacks
@@ -140,6 +140,40 @@ class EngineTest < Minitest::Test
     end
 
     assert_equal 2, to_prepare_blocks.size
+  end
+
+  def test_helpers_initializer_registers_a_to_prepare_callback
+    to_prepare_blocks = []
+    config_stub = Object.new
+    config_stub.define_singleton_method(:to_prepare) do |&block|
+      to_prepare_blocks << block
+    end
+
+    RecordingStudioPresskits::Engine.stub(:config, config_stub) do
+      find_initializer("recording_studio_presskits.helpers").block.call
+    end
+
+    assert_equal 1, to_prepare_blocks.size
+    to_prepare_blocks.first.call
+  end
+
+  def test_admin_initializer_registers_the_press_kits_section
+    to_prepare_blocks = []
+    config_stub = Object.new
+    config_stub.define_singleton_method(:to_prepare) do |&block|
+      to_prepare_blocks << block
+    end
+
+    RecordingStudioPresskits::Engine.stub(:config, config_stub) do
+      find_initializer("recording_studio_presskits.admin").block.call
+    end
+
+    registered = []
+    RecordingStudioPresskits::Admin.stub(:register!, -> { registered << true }) do
+      to_prepare_blocks.first.call
+    end
+
+    assert_equal [true], registered
   end
 
   def test_model_extension_initializer_skips_abstract_models

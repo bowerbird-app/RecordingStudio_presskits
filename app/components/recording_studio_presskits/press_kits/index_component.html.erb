@@ -1,0 +1,49 @@
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Press kits",
+    subtitle: "The folders you fill. Sections drop in later.",
+    variant: :h1
+  ) %>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <%= render FlatPack::SegmentedButtons::Component.new do |group| %>
+      <% group.button(text: "Cards", selected: !table_view?, href: @cards_path) %>
+      <% group.button(text: "Table", selected: table_view?, href: @table_path) %>
+    <% end %>
+
+    <%= render FlatPack::Button::Component.new(
+      text: "New press kit",
+      style: :primary,
+      href: @new_path
+    ) %>
+  </div>
+
+  <% if @press_kit_recordings.empty? %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: "Nothing here yet",
+      description: "Make a press kit and start filling it.",
+      icon: :inbox
+    ) %>
+  <% elsif table_view? %>
+    <%= render FlatPack::Table::Component.new(data: @press_kit_recordings) do |table| %>
+      <% table.column(title: "Name", html: ->(recording) { helpers.link_to(helpers.presskits_title_for(recording), @show_path.call(recording)) }) %>
+      <% table.column(title: "Added", html: ->(recording) { recording.created_at&.to_fs(:long) }) %>
+    <% end %>
+  <% else %>
+    <%= render FlatPack::Grid::Component.new(cols: 3, gap: :md) do %>
+      <% @press_kit_recordings.each do |recording| %>
+        <%= render FlatPack::Card::Component.new(
+          style: :interactive,
+          clickable: true,
+          href: @show_path.call(recording)
+        ) do |card| %>
+          <% card.body do %>
+            <p class="text-base font-semibold text-(--surface-content-color)">
+              <%= helpers.presskits_title_for(recording) %>
+            </p>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

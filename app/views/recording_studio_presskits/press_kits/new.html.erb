@@ -1,0 +1,30 @@
+<% presskits_page_nav(
+  title: "New press kit",
+  back_url: press_kits_path,
+  back_label: "Press kits",
+  close_url: press_kits_path
+) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "New press kit",
+    subtitle: "Name it something you will remember on launch day.",
+    variant: :h1
+  ) %>
+
+  <%= form_with model: @press_kit, url: press_kits_path, local: true, class: "flex max-w-xl flex-col gap-4" do |form| %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "press_kit[title]",
+      label: "Title",
+      value: @press_kit.title,
+      required: true,
+      placeholder: "Spring launch"
+    ) %>
+
+    <%= render FlatPack::Button::Component.new(
+      text: "Create",
+      style: :primary,
+      type: "submit"
+    ) %>
+  <% end %>
+</div>

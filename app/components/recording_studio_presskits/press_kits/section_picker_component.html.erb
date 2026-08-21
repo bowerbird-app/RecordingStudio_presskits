@@ -1,0 +1,21 @@
+<%= render FlatPack::Picker::Component.new(
+  id: "presskits-section-picker",
+  title: "Add a section",
+  subtitle: "Pick what to drop into this kit.",
+  confirm_label: "Add",
+  close_label: "Close",
+  selection_mode: :single,
+  auto_confirm: true,
+  output_mode: :field,
+  accepted_kinds: ["record"],
+  searchable: @items.length > 6,
+  empty_text: "Nothing to add yet. Later addons show up here.",
+  items: @items,
+  form: {
+    url: @add_path,
+    method: :post,
+    field: "type",
+    value_mode: :id,
+    value_path: "id"
+  }
+) %>

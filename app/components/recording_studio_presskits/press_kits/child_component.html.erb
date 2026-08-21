@@ -1,0 +1,35 @@
+<%= render FlatPack::List::Item.new(hover: true) do %>
+  <div class="flex w-full flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0 flex-1">
+      <% if section_component %>
+        <%= render section_component.new(recording: @recording) %>
+      <% else %>
+        <p class="text-sm font-medium text-(--surface-content-color)">
+          <%= @recording.type_label %>: <%= helpers.presskits_title_for(@recording) %>
+        </p>
+      <% end %>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <% if can_move_up? %>
+        <%= form_with url: @reorder_path, method: :patch, local: true do %>
+          <%= hidden_field_tag :recording_id, @recording.id %>
+          <%= hidden_field_tag :to_index, @index - 1 %>
+          <%= render FlatPack::Button::Component.new(text: "Move up", style: :ghost, size: :sm, type: "submit") %>
+        <% end %>
+      <% end %>
+      <% if can_move_down? %>
+        <%= form_with url: @reorder_path, method: :patch, local: true do %>
+          <%= hidden_field_tag :recording_id, @recording.id %>
+          <%= hidden_field_tag :to_index, @index + 1 %>
+          <%= render FlatPack::Button::Component.new(text: "Move down", style: :ghost, size: :sm, type: "submit") %>
+        <% end %>
+      <% end %>
+      <% if can_remove? %>
+        <%= form_with url: @remove_path, method: :delete, local: true do %>
+          <%= render FlatPack::Button::Component.new(text: "Remove", style: :ghost, size: :sm, type: "submit") %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

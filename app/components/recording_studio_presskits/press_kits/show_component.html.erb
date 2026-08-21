@@ -1,0 +1,38 @@
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: kit_title,
+    subtitle: "Add sections, then put them in the order you want.",
+    variant: :h1
+  ) %>
+
+  <% if @section_recordings.empty? %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: "No sections yet",
+      description: "Pick something to drop in. Later addons fill the real parts.",
+      icon: :inbox
+    ) %>
+  <% else %>
+    <%= render FlatPack::List::Component.new(
+      orderable: true,
+      orderable_url: @reorder_path,
+      orderable_method: :patch,
+      param_uuid_name: "recording_id",
+      param_target_position_name: "to_index"
+    ) do %>
+      <% @section_recordings.each_with_index do |recording, index| %>
+        <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
+          recording: recording,
+          index: index,
+          total: @section_recordings.size,
+          remove_path: @remove_path.call(recording),
+          reorder_path: @reorder_path
+        ) %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render RecordingStudioPresskits::PressKits::SectionPickerComponent.new(
+    items: picker_items,
+    add_path: @add_path
+  ) %>
+</div>
