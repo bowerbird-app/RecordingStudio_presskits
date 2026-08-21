@@ -45,6 +45,6 @@ Then open the app and sign in with:
 
 Use this app to verify press kits boot in a host. If a layout, route, asset source, or Recording Studio initializer change breaks here, the gem likely needs adjustment before reuse.
 
-Authenticated pages keep `RecordingStudio::UsesDefaultLayout`. Dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps those screens (index, kit show, Admin). That is Flatpack's built-in rounded theme from `flat_pack/variables`. Devise sign-in keeps `layouts/application`, which already has the same html attribute.
+Authenticated pages keep `RecordingStudio::UsesDefaultLayout`. Dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps those screens (index, kit show, Admin). That is Flatpack's built-in rounded theme from `flat_pack/variables`. The same override passes Flatpack 0.1.133 `anchor_href` so the close X renders next to back. Devise sign-in keeps `layouts/application`, which already has the same html attribute.
 
 Dummy Tailwind must scan FlatPack components, Recording Studio's default layout, Admin, and this gem, or the host looks unstyled. `bin/rails tailwindcss:build` writes gem `@source` paths first. After changing views or gems, run that build (or `bin/dev`) so CSS is not an empty shell.

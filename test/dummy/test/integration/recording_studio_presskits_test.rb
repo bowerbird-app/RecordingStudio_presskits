@@ -169,6 +169,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     controller = File.read(Rails.root.join("app/controllers/application_controller.rb"))
 
     assert_includes layout, '<html data-theme="rounded">'
+    assert_includes layout, "page_nav_options[:anchor_href]"
+    refute_includes layout, "page_nav_options[:anchor_url]"
     assert_includes controller, "include RecordingStudio::UsesDefaultLayout"
     assert_includes controller, '"recording_studio/default_layout"'
     refute File.exist?(Rails.root.join("app/views/home/index.html.erb"))

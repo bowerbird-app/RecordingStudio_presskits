@@ -207,7 +207,7 @@ Dummy kit pins:
 | Trashable | `0.4.0` |
 | Duplicatable | `0.4.0` |
 
-Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, and this gem so that layout is not an unstyled box.
+Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, and this gem so that layout is not an unstyled box.
 
 Cards, table, kit show, and the Admin list: `docs/dummy-screenshots/`.
 

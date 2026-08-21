@@ -49,6 +49,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "Cards"
     assert_includes response.body, "Table"
+    assert_includes response.body, "Sign out"
+    assert_select "[data-flat-pack--icon-name-value='x-mark']", count: 1
+    assert_select "a[href='/recording_studio_presskits/press_kits'][aria-label='Close']", count: 1
 
     get recording_studio_presskits.press_kits_path(view: "table")
     assert_response :success
