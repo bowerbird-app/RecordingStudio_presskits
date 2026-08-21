@@ -6,7 +6,8 @@ This Rails app exists to prove Recording Studio Press Kits in a real host. It is
 
 - Devise authentication with a seeded admin user
 - `Current.actor` wiring for Recording Studio events
-- Root workspace plus a seeded press kit and host-only fake section
+- Root workspace plus a seeded press kit and two host-only fake sections
+- Orderable, Trashable, and Duplicatable install, migrations, and mounts
 - Authenticated home on Recording Studio's default layout, with FlatPack assets, showing that seeded outline
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
 
@@ -30,6 +31,9 @@ Then open the app and sign in with:
 
 - `/` - dummy host home page (default layout plus the seeded workspace outline)
 - `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes
+- `/recording_studio_orderable` - Orderable engine mount from its install generator
+- `/recording_studio_trashable` - Trashable engine mount from its install generator
+- `/recording_studio_duplicatable` - Duplicatable engine mount from its install generator
 - `/users/sign_in` - Devise sign-in page
 - `/up` - Rails health check
 

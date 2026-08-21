@@ -219,6 +219,40 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:accessible, for: "FakeBlock")
   end
 
+  test "orderable is enabled on press kit and dummy workspace" do
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PressKit")
+    assert RecordingStudio.capability_enabled?(:orderable, for: "Workspace")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "FakeBlock")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "Folder")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
+
+    press_kit_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::PressKit").to_h
+    refute press_kit_options.key?(:allows)
+
+    workspace_options = RecordingStudio.capability_options(:orderable, for: "Workspace").to_h
+    assert_equal ["RecordingStudioPresskits::PressKit"], Array(workspace_options[:allows]).map(&:to_s)
+  end
+
+  test "trashable is enabled on press kit and dummy fake block" do
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::PressKit")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "FakeBlock")
+    refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
+    refute RecordingStudio.capability_enabled?(:trashable, for: "Folder")
+    refute RecordingStudio.capability_enabled?(:trashable, for: "Page")
+  end
+
+  test "duplicatable is enabled on press kit only" do
+    assert RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "FakeBlock")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "Workspace")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "Folder")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "Page")
+
+    options = RecordingStudio.capability_options(:duplicatable, for: "RecordingStudioPresskits::PressKit").to_h
+    assert_equal " (Copy)", options[:suffix]
+    assert_equal [], options[:exclude_children]
+  end
+
   private
 
   def record_child(recordable, root_recording, parent_recording)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_21_060001) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_21_120003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -73,9 +73,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_060001) do
     t.uuid "parent_recording_id"
     t.uuid "recordable_id", null: false
     t.string "recordable_type", null: false
+    t.integer "recording_studio_orderable_position"
     t.uuid "root_recording_id"
+    t.boolean "trash_root", default: false, null: false
     t.datetime "trashed_at"
     t.datetime "updated_at", null: false
+    t.index ["parent_recording_id", "recording_studio_orderable_position"], name: "idx_rs_recordings_orderable_sibling_position"
     t.index ["parent_recording_id"], name: "index_recording_studio_recordings_on_parent_recording_id"
     t.index ["recordable_type", "recordable_id", "parent_recording_id", "trashed_at"], name: "index_recording_studio_recordings_on_recordable_parent_trashed"
     t.index ["recordable_type", "recordable_id"], name: "index_recording_studio_recordings_on_recordable"
@@ -83,6 +86,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_060001) do
     t.index ["root_recording_id", "parent_recording_id"], name: "index_rs_recordings_on_root_and_parent"
     t.index ["root_recording_id", "recordable_type", "recordable_id"], name: "index_rs_recordings_on_root_and_recordable"
     t.index ["root_recording_id"], name: "index_rs_recordings_on_root_recording"
+    t.index ["trashed_at", "trash_root"], name: "idx_rs_recordings_trashed_at_trash_root"
+    t.index ["trashed_at"], name: "index_recording_studio_recordings_on_trashed_at"
   end
 
   create_table "recording_studio_root_switchable_selections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -102,6 +107,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_060001) do
     t.index ["actor_type", "actor_id", "device_key", "scope_key"], name: "idx_rs_root_switchable_actor_device_scope", unique: true, where: "(actor_id IS NOT NULL)"
     t.index ["device_key", "scope_key"], name: "idx_rs_root_switchable_anonymous_device_scope", unique: true, where: "(actor_id IS NULL)"
     t.index ["root_recording_id"], name: "idx_rs_root_switchable_root_recording"
+  end
+
+  create_table "recording_studio_trashable_retention_settings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "purge_after_days"
+    t.uuid "recording_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["recording_id"], name: "idx_rs_trashable_retention_on_recording", unique: true
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -125,4 +138,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_060001) do
   add_foreign_key "recording_studio_events", "recording_studio_recordings", column: "recording_id"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "parent_recording_id"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "root_recording_id"
+  add_foreign_key "recording_studio_trashable_retention_settings", "recording_studio_recordings", column: "recording_id"
 end

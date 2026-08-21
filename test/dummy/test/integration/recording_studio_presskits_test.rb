@@ -39,6 +39,10 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.table_exists?(:fake_blocks)
     assert connection.column_exists?(:fake_blocks, :title)
     refute connection.column_exists?(:fake_blocks, :updated_at)
+    assert connection.column_exists?(:recording_studio_recordings, :recording_studio_orderable_position)
+    assert connection.column_exists?(:recording_studio_recordings, :trashed_at)
+    assert connection.column_exists?(:recording_studio_recordings, :trash_root)
+    assert connection.table_exists?(:recording_studio_trashable_retention_settings)
     refute connection.table_exists?(:recording_studio_access_boundaries)
     refute connection.table_exists?(:recording_studio_device_sessions)
   end
@@ -54,14 +58,16 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     folder = Folder.find_by!(name: "Product Docs")
     page = Page.find_by!(title: "Getting Started")
     press_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Spring launch")
-    fake_block = FakeBlock.find_by!(title: "Hero")
+    hero = FakeBlock.find_by!(title: "Hero")
+    quotes = FakeBlock.find_by!(title: "Quotes")
     root_recording = RecordingStudio::Recording.find_by!(recordable: workspace)
     accessible_root_recording = RecordingStudio::Recording.find_by!(recordable: accessible_workspace)
     private_root_recording = RecordingStudio::Recording.find_by!(recordable: private_workspace)
     folder_recording = RecordingStudio::Recording.find_by!(recordable: folder)
     page_recording = RecordingStudio::Recording.find_by!(recordable: page)
     press_kit_recording = RecordingStudio::Recording.find_by!(recordable: press_kit)
-    fake_block_recording = RecordingStudio::Recording.find_by!(recordable: fake_block)
+    hero_recording = RecordingStudio::Recording.find_by!(recordable: hero)
+    quotes_recording = RecordingStudio::Recording.find_by!(recordable: quotes)
 
     assert_nil Current.actor
     assert_nil root_recording.parent_recording_id
@@ -73,11 +79,13 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal root_recording, page_recording.root_recording
     assert_equal root_recording, press_kit_recording.parent_recording
     assert_equal root_recording, press_kit_recording.root_recording
-    assert_equal press_kit_recording, fake_block_recording.parent_recording
-    assert_equal root_recording, fake_block_recording.root_recording
+    assert_equal press_kit_recording, hero_recording.parent_recording
+    assert_equal root_recording, hero_recording.root_recording
+    assert_equal press_kit_recording, quotes_recording.parent_recording
+    assert_equal root_recording, quotes_recording.root_recording
     assert_equal 3, Workspace.count
     assert_operator RecordingStudioPresskits::PressKit.count, :>=, 1
-    assert_operator FakeBlock.count, :>=, 1
+    assert_operator FakeBlock.count, :>=, 2
 
     assert_no_difference -> { User.count } do
       assert_no_difference -> { RecordingStudio::Recording.count } do
@@ -93,15 +101,23 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     Current.actor = nil
   end
 
-  test "workspace opts into accessible without enabling it on press kits" do
+  test "workspace opts into accessible and orderable without enabling mixins on the wrong types" do
     workspace_source = File.read(Rails.root.join("app/models/workspace.rb"))
 
     refute_includes workspace_source, "Capabilities::Example"
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
+    assert RecordingStudio.capability_enabled?(:orderable, for: Workspace)
+    assert RecordingStudio.capability_enabled?(:orderable, for: RecordingStudioPresskits::PressKit)
+    assert RecordingStudio.capability_enabled?(:trashable, for: RecordingStudioPresskits::PressKit)
+    assert RecordingStudio.capability_enabled?(:trashable, for: FakeBlock)
+    assert RecordingStudio.capability_enabled?(:duplicatable, for: RecordingStudioPresskits::PressKit)
     refute RecordingStudio.capability_enabled?(:accessible, for: Folder)
     refute RecordingStudio.capability_enabled?(:accessible, for: Page)
     refute RecordingStudio.capability_enabled?(:accessible, for: RecordingStudioPresskits::PressKit)
     refute RecordingStudio.capability_enabled?(:accessible, for: FakeBlock)
+    refute RecordingStudio.capability_enabled?(:orderable, for: FakeBlock)
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: FakeBlock)
+    refute RecordingStudio.capability_enabled?(:trashable, for: Workspace)
     assert_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
   end
 

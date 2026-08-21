@@ -6,7 +6,10 @@ class HomeController < ApplicationController
   private
 
   def build_workspace_tree
-    recordings = RecordingStudio::Recording.includes(:recordable).reorder(:created_at, :id).to_a
+    recordings = RecordingStudio::Recording.recording_studio_trashable_active
+                                           .includes(:recordable)
+                                           .reorder(:recording_studio_orderable_position, :created_at, :id)
+                                           .to_a
     recordings_by_parent_id = recordings.group_by(&:parent_recording_id)
     roots = workspace_tree_roots(recordings_by_parent_id)
 

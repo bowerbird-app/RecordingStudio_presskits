@@ -17,11 +17,12 @@
 
 - The standard root validation command is `bundle exec rake test:all` from the repository root.
 - If a change affects dummy app boot, assets, or migrations, also validate the dummy app setup the same way CI does.
-- Cover Press kit declaration, root rejection, parent rejection, picker types, and Accessible grants on the workspace root in Minitest.
+- Cover Press kit declaration, root rejection, parent rejection, picker types, Accessible grants on the workspace root, Orderable reorder, Trashable trash/restore, and Duplicatable in-place copy in Minitest.
 
 ## Repo Conventions
 
-- Writes go through `record`, `revise`, and `log_event!`.
-- Do not invent an ACL. Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits.
+- Writes go through `record`, `revise`, and `log_event!`. Reorder, trash, and duplicate go through the mixin APIs.
+- Do not invent an ACL. Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits. Mixin writes authorize through Accessible.
 - Later section addons opt in via `allowed_parent_types: ["RecordingStudioPresskits::PressKit"]`. Do not keep a list of block types in this gem.
+- Orderable is on PressKit (the parent). Trashable is on PressKit and dummy FakeBlock. Duplicatable is on PressKit only.
 - Update docs when setup steps change. Keep the README as the product.

@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.3.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.4.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_exists
@@ -16,10 +16,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.6"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_publishable"'
-    refute_includes gemspec, 'spec.add_dependency "recording_studio_orderable"'
-    refute_includes gemspec, 'spec.add_dependency "recording_studio_trashable"'
-    refute_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_attachable"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
     refute_includes gemspec, 'spec.add_dependency "flat_pack"'
@@ -32,6 +32,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.133"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "0.2.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "0.4.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "0.4.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -53,8 +56,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, 'label: "Press kit"'
     assert_includes source, "root: false"
     assert_includes source, 'allowed_parent_types: ["Workspace"]'
+    assert_includes source, "include RecordingStudio::Capabilities::Orderable.to"
+    assert_includes source, "include RecordingStudio::Capabilities::Trashable.to"
+    assert_includes source, "RecordingStudio::Capabilities::Duplicatable.to"
+    assert_includes source, 'suffix: " (Copy)"'
+    assert_includes source, "exclude_children: []"
+    refute_includes source, "include_children: true"
     refute_includes source, "Recordable"
     refute_match(/label:\s*"[^"]*Recordable/, source)
+    refute_includes source, "enable_capability(:orderable"
+    refute_includes source, "enable_capability(:trashable"
+    refute_includes source, "enable_capability(:duplicatable"
   end
 
   def test_picker_helper_uses_core_public_parent_apis
@@ -80,6 +92,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute File.exist?(File.expand_path("dummy/app/views/layouts/flat_pack/_sidebar.html.erb", __dir__))
   end
 
+  def test_dummy_mounts_mixin_engines
+    routes = File.read(File.expand_path("dummy/config/routes.rb", __dir__))
+
+    assert_includes routes, 'mount RecordingStudioOrderable::Engine, at: "/recording_studio_orderable"'
+    assert_includes routes, 'mount RecordingStudioTrashable::Engine, at: "/recording_studio_trashable"'
+    assert_includes routes, 'mount RecordingStudioDuplicatable::Engine, at: "/recording_studio_duplicatable"'
+    refute_includes routes, "recording_studio_publishable"
+    refute_includes routes, "recording_studio_admin"
+  end
+
   def test_dummy_login_layout_keeps_flatpack_assets_without_tight_main_offset
     application_layout = File.read(File.expand_path("dummy/app/views/layouts/application.html.erb", __dir__))
 
@@ -100,6 +122,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes tailwind_source, "vendor/bundle/**/bundler/gems/RecordingStudio-*/app/views/**/*.erb"
     assert_includes sources_task, '"flat_pack"'
     assert_includes sources_task, '"recording_studio"'
+    assert_includes sources_task, '"recording_studio_orderable"'
+    assert_includes sources_task, '"recording_studio_trashable"'
+    assert_includes sources_task, '"recording_studio_duplicatable"'
     refute_includes tailwind_source, "@theme"
     refute_includes tailwind_source, ":root {"
     refute_includes tailwind_source, "--color-fp-primary"
@@ -135,8 +160,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "v4.2.0"
     assert_includes readme, "v0.6.1"
     assert_includes readme, "v0.1.133"
+    assert_includes readme, "tag: \"0.2.0\""
+    assert_includes readme, "tag: \"0.4.0\""
     assert_includes readme, "Press kit"
     assert_includes readme, "RecordingStudioPresskits::PressKit"
+    assert_includes readme, "recording_studio_orderable_reorder!"
+    assert_includes readme, "recording_studio_trashable_trash!"
+    assert_includes readme, "duplicate_in_place!"
     refute_includes readme, "v3 declarations"
     refute_includes readme, "RecordingStudio v3"
     refute_includes readme, "ExampleService"
@@ -173,5 +203,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
     source = File.read(File.expand_path("dummy/app/models/fake_block.rb", __dir__))
     assert_includes source, 'label: "Fake block"'
     assert_includes source, 'allowed_parent_types: ["RecordingStudioPresskits::PressKit"]'
+    assert_includes source, "include RecordingStudio::Capabilities::Trashable.to"
+    refute_includes source, "Capabilities::Orderable"
+    refute_includes source, "Capabilities::Duplicatable"
+  end
+
+  def test_dummy_workspace_enables_orderable_for_press_kits_only
+    source = File.read(File.expand_path("dummy/app/models/workspace.rb", __dir__))
+
+    assert_includes source, "RecordingStudio.enable_capability(:accessible, on: self)"
+    assert_includes source, "Capabilities::Orderable.to(allows:"
+    assert_includes source, '"RecordingStudioPresskits::PressKit"'
+    refute_includes source, "Capabilities::Trashable"
+    refute_includes source, "Capabilities::Duplicatable"
   end
 end
