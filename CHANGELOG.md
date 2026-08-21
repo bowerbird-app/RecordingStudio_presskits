@@ -29,7 +29,7 @@ Authenticated press kit screens and a staff list of live kits. This gem is still
 - Dummy `/` redirects to the mounted press kit index
 - Dummy app name is "Press kits"
 - Dummy overrides Recording Studio's default layout so `<html data-theme="rounded">` wraps index, kit show, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables`. Authenticated screens still use `UsesDefaultLayout`.
-- Dummy PageNav maps core's `page_nav_anchor_url` slot to Flatpack 0.1.133 `anchor_href` so the close X renders next to back.
+- Dummy PageNav maps core's `page_nav_anchor_url` slot to Flatpack 0.1.133 `anchor_href` and `anchor_tooltip` so the close X renders next to back on index, kit show, and new.
 
 ### Removed
 - Dummy "Dummy host" landing page and workspace outline tree

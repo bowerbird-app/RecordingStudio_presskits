@@ -13,6 +13,13 @@ module RoundedDefaultLayoutAssertions
     assert_includes response.body, "/assets/tailwind"
     assert_includes response.body, "/assets/flat_pack/variables"
   end
+
+  def assert_page_nav_close(href: "/recording_studio_presskits/press_kits")
+    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='x-mark']", count: 1
+    assert_select "a[href='#{href}'][aria-label='Close']", count: 1
+    assert_includes response.body, "Sign out"
+    refute_includes response.body, "Dummy host"
+  end
 end
 
 class ActionDispatch::IntegrationTest

@@ -57,7 +57,8 @@
         back_style: (content_for(:page_nav_back_style).presence || "secondary").to_sym,
         back_size: (content_for(:page_nav_back_size).presence || "md").to_sym,
         anchor_icon: content_for(:page_nav_anchor_icon).presence || "x-mark",
-        anchor_label: content_for(:page_nav_anchor_label).presence || "Close"
+        anchor_label: content_for(:page_nav_anchor_label).presence || "Close",
+        anchor_tooltip: content_for(:page_nav_anchor_label).presence || "Close"
       } %>
       <% back_url = content_for(:page_nav_back_url).presence %>
       <% anchor_url = content_for(:page_nav_anchor_url).presence %>

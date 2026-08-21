@@ -49,9 +49,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "Cards"
     assert_includes response.body, "Table"
-    assert_includes response.body, "Sign out"
-    assert_select "[data-flat-pack--icon-name-value='x-mark']", count: 1
-    assert_select "a[href='/recording_studio_presskits/press_kits'][aria-label='Close']", count: 1
+    assert_page_nav_close
 
     get recording_studio_presskits.press_kits_path(view: "table")
     assert_response :success
@@ -84,7 +82,19 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Hero"
     assert_includes response.body, "Quotes"
     assert_match(/Hero.*Quotes/m, response.body)
+    assert_page_nav_close
     refute_includes response.body, "Dummy host"
+  end
+
+  test "new press kit form renders the PageNav close X" do
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.new_press_kit_path
+    assert_response :success
+    assert_rounded_default_layout
+    assert_includes response.body, "New press kit"
+    assert_page_nav_close
   end
 
   test "empty kit shows no sections yet and the picker" do

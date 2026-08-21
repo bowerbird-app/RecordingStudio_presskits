@@ -97,6 +97,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes controller_source, 'devise_controller? ? "application"'
     assert_includes default_layout, '<html data-theme="rounded">'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
+    assert_includes default_layout, "anchor_tooltip:"
     refute_includes default_layout, "page_nav_options[:anchor_url]"
     refute_includes controller_source, "flat_pack_sidebar"
     refute File.exist?(File.expand_path("dummy/app/views/layouts/flat_pack_sidebar.html.erb", __dir__))

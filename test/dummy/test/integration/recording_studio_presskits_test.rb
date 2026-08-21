@@ -170,6 +170,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
 
     assert_includes layout, '<html data-theme="rounded">'
     assert_includes layout, "page_nav_options[:anchor_href]"
+    assert_includes layout, "anchor_tooltip:"
     refute_includes layout, "page_nav_options[:anchor_url]"
     assert_includes controller, "include RecordingStudio::UsesDefaultLayout"
     assert_includes controller, '"recording_studio/default_layout"'
