@@ -169,7 +169,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.parent_allowed?(child_type: "FakeBlock", parent_recording: kit_recording)
     refute RecordingStudio.parent_allowed?(child_type: "FakeBlock", parent_recording: root_recording)
 
-    block_recording = kit_recording.record(FakeBlock) do |fake_block|
+    block_recording = kit_recording.record(FakeBlock, parent_recording: kit_recording) do |fake_block|
       fake_block.title = "Hero"
     end
 

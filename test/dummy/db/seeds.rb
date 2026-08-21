@@ -62,7 +62,7 @@ begin
   )
 
   if fake_block_recording.nil?
-    press_kit_recording.record(FakeBlock) do |fake_block|
+    press_kit_recording.record(FakeBlock, parent_recording: press_kit_recording) do |fake_block|
       fake_block.title = "Hero"
     end
   end

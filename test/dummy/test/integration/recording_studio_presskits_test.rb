@@ -115,7 +115,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
       press_kit.title = "Spring launch"
     end
 
-    assert RecordingStudioAccessible.authorized?(actor: user, recording: kit_recording, role: :viewer)
+    assert RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
+    assert RecordingStudioAccessible.authorized?(actor: user, recording: kit_recording, role: :view)
     assert RecordingStudioAccessible.authorized?(actor: user, recording: kit_recording, role: :admin)
   end
 end

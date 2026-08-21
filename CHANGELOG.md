@@ -34,6 +34,7 @@ First product release of Recording Studio Press Kits. A press kit is the contain
 - Declare `spec.add_dependency "recording_studio", "~> 4.2"` and `spec.add_dependency "recording_studio_accessible", "~> 0.6"`
 - Register `"RecordingStudioPresskits::PressKit"` in `RecordingStudio.configure`
 - Later section addons must use `allowed_parent_types: ["RecordingStudioPresskits::PressKit"]`. Core 4.2 has no public type-name alias.
+- Core `record` defaults the parent to the workspace root. Nest a section with `parent_recording: kit_recording`.
 - Install engine migrations and keep writes on `record` / `revise` / `log_event!`
 - Do not enable Publishable, Orderable, Trashable, Duplicatable, Attachable, or API in this slice
 

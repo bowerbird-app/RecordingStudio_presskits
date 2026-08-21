@@ -19,6 +19,7 @@ This repo is now Recording Studio Press Kits, not the addon starting point.
 4. Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`.
 5. Create kits with `root.record(RecordingStudioPresskits::PressKit)` and change them with `revise`.
 6. Later section addons must declare `allowed_parent_types: ["RecordingStudioPresskits::PressKit"]`. Core 4.2 has no public type-name alias.
+7. Core `record` defaults the parent to the workspace root. Nest a section with `parent_recording: kit_recording`.
 
 Do not add Publishable, Orderable, Trashable, Duplicatable, Attachable, or API in this slice.
 

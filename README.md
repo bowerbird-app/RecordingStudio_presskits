@@ -75,6 +75,14 @@ end
 kit_recording.log_event!(action: "noted")
 ```
 
+Core `record` defaults the parent to the workspace root. Nest a section under the kit by passing the kit as `parent_recording`:
+
+```ruby
+kit_recording.record(SomeSection, parent_recording: kit_recording) do |section|
+  section.title = "Hero"
+end
+```
+
 Section addons opt in solely by declaring PressKit as a parent. This gem does not keep a list of block types. The picker lists whatever the host has registered:
 
 ```ruby

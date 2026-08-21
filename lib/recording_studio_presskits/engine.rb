@@ -52,7 +52,8 @@ module RecordingStudioPresskits
     end
 
     # Run before_initialize hooks
-    initializer "recording_studio_presskits.before_initialize", before: "recording_studio_presskits.load_config" do |_app|
+    initializer "recording_studio_presskits.before_initialize",
+                before: "recording_studio_presskits.load_config" do |_app|
       RecordingStudioPresskits.configuration.hooks.run(:before_initialize, self)
     end
 
@@ -93,7 +94,8 @@ module RecordingStudioPresskits
     end
 
     # Run after_initialize hooks
-    initializer "recording_studio_presskits.after_initialize", after: "recording_studio_presskits.load_config" do |_app|
+    initializer "recording_studio_presskits.after_initialize",
+                after: "recording_studio_presskits.load_config" do |_app|
       RecordingStudioPresskits.configuration.hooks.run(:after_initialize, self)
     end
 
