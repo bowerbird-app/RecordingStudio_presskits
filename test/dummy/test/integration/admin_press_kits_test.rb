@@ -35,11 +35,7 @@ class AdminPressKitsTest < ActionDispatch::IntegrationTest
     end
 
     Current.actor = @user
-    admin_grant = RecordingStudioAccessible.bootstrap_owner_access!(
-      recording: @admin_root_recording,
-      actor: @user
-    )
-    raise admin_grant.error if admin_grant.failure?
+    ensure_admin_access!(@user)
   end
 
   teardown do
@@ -94,5 +90,26 @@ class AdminPressKitsTest < ActionDispatch::IntegrationTest
       }
     }
     follow_redirect! if response.redirect?
+  end
+
+  def ensure_admin_access!(actor)
+    recording = @admin_root_recording
+    return if RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :view)
+
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: recording, actor: actor)
+    return if result.success?
+
+    manager = User.find_by(email: "admin@admin.com")
+    if manager.blank? || manager == actor
+      raise result.error
+    end
+
+    grant = RecordingStudioAccessible.grant_access(
+      recording: recording,
+      actor: actor,
+      role: :admin,
+      manager_actor: manager
+    )
+    raise grant.error if grant.failure?
   end
 end
