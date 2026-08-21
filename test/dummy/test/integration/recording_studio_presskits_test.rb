@@ -105,6 +105,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     workspace_source = File.read(Rails.root.join("app/models/workspace.rb"))
 
     refute_includes workspace_source, "Capabilities::Example"
+    refute_includes workspace_source, "if defined?(RecordingStudioAccessible)"
+    refute_includes workspace_source, ".with("
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: RecordingStudioPresskits::PressKit)

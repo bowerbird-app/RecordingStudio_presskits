@@ -62,6 +62,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, 'suffix: " (Copy)"'
     assert_includes source, "exclude_children: []"
     refute_includes source, "include_children: true"
+    refute_includes source, ".with("
+    refute_includes source, ".enabled"
+    refute_includes source, "RecordingStudioDuplicatable::Capabilities"
     refute_includes source, "Recordable"
     refute_match(/label:\s*"[^"]*Recordable/, source)
     refute_includes source, "enable_capability(:orderable"
@@ -206,6 +209,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "include RecordingStudio::Capabilities::Trashable.to"
     refute_includes source, "Capabilities::Orderable"
     refute_includes source, "Capabilities::Duplicatable"
+    refute_includes source, ".with("
+    refute_includes source, ".enabled"
   end
 
   def test_dummy_workspace_enables_orderable_for_press_kits_only
@@ -214,7 +219,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "RecordingStudio.enable_capability(:accessible, on: self)"
     assert_includes source, "Capabilities::Orderable.to(allows:"
     assert_includes source, '"RecordingStudioPresskits::PressKit"'
+    refute_includes source, "if defined?(RecordingStudioAccessible)"
     refute_includes source, "Capabilities::Trashable"
     refute_includes source, "Capabilities::Duplicatable"
+    refute_includes source, ".with("
+    refute_includes source, ".enabled"
   end
 end

@@ -25,4 +25,5 @@
 - Do not invent an ACL. Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits. Mixin writes authorize through Accessible.
 - Later section addons opt in via `allowed_parent_types: ["RecordingStudioPresskits::PressKit"]`. Do not keep a list of block types in this gem.
 - Orderable is on PressKit (the parent). Trashable is on PressKit and dummy FakeBlock. Duplicatable is on PressKit only.
+- Enable those mixins with `include RecordingStudio::Capabilities::<Name>.to(...)` only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path.
 - Update docs when setup steps change. Keep the README as the product.

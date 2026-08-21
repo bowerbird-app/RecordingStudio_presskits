@@ -28,7 +28,7 @@ Press kits can be ordered, trashed, restored, and duplicated. This gem is still 
 ### Upgrade notes
 - Add `recording_studio_orderable`, `recording_studio_trashable`, and `recording_studio_duplicatable` next to this gem
 - Run each mixin's install generator and Orderable/Trashable migrations
-- PressKit already includes the three mixins. Do not enable Orderable on PressKit children. Do not enable Duplicatable on FakeBlock — child copy is a parent filter, not a child opt-in.
+- PressKit already includes the three mixins via `.to` only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path. Do not enable Orderable on PressKit children. Do not enable Duplicatable on FakeBlock — child copy is a parent filter, not a child opt-in.
 - Duplicatable's README takes `include_children` as an array of types, not `true`. This gem uses `exclude_children: []` so every direct child type is copied.
 - Reorder, trash, restore, purge, and duplicate through the mixin APIs. Prefer `recording_studio_trashable_active` over a new host `default_scope`.
 - Accessible grants on the workspace root still cover kits. Mixin writes authorize through Accessible.

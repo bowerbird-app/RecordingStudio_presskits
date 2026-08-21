@@ -59,7 +59,7 @@ RecordingStudio.configure do |config|
 end
 ```
 
-The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, and Duplicatable:
+The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, and Duplicatable with the current `.to` API only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path for these mixins.
 
 ```ruby
 recording_studio_recordable label: "Press kit",
