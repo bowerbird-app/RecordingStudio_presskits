@@ -1,4 +1,12 @@
-<% content_for :title, (@press_kit&.title.presence || "Press kit") %>
+<% if respond_to?(:recording_studio_page_nav) %>
+  <% recording_studio_page_nav(
+    title: (@press_kit&.title.presence || "Press kit"),
+    page_nav_anchor_url: "/"
+  ) %>
+<% else %>
+  <% content_for :title, (@press_kit&.title.presence || "Press kit") %>
+  <% content_for :page_nav_anchor_url, "/" %>
+<% end %>
 
 <%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
   press_kit_recording: @parent_recording || @press_kit_recording,

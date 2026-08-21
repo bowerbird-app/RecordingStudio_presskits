@@ -70,13 +70,18 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "html[data-theme='rounded']", count: 1
-    assert_includes response.body, "recording_studio-publishable-layout"
+    assert_rounded_default_layout
+    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='chevron-left']", count: 1
+    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='x-mark']", count: 1
+    assert_select "a[href='/'][aria-label='Close']", count: 1
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "Hero"
     assert_includes response.body, "Quotes"
+    refute_includes response.body, "recording_studio-publishable-layout"
+    refute_includes response.body, "flat-pack--top-nav"
     refute_includes response.body, "Dummy host"
-    refute_includes response.body, "data-recording-studio-default-layout"
+    refute_includes response.body, "Sign in"
+    refute_includes response.body, "Sign out"
   end
 
   test "logged-out visitors cannot read an unpublished kit" do

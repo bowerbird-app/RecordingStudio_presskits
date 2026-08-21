@@ -65,6 +65,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "RecordingStudio::Capabilities::Publishable.to"
     assert_includes source, 'public_controller: "recording_studio_presskits/public_press_kits"'
     assert_includes source, "public_action: :show"
+    assert_includes source, 'public_layout: "recording_studio/default_layout"'
     assert_includes source, 'suffix: " (Copy)"'
     assert_includes source, "exclude_children: []"
     refute_includes source, "include_children: true"
@@ -214,9 +215,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
   def test_engine_ships_press_kit_screens
     view_path = File.expand_path("../app/views/recording_studio_presskits/press_kits/index.html.erb", __dir__)
+    public_controller = File.read(
+      File.expand_path("../app/controllers/recording_studio_presskits/public_press_kits_controller.rb", __dir__)
+    )
+    public_show = File.read(
+      File.expand_path("../app/views/recording_studio_presskits/public_press_kits/show.html.erb", __dir__)
+    )
 
     assert File.exist?(view_path)
     refute File.exist?(File.expand_path("../app/controllers/recording_studio_presskits/home_controller.rb", __dir__))
+    assert_includes public_controller, "include RecordingStudio::UsesDefaultLayout"
+    refute_includes public_controller, "Sign in"
+    assert_includes public_show, "recording_studio_page_nav"
+    refute_includes public_show, "presskits_page_nav"
+    refute_includes public_show, "Sign in"
   end
 
   def test_dummy_fake_block_is_host_only

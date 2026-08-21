@@ -254,6 +254,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     options = RecordingStudio.capability_options(:publishable, for: "RecordingStudioPresskits::PressKit").to_h
     assert_equal "recording_studio_presskits/public_press_kits", options[:public_controller]
     assert_equal :show, options[:public_action]
+    assert_equal "recording_studio/default_layout", options[:public_layout]
   end
 
   test "duplicatable is enabled on press kit only" do

@@ -90,7 +90,8 @@ include RecordingStudio::Capabilities::Duplicatable.to(
 )
 include RecordingStudio::Capabilities::Publishable.to(
   public_controller: "recording_studio_presskits/public_press_kits",
-  public_action: :show
+  public_action: :show,
+  public_layout: "recording_studio/default_layout"
 )
 ```
 
@@ -187,7 +188,7 @@ One primary action per page: **New press kit** on the index, **Create** on the n
 
 ## Public
 
-A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`) and wraps the kit in Publishable's own public chrome. This gem does not invent a press-kit public shell.
+A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). The public controller includes `UsesDefaultLayout` and `.to` sets `public_layout: "recording_studio/default_layout"`. Core owns back and close. This gem does not use Publishable's empty TopNav and does not invent a press-kit public shell.
 
 Logged-out visitors get a 404 for a kit that is not currently published. An authenticated owner can still open the preview on the default layout.
 
@@ -240,9 +241,9 @@ Dummy kit pins:
 | Duplicatable | `0.4.0` |
 | Publishable | `v0.2.0` |
 
-Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, and this gem so that layout is not an unstyled box.
+Every dummy screen, including logged-out public show, keeps `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, public show, preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, and this gem so that layout is not an unstyled box.
 
-Public live kits use Publishable's layout. Cards, table, kit show, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
+Public live kits use that same default layout. Do not use Publishable's empty TopNav. Do not invent a press-kit public shell. Do not insert Sign in into PageNav — core owns back/close. Cards, table, kit show, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 
 ```bash
 cd test/dummy

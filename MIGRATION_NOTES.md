@@ -21,8 +21,8 @@ Publish the kit, not each block. A live kit has a public page. An owner can prev
 1. Add `recording_studio_publishable`, `~> 0.2`.
 2. Run `bin/rails generate recording_studio_publishable:install` and the Publishable migrations generator.
 3. Register `"RecordingStudioPublishable::Publishable"` next to `"RecordingStudioPresskits::PressKit"`.
-4. Mount Publishable at `/` so live kits use `/published/:uuid/:slug`. Keep Publishable's public chrome. Do not invent a press-kit public shell.
-5. PressKit already enables Publishable with `.to` only (`public_controller: "recording_studio_presskits/public_press_kits"`, `public_action: :show`). Do not use `.with`. Do not enable Publishable on section children.
+4. Mount Publishable at `/` so live kits use `/published/:uuid/:slug`. Point `.to` `public_layout` at `recording_studio/default_layout`. Do not use Publishable's empty TopNav. Do not invent a press-kit public shell.
+5. PressKit already enables Publishable with `.to` only (`public_controller: "recording_studio_presskits/public_press_kits"`, `public_action: :show`, `public_layout: "recording_studio/default_layout"`). The public controller includes `UsesDefaultLayout`. Do not use `.with`. Do not enable Publishable on section children.
 6. Publish and unpublish through `RecordingStudioPublishable::Services::Publishables::Update` (or Publishable's management screens). Prefer `publishable_public_path`, `currently_published?`, `current_publishable`, `published?`, and `indexable?`.
 7. Public lists use `PressKit.indexable`. Do not invent a second published query.
 8. Admin now has live vs not-live widgets. Remove any host list-only / vanity-total widgets for kits.

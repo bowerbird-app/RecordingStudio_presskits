@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Publish the kit, not each block. A live kit is readable without signing in. An owner can preview a kit that is not live yet. Admin shows live vs not-live work. Nothing is in production — this breaks in place.
 
 ### Added
-- Publishable on `RecordingStudioPresskits::PressKit` via `.to` only (`public_controller: "recording_studio_presskits/public_press_kits"`, `public_action: :show`)
-- Public show that walks children in order and renders each type's public component. The container does not style the blocks
+- Publishable on `RecordingStudioPresskits::PressKit` via `.to` only (`public_controller: "recording_studio_presskits/public_press_kits"`, `public_action: :show`, `public_layout: "recording_studio/default_layout"`)
+- Public show that walks children in order and renders each type's public component. The container does not style the blocks. Logged-out public show uses Recording Studio's default layout (`UsesDefaultLayout`), not Publishable's empty TopNav
 - Owner preview of a kit that is not live, on Recording Studio's default layout
 - Admin widgets for live kits (`PressKit.indexable`) and kits that are not live yet. Still no vanity total
 - Dummy seed publishes **Spring launch** and leaves **Autumn recap** unpublished
@@ -31,7 +31,7 @@ Publish the kit, not each block. A live kit is readable without signing in. An o
 - Run `bin/rails generate recording_studio_publishable:install` and `bin/rails generate recording_studio_publishable:migrations`
 - Register `"RecordingStudioPublishable::Publishable"` in `RecordingStudio.configure`
 - Mount `RecordingStudioPublishable::Engine` at `/` (or keep the path Publishable's README uses)
-- PressKit already includes Publishable via `.to` only. Do not use `.with`. Do not enable Publishable on FakeBlock or later section children
+- PressKit already includes Publishable via `.to` only, with `public_layout: "recording_studio/default_layout"`. Do not use `.with`. Do not enable Publishable on FakeBlock or later section children. Do not use Publishable's public layout as the public shell
 - Use `PressKit.indexable` / `indexable?` for public lists. Publish and unpublish through Publishable's services
 - Replace any host list-only Admin widget with the live / not-live widgets this gem now registers
 - Publishable's child recordable uses Attachable for social cards. Dummy pins Attachable `0.4.0` so that child can boot. Do not enable Attachable on PressKit
