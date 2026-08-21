@@ -10,7 +10,7 @@
 ## UI Conventions
 
 - FlatPack is the default UI system. Compose Card, Table, Grid, SegmentedButtons, EmptyState, Picker, PageTitle, PageNav, Button, and List. Do not invent a custom view-mode widget.
-- Dummy authenticated screens keep `UsesDefaultLayout` and put Flatpack's built-in rounded theme on `<html data-theme="rounded">`. Do not invent a custom theme.
+- Dummy authenticated screens keep `UsesDefaultLayout` and put Flatpack's built-in rounded theme on `<html data-theme="rounded">`. Dummy PageNav passes Flatpack 0.1.133 `anchor_href` so the close X renders. Do not invent a custom theme.
 - The approved UI reference is the live FlatPack demo app at https://flatpack.bowerbird.io/ when you need to inspect current shared components and patterns.
 - When editing ERB views, prefer `render FlatPack::...` components over custom HTML when an equivalent component exists.
 
