@@ -53,9 +53,16 @@ class AdminPressKitsTest < ActionDispatch::IntegrationTest
     get "/admin"
     assert_response :success
     assert_rounded_default_layout
-    assert_includes response.body, "Spring launch"
     assert_includes response.body, "Press kits"
+    assert_includes response.body, "/admin/sections/press_kits/widgets/widgets.press_kits.list"
     refute_includes response.body, "Dummy host"
+
+    get "/admin/sections/press_kits/widgets/widgets.press_kits.list", params: {
+      widget_usage_index: 0,
+      widget_view_variant: "__default__"
+    }
+    assert_response :success
+    assert_includes response.body, "Spring launch"
   end
 
   test "admin denies missing access with 403" do
