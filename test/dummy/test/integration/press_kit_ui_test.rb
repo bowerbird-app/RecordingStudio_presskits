@@ -146,7 +146,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     follow_redirect!
     assert_response :success
-    assert_includes response.body, "That section isn't on the list."
+    assert_match(/That section isn(?:'|&#39;)t on the list/, response.body)
   end
 
   test "remove trashes a child through trashable" do

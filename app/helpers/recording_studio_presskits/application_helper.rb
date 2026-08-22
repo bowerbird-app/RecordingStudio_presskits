@@ -23,9 +23,7 @@ module RecordingStudioPresskits
     end
 
     def presskits_access_recording
-      if respond_to?(:current_presskits_root) && current_presskits_root.present?
-        return current_presskits_root
-      end
+      return current_presskits_root if respond_to?(:current_presskits_root) && current_presskits_root.present?
       return current_root_recording if respond_to?(:current_root_recording) && current_root_recording.present?
 
       nil
