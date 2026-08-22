@@ -309,7 +309,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes query, "def unpublished_kits"
   end
 
-  def test_user_slice_uses_segmented_buttons_and_picker
+  def test_user_slice_uses_button_group_and_picker
     index = File.read(
       File.expand_path("../app/components/recording_studio_presskits/press_kits/index_component.html.erb", __dir__)
     )
@@ -318,11 +318,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     )
 
     assert_includes index, 'text: "New press kit"'
-    assert_match(/New press kit.*FlatPack::SegmentedButtons::Component/m, index)
-    assert_includes index, "FlatPack::SegmentedButtons::Component"
+    assert_match(/New press kit.*FlatPack::ButtonGroup::Component/m, index)
+    assert_includes index, "FlatPack::ButtonGroup::Component"
     assert_includes index, "icon_only: true"
     assert_includes index, "squares-2x2"
     assert_includes index, "table-cells"
+    refute_includes index, "FlatPack::SegmentedButtons::Component"
     refute_includes index, "justify-between"
     refute_includes index, 'text: "Cards"'
     refute_includes index, 'text: "Table"'

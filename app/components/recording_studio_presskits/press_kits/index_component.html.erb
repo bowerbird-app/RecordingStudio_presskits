@@ -12,23 +12,21 @@
       href: @new_path
     ) %>
 
-    <%= render FlatPack::SegmentedButtons::Component.new do |group| %>
-      <% group.button(
-        text: nil,
+    <%= render FlatPack::ButtonGroup::Component.new do |group| %>
+      <% group.button(FlatPack::Button::Component.new(
         icon: "squares-2x2",
         icon_only: true,
-        selected: !table_view?,
+        style: table_view? ? :secondary : :primary,
         href: @cards_path,
-        aria: { label: "Cards" }
-      ) %>
-      <% group.button(
-        text: nil,
+        aria: { label: "Cards", pressed: !table_view? }
+      )) %>
+      <% group.button(FlatPack::Button::Component.new(
         icon: "table-cells",
         icon_only: true,
-        selected: table_view?,
+        style: table_view? ? :primary : :secondary,
         href: @table_path,
-        aria: { label: "Table" }
-      ) %>
+        aria: { label: "Table", pressed: table_view? }
+      )) %>
     <% end %>
   </div>
 

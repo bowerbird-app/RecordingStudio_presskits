@@ -15,7 +15,7 @@ The kit editor is a form plus an add dropdown. Default-layout chrome is page act
 3. On kit edit, keep **Add a section**, **Preview**, and Publishable's Draft / Published action (`RecordingStudioPublishable::EditButtonComponent`) on one row. Do not hand-roll a second publish control. Save stays normal size.
 4. Keep test-only children off the dropdown with `config.excluded_picker_types`. Dummy excludes `FakeBlock`.
 5. Put only page actions in `page_nav_right`. Access stays. Do not insert Sign in, Sign out, or Root Switchable into default layout. Core owns back and close.
-6. On the kit index, keep **New press kit** first and left. Switch cards vs table with icon-only `FlatPack::SegmentedButtons::Component`. Do not put the create button on the right of the toggle. Do not invent a Press kits view-mode helper.
+6. On the kit index, keep **New press kit** first and left. Switch cards vs table with icon-only `FlatPack::ButtonGroup::Component` (Flatpack's documented icon-only group). Do not put the create button on the right of the toggle. Do not invent a Press kits view-mode helper.
 7. Logged-out public show stays default layout with back and close only.
 8. Re-seed dummy if you still have Hero / Quotes / Notes children. Seed is Spring launch published and Autumn recap unpublished.
 

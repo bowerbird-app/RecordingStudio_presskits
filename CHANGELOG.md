@@ -26,7 +26,7 @@ The kit editor is a form and one action row. Chrome on default-layout screens is
 - Owner preview can show Access. No Sign out or Root Switchable
 - Dummy seed: **Spring launch** published, **Autumn recap** unpublished, no seeded fake sections
 - Kit edit Save stays normal size (`items-start`). Empty kits skip the empty-state tray. An add dropdown with no types is a disabled button, not an empty menu hole
-- Index toolbar is left-justified: **New press kit** first, then icon-only `FlatPack::SegmentedButtons::Component` for cards vs table (`squares-2x2` / `table-cells`). No Cards / Table labels. No Press kits helper.
+- Index toolbar is left-justified: **New press kit** first, then icon-only `FlatPack::ButtonGroup::Component` for cards vs table (`squares-2x2` / `table-cells`). No Cards / Table labels. No Press kits helper. This Flatpack pin's SegmentedButtons is text-only.
 
 ### Removed
 - The "Add a section" picker card and radio list
@@ -36,7 +36,7 @@ The kit editor is a form and one action row. Chrome on default-layout screens is
 - Point create / add / remove / reorder at `edit_press_kit_path` if you overrode those redirects
 - Replace any host copy of the picker card with `SectionDropdownComponent` (Flatpack Button Dropdown)
 - Do not put Sign in, Sign out, or Root Switchable into `page_nav_right` or `recording_studio/default_layout`. Core owns back and close. Access stays in the slot
-- Keep **New press kit** first and left on the index. Cards vs table is icon-only `FlatPack::SegmentedButtons::Component`. Do not invent a Press kits toggle
+- Keep **New press kit** first and left on the index. Cards vs table is icon-only `FlatPack::ButtonGroup::Component`. Do not invent a Press kits toggle
 - If a dummy or test type should stay off the add dropdown, set `config.excluded_picker_types`
 - Re-seed dummy to drop leftover Hero / Quotes / Notes children
 
