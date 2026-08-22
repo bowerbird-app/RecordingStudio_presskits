@@ -186,7 +186,7 @@ Access uses `grant_access` / `authorized?` on recordings. Grants on the workspac
 
 The mounted user slice uses Recording Studio's default layout (back and close). Index, kit, and owner preview pages are ViewComponents you can reuse or replace.
 
-- Index: the current root's live kits. Same list as cards or a table, switched with `FlatPack::SegmentedButtons::Component`.
+- Index: the current root's live kits. **New press kit** is first and left. Cards vs table is icon-only `FlatPack::SegmentedButtons::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle.
 - Empty index: what happened, and a way to make a kit.
 - Kit show: title, publish, and children. No add card.
 - Kit edit: title plus subtitle, then one row of **Add a section**, **Preview**, and Publishable's Draft / Published action. Then the title form with a normal-size **Save**. Children you can reorder or remove come next. Types come from `picker_types`. No empty-state tray on edit.

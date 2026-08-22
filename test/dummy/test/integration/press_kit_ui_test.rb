@@ -48,8 +48,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
-    assert_includes response.body, "Cards"
-    assert_includes response.body, "Table"
+    assert_includes response.body, "New press kit"
+    assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    assert_select "a[aria-label='Cards'] [data-flat-pack--icon-name-value='squares-2x2']", count: 1
+    assert_select "a[aria-label='Table'] [data-flat-pack--icon-name-value='table-cells']", count: 1
+    refute_includes response.body, ">Cards<"
+    refute_includes response.body, ">Table<"
     assert_page_nav_close
     assert_access_slot_only
 
@@ -58,6 +62,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "<table"
+    assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    refute_includes response.body, ">Cards<"
+    refute_includes response.body, ">Table<"
   end
 
   test "empty index explains what to do next" do
