@@ -49,15 +49,17 @@ module RecordingStudioPresskits
       engine = presskits_publishable_engine
       return unless engine.respond_to?(:edit_recording_publishable_path)
 
-      engine.edit_recording_publishable_path(recording.id)
+      engine.edit_recording_publishable_path(recording_id: recording.id)
     rescue StandardError
       nil
     end
 
+    def recording_studio_publishable
+      presskits_publishable_engine
+    end
+
     def presskits_publishable_engine
-      return recording_studio_publishable if respond_to?(:recording_studio_publishable)
-      return main_app.recording_studio_publishable if respond_to?(:main_app) &&
-                                                      main_app.respond_to?(:recording_studio_publishable)
+      return RecordingStudioPublishable::Engine.routes.url_helpers if defined?(RecordingStudioPublishable::Engine)
 
       nil
     end

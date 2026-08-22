@@ -11,11 +11,12 @@ The kit editor is a form plus an add dropdown. Default-layout chrome is page act
 ### Host app
 
 1. Creating a kit now lands on edit. Add, remove, and reorder return there too. Update any overridden redirects.
-2. Replace the picker card with `RecordingStudioPresskits::PressKits::SectionDropdownComponent` (Flatpack `Button::Dropdown`). Types still come from `picker_types` / `allowed_parent_types`.
-3. Keep test-only children off the dropdown with `config.excluded_picker_types`. Dummy excludes `FakeBlock`.
-4. Put only page actions in `page_nav_right`. Access stays. Do not insert Sign in, Sign out, or Root Switchable into default layout. Core owns back and close.
-5. Logged-out public show stays default layout with back and close only.
-6. Re-seed dummy if you still have Hero / Quotes / Notes children. Seed is Spring launch published and Autumn recap unpublished.
+2. Replace the picker card with `RecordingStudioPresskits::PressKits::SectionDropdownComponent` (Flatpack `Button::Dropdown`). Types still come from `picker_types` / `allowed_parent_types`. If no types are registered, the control is a disabled Add a section button — no empty menu box.
+3. On kit edit, keep **Add a section**, **Preview**, and Publishable's Draft / Published action (`RecordingStudioPublishable::EditButtonComponent`) on one row. Do not hand-roll a second publish control. Save stays normal size.
+4. Keep test-only children off the dropdown with `config.excluded_picker_types`. Dummy excludes `FakeBlock`.
+5. Put only page actions in `page_nav_right`. Access stays. Do not insert Sign in, Sign out, or Root Switchable into default layout. Core owns back and close.
+6. Logged-out public show stays default layout with back and close only.
+7. Re-seed dummy if you still have Hero / Quotes / Notes children. Seed is Spring launch published and Autumn recap unpublished.
 
 ### Verify
 

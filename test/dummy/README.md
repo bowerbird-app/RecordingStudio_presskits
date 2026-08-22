@@ -10,7 +10,7 @@ This Rails app exists to prove Recording Studio Press Kits in a real host. It is
 - Orderable, Trashable, Duplicatable, and Publishable install, migrations, and mounts
 - Recording Studio Admin 2.0 mounted under an admin root, with Accessible grants for the seeded admin
 - Authenticated `/` redirects to the press kit index on Recording Studio's default layout
-- Cards and table views of kits, plus a kit editor with a real title form and an add dropdown
+- Cards and table views of kits, plus a kit editor with a real title form, Add a section, Preview, and Publishable's Draft / Published action on one row
 - Logged-out public show of a live kit on Recording Studio's default layout (PageNav back + close only)
 - Owner preview of a kit that is not live, on the default layout, with Access in the slot
 - Dummy FakeBlock stays test-only and stays off the add dropdown

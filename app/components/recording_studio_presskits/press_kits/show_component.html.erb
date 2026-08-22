@@ -6,19 +6,32 @@
   ) %>
 
   <% if editing? %>
-    <%= render RecordingStudioPresskits::PressKits::SectionDropdownComponent.new(
-      items: picker_items,
-      add_path: @add_path
-    ) %>
-
-    <%= form_with url: @update_path, method: :patch, local: true, class: "flex max-w-xl flex-col gap-4" do %>
-      <%= render FlatPack::TextInput::Component.new(
-        name: "press_kit[title]",
-        label: "Title",
-        value: kit_title,
-        required: true,
-        placeholder: "Spring launch"
+    <div class="flex flex-wrap items-center gap-2">
+      <%= render RecordingStudioPresskits::PressKits::SectionDropdownComponent.new(
+        items: picker_items,
+        add_path: @add_path
       ) %>
+
+      <% if @preview_path.present? %>
+        <%= render FlatPack::Button::Component.new(text: "Preview", style: :secondary, href: @preview_path) %>
+      <% end %>
+
+      <%= render RecordingStudioPublishable::EditButtonComponent.new(
+        recording: @press_kit_recording,
+        label: "Draft"
+      ) %>
+    </div>
+
+    <%= form_with url: @update_path, method: :patch, local: true, class: "flex max-w-xl flex-col items-start gap-4" do %>
+      <div class="w-full">
+        <%= render FlatPack::TextInput::Component.new(
+          name: "press_kit[title]",
+          label: "Title",
+          value: kit_title,
+          required: true,
+          placeholder: "Spring launch"
+        ) %>
+      </div>
 
       <%= render FlatPack::Button::Component.new(
         text: "Save",
@@ -26,11 +39,9 @@
         type: "submit"
       ) %>
     <% end %>
-  <% end %>
-
-  <% if @preview_path.present? || @public_path.present? || @publish_path.present? || @edit_path.present? %>
+  <% elsif @preview_path.present? || @public_path.present? || @publish_path.present? || @edit_path.present? %>
     <div class="flex flex-wrap items-center gap-2">
-      <% if !editing? && @edit_path.present? %>
+      <% if @edit_path.present? %>
         <%= render FlatPack::Button::Component.new(text: "Edit", style: :secondary, href: @edit_path) %>
       <% end %>
       <% if @preview_path.present? %>
@@ -45,11 +56,13 @@
   <% end %>
 
   <% if @section_recordings.empty? %>
-    <%= render FlatPack::EmptyState::Component.new(
-      title: editing? ? "No sections yet" : "Nothing to show yet",
-      description: editing? ? "Add one when a real part is ready." : "Sections land here once they add some.",
-      icon: :inbox
-    ) %>
+    <% unless editing? %>
+      <%= render FlatPack::EmptyState::Component.new(
+        title: "Nothing to show yet",
+        description: "Sections land here once they add some.",
+        icon: :inbox
+      ) %>
+    <% end %>
   <% elsif editing? %>
     <%= render FlatPack::List::Component.new(
       orderable: true,

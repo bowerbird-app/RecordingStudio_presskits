@@ -9,10 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.7.0] - 2026-08-22
 
-The kit editor is a form and a dropdown. Chrome on default-layout screens is page actions only. Dummy seed stays two kits and no fake sections.
+The kit editor is a form and one action row. Chrome on default-layout screens is page actions only. Dummy seed stays two kits and no fake sections.
 
 ### Added
 - Kit edit screen with the kit title form and a Flatpack **Add a section** dropdown under the title
+- The same row holds Preview and Publishable's **Draft / Published** action (`EditButtonComponent`)
 - `excluded_picker_types` so hosts can keep test-only children off the dropdown
 - Dummy excludes `FakeBlock` from the dropdown. FakeBlock stays for tests only
 
@@ -24,6 +25,7 @@ The kit editor is a form and a dropdown. Chrome on default-layout screens is pag
 - Logged-out public show stays default layout with back and close only. No Sign in
 - Owner preview can show Access. No Sign out or Root Switchable
 - Dummy seed: **Spring launch** published, **Autumn recap** unpublished, no seeded fake sections
+- Kit edit Save stays normal size (`items-start`). Empty kits skip the empty-state tray. An add dropdown with no types is a disabled button, not an empty menu hole
 
 ### Removed
 - The "Add a section" picker card and radio list

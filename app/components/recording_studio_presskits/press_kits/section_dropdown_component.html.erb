@@ -1,14 +1,23 @@
-<%= render FlatPack::Button::Dropdown::Component.new(
-  text: "Add a section",
-  style: :secondary,
-  placement: :bottom_left,
-  id: "presskits-section-dropdown"
-) do |dropdown| %>
-  <% @items.each do |item| %>
-    <% dropdown.menu_item(
-      text: item[:label],
-      href: add_path_for(item[:id]),
-      data: { turbo_method: :post }
-    ) %>
+<% if @items.any? %>
+  <%= render FlatPack::Button::Dropdown::Component.new(
+    text: "Add a section",
+    style: :secondary,
+    placement: :bottom_left,
+    id: "presskits-section-dropdown"
+  ) do |dropdown| %>
+    <% @items.each do |item| %>
+      <% dropdown.menu_item(
+        text: item[:label],
+        href: add_path_for(item[:id]),
+        data: { turbo_method: :post }
+      ) %>
+    <% end %>
   <% end %>
+<% else %>
+  <%= render FlatPack::Button::Component.new(
+    text: "Add a section",
+    style: :secondary,
+    disabled: true,
+    id: "presskits-section-dropdown"
+  ) %>
 <% end %>

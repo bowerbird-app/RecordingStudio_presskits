@@ -172,7 +172,7 @@ RecordingStudioPresskits.picker_types
 #    minus excluded_picker_types
 ```
 
-If nothing real is registered, the dropdown is empty. That is fine.
+If nothing real is registered, Add a section is a disabled button. No empty menu box.
 
 The kit page walks children in order and renders each type's component. The public page does the same walk and renders each type's public component. Register a host or addon component; the container does not style the blocks.
 
@@ -189,12 +189,12 @@ The mounted user slice uses Recording Studio's default layout (back and close). 
 - Index: the current root's live kits. Same list as cards or a table, switched with `FlatPack::SegmentedButtons::Component`.
 - Empty index: what happened, and a way to make a kit.
 - Kit show: title, publish, and children. No add card.
-- Kit edit: title plus subtitle, **Add a section** dropdown under the title, the real title form, then children you can reorder or remove. Types come from `picker_types`. Empty is fine when no real addon has opted in.
+- Kit edit: title plus subtitle, then one row of **Add a section**, **Preview**, and Publishable's Draft / Published action. Then the title form with a normal-size **Save**. Children you can reorder or remove come next. Types come from `picker_types`. No empty-state tray on edit.
 - Owner preview: the same public walk of children, on the default layout, for an authenticated owner. A kit that is not live stays hidden from logged-out visitors.
 
 Default-layout chrome is back, close, and page actions. Access stays in the right slot. Do not put Sign in, Sign out, or Root Switchable there — core owns back and close.
 
-One primary action per page: **New press kit** on the index, **Create** on the new form, **Save** on kit edit. The add dropdown sits under the title.
+One primary action per page: **New press kit** on the index, **Create** on the new form, **Save** on kit edit. Publish state stays on Publishable's own action. Do not hand-roll a second publish system.
 
 ## Public
 

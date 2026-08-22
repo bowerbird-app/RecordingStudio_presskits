@@ -115,24 +115,31 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Add the bits you need"
     assert_includes response.body, "presskits-section-dropdown"
     assert_includes response.body, "Add a section"
+    assert_includes response.body, "Preview"
     assert_includes response.body, 'name="press_kit[title]"'
     refute_includes response.body, "presskits-section-picker"
     refute_includes response.body, "Pick what to drop into this kit."
     refute_includes response.body, "Fake block"
+    refute_includes response.body, "No sections yet"
+    refute_includes response.body, "role=\"menu\""
     assert_access_slot_only
+    assert_includes response.body, "items-start"
+    assert_match(/EditButtonComponent|Published|Draft/, response.body)
   end
 
-  test "empty kit editor shows no sections yet and the add dropdown" do
+  test "empty kit editor keeps add, preview, and publishable on one row" do
     kit = record_kit("Empty launch")
     sign_in @user
     switch_to_root(@root)
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_includes response.body, "No sections yet"
     assert_includes response.body, "presskits-section-dropdown"
+    assert_includes response.body, "Preview"
+    refute_includes response.body, "No sections yet"
     refute_includes response.body, "presskits-section-picker"
     refute_includes response.body, "Fake block"
+    refute_includes response.body, "role=\"menu\""
   end
 
   test "dropdown rejects dummy fake block types" do

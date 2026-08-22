@@ -81,6 +81,21 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Dummy host"
   end
 
+  test "kit edit uses publishable draft published action" do
+    kit = record_kit("Spring launch")
+    publish_kit!(kit, slug: "spring-launch", status: "published")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_includes response.body, "Published"
+    assert_includes response.body, "/recordings/#{kit.id}/publishable/edit"
+    refute_includes response.body, "Go live"
+    refute_includes response.body, "See it live"
+    refute_includes response.body, "No sections yet"
+  end
+
   test "logged-out visitors cannot read an unpublished kit" do
     kit = record_kit("Autumn recap")
     publish_kit!(kit, slug: "autumn-recap", status: "draft")
