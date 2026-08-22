@@ -1,5 +1,30 @@
 # Upgrade notes
 
+## 0.7.0
+
+The kit editor is a form plus an add dropdown. Default-layout chrome is page actions only.
+
+- Ruby 3.3 or newer
+- Rails 8.1 or newer
+- Same gem pins as 0.6.0
+
+### Host app
+
+1. Creating a kit now lands on edit. Add, remove, and reorder return there too. Update any overridden redirects.
+2. Replace the picker card with `RecordingStudioPresskits::PressKits::SectionDropdownComponent` (Flatpack `Button::Dropdown`). Types still come from `picker_types` / `allowed_parent_types`.
+3. Keep test-only children off the dropdown with `config.excluded_picker_types`. Dummy excludes `FakeBlock`.
+4. Put only page actions in `page_nav_right`. Access stays. Do not insert Sign in, Sign out, or Root Switchable into default layout. Core owns back and close.
+5. Logged-out public show stays default layout with back and close only.
+6. Re-seed dummy if you still have Hero / Quotes / Notes children. Seed is Spring launch published and Autumn recap unpublished.
+
+### Verify
+
+```bash
+bundle install
+BUNDLE_GEMFILE=test/dummy/Gemfile bundle install
+bundle exec rake test:all
+```
+
 ## 0.6.0
 
 Publish the kit, not each block. A live kit has a public page. An owner can preview a kit that is not live yet.

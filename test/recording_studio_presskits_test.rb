@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.6.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.7.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_exists
@@ -86,6 +86,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "def picker_types"
     assert_includes source, "RecordingStudio.recordable_type_name"
     assert_includes source, "RecordingStudio.declared_allowed_parent_types_for"
+    assert_includes source, "excluded_picker_types"
     refute_includes source, "Block"
     refute_includes source, "Slot"
   end
@@ -100,6 +101,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes controller_source, "include RecordingStudio::UsesDefaultLayout"
     assert_includes controller_source, '"recording_studio/default_layout"'
     assert_includes controller_source, 'devise_controller? ? "application"'
+    refute_includes controller_source, "Sign out"
+    refute_includes controller_source, "Sign in"
+    dummy_helper = File.read(File.expand_path("dummy/app/helpers/application_helper.rb", __dir__))
+    refute_includes dummy_helper, "presskits_extra_nav"
+    refute_includes dummy_helper, "Sign out"
+    refute_includes default_layout, "Sign out"
+    refute_includes default_layout, "Sign in"
+    refute_includes default_layout, "root_switch"
     assert_includes default_layout, '<html data-theme="rounded">'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
     assert_includes default_layout, "anchor_tooltip:"
@@ -158,6 +167,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, '"RecordingStudioPresskits::PressKit"'
     assert_includes initializer_source, '"FakeBlock"'
+    presskits_initializer = File.read(
+      File.expand_path("dummy/config/initializers/recording_studio_presskits.rb", __dir__)
+    )
+    assert_includes presskits_initializer, "excluded_picker_types"
+    assert_includes presskits_initializer, '"FakeBlock"'
     assert_includes initializer_source, '"AdminRoot"'
     assert_includes initializer_source, '"RecordingStudioPublishable::Publishable"'
     refute_includes initializer_source, "config.include_children"
@@ -223,12 +237,19 @@ class RecordingStudioPresskitsTest < Minitest::Test
     )
 
     assert File.exist?(view_path)
+    assert File.exist?(File.expand_path("../app/views/recording_studio_presskits/press_kits/edit.html.erb", __dir__))
     refute File.exist?(File.expand_path("../app/controllers/recording_studio_presskits/home_controller.rb", __dir__))
     assert_includes public_controller, "include RecordingStudio::UsesDefaultLayout"
     refute_includes public_controller, "Sign in"
     assert_includes public_show, "recording_studio_page_nav"
     refute_includes public_show, "presskits_page_nav"
     refute_includes public_show, "Sign in"
+
+    helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/application_helper.rb", __dir__))
+    assert_includes helper, "recording_studio_accessible_avatars"
+    refute_includes helper, "root_switch"
+    refute_includes helper, "Sign out"
+    refute_includes helper, "presskits_extra_nav"
   end
 
   def test_dummy_fake_block_is_host_only
@@ -302,7 +323,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
     assert_includes show, "FlatPack::EmptyState::Component"
-    assert_includes show, "SectionPickerComponent"
+    assert_includes show, "SectionDropdownComponent"
+    refute_includes show, "SectionPickerComponent"
+    refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"
   end
 end

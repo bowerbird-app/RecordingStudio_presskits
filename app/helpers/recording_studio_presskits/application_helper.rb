@@ -13,12 +13,22 @@ module RecordingStudioPresskits
     end
 
     def fill_presskits_page_nav_right
+      recording = presskits_access_recording
+      return unless recording
+      return unless respond_to?(:recording_studio_accessible_avatars)
+
       recording_studio_page_nav_right do
-        if respond_to?(:recording_studio_root_switch_dropdown)
-          concat recording_studio_root_switch_dropdown(style: :ghost, size: :md)
-        end
-        concat presskits_extra_nav if respond_to?(:presskits_extra_nav)
+        concat recording_studio_accessible_avatars(recording, button_style: :ghost, button_size: :md)
       end
+    end
+
+    def presskits_access_recording
+      if respond_to?(:current_presskits_root) && current_presskits_root.present?
+        return current_presskits_root
+      end
+      return current_root_recording if respond_to?(:current_root_recording) && current_root_recording.present?
+
+      nil
     end
 
     def presskits_title_for(recording)

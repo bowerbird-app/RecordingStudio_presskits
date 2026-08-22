@@ -35,6 +35,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Press kits"
+    assert_access_slot_only
     refute_includes response.body, "Dummy host"
   end
 
@@ -50,6 +51,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Cards"
     assert_includes response.body, "Table"
     assert_page_nav_close
+    assert_access_slot_only
 
     get recording_studio_presskits.press_kits_path(view: "table")
     assert_response :success
@@ -83,6 +85,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Quotes"
     assert_match(/Hero.*Quotes/m, response.body)
     assert_page_nav_close
+    assert_access_slot_only
+    refute_includes response.body, "presskits-section-picker"
+    refute_includes response.body, "Add a section"
     refute_includes response.body, "Dummy host"
   end
 
@@ -95,33 +100,53 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_includes response.body, "New press kit"
     assert_page_nav_close
+    assert_access_slot_only
   end
 
-  test "empty kit shows no sections yet and the picker" do
-    kit = record_kit("Empty launch")
-    sign_in @user
-    switch_to_root(@root)
-
-    get recording_studio_presskits.press_kit_path(kit)
-    assert_response :success
-    assert_includes response.body, "No sections yet"
-    assert_includes response.body, "presskits-section-picker"
-  end
-
-  test "picker adds a fake block under the kit" do
+  test "kit edit shows the title form and add dropdown without the picker card" do
     kit = record_kit("Spring launch")
     sign_in @user
     switch_to_root(@root)
 
-    assert_difference -> { FakeBlock.count }, 1 do
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_rounded_default_layout
+    assert_includes response.body, "Spring launch"
+    assert_includes response.body, "Add the bits you need"
+    assert_includes response.body, "presskits-section-dropdown"
+    assert_includes response.body, "Add a section"
+    assert_includes response.body, 'name="press_kit[title]"'
+    refute_includes response.body, "presskits-section-picker"
+    refute_includes response.body, "Pick what to drop into this kit."
+    refute_includes response.body, "Fake block"
+    assert_access_slot_only
+  end
+
+  test "empty kit editor shows no sections yet and the add dropdown" do
+    kit = record_kit("Empty launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_includes response.body, "No sections yet"
+    assert_includes response.body, "presskits-section-dropdown"
+    refute_includes response.body, "presskits-section-picker"
+    refute_includes response.body, "Fake block"
+  end
+
+  test "dropdown rejects dummy fake block types" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    assert_no_difference -> { FakeBlock.count } do
       post recording_studio_presskits.press_kit_sections_path(kit), params: { type: "FakeBlock" }
     end
 
     follow_redirect!
     assert_response :success
-    child = kit.recording_studio_orderable_children.last
-    assert_equal kit, child.parent_recording
-    assert_equal "Fake block", child.recordable.title
+    assert_includes response.body, "That section isn't on the list."
   end
 
   test "remove trashes a child through trashable" do
@@ -166,8 +191,21 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     press_kit = RecordingStudioPresskits::PressKit.where(title: title).order(:created_at).last
     kit = RecordingStudioPresskits::KitQuery.for_root(@root).find { |recording| recording.recordable_id == press_kit.id }
-    assert_redirected_to recording_studio_presskits.press_kit_path(kit)
+    assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
     assert_equal @root, kit.parent_recording
+  end
+
+  test "saving the kit title uses revise" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_path(kit), params: { press_kit: { title: "Spring launch, take two" } }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "Spring launch, take two"
+    assert_equal "Spring launch, take two", kit.reload.recordable.title
   end
 
   test "unauthenticated visitors are sent to sign in" do

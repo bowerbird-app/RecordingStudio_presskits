@@ -37,6 +37,7 @@ class ConfigurationTest < Minitest::Test
     assert_equal :authenticate_user!, configuration.authentication_method
     assert_equal :current_user, configuration.current_actor_method
     assert_equal({}, configuration.section_components)
+    assert_equal [], configuration.excluded_picker_types
     assert_instance_of RecordingStudio::Hooks, configuration.hooks
   end
 

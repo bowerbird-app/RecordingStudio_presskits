@@ -18,7 +18,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "fixed inset-0"
   end
 
-  test "home page renders the root switch dropdown trigger" do
+  test "press kit pages keep root switchable out of the default layout slot" do
     user = User.find_or_create_by!(email: "root-switch-test@example.com") do |record|
       record.password = "Password123!"
       record.password_confirmation = "Password123!"
@@ -42,8 +42,9 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     follow_redirect! if response.redirect?
 
     assert_response :success
-    assert_includes response.body, workspace.name
     assert_rounded_default_layout
+    assert_access_slot_only
+    refute_includes response.body, "Sign out"
   end
 
   test "root switch page renders with the host default layout" do

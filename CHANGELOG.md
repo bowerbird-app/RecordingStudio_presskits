@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-22
+
+The kit editor is a form and a dropdown. Chrome on default-layout screens is page actions only. Dummy seed stays two kits and no fake sections.
+
+### Added
+- Kit edit screen with the kit title form and a Flatpack **Add a section** dropdown under the title
+- `excluded_picker_types` so hosts can keep test-only children off the dropdown
+- Dummy excludes `FakeBlock` from the dropdown. FakeBlock stays for tests only
+
+### Changed
+- Version `0.7.0`
+- Creating a kit lands on edit
+- Add, remove, and reorder return to edit
+- Default-layout page-nav right slot is Access only (`recording_studio_accessible_avatars`). Sign out and Root Switchable stay out of that slot, dummy extra nav, and gem views that use default layout
+- Logged-out public show stays default layout with back and close only. No Sign in
+- Owner preview can show Access. No Sign out or Root Switchable
+- Dummy seed: **Spring launch** published, **Autumn recap** unpublished, no seeded fake sections
+
+### Removed
+- The "Add a section" picker card and radio list
+- Dummy `presskits_extra_nav` Sign out control
+
+### Upgrade notes
+- Point create / add / remove / reorder at `edit_press_kit_path` if you overrode those redirects
+- Replace any host copy of the picker card with `SectionDropdownComponent` (Flatpack Button Dropdown)
+- Do not put Sign in, Sign out, or Root Switchable into `page_nav_right` or `recording_studio/default_layout`. Core owns back and close. Access stays in the slot
+- If a dummy or test type should stay off the add dropdown, set `config.excluded_picker_types`
+- Re-seed dummy to drop leftover Hero / Quotes / Notes children
+
 ## [0.6.0] - 2026-08-21
 
 Publish the kit, not each block. A live kit is readable without signing in. An owner can preview a kit that is not live yet. Admin shows live vs not-live work. Nothing is in production — this breaks in place.
@@ -184,7 +213,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.4.0

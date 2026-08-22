@@ -25,7 +25,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
     assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("FakeBlock")
     assert_equal "Press kit", RecordingStudio.recordable_type_label(RecordingStudioPresskits::PressKit)
-    assert_includes RecordingStudioPresskits.picker_types, "FakeBlock"
+    refute_includes RecordingStudioPresskits.picker_types, "FakeBlock"
+    assert_includes RecordingStudioPresskits.configuration.excluded_picker_types, "FakeBlock"
   end
 
   test "dummy app schema keeps accessible grants and press kits" do
@@ -61,9 +62,6 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     page = Page.find_by!(title: "Getting Started")
     press_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Spring launch")
     unpublished_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Autumn recap")
-    hero = FakeBlock.find_by!(title: "Hero")
-    quotes = FakeBlock.find_by!(title: "Quotes")
-    notes = FakeBlock.find_by!(title: "Notes")
     admin_root = AdminRoot.find_by!(name: "Admin")
     root_recording = RecordingStudio::Recording.find_by!(recordable: workspace)
     accessible_root_recording = RecordingStudio::Recording.find_by!(recordable: accessible_workspace)
@@ -73,9 +71,6 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     page_recording = RecordingStudio::Recording.find_by!(recordable: page)
     press_kit_recording = RecordingStudio::Recording.find_by!(recordable: press_kit)
     unpublished_kit_recording = RecordingStudio::Recording.find_by!(recordable: unpublished_kit)
-    hero_recording = RecordingStudio::Recording.find_by!(recordable: hero)
-    quotes_recording = RecordingStudio::Recording.find_by!(recordable: quotes)
-    notes_recording = RecordingStudio::Recording.find_by!(recordable: notes)
 
     assert_nil Current.actor
     assert_nil root_recording.parent_recording_id
@@ -93,11 +88,9 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal root_recording, page_recording.root_recording
     assert_equal root_recording, press_kit_recording.parent_recording
     assert_equal root_recording, press_kit_recording.root_recording
-    assert_equal press_kit_recording, hero_recording.parent_recording
-    assert_equal root_recording, hero_recording.root_recording
-    assert_equal press_kit_recording, quotes_recording.parent_recording
-    assert_equal root_recording, quotes_recording.root_recording
-    assert_equal unpublished_kit_recording, notes_recording.parent_recording
+    assert_equal unpublished_kit_recording.root_recording, root_recording
+    assert_empty RecordingStudioPresskits::KitQuery.live_children(press_kit_recording)
+    assert_empty RecordingStudioPresskits::KitQuery.live_children(unpublished_kit_recording)
     assert press_kit.published?
     assert press_kit.indexable?
     assert press_kit_recording.currently_published?
@@ -105,7 +98,6 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute unpublished_kit_recording.currently_published?
     assert_equal 3, Workspace.count
     assert_operator RecordingStudioPresskits::PressKit.count, :>=, 2
-    assert_operator FakeBlock.count, :>=, 3
 
     assert_no_difference -> { User.count } do
       assert_no_difference -> { RecordingStudio::Recording.count } do

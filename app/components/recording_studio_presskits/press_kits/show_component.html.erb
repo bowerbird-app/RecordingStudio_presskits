@@ -1,12 +1,38 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: kit_title,
-    subtitle: "Add sections, then put them in the order you want.",
+    subtitle: kit_subtitle,
     variant: :h1
   ) %>
 
-  <% if @preview_path.present? || @public_path.present? || @publish_path.present? %>
+  <% if editing? %>
+    <%= render RecordingStudioPresskits::PressKits::SectionDropdownComponent.new(
+      items: picker_items,
+      add_path: @add_path
+    ) %>
+
+    <%= form_with url: @update_path, method: :patch, local: true, class: "flex max-w-xl flex-col gap-4" do %>
+      <%= render FlatPack::TextInput::Component.new(
+        name: "press_kit[title]",
+        label: "Title",
+        value: kit_title,
+        required: true,
+        placeholder: "Spring launch"
+      ) %>
+
+      <%= render FlatPack::Button::Component.new(
+        text: "Save",
+        style: :primary,
+        type: "submit"
+      ) %>
+    <% end %>
+  <% end %>
+
+  <% if @preview_path.present? || @public_path.present? || @publish_path.present? || @edit_path.present? %>
     <div class="flex flex-wrap items-center gap-2">
+      <% if !editing? && @edit_path.present? %>
+        <%= render FlatPack::Button::Component.new(text: "Edit", style: :secondary, href: @edit_path) %>
+      <% end %>
       <% if @preview_path.present? %>
         <%= render FlatPack::Button::Component.new(text: "Preview", style: :secondary, href: @preview_path) %>
       <% end %>
@@ -20,11 +46,11 @@
 
   <% if @section_recordings.empty? %>
     <%= render FlatPack::EmptyState::Component.new(
-      title: "No sections yet",
-      description: "Pick something to drop in. Later addons fill the real parts.",
+      title: editing? ? "No sections yet" : "Nothing to show yet",
+      description: editing? ? "Add one when a real part is ready." : "Sections land here once they add some.",
       icon: :inbox
     ) %>
-  <% else %>
+  <% elsif editing? %>
     <%= render FlatPack::List::Component.new(
       orderable: true,
       orderable_url: @reorder_path,
@@ -42,10 +68,16 @@
         ) %>
       <% end %>
     <% end %>
+  <% else %>
+    <% @section_recordings.each do |recording| %>
+      <% component = RecordingStudioPresskits.section_component_for(recording) %>
+      <% if component %>
+        <%= render component.new(recording: recording) %>
+      <% else %>
+        <p class="text-sm font-medium text-(--surface-content-color)">
+          <%= helpers.presskits_title_for(recording) %>
+        </p>
+      <% end %>
+    <% end %>
   <% end %>
-
-  <%= render RecordingStudioPresskits::PressKits::SectionPickerComponent.new(
-    items: picker_items,
-    add_path: @add_path
-  ) %>
 </div>

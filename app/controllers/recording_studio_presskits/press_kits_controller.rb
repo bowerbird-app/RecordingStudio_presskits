@@ -3,7 +3,7 @@
 module RecordingStudioPresskits
   class PressKitsController < ApplicationController
     before_action :require_root!
-    before_action :set_press_kit, only: %i[show preview]
+    before_action :set_press_kit, only: %i[show preview edit update]
 
     def index
       authorize_recording!(current_presskits_root, role: :view)
@@ -18,7 +18,6 @@ module RecordingStudioPresskits
       return if performed?
 
       @section_recordings = KitQuery.live_children(@press_kit_recording)
-      @picker_types = RecordingStudioPresskits.picker_types
     end
 
     def preview
@@ -26,6 +25,27 @@ module RecordingStudioPresskits
       return if performed?
 
       @section_recordings = KitQuery.live_children(@press_kit_recording)
+    end
+
+    def edit
+      authorize_recording!(@press_kit_recording, role: :edit)
+      return if performed?
+
+      @section_recordings = KitQuery.live_children(@press_kit_recording)
+      @picker_types = RecordingStudioPresskits.picker_types
+    end
+
+    def update
+      authorize_recording!(@press_kit_recording, role: :edit)
+      return if performed?
+
+      title = press_kit_params[:title].to_s.strip
+      return render_missing_edit_title if title.blank?
+
+      current_presskits_root.revise(@press_kit_recording) { |press_kit| press_kit.title = title }
+      redirect_to edit_press_kit_path(@press_kit_recording), notice: "Saved. That's the name people will see."
+    rescue ActiveRecord::RecordInvalid
+      render_missing_edit_title(title)
     end
 
     def new
@@ -43,7 +63,7 @@ module RecordingStudioPresskits
       return render_missing_title if title.blank?
 
       recording = current_presskits_root.record(PressKit) { |press_kit| press_kit.title = title }
-      redirect_to press_kit_path(recording), notice: "Press kit is ready. Add a section when you are."
+      redirect_to edit_press_kit_path(recording), notice: "Press kit is ready. Add a section when you are."
     rescue ActiveRecord::RecordInvalid
       render_missing_title(title)
     end
@@ -69,6 +89,13 @@ module RecordingStudioPresskits
       @press_kit = PressKit.new(title: title)
       flash.now[:alert] = "Give it a name so you can find it later."
       render :new, status: :unprocessable_entity
+    end
+
+    def render_missing_edit_title(_title = nil)
+      @section_recordings = KitQuery.live_children(@press_kit_recording)
+      @picker_types = RecordingStudioPresskits.picker_types
+      flash.now[:alert] = "Give it a name so you can find it later."
+      render :edit, status: :unprocessable_entity
     end
   end
 end

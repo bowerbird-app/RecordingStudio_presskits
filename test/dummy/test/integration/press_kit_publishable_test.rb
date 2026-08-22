@@ -71,8 +71,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_rounded_default_layout
-    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='chevron-left']", count: 1
-    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='x-mark']", count: 1
+    assert_public_chrome_only
     assert_select "a[href='/'][aria-label='Close']", count: 1
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "Hero"
@@ -80,8 +79,6 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "recording_studio-publishable-layout"
     refute_includes response.body, "flat-pack--top-nav"
     refute_includes response.body, "Dummy host"
-    refute_includes response.body, "Sign in"
-    refute_includes response.body, "Sign out"
   end
 
   test "logged-out visitors cannot read an unpublished kit" do
@@ -103,6 +100,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_page_nav_close
+    assert_access_slot_only
     assert_includes response.body, "Autumn recap"
     assert_includes response.body, "This is just for you"
     assert_includes response.body, "Notes"

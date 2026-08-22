@@ -201,10 +201,10 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal 1, recording.events.where(action: "noted").count
   end
 
-  test "picker types include fake block and exclude types that do not allow press kit" do
+  test "picker types skip dummy placeholders and types that do not allow press kit" do
     types = RecordingStudioPresskits.picker_types
 
-    assert_includes types, "FakeBlock"
+    refute_includes types, "FakeBlock"
     refute_includes types, "Workspace"
     refute_includes types, "Folder"
     refute_includes types, "Page"
