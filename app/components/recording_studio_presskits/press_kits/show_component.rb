@@ -3,7 +3,7 @@
 module RecordingStudioPresskits
   module PressKits
     class ShowComponent < ViewComponent::Base
-      def initialize(press_kit_recording:, section_recordings:, picker_types: [], add_path: nil, remove_path: nil, # rubocop:disable Metrics/ParameterLists
+      def initialize(press_kit_recording:, section_recordings:, picker_types: [], add_path: nil, remove_path: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
                      reorder_path: nil, preview_path: nil, public_path: nil, publish_path: nil, edit_path: nil,
                      update_path: nil, editing: false)
         super()
