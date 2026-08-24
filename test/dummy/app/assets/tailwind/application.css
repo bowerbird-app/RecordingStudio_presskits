@@ -3,11 +3,13 @@
 /* Absolute gem paths, written by `rake tailwind:bundle_sources` before each build. */
 @import "./bundle_sources.css";
 
-/* Dummy host views */
+/* Dummy host views and components */
 @source "../../views/**/*.erb";
+@source "../../components/**/*.{rb,erb}";
 
-/* This engine's views */
+/* This engine's views and components */
 @source "../../../../../app/views/**/*.erb";
+@source "../../../../../app/components/**/*.{rb,erb}";
 
 /* Fallback scans when Bundler installs into vendor or /usr/local/bundle (CI). */
 @source "../../../vendor/bundle/**/bundler/gems/flatpack-*/app/components/**/*.rb";
@@ -18,6 +20,9 @@
 @source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_orderable-*/app/views/**/*.erb";
 @source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_trashable-*/app/views/**/*.erb";
 @source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_duplicatable-*/app/views/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_admin-*/app/views/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_admin-*/app/components/**/*.rb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_admin-*/app/components/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/flatpack-*/app/components/**/*.rb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/flatpack-*/app/components/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio-*/app/views/**/*.erb";
@@ -26,3 +31,6 @@
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_orderable-*/app/views/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_trashable-*/app/views/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_duplicatable-*/app/views/**/*.erb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_admin-*/app/views/**/*.erb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_admin-*/app/components/**/*.rb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_admin-*/app/components/**/*.erb";

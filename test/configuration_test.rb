@@ -8,18 +8,17 @@ class ConfigurationTest < Minitest::Test
   end
 
   def test_merge_updates_known_attributes
-    @configuration.merge!(api_key: "abc123", timeout: 9, enable_feature_x: true)
+    @configuration.merge!(parent_root_type: "Site", authentication_method: :sign_in)
 
-    assert_equal "abc123", @configuration.api_key
-    assert_equal 9, @configuration.timeout
-    assert_equal true, @configuration.enable_feature_x
+    assert_equal "Site", @configuration.parent_root_type
+    assert_equal :sign_in, @configuration.authentication_method
   end
 
   def test_merge_ignores_unknown_keys
-    @configuration.merge!(unknown_key: "ignored", timeout: 7)
+    @configuration.merge!(unknown_key: "ignored", parent_root_type: "Folder")
 
     refute_respond_to @configuration, :unknown_key
-    assert_equal 7, @configuration.timeout
+    assert_equal "Folder", @configuration.parent_root_type
   end
 
   def test_merge_with_non_enumerable_is_noop
@@ -27,31 +26,24 @@ class ConfigurationTest < Minitest::Test
 
     @configuration.merge!(nil)
 
-    assert_nil @configuration.api_key if original[:api_key].nil?
-    assert_equal original[:api_key], @configuration.api_key unless original[:api_key].nil?
-    assert_equal original[:timeout], @configuration.timeout
-    assert_equal original[:enable_feature_x], @configuration.enable_feature_x
+    assert_equal original[:parent_root_type], @configuration.parent_root_type
+    assert_equal original[:authentication_method], @configuration.authentication_method
   end
 
-  def test_initialize_uses_environment_api_key_and_defaults
-    previous_value = ENV.fetch("RECORDING_STUDIO_PRESSKITS_API_KEY", nil)
-    ENV["RECORDING_STUDIO_PRESSKITS_API_KEY"] = "env-token"
-
+  def test_initialize_uses_workspace_parent_and_host_auth_defaults
     configuration = RecordingStudioPresskits::Configuration.new
 
-    assert_equal "env-token", configuration.api_key
-    assert_equal false, configuration.enable_feature_x
-    assert_equal 5, configuration.timeout
+    assert_equal "Workspace", configuration.parent_root_type
+    assert_equal :authenticate_user!, configuration.authentication_method
+    assert_equal :current_user, configuration.current_actor_method
+    assert_equal({}, configuration.section_components)
     assert_instance_of RecordingStudio::Hooks, configuration.hooks
-  ensure
-    ENV["RECORDING_STUDIO_PRESSKITS_API_KEY"] = previous_value
   end
 
   def test_merge_accepts_string_keys
-    @configuration.merge!("api_key" => "string-key", "timeout" => 12)
+    @configuration.merge!("parent_root_type" => "Organisation")
 
-    assert_equal "string-key", @configuration.api_key
-    assert_equal 12, @configuration.timeout
+    assert_equal "Organisation", @configuration.parent_root_type
   end
 
   def test_to_h_reports_registered_hook_counts
@@ -69,5 +61,13 @@ class ConfigurationTest < Minitest::Test
     RecordingStudioPresskits.configure
 
     assert_kind_of RecordingStudioPresskits::Configuration, RecordingStudioPresskits.configuration
+  end
+
+  def test_section_components_can_be_registered
+    RecordingStudioPresskits.register_section_component("FakeBlock", "FakeBlock::Component")
+
+    assert_equal "FakeBlock::Component", RecordingStudioPresskits.configuration.section_components["FakeBlock"]
+  ensure
+    RecordingStudioPresskits.configuration.section_components.delete("FakeBlock")
   end
 end

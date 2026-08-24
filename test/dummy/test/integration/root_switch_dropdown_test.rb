@@ -27,13 +27,23 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     sign_in user
 
     workspace = Workspace.create!(name: "Dropdown Workspace")
-    RecordingStudio.root_recording_for(workspace)
+    root_recording = grant_owner!(user, workspace)
 
-    get root_path
+    patch "/recording_studio_root_switchable/v1/root_switch", params: {
+      scope: "all_workspaces",
+      root_switch: {
+        root_recording_id: root_recording.id,
+        return_to: "/recording_studio_presskits"
+      }
+    }
+    follow_redirect! if response.redirect?
+
+    get "/"
+    follow_redirect! if response.redirect?
 
     assert_response :success
     assert_includes response.body, workspace.name
-    assert_select "body[data-recording-studio-default-layout='true']", count: 1
+    assert_rounded_default_layout
   end
 
   test "root switch page renders with the host default layout" do
@@ -45,12 +55,12 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     sign_in user
 
     workspace = Workspace.create!(name: "Switch Page Workspace")
-    RecordingStudio.root_recording_for(workspace)
+    grant_owner!(user, workspace)
 
     get "/recording_studio_root_switchable/v1/root_switch?scope=all_workspaces"
 
     assert_response :success
-    assert_select "body[data-recording-studio-default-layout='true']", count: 1
+    assert_rounded_default_layout
     refute_includes response.body, "flat-pack-sidebar-layout"
   end
 
@@ -64,8 +74,8 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     source_workspace = Workspace.create!(name: "Source Workspace")
     target_workspace = Workspace.create!(name: "Target Workspace")
-    target_root_recording = RecordingStudio.root_recording_for(target_workspace)
-    RecordingStudio.root_recording_for(source_workspace)
+    grant_owner!(user, source_workspace)
+    target_root_recording = grant_owner!(user, target_workspace)
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
@@ -88,8 +98,8 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     source_workspace = Workspace.create!(name: "Fallback Source Workspace")
     target_workspace = Workspace.create!(name: "Fallback Target Workspace")
-    target_root_recording = RecordingStudio.root_recording_for(target_workspace)
-    RecordingStudio.root_recording_for(source_workspace)
+    grant_owner!(user, source_workspace)
+    target_root_recording = grant_owner!(user, target_workspace)
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
@@ -100,5 +110,18 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     }
 
     assert_redirected_to "/"
+  end
+
+  private
+
+  def grant_owner!(user, workspace)
+    recording = RecordingStudio.root_recording_for(workspace)
+    result = RecordingStudioAccessible.bootstrap_owner_access!(
+      recording: recording,
+      actor: user
+    )
+    raise result.error if result.failure?
+
+    recording
   end
 end

@@ -20,7 +20,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
 
   test "dummy app validates recordable declarations" do
     assert RecordingStudio.validate_recordable_declarations!
-    assert_equal [ "Workspace" ], RecordingStudio.root_recordable_types
+    assert_equal [ "AdminRoot", "Workspace" ].sort, RecordingStudio.root_recordable_types.sort
     assert_equal [ "Workspace", "Folder" ], RecordingStudio.allowed_parent_types_for("Page")
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
     assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("FakeBlock")
@@ -34,6 +34,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.column_exists?(:recording_studio_recordings, :root_recording_id)
     assert connection.table_exists?(:recording_studio_accesses)
     assert connection.table_exists?(:recording_studio_press_kits)
+    assert connection.table_exists?(:admin_roots)
     assert connection.column_exists?(:recording_studio_press_kits, :title)
     refute connection.column_exists?(:recording_studio_press_kits, :updated_at)
     assert connection.table_exists?(:fake_blocks)
@@ -60,9 +61,11 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     press_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Spring launch")
     hero = FakeBlock.find_by!(title: "Hero")
     quotes = FakeBlock.find_by!(title: "Quotes")
+    admin_root = AdminRoot.find_by!(name: "Admin")
     root_recording = RecordingStudio::Recording.find_by!(recordable: workspace)
     accessible_root_recording = RecordingStudio::Recording.find_by!(recordable: accessible_workspace)
     private_root_recording = RecordingStudio::Recording.find_by!(recordable: private_workspace)
+    admin_root_recording = RecordingStudio::Recording.find_by!(recordable: admin_root)
     folder_recording = RecordingStudio::Recording.find_by!(recordable: folder)
     page_recording = RecordingStudio::Recording.find_by!(recordable: page)
     press_kit_recording = RecordingStudio::Recording.find_by!(recordable: press_kit)
@@ -73,6 +76,12 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_nil root_recording.parent_recording_id
     assert_nil accessible_root_recording.parent_recording_id
     assert_nil private_root_recording.parent_recording_id
+    assert_nil admin_root_recording.parent_recording_id
+    assert RecordingStudioAccessible.authorized?(
+      actor: User.find_by!(email: "admin@admin.com"),
+      recording: admin_root_recording,
+      role: :view
+    )
     assert_equal root_recording, folder_recording.parent_recording
     assert_equal root_recording, folder_recording.root_recording
     assert_equal folder_recording, page_recording.parent_recording
@@ -121,6 +130,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:duplicatable, for: FakeBlock)
     refute RecordingStudio.capability_enabled?(:trashable, for: Workspace)
     assert_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+    assert RecordingStudio.capability_enabled?(:accessible, for: AdminRoot)
   end
 
   test "accessible grant on the workspace root covers a nested press kit" do
@@ -144,5 +154,27 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
     assert RecordingStudioAccessible.authorized?(actor: user, recording: kit_recording, role: :view)
     assert RecordingStudioAccessible.authorized?(actor: user, recording: kit_recording, role: :admin)
+  end
+
+  test "dummy admin root enables the press kits section" do
+    source = File.read(Rails.root.join("app/models/admin_root.rb"))
+
+    assert_includes source, "include RecordingStudioAdmin::AllowsAdminSections"
+    assert_includes source, "section :press_kits"
+    assert RecordingStudio.capability_enabled?(:accessible, for: AdminRoot)
+  end
+
+  test "dummy default layout puts rounded on html without dropping UsesDefaultLayout" do
+    layout = File.read(Rails.root.join("app/views/layouts/recording_studio/default_layout.html.erb"))
+    controller = File.read(Rails.root.join("app/controllers/application_controller.rb"))
+
+    assert_includes layout, '<html data-theme="rounded">'
+    assert_includes layout, "page_nav_options[:anchor_href]"
+    assert_includes layout, "anchor_tooltip:"
+    refute_includes layout, "page_nav_options[:anchor_url]"
+    assert_includes controller, "include RecordingStudio::UsesDefaultLayout"
+    assert_includes controller, '"recording_studio/default_layout"'
+    refute File.exist?(Rails.root.join("app/views/home/index.html.erb"))
+    refute File.exist?(Rails.root.join("app/controllers/home_controller.rb"))
   end
 end

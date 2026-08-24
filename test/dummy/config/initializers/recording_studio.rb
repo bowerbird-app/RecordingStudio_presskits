@@ -5,13 +5,14 @@ RecordingStudio.configure do |config|
     "Workspace",
     "Folder",
     "Page",
+    "AdminRoot",
     "RecordingStudioPresskits::PressKit",
     "FakeBlock"
   ]
 
   config.require_recordable_declarations = true
 
-  config.app_name = "Dummy host" if config.respond_to?(:app_name=)
+  config.app_name = "Press kits" if config.respond_to?(:app_name=)
 
   config.actor = -> { Current.actor }
 

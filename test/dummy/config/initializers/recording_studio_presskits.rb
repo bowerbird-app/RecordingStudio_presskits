@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
 RecordingStudioPresskits.configure do |config|
-  # Hosts can set options here. Press kits do not need extra config in this slice.
+  config.parent_root_type = "Workspace"
+  config.authentication_method = :authenticate_user!
+  config.current_actor_method = :current_user
 end
+
+RecordingStudioPresskits.register_section_component("FakeBlock", "FakeBlock::Component")

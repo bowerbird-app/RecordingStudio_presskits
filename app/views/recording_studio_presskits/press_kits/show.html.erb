@@ -1,0 +1,15 @@
+<% presskits_page_nav(
+  title: presskits_title_for(@press_kit_recording),
+  back_url: press_kits_path,
+  back_label: "Press kits",
+  close_url: press_kits_path
+) %>
+
+<%= render RecordingStudioPresskits::PressKits::ShowComponent.new(
+  press_kit_recording: @press_kit_recording,
+  section_recordings: @section_recordings,
+  picker_types: @picker_types,
+  add_path: press_kit_sections_path(@press_kit_recording),
+  remove_path: ->(recording) { press_kit_section_path(@press_kit_recording, recording) },
+  reorder_path: press_kit_order_path(@press_kit_recording)
+) %>

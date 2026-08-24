@@ -61,7 +61,9 @@ class InstallGeneratorTest < Minitest::Test
       File.write(css_path, <<~CSS)
         @import "tailwindcss";
         @source "../../vendor/bundle/**/recording_studio_presskits/app/views/**/*.erb";
+        @source "../../vendor/bundle/**/recording_studio_presskits/app/components/**/*.{rb,erb}";
         @source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/recording_studio_presskits-*/app/views/**/*.erb";
+        @source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/recording_studio_presskits-*/app/components/**/*.{rb,erb}";
         @source "../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}";
         @source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";
       CSS
@@ -135,17 +137,96 @@ class InstallGeneratorTest < Minitest::Test
     assert_equal ["INSTALL.md"], shown_templates
   end
 
+  def test_copy_initializer_writes_parent_root_type
+    with_temp_app do |dir|
+      FileUtils.mkdir_p(File.join(dir, "config/initializers"))
+      generator = build_generator(dir, parent_root_type: "Organisation")
+
+      generator.stub(:say, nil) do
+        generator.copy_initializer
+      end
+
+      initializer = File.read(File.join(dir, "config/initializers/recording_studio_presskits.rb"))
+      assert_includes initializer, 'config.parent_root_type = "Organisation"'
+      assert_includes initializer, "config.authentication_method = :authenticate_user!"
+      assert_includes initializer, "config.current_actor_method = :current_user"
+    end
+  end
+
+  def test_enable_admin_section_injects_press_kits_into_existing_block
+    with_temp_app do |dir|
+      admin_root_path = File.join(dir, "app/models/admin_root.rb")
+      FileUtils.mkdir_p(File.dirname(admin_root_path))
+      File.write(admin_root_path, <<~RUBY)
+        class AdminRoot < ApplicationRecord
+          recording_studio_admin_sections do
+            section :root
+          end
+        end
+      RUBY
+
+      generator = build_generator(dir)
+      messages = []
+
+      generator.stub(:say, ->(message, color = nil) { messages << [message, color] }) do
+        generator.enable_admin_section
+      end
+
+      content = File.read(admin_root_path)
+      assert_includes content, "section :press_kits"
+      assert_includes messages, ["Enabled the press kits Admin section on AdminRoot.", :green]
+    end
+  end
+
+  def test_enable_admin_section_is_idempotent_when_already_enabled
+    with_temp_app do |dir|
+      admin_root_path = File.join(dir, "app/models/admin_root.rb")
+      FileUtils.mkdir_p(File.dirname(admin_root_path))
+      File.write(admin_root_path, <<~RUBY)
+        class AdminRoot < ApplicationRecord
+          recording_studio_admin_sections do
+            section :press_kits
+          end
+        end
+      RUBY
+
+      generator = build_generator(dir)
+      messages = []
+
+      generator.stub(:say, ->(message, color = nil) { messages << [message, color] }) do
+        generator.enable_admin_section
+      end
+
+      assert_equal 1, File.read(admin_root_path).scan("section :press_kits").size
+      assert_includes messages, ["Admin root already enables the press kits section.", :green]
+    end
+  end
+
+  def test_enable_admin_section_warns_when_admin_root_is_missing
+    with_temp_app do |dir|
+      generator = build_generator(dir)
+      messages = []
+
+      generator.stub(:say, ->(message, color = nil) { messages << [message, color] }) do
+        generator.enable_admin_section
+      end
+
+      assert(messages.any? { |message, color| message.include?("No AdminRoot model found") && color == :yellow })
+    end
+  end
+
   def test_install_guide_includes_migration_and_host_setup_steps
     install_guide = File.read(INSTALL_TEMPLATE_PATH)
 
     assert_includes install_guide, "bin/rails generate recording_studio_presskits:migrations"
     assert_includes install_guide, "bin/rails db:migrate"
-    assert_includes install_guide, "auth, layout, and current actor integration"
+    assert_includes install_guide, "parent_root_type"
     assert_includes install_guide, "recording_studio_recordable"
     assert_includes install_guide, "RecordingStudioPresskits::PressKit"
     assert_includes install_guide, "recording_studio_orderable"
     assert_includes install_guide, "recording_studio_trashable"
     assert_includes install_guide, "recording_studio_duplicatable"
+    assert_includes install_guide, "section :press_kits"
     refute_includes install_guide, "RecordingStudio v3"
   end
 
@@ -166,8 +247,11 @@ class InstallGeneratorTest < Minitest::Test
   def tailwind_source_lines
     [
       '@source "../../vendor/bundle/**/recording_studio_presskits/app/views/**/*.erb";',
+      '@source "../../vendor/bundle/**/recording_studio_presskits/app/components/**/*.{rb,erb}";',
       '@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/' \
       'recording_studio_presskits-*/app/views/**/*.erb";',
+      '@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/' \
+      'recording_studio_presskits-*/app/components/**/*.{rb,erb}";',
       '@source "../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}";',
       '@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";'
     ]

@@ -16,6 +16,16 @@ GIT
       recording_studio (~> 4.1)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_admin.git
+  revision: f946dd42abd9c21eef4a055ac9260c9019f71f6b
+  tag: 2.0.0
+  specs:
+    recording_studio_admin (2.0.0)
+      flat_pack (~> 0.1.129)
+      rails (~> 8.1.0)
+      recording_studio_accessible (~> 0.6)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_duplicatable.git
   revision: b6f421c193194b8126789ecf1ac1fb9fbf4ef05a
   tag: 0.4.0
@@ -59,10 +69,12 @@ GIT
 PATH
   remote: .
   specs:
-    recording_studio_presskits (0.4.0)
+    recording_studio_presskits (0.5.0)
+      flat_pack (>= 0.1.133)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
       recording_studio_accessible (~> 0.6)
+      recording_studio_admin (~> 2.0)
       recording_studio_duplicatable (~> 0.4)
       recording_studio_orderable (~> 0.2)
       recording_studio_trashable (~> 0.4)
@@ -362,6 +374,7 @@ DEPENDENCIES
   puma
   recording_studio (~> 4.2)!
   recording_studio_accessible (~> 0.6)!
+  recording_studio_admin (~> 2.0)!
   recording_studio_duplicatable (~> 0.4)!
   recording_studio_orderable (~> 0.2)!
   recording_studio_presskits!
@@ -449,9 +462,10 @@ CHECKSUMS
   rdoc (6.16.1) sha256=71357cc208e6da77ba0c4494e01ae870dd18b437c7c7d801dd73ee2f340b9f5c
   recording_studio (4.2.0)
   recording_studio_accessible (0.6.1)
+  recording_studio_admin (2.0.0)
   recording_studio_duplicatable (0.4.0)
   recording_studio_orderable (0.2.0)
-  recording_studio_presskits (0.4.0)
+  recording_studio_presskits (0.5.0)
   recording_studio_trashable (0.4.0)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
   reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835

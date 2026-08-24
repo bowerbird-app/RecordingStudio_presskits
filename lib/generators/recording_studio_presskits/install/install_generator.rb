@@ -13,7 +13,14 @@ module RecordingStudioPresskits
         :mount_path,
         type: :string,
         default: "/recording_studio_presskits",
-        desc: "Route prefix used when mounting the engine"
+        desc: "Route prefix used when mounting the user slice"
+      )
+
+      class_option(
+        :parent_root_type,
+        type: :string,
+        default: "Workspace",
+        desc: "Host root recordable class name PressKit may nest under"
       )
 
       def mount_engine
@@ -30,6 +37,30 @@ module RecordingStudioPresskits
         return unless yes?(prompt)
 
         template "recording_studio_presskits.yml", "config/recording_studio_presskits.yml"
+      end
+
+      def enable_admin_section
+        admin_root_path = File.join(destination_root, "app/models/admin_root.rb")
+        unless File.exist?(admin_root_path)
+          say "No AdminRoot model found. After you install Recording Studio Admin, enable " \
+              "`section :press_kits` on your admin root.", :yellow
+          return
+        end
+
+        content = File.read(admin_root_path)
+        if content.include?("section :press_kits")
+          say "Admin root already enables the press kits section.", :green
+          return
+        end
+
+        if content.include?("recording_studio_admin_sections do")
+          inject_into_file admin_root_path, after: "recording_studio_admin_sections do\n" do
+            "    section :press_kits\n"
+          end
+          say "Enabled the press kits Admin section on AdminRoot.", :green
+        else
+          say "Add `section :press_kits` inside recording_studio_admin_sections on your admin root.", :yellow
+        end
       end
 
       def add_tailwind_source
@@ -58,6 +89,10 @@ module RecordingStudioPresskits
 
       private
 
+      def parent_root_type
+        options[:parent_root_type].presence || "Workspace"
+      end
+
       def show_missing_tailwind_notice
         say "Tailwind CSS not detected. Skipping Tailwind configuration.", :yellow
         say "If you use Tailwind, add these lines to your Tailwind CSS config:", :yellow
@@ -80,10 +115,8 @@ module RecordingStudioPresskits
 
       def formatted_tailwind_source_block(missing_lines)
         [
-          "\n/* Include RecordingStudioPresskits engine views for Tailwind CSS */",
-          missing_lines.first(2),
-          "\n/* Include FlatPack component sources for Tailwind CSS */",
-          missing_lines.drop(2)
+          "\n/* Include RecordingStudioPresskits engine views and components for Tailwind CSS */",
+          missing_lines
         ].flatten.reject(&:empty?).join("\n")
       end
 
@@ -98,8 +131,11 @@ module RecordingStudioPresskits
       def tailwind_source_lines
         [
           '@source "../../vendor/bundle/**/recording_studio_presskits/app/views/**/*.erb";',
+          '@source "../../vendor/bundle/**/recording_studio_presskits/app/components/**/*.{rb,erb}";',
           '@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/' \
           'recording_studio_presskits-*/app/views/**/*.erb";',
+          '@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/' \
+          'recording_studio_presskits-*/app/components/**/*.{rb,erb}";',
           '@source "../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}";',
           '@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";'
         ]

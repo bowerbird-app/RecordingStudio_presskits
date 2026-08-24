@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.4.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.5.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_exists
@@ -16,13 +16,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.6"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.133"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_publishable"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_attachable"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
-    refute_includes gemspec, 'spec.add_dependency "flat_pack"'
   end
 
   def test_dummy_gemfile_pins_verified_4x_github_tags
@@ -30,6 +31,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "2.0.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.133"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "0.2.0"'
@@ -55,7 +57,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, 'self.table_name = "recording_studio_press_kits"'
     assert_includes source, 'label: "Press kit"'
     assert_includes source, "root: false"
-    assert_includes source, 'allowed_parent_types: ["Workspace"]'
+    assert_includes source, "allowed_parent_types: [RecordingStudioPresskits.parent_root_type]"
     assert_includes source, "include RecordingStudio::Capabilities::Orderable.to"
     assert_includes source, "include RecordingStudio::Capabilities::Trashable.to"
     assert_includes source, "RecordingStudio::Capabilities::Duplicatable.to"
@@ -86,10 +88,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
   def test_dummy_app_uses_recording_studio_default_layout
     application_controller_path = File.expand_path("dummy/app/controllers/application_controller.rb", __dir__)
     controller_source = File.read(application_controller_path)
+    default_layout = File.read(
+      File.expand_path("dummy/app/views/layouts/recording_studio/default_layout.html.erb", __dir__)
+    )
 
     assert_includes controller_source, "include RecordingStudio::UsesDefaultLayout"
     assert_includes controller_source, '"recording_studio/default_layout"'
     assert_includes controller_source, 'devise_controller? ? "application"'
+    assert_includes default_layout, '<html data-theme="rounded">'
+    assert_includes default_layout, "page_nav_options[:anchor_href]"
+    assert_includes default_layout, "anchor_tooltip:"
+    refute_includes default_layout, "page_nav_options[:anchor_url]"
     refute_includes controller_source, "flat_pack_sidebar"
     refute File.exist?(File.expand_path("dummy/app/views/layouts/flat_pack_sidebar.html.erb", __dir__))
     refute File.exist?(File.expand_path("dummy/app/views/layouts/flat_pack/_sidebar.html.erb", __dir__))
@@ -101,8 +110,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, 'mount RecordingStudioOrderable::Engine, at: "/recording_studio_orderable"'
     assert_includes routes, 'mount RecordingStudioTrashable::Engine, at: "/recording_studio_trashable"'
     assert_includes routes, 'mount RecordingStudioDuplicatable::Engine, at: "/recording_studio_duplicatable"'
+    assert_includes routes, 'mount RecordingStudioPresskits::Engine, at: "/recording_studio_presskits"'
+    assert_includes routes, 'recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits'
     refute_includes routes, "recording_studio_publishable"
-    refute_includes routes, "recording_studio_admin"
   end
 
   def test_dummy_login_layout_keeps_flatpack_assets_without_tight_main_offset
@@ -128,6 +138,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes sources_task, '"recording_studio_orderable"'
     assert_includes sources_task, '"recording_studio_trashable"'
     assert_includes sources_task, '"recording_studio_duplicatable"'
+    assert_includes sources_task, '"recording_studio_admin"'
+    assert_includes sources_task, '"recording_studio_presskits"'
     refute_includes tailwind_source, "@theme"
     refute_includes tailwind_source, ":root {"
     refute_includes tailwind_source, "--color-fp-primary"
@@ -140,6 +152,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, '"RecordingStudioPresskits::PressKit"'
     assert_includes initializer_source, '"FakeBlock"'
+    assert_includes initializer_source, '"AdminRoot"'
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
@@ -151,7 +164,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes readme_source, "This Rails app exists to prove Recording Studio Press Kits"
     assert_includes readme_source, "/recording_studio"
-    assert_includes readme_source, "redirects to `/`"
+    assert_includes readme_source, "redirects to the press kit index"
     refute_includes readme_source, "flat_pack_sidebar"
     refute_includes readme_source, "/docs/"
   end
@@ -162,7 +175,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.2.0"
     assert_includes readme, "v0.6.1"
-    assert_includes readme, "v0.1.133"
+    assert_includes readme, "tag: \"2.0.0\""
     assert_includes readme, "tag: \"0.2.0\""
     assert_includes readme, "tag: \"0.4.0\""
     assert_includes readme, "Press kit"
@@ -177,15 +190,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes readme, "recording_studio/v3.0.0"
   end
 
-  def test_dummy_home_page_is_a_host_not_the_product
+  def test_dummy_root_is_the_press_kit_slice
+    routes = File.read(File.expand_path("dummy/config/routes.rb", __dir__))
     view_path = File.expand_path("dummy/app/views/home/index.html.erb", __dir__)
-    view_source = File.read(view_path)
 
-    assert_includes view_source, 'title: "Dummy host"'
-    assert_includes view_source, "FlatPack::Tree::Component"
-    assert_includes view_source, "dummy_page_nav"
-    refute_includes view_source, "Template Demo"
-    refute_includes view_source, "FlatPack::Breadcrumb::Component"
+    assert_includes routes, 'root to: redirect("/recording_studio_presskits")'
+    refute File.exist?(view_path)
+    refute File.exist?(File.expand_path("dummy/app/controllers/home_controller.rb", __dir__))
   end
 
   def test_dummy_does_not_ship_starter_docs
@@ -193,10 +204,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_empty Dir[File.expand_path("dummy/app/views/docs/**/*.erb", __dir__)]
   end
 
-  def test_engine_does_not_ship_a_home_view
-    view_path = File.expand_path("../app/views/recording_studio_presskits/home/index.html.erb", __dir__)
+  def test_engine_ships_press_kit_screens
+    view_path = File.expand_path("../app/views/recording_studio_presskits/press_kits/index.html.erb", __dir__)
 
-    refute File.exist?(view_path)
+    assert File.exist?(view_path)
+    refute File.exist?(File.expand_path("../app/controllers/recording_studio_presskits/home_controller.rb", __dir__))
   end
 
   def test_dummy_fake_block_is_host_only
@@ -224,5 +236,41 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes source, "Capabilities::Duplicatable"
     refute_includes source, ".with("
     refute_includes source, ".enabled"
+  end
+
+  def test_engine_registers_admin_list_section
+    section = File.read(File.expand_path("../lib/recording_studio_presskits/admin/press_kits_section.rb", __dir__))
+    widget = File.read(File.expand_path("../lib/recording_studio_presskits/admin/press_kits_list_widget.rb", __dir__))
+
+    assert_includes section, 'key "press_kits"'
+    assert_includes section, 'widget "widgets.press_kits.list"'
+    refute_includes section, "published"
+    refute_includes widget, "type :number"
+    assert_includes widget, "type :list"
+    assert_includes widget, "KitQuery.live_kits"
+    refute_includes widget, "Publishable"
+
+    query = File.read(File.expand_path("../lib/recording_studio_presskits/kit_query.rb", __dir__))
+    assert_includes query, "recording_studio_trashable_active"
+    assert_includes query, "def live_children"
+    assert_includes query, "def live_child"
+  end
+
+  def test_user_slice_uses_segmented_buttons_and_picker
+    index = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/press_kits/index_component.html.erb", __dir__)
+    )
+    show = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/press_kits/show_component.html.erb", __dir__)
+    )
+
+    assert_includes index, "FlatPack::SegmentedButtons::Component"
+    assert_includes index, "FlatPack::Card::Component"
+    assert_includes index, "FlatPack::Table::Component"
+    assert_includes index, "FlatPack::Grid::Component"
+    assert_includes index, "FlatPack::EmptyState::Component"
+    assert_includes show, "FlatPack::EmptyState::Component"
+    assert_includes show, "SectionPickerComponent"
+    refute_includes index, "Dummy host"
   end
 end

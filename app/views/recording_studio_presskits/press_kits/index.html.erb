@@ -1,0 +1,13 @@
+<% presskits_page_nav(
+  title: "Press kits",
+  close_url: press_kits_path
+) %>
+
+<%= render RecordingStudioPresskits::PressKits::IndexComponent.new(
+  press_kit_recordings: @press_kit_recordings,
+  view: @view,
+  cards_path: press_kits_path(view: "cards"),
+  table_path: press_kits_path(view: "table"),
+  new_path: new_press_kit_path,
+  show_path: ->(recording) { press_kit_path(recording) }
+) %>

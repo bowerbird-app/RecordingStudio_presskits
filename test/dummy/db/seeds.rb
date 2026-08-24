@@ -27,6 +27,18 @@ find_or_record_named_child = lambda do |type, title, root_recording, parent_reco
   end
 end
 
+bootstrap_owner_access = lambda do |recording, actor|
+  current_role = RecordingStudioAccessible.role_for(actor: actor, recording: recording)
+  next if current_role == :admin
+
+  result = RecordingStudioAccessible.bootstrap_owner_access!(
+    recording: recording,
+    actor: actor
+  )
+
+  raise result.error if result.failure?
+end
+
 # Create the admin user
 user = User.find_or_create_by!(email: "admin@admin.com") do |u|
   u.password = "Password"
@@ -39,6 +51,7 @@ accessible_workspace = Workspace.find_or_create_by!(name: "Client Workspace")
 private_workspace = Workspace.find_or_create_by!(name: "Private Workspace")
 folder = Folder.find_or_create_by!(name: "Product Docs")
 page = Page.find_or_create_by!(title: "Getting Started")
+admin_root = AdminRoot.find_or_create_by!(name: "Admin")
 
 previous_actor = Current.actor
 Current.actor = user
@@ -47,6 +60,7 @@ begin
   root_recording = RecordingStudio.root_recording_for(workspace)
   accessible_root_recording = RecordingStudio.root_recording_for(accessible_workspace)
   private_root_recording = RecordingStudio.root_recording_for(private_workspace)
+  admin_root_recording = RecordingStudio.root_recording_for(admin_root)
 
   folder_recording = find_or_record_child.call(folder, root_recording, root_recording)
 
@@ -66,6 +80,10 @@ begin
 
   find_or_record_named_child.call(FakeBlock, "Hero", root_recording, press_kit_recording)
   find_or_record_named_child.call(FakeBlock, "Quotes", root_recording, press_kit_recording)
+
+  [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
+    bootstrap_owner_access.call(recording, user)
+  end
 ensure
   Current.actor = previous_actor
 end
@@ -74,5 +92,6 @@ puts "Seeded: admin@admin.com / Password"
 puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recording.id}"
 puts "Seeded: Workspace '#{accessible_workspace.name}' with root recording ##{accessible_root_recording.id}"
 puts "Seeded: Workspace '#{private_workspace.name}' with root recording ##{private_root_recording.id}"
+puts "Seeded: Admin root '#{admin_root.name}' with root recording ##{admin_root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
 puts "Seeded: Press kit 'Spring launch' with fake blocks 'Hero' and 'Quotes'"

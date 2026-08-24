@@ -51,14 +51,12 @@ module RecordingStudioPresskits
       end
     end
 
-    # Run before_initialize hooks
     initializer "recording_studio_presskits.before_initialize",
                 before: "recording_studio_presskits.load_config" do |_app|
       RecordingStudioPresskits.configuration.hooks.run(:before_initialize, self)
     end
 
     initializer "recording_studio_presskits.load_config" do |app|
-      # Load config/recording_studio_presskits.yml via Rails config_for if present
       if app.respond_to?(:config_for)
         begin
           yaml = begin
@@ -72,14 +70,12 @@ module RecordingStudioPresskits
         end
       end
 
-      # Merge Rails.application.config.x.recording_studio_presskits if present
       if app.config.respond_to?(:x) && app.config.x.respond_to?(:recording_studio_presskits)
         xcfg = app.config.x.recording_studio_presskits
         if xcfg.respond_to?(:to_h)
           RecordingStudioPresskits.configuration.merge!(xcfg.to_h)
         else
           begin
-            # try converting OrderedOptions
             hash = {}
             xcfg.each_pair { |k, v| hash[k] = v } if xcfg.respond_to?(:each_pair)
             RecordingStudioPresskits.configuration.merge!(hash) if hash&.any?
@@ -89,17 +85,14 @@ module RecordingStudioPresskits
         end
       end
 
-      # Run on_configuration hooks after config is loaded
       RecordingStudioPresskits.configuration.hooks.run(:on_configuration, RecordingStudioPresskits.configuration)
     end
 
-    # Run after_initialize hooks
     initializer "recording_studio_presskits.after_initialize",
                 after: "recording_studio_presskits.load_config" do |_app|
       RecordingStudioPresskits.configuration.hooks.run(:after_initialize, self)
     end
 
-    # Apply model extensions when models are loaded
     initializer "recording_studio_presskits.apply_model_extensions" do
       config.to_prepare do
         next unless defined?(ActiveRecord::Base)
@@ -112,7 +105,6 @@ module RecordingStudioPresskits
       end
     end
 
-    # Apply controller extensions
     initializer "recording_studio_presskits.apply_controller_extensions" do
       config.to_prepare do
         next unless defined?(ActionController::Base)
@@ -120,6 +112,22 @@ module RecordingStudioPresskits
         ActionController::Base.descendants.each do |controller|
           RecordingStudioPresskits::Engine.apply_controller_extensions(controller)
         end
+      end
+    end
+
+    initializer "recording_studio_presskits.helpers" do
+      config.to_prepare do
+        next unless defined?(Rails.application) && Rails.application.respond_to?(:helpers)
+
+        RecordingStudioPresskits::ApplicationController.helper Rails.application.helpers
+      rescue StandardError
+        nil
+      end
+    end
+
+    initializer "recording_studio_presskits.admin" do
+      config.to_prepare do
+        RecordingStudioPresskits::Admin.register!
       end
     end
   end
