@@ -1,0 +1,32 @@
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: kit_title,
+    variant: :h1
+  ) %>
+
+  <% if preview? && !live? %>
+    <%= render FlatPack::Alert::Component.new(
+      description: "This is just for you. Nobody else can see it yet.",
+      style: :info
+    ) %>
+  <% end %>
+
+  <% if section_recordings.empty? %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: "Nothing to show yet",
+      description: "Sections will land here once they add some.",
+      icon: :inbox
+    ) %>
+  <% else %>
+    <% section_recordings.each do |recording| %>
+      <% component = section_component_for(recording) %>
+      <% if component %>
+        <%= render component.new(recording: recording) %>
+      <% else %>
+        <p class="text-sm font-medium text-(--surface-content-color)">
+          <%= section_title(recording) %>
+        </p>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

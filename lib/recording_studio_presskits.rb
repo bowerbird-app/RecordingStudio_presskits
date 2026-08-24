@@ -3,6 +3,7 @@
 require "recording_studio"
 require "recording_studio_accessible"
 require "recording_studio_orderable"
+require "recording_studio_publishable"
 require "recording_studio_trashable"
 require "recording_studio_duplicatable"
 require "recording_studio_admin"
@@ -43,7 +44,7 @@ module RecordingStudioPresskits
       RecordingStudio.configuration.recordable_types.filter_map do |type|
         type_name = RecordingStudio.recordable_type_name(type)
         next if type_name.blank?
-        next unless RecordingStudio.allowed_parent_types_for(type_name).include?(parent_type)
+        next unless RecordingStudio.declared_allowed_parent_types_for(type_name).include?(parent_type)
 
         type_name
       end

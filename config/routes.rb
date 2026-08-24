@@ -4,6 +4,9 @@
 # the index and kit editor. Admin screens register separately.
 RecordingStudioPresskits::Engine.routes.draw do
   resources :press_kits, only: %i[index show new create] do
+    member do
+      get :preview
+    end
     resources :sections, only: %i[create destroy]
     resource :order, only: :update, controller: "orders"
   end

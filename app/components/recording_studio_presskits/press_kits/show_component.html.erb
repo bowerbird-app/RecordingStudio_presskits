@@ -5,6 +5,19 @@
     variant: :h1
   ) %>
 
+  <% if @preview_path.present? || @public_path.present? || @publish_path.present? %>
+    <div class="flex flex-wrap items-center gap-2">
+      <% if @preview_path.present? %>
+        <%= render FlatPack::Button::Component.new(text: "Preview", style: :secondary, href: @preview_path) %>
+      <% end %>
+      <% if live? && @public_path.present? %>
+        <%= render FlatPack::Button::Component.new(text: "See it live", style: :ghost, href: @public_path) %>
+      <% elsif @publish_path.present? %>
+        <%= render FlatPack::Button::Component.new(text: "Go live", style: :ghost, href: @publish_path) %>
+      <% end %>
+    </div>
+  <% end %>
+
   <% if @section_recordings.empty? %>
     <%= render FlatPack::EmptyState::Component.new(
       title: "No sections yet",

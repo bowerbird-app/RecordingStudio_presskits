@@ -3,7 +3,7 @@
 module RecordingStudioPresskits
   class PressKitsController < ApplicationController
     before_action :require_root!
-    before_action :set_press_kit, only: :show
+    before_action :set_press_kit, only: %i[show preview]
 
     def index
       authorize_recording!(current_presskits_root, role: :view)
@@ -19,6 +19,13 @@ module RecordingStudioPresskits
 
       @section_recordings = KitQuery.live_children(@press_kit_recording)
       @picker_types = RecordingStudioPresskits.picker_types
+    end
+
+    def preview
+      authorize_recording!(@press_kit_recording, role: :view)
+      return if performed?
+
+      @section_recordings = KitQuery.live_children(@press_kit_recording)
     end
 
     def new

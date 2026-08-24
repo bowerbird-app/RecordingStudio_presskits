@@ -2,25 +2,24 @@
 
 module RecordingStudioPresskits
   module Admin
-    PressKitsListWidget = RecordingStudioAdmin::Widget.new("widgets.press_kits.list") do
+    PressKitsPublishedWidget = RecordingStudioAdmin::Widget.new("widgets.press_kits.published") do
       type :list
-      title "Press kits"
-      info "Newest kits first. Trashed kits stay off this list."
+      title "Live kits"
+      info "Out in the world. Search can find these."
       blast_radius :site
       hide_metric
       hide_change
       hide_period
       list_options divider: true, hover: true, compact_preview: :text_summary
       items do |_context|
-        RecordingStudioPresskits::KitQuery.live_kits
-                                          .reorder(created_at: :desc)
+        RecordingStudioPresskits::KitQuery.published_kits
                                           .limit(25)
                                           .filter_map do |recording|
                                             title = recording.recordable&.try(:title)
                                             next if title.blank?
 
                                             {
-                                              icon: :folder,
+                                              icon: :globe,
                                               text: title
                                             }
                                           end

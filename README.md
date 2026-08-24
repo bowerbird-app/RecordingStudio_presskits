@@ -2,11 +2,11 @@
 
 A press kit is the folder you fill. Later addons drop in the sections — bio, downloads, logos. This gem is the container only.
 
-Kits sit under your workspace. You can have many. This slice ships the authenticated editor: an index of kits and a kit page for adding, removing, and reordering sections. Staff get one Admin list of live kits. Publish is still later.
+Kits sit under your workspace. You can have many. You publish the kit, not each block. This slice ships the authenticated editor, a public page for a live kit, an owner preview of a kit that is not live yet, and Admin widgets for live vs not-live work.
 
 ## Install
 
-Add the gem next to Recording Studio 4.2, Accessible, Admin 2.0, and the three mixins PressKit opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.2, Accessible, Admin 2.0, Publishable 0.2, and the three mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
@@ -16,6 +16,7 @@ gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "0.2.0"
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "0.4.0"
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "0.4.0"
+gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.2.0"
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.133"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
@@ -28,6 +29,7 @@ gem "recording_studio_admin", "~> 2.0"
 gem "recording_studio_orderable", "~> 0.2"
 gem "recording_studio_trashable", "~> 0.4"
 gem "recording_studio_duplicatable", "~> 0.4"
+gem "recording_studio_publishable", "~> 0.2"
 gem "flat_pack", ">= 0.1.133"
 ```
 
@@ -42,23 +44,26 @@ bin/rails generate recording_studio_orderable:migrations
 bin/rails generate recording_studio_trashable:install
 bin/rails generate recording_studio_trashable:migrations
 bin/rails generate recording_studio_duplicatable:install
+bin/rails generate recording_studio_publishable:install
+bin/rails generate recording_studio_publishable:migrations
 bin/rails generate recording_studio_admin:install
 bin/rails db:migrate
 ```
 
-The install generator mounts the user slice, writes `parent_root_type`, and enables `section :press_kits` when an `AdminRoot` model is already there. Duplicatable has no engine-owned schema.
+The install generator mounts the user slice, writes `parent_root_type`, and enables `section :press_kits` when an `AdminRoot` model is already there. Duplicatable has no engine-owned schema. Publishable's install mounts that engine at `/` so live kits use `/published/:uuid/:slug`.
 
 Point the host root at the mounted slice, or redirect `/` there. Dummy redirects `/` to `/recording_studio_presskits`.
 
 ## Press kits
 
-Register the type next to your host root. Dummy uses `Workspace`. Name that parent on install (`--parent-root-type`) or in the initializer. There is one declaration, not a second DSL.
+Register the type next to your host root. Dummy uses `Workspace`. Name that parent on install (`--parent-root-type`) or in the initializer. There is one declaration, not a second DSL. Register Publishable's child type too.
 
 ```ruby
 RecordingStudio.configure do |config|
   config.recordable_types = [
     "Workspace",
-    "RecordingStudioPresskits::PressKit"
+    "RecordingStudioPresskits::PressKit",
+    "RecordingStudioPublishable::Publishable"
   ]
   config.require_recordable_declarations = true
 end
@@ -70,7 +75,7 @@ RecordingStudioPresskits.configure do |config|
 end
 ```
 
-The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, and Duplicatable with the current `.to` API only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path for these mixins.
+The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, Duplicatable, and Publishable with the current `.to` API only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path for these mixins. Do not enable Publishable on section children.
 
 ```ruby
 recording_studio_recordable label: "Press kit",
@@ -82,6 +87,11 @@ include RecordingStudio::Capabilities::Trashable.to
 include RecordingStudio::Capabilities::Duplicatable.to(
   suffix: " (Copy)",
   exclude_children: []
+)
+include RecordingStudio::Capabilities::Publishable.to(
+  public_controller: "recording_studio_presskits/public_press_kits",
+  public_action: :show,
+  public_layout: "recording_studio/default_layout"
 )
 ```
 
@@ -134,16 +144,30 @@ kit_recording.recording_studio_trashable_restore!(actor: current_user)
 kit_recording.duplicate_in_place!(actor: current_user)
 ```
 
+Publish and unpublish through Publishable's own services. Prefer `publishable_public_path`, `currently_published?`, `current_publishable`, `published?`, and `indexable?`. Public lists use `PressKit.indexable`. Do not invent a second published query.
+
+```ruby
+RecordingStudioPublishable::Services::Publishables::Update.call(
+  parent_recording: kit_recording,
+  actor: current_user,
+  attributes: { slug: "spring-launch", status: "published" }
+)
+
+kit_recording.currently_published?
+kit_recording.publishable_public_path
+RecordingStudioPresskits::PressKit.indexable
+```
+
 Prefer `RecordingStudio::Recording.recording_studio_trashable_active` over a host `default_scope`, unless the host already needs one for queries.
 
-Section addons opt in solely by declaring PressKit as a parent. This gem does not keep a list of block types. The picker lists whatever the host has registered:
+Section addons opt in solely by declaring PressKit as a parent. This gem does not keep a list of block types. The picker lists whatever the host has **declared** — capability children such as Publishable stay off that list:
 
 ```ruby
 RecordingStudioPresskits.picker_types
-# => types whose allowed_parent_types include RecordingStudioPresskits::PressKit
+# => types whose declared allowed_parent_types include RecordingStudioPresskits::PressKit
 ```
 
-The kit page walks children in order and renders each type's component. Register a host or addon component; the container does not style the blocks.
+The kit page walks children in order and renders each type's component. The public page does the same walk and renders each type's public component. Register a host or addon component; the container does not style the blocks.
 
 ```ruby
 RecordingStudioPresskits.register_section_component("FakeBlock", "FakeBlock::Component")
@@ -153,17 +177,26 @@ Access uses `grant_access` / `authorized?` on recordings. Grants on the workspac
 
 ## Screens
 
-The mounted user slice uses Recording Studio's default layout (back and close). Index and kit pages are ViewComponents you can reuse or replace.
+The mounted user slice uses Recording Studio's default layout (back and close). Index, kit, and owner preview pages are ViewComponents you can reuse or replace.
 
 - Index: the current root's live kits. Same list as cards or a table, switched with `FlatPack::SegmentedButtons::Component`.
 - Empty index: what happened, and a way to make a kit.
-- Kit page: children in order, picker from `picker_types`, remove, reorder. Empty kit still shows the picker.
+- Kit page: children in order, picker from `picker_types`, remove, reorder. Empty kit still shows the picker. Preview and go-live sit next to the editor, not as a second primary action.
+- Owner preview: the same public walk of children, on the default layout, for an authenticated owner. A kit that is not live stays hidden from logged-out visitors.
 
 One primary action per page: **New press kit** on the index, **Create** on the new form, **Add a section** on the kit page via the picker.
 
+## Public
+
+A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). The public controller includes `UsesDefaultLayout` and `.to` sets `public_layout: "recording_studio/default_layout"`. Core owns back and close. This gem does not use Publishable's empty TopNav and does not invent a press-kit public shell.
+
+Logged-out visitors get a 404 for a kit that is not currently published. An authenticated owner can still open the preview on the default layout.
+
+Use `PressKit.indexable` / `indexable?` for public lists. A kit is indexable when it is currently published, not trashed, not marked noindex, and has a canonical or public URL.
+
 ## Admin
 
-This gem registers one Admin section, `press_kits`, with one list widget of live kits. Enable it on your admin root. Do not invent published counts or a vanity total.
+This gem registers one Admin section, `press_kits`, with two list widgets: live kits (`PressKit.indexable`) and kits that are not live yet. Enable it on your admin root. There is no vanity total.
 
 ```ruby
 class AdminRoot < ApplicationRecord
@@ -206,10 +239,11 @@ Dummy kit pins:
 | Orderable | `0.2.0` |
 | Trashable | `0.4.0` |
 | Duplicatable | `0.4.0` |
+| Publishable | `v0.2.0` |
 
-Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, and this gem so that layout is not an unstyled box.
+Every dummy screen, including logged-out public show, keeps `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, public show, preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, and this gem so that layout is not an unstyled box.
 
-Cards, table, kit show, and the Admin list: `docs/dummy-screenshots/`.
+Public live kits use that same default layout. Do not use Publishable's empty TopNav. Do not invent a press-kit public shell. Do not insert Sign in into PageNav — core owns back/close. Cards, table, kit show, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 
 ```bash
 cd test/dummy
@@ -217,7 +251,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one kit titled **Spring launch** and two host-only fake sections (**Hero**, **Quotes**) so reorder is obvious. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` enables Trashable so remove is testable without a real addon. The seeded admin user gets Accessible owner access on the workspace and the admin root.
+Seeds one published kit titled **Spring launch** (Hero + Quotes) and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` enables Trashable so remove is testable without a real addon. Dummy `FakeBlock` does not enable Publishable. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
 ## Engine internals
 

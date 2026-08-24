@@ -9,5 +9,5 @@ Next steps:
 5. Run `bin/rails tailwindcss:build` if you use Tailwind CSS.
 6. Mount routes are added at the configured mount path. Point your host root at that slice, or redirect `/` there.
 7. Register `"RecordingStudioPresskits::PressKit"` next to your workspace type and keep `recording_studio_recordable(...)` on every configured type before running `RecordingStudio.validate_recordable_declarations!`.
-8. Add `recording_studio_orderable`, `recording_studio_trashable`, and `recording_studio_duplicatable`. Run each mixin's install and migrations generators. PressKit already opts in.
+8. Add `recording_studio_orderable`, `recording_studio_trashable`, `recording_studio_duplicatable`, and `recording_studio_publishable`. Run each mixin's install and migrations generators. PressKit already opts in. Register `RecordingStudioPublishable::Publishable` in `recordable_types` and mount Publishable at `/`.
 9. Install Recording Studio Admin 2.0, mount it under an admin root, and enable `section :press_kits`. Access is Accessible grants on that admin root, not `user.admin?`.

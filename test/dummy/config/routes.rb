@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   mount RecordingStudioOrderable::Engine, at: "/recording_studio_orderable"
   mount RecordingStudioTrashable::Engine, at: "/recording_studio_trashable"
   mount RecordingStudioDuplicatable::Engine, at: "/recording_studio_duplicatable"
+  mount RecordingStudioPublishable::Engine, at: "/"
   mount RecordingStudioPresskits::Engine, at: "/recording_studio_presskits"
   mount RecordingStudioAccessible::Engine, at: "/admin/access"
   recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits

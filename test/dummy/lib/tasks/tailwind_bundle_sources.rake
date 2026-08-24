@@ -11,6 +11,7 @@ namespace :tailwind do
       "recording_studio_trashable" => %w[app/views/**/*.erb],
       "recording_studio_duplicatable" => %w[app/views/**/*.erb],
       "recording_studio_admin" => %w[app/views/**/*.erb app/components/**/*.{rb,erb}],
+      "recording_studio_publishable" => %w[app/views/**/*.erb app/components/**/*.{rb,erb}],
       "recording_studio_presskits" => %w[app/views/**/*.erb app/components/**/*.{rb,erb}]
     }
 

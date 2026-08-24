@@ -23,6 +23,9 @@
 @source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_admin-*/app/views/**/*.erb";
 @source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_admin-*/app/components/**/*.rb";
 @source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_admin-*/app/components/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/views/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/components/**/*.rb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/components/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/flatpack-*/app/components/**/*.rb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/flatpack-*/app/components/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio-*/app/views/**/*.erb";
@@ -34,3 +37,9 @@
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_admin-*/app/views/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_admin-*/app/components/**/*.rb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_admin-*/app/components/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/views/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/components/**/*.rb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/components/**/*.erb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/views/**/*.erb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/components/**/*.rb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/components/**/*.erb";
