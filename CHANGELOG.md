@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-21
+
+Press kits can be ordered, trashed, restored, and duplicated. This gem is still the container only — no editor, no public page, no publish.
+
+### Added
+- `recording_studio_orderable`, `~> 0.2`, `recording_studio_trashable`, `~> 0.4`, and `recording_studio_duplicatable`, `~> 0.4`
+- Orderable on `RecordingStudioPresskits::PressKit` with no `allows:` so every direct child type can sort
+- Trashable on `RecordingStudioPresskits::PressKit`
+- Duplicatable on `RecordingStudioPresskits::PressKit` with suffix `" (Copy)"` and `exclude_children: []` so FakeBlock and later section children copy with the kit
+- Dummy `FakeBlock` enables Trashable so remove is testable without a real addon
+- Dummy `Workspace` enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests
+- Dummy seed for a second fake section (`Quotes`) so reorder is obvious
+- Dummy mounts and migrations for Orderable and Trashable (Duplicatable has no engine-owned schema)
+
+### Changed
+- Dummy GitHub tags add Orderable `0.2.0`, Trashable `0.4.0`, and Duplicatable `0.4.0`
+- Dummy home lists active recordings in Orderable position order
+
+### Upgrade notes
+- Add `recording_studio_orderable`, `recording_studio_trashable`, and `recording_studio_duplicatable` next to this gem
+- Run each mixin's install generator and Orderable/Trashable migrations
+- PressKit already includes the three mixins via `.to` only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path. Do not enable Orderable on PressKit children. Do not enable Duplicatable on FakeBlock — child copy is a parent filter, not a child opt-in.
+- Duplicatable's README takes `include_children` as an array of types, not `true`. This gem uses `exclude_children: []` so every direct child type is copied.
+- Reorder, trash, restore, purge, and duplicate through the mixin APIs. Prefer `recording_studio_trashable_active` over a new host `default_scope`.
+- Accessible grants on the workspace root still cover kits. Mixin writes authorize through Accessible.
+- Do not enable Publishable, Attachable, or API in this slice
+
 ## [0.3.0] - 2026-08-21
 
 First product release of Recording Studio Press Kits. A press kit is the container under a host root. Later addons supply the sections. Publish the kit, not each block.
@@ -92,7 +119,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.3.0
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.2.0
 [0.1.2]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.1.2

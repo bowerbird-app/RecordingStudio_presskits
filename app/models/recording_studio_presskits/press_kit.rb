@@ -8,6 +8,13 @@ module RecordingStudioPresskits
                                 root: false,
                                 allowed_parent_types: ["Workspace"]
 
+    include RecordingStudio::Capabilities::Orderable.to
+    include RecordingStudio::Capabilities::Trashable.to
+    include RecordingStudio::Capabilities::Duplicatable.to(
+      suffix: " (Copy)",
+      exclude_children: []
+    )
+
     validates :title, presence: true
   end
 end

@@ -3,17 +3,28 @@
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
 find_or_record_child = lambda do |recordable, root_recording, parent_recording|
-  RecordingStudio::Recording.find_by(
+  RecordingStudio::Recording.recording_studio_trashable_active.find_by(
     root_recording: root_recording,
     parent_recording: parent_recording,
-    recordable: recordable,
-    trashed_at: nil
+    recordable: recordable
   ) || RecordingStudio.record!(
     action: "created",
     recordable: recordable,
     root_recording: root_recording,
     parent_recording: parent_recording
   ).recording
+end
+
+find_or_record_named_child = lambda do |type, title, root_recording, parent_recording|
+  existing = RecordingStudio::Recording.recording_studio_trashable_active
+                                       .where(root_recording: root_recording, parent_recording: parent_recording,
+                                              recordable_type: type.name)
+                                       .find { |recording| recording.recordable.title == title }
+  return existing if existing
+
+  parent_recording.record(type, parent_recording: parent_recording) do |recordable|
+    recordable.title = title
+  end
 end
 
 # Create the admin user
@@ -41,11 +52,10 @@ begin
 
   find_or_record_child.call(page, root_recording, folder_recording)
 
-  press_kit_recording = RecordingStudio::Recording.find_by(
+  press_kit_recording = RecordingStudio::Recording.recording_studio_trashable_active.find_by(
     root_recording: root_recording,
     parent_recording: root_recording,
-    recordable_type: "RecordingStudioPresskits::PressKit",
-    trashed_at: nil
+    recordable_type: "RecordingStudioPresskits::PressKit"
   )
 
   if press_kit_recording.nil?
@@ -54,18 +64,8 @@ begin
     end
   end
 
-  fake_block_recording = RecordingStudio::Recording.find_by(
-    root_recording: root_recording,
-    parent_recording: press_kit_recording,
-    recordable_type: "FakeBlock",
-    trashed_at: nil
-  )
-
-  if fake_block_recording.nil?
-    press_kit_recording.record(FakeBlock, parent_recording: press_kit_recording) do |fake_block|
-      fake_block.title = "Hero"
-    end
-  end
+  find_or_record_named_child.call(FakeBlock, "Hero", root_recording, press_kit_recording)
+  find_or_record_named_child.call(FakeBlock, "Quotes", root_recording, press_kit_recording)
 ensure
   Current.actor = previous_actor
 end
@@ -75,4 +75,4 @@ puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recordin
 puts "Seeded: Workspace '#{accessible_workspace.name}' with root recording ##{accessible_root_recording.id}"
 puts "Seeded: Workspace '#{private_workspace.name}' with root recording ##{private_root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
-puts "Seeded: Press kit 'Spring launch' with fake block 'Hero'"
+puts "Seeded: Press kit 'Spring launch' with fake blocks 'Hero' and 'Quotes'"

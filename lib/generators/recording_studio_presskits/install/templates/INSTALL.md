@@ -9,3 +9,4 @@ Next steps:
 5. Run `bin/rails tailwindcss:build` if you use Tailwind CSS.
 6. Mount routes are added at the configured mount path. Adjust auth, layout, and current actor integration to match your host app.
 7. Register `"RecordingStudioPresskits::PressKit"` next to your workspace type and keep `recording_studio_recordable(...)` on every configured type before running `RecordingStudio.validate_recordable_declarations!`.
+8. Add `recording_studio_orderable`, `recording_studio_trashable`, and `recording_studio_duplicatable`. Run each mixin's install and migrations generators. PressKit already opts in.

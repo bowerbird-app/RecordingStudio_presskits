@@ -6,6 +6,9 @@ Rails.application.routes.draw do
   get "/recording_studio", to: redirect("/"), as: nil
   mount RecordingStudio::Engine, at: "/recording_studio"
   mount RecordingStudioRootSwitchable::Engine, at: "/recording_studio_root_switchable"
+  mount RecordingStudioOrderable::Engine, at: "/recording_studio_orderable"
+  mount RecordingStudioTrashable::Engine, at: "/recording_studio_trashable"
+  mount RecordingStudioDuplicatable::Engine, at: "/recording_studio_duplicatable"
 
   get "up" => "rails/health#show", as: :rails_health_check
 

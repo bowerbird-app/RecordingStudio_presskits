@@ -2,6 +2,9 @@
 
 require "recording_studio"
 require "recording_studio_accessible"
+require "recording_studio_orderable"
+require "recording_studio_trashable"
+require "recording_studio_duplicatable"
 require "recording_studio_presskits/version"
 require "recording_studio_presskits/engine"
 require "recording_studio_presskits/configuration"
