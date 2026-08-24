@@ -73,9 +73,6 @@ begin
     root_recording
   )
 
-  find_or_record_named_child.call(FakeBlock, "Hero", root_recording, press_kit_recording)
-  find_or_record_named_child.call(FakeBlock, "Quotes", root_recording, press_kit_recording)
-
   unpublished_kit_recording = RecordingStudio::Recording.recording_studio_trashable_active
                                                         .where(root_recording: root_recording,
                                                                parent_recording: root_recording,
@@ -87,7 +84,19 @@ begin
     end
   end
 
-  find_or_record_named_child.call(FakeBlock, "Notes", root_recording, unpublished_kit_recording)
+  trash_named_child = lambda do |parent_recording, type, title|
+    existing = RecordingStudio::Recording.recording_studio_trashable_active
+                                         .where(root_recording: root_recording,
+                                                parent_recording: parent_recording,
+                                                recordable_type: type.name)
+                                         .find { |recording| recording.recordable.title == title }
+    return unless existing&.respond_to?(:recording_studio_trashable_trash!)
+
+    existing.recording_studio_trashable_trash!(actor: user)
+  end
+
+  %w[Hero Quotes].each { |title| trash_named_child.call(press_kit_recording, FakeBlock, title) }
+  trash_named_child.call(unpublished_kit_recording, FakeBlock, "Notes")
 
   publish_kit = lambda do |kit_recording, slug:, status:|
     result = RecordingStudioPublishable::Services::Publishables::Update.call(
@@ -120,5 +129,5 @@ puts "Seeded: Workspace '#{accessible_workspace.name}' with root recording ##{ac
 puts "Seeded: Workspace '#{private_workspace.name}' with root recording ##{private_root_recording.id}"
 puts "Seeded: Admin root '#{admin_root.name}' with root recording ##{admin_root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
-puts "Seeded: Press kit 'Spring launch' published at /published/:uuid/spring-launch with fake blocks 'Hero' and 'Quotes'"
-puts "Seeded: Press kit 'Autumn recap' as unpublished with fake block 'Notes'"
+puts "Seeded: Press kit 'Spring launch' published at /published/:uuid/spring-launch"
+puts "Seeded: Press kit 'Autumn recap' as unpublished"

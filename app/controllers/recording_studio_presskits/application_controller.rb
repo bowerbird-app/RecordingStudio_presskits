@@ -12,9 +12,13 @@ module RecordingStudioPresskits
     layout "recording_studio/default_layout"
 
     helper ::RecordingStudio::LayoutHelper if defined?(::RecordingStudio::LayoutHelper)
+    helper ::RecordingStudioAccessible::AvatarsHelper if defined?(::RecordingStudioAccessible::AvatarsHelper)
+    helper ::RecordingStudioPublishable::Engine.helpers if defined?(::RecordingStudioPublishable::Engine)
 
     before_action :authenticate_presskits_actor!
     before_action :set_presskits_current_actor
+
+    helper_method :current_presskits_root
 
     private
 

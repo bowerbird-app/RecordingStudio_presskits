@@ -1,5 +1,32 @@
 # Upgrade notes
 
+## 0.7.0
+
+The kit editor is a form plus an add dropdown. Default-layout chrome is page actions only.
+
+- Ruby 3.3 or newer
+- Rails 8.1 or newer
+- Same gem pins as 0.6.0
+
+### Host app
+
+1. Creating a kit now lands on edit. Add, remove, and reorder return there too. Update any overridden redirects.
+2. Replace the picker card with `RecordingStudioPresskits::PressKits::SectionDropdownComponent` (Flatpack `Button::Dropdown`). Types still come from `picker_types` / `allowed_parent_types`. If no types are registered, the control is a disabled Add a section button — no empty menu box.
+3. On kit edit, keep **Add a section**, **Preview**, and Publishable's Draft / Published action (`RecordingStudioPublishable::EditButtonComponent`) on one row. Do not hand-roll a second publish control. Save stays normal size.
+4. Keep test-only children off the dropdown with `config.excluded_picker_types`. Dummy excludes `FakeBlock`.
+5. Put only page actions in `page_nav_right`. Access stays. Do not insert Sign in, Sign out, or Root Switchable into default layout. Core owns back and close.
+6. On the kit index, keep **New press kit** first and left. Switch cards vs table with icon-only `FlatPack::ButtonGroup::Component` (Flatpack's documented icon-only group). Do not put the create button on the right of the toggle. Do not invent a Press kits view-mode helper.
+7. Logged-out public show stays default layout with back and close only.
+8. Re-seed dummy if you still have Hero / Quotes / Notes children. Seed is Spring launch published and Autumn recap unpublished.
+
+### Verify
+
+```bash
+bundle install
+BUNDLE_GEMFILE=test/dummy/Gemfile bundle install
+bundle exec rake test:all
+```
+
 ## 0.6.0
 
 Publish the kit, not each block. A live kit has a public page. An owner can preview a kit that is not live yet.

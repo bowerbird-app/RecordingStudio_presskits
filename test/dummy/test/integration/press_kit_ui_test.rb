@@ -35,6 +35,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Press kits"
+    assert_access_slot_only
     refute_includes response.body, "Dummy host"
   end
 
@@ -47,15 +48,23 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
-    assert_includes response.body, "Cards"
-    assert_includes response.body, "Table"
+    assert_includes response.body, "New press kit"
+    assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    assert_select "a[aria-label='Cards'] [data-flat-pack--icon-name-value='squares-2x2']", count: 1
+    assert_select "a[aria-label='Table'] [data-flat-pack--icon-name-value='table-cells']", count: 1
+    refute_includes response.body, ">Cards<"
+    refute_includes response.body, ">Table<"
     assert_page_nav_close
+    assert_access_slot_only
 
     get recording_studio_presskits.press_kits_path(view: "table")
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "<table"
+    assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    refute_includes response.body, ">Cards<"
+    refute_includes response.body, ">Table<"
   end
 
   test "empty index explains what to do next" do
@@ -83,6 +92,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Quotes"
     assert_match(/Hero.*Quotes/m, response.body)
     assert_page_nav_close
+    assert_access_slot_only
+    refute_includes response.body, "presskits-section-picker"
+    refute_includes response.body, "Add a section"
     refute_includes response.body, "Dummy host"
   end
 
@@ -95,33 +107,60 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_includes response.body, "New press kit"
     assert_page_nav_close
+    assert_access_slot_only
   end
 
-  test "empty kit shows no sections yet and the picker" do
-    kit = record_kit("Empty launch")
-    sign_in @user
-    switch_to_root(@root)
-
-    get recording_studio_presskits.press_kit_path(kit)
-    assert_response :success
-    assert_includes response.body, "No sections yet"
-    assert_includes response.body, "presskits-section-picker"
-  end
-
-  test "picker adds a fake block under the kit" do
+  test "kit edit shows the title form and add dropdown without the picker card" do
     kit = record_kit("Spring launch")
     sign_in @user
     switch_to_root(@root)
 
-    assert_difference -> { FakeBlock.count }, 1 do
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_rounded_default_layout
+    assert_includes response.body, "Spring launch"
+    assert_includes response.body, "Add the bits you need"
+    assert_includes response.body, "presskits-section-dropdown"
+    assert_includes response.body, "Add a section"
+    assert_includes response.body, "Preview"
+    assert_includes response.body, 'name="press_kit[title]"'
+    refute_includes response.body, "presskits-section-picker"
+    refute_includes response.body, "Pick what to drop into this kit."
+    refute_includes response.body, "Fake block"
+    refute_includes response.body, "No sections yet"
+    refute_includes response.body, "role=\"menu\""
+    assert_access_slot_only
+    assert_includes response.body, "items-start"
+    assert_match(/EditButtonComponent|Published|Draft/, response.body)
+  end
+
+  test "empty kit editor keeps add, preview, and publishable on one row" do
+    kit = record_kit("Empty launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_includes response.body, "presskits-section-dropdown"
+    assert_includes response.body, "Preview"
+    refute_includes response.body, "No sections yet"
+    refute_includes response.body, "presskits-section-picker"
+    refute_includes response.body, "Fake block"
+    refute_includes response.body, "role=\"menu\""
+  end
+
+  test "dropdown rejects dummy fake block types" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    assert_no_difference -> { FakeBlock.count } do
       post recording_studio_presskits.press_kit_sections_path(kit), params: { type: "FakeBlock" }
     end
 
     follow_redirect!
     assert_response :success
-    child = kit.recording_studio_orderable_children.last
-    assert_equal kit, child.parent_recording
-    assert_equal "Fake block", child.recordable.title
+    assert_match(/That section isn(?:'|&#39;)t on the list/, response.body)
   end
 
   test "remove trashes a child through trashable" do
@@ -166,8 +205,21 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     press_kit = RecordingStudioPresskits::PressKit.where(title: title).order(:created_at).last
     kit = RecordingStudioPresskits::KitQuery.for_root(@root).find { |recording| recording.recordable_id == press_kit.id }
-    assert_redirected_to recording_studio_presskits.press_kit_path(kit)
+    assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
     assert_equal @root, kit.parent_recording
+  end
+
+  test "saving the kit title uses revise" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_path(kit), params: { press_kit: { title: "Spring launch, take two" } }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "Spring launch, take two"
+    assert_equal "Spring launch, take two", kit.reload.recordable.title
   end
 
   test "unauthenticated visitors are sent to sign in" do

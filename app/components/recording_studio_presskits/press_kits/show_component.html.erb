@@ -1,12 +1,49 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: kit_title,
-    subtitle: "Add sections, then put them in the order you want.",
+    subtitle: kit_subtitle,
     variant: :h1
   ) %>
 
-  <% if @preview_path.present? || @public_path.present? || @publish_path.present? %>
+  <% if editing? %>
     <div class="flex flex-wrap items-center gap-2">
+      <%= render RecordingStudioPresskits::PressKits::SectionDropdownComponent.new(
+        items: picker_items,
+        add_path: @add_path
+      ) %>
+
+      <% if @preview_path.present? %>
+        <%= render FlatPack::Button::Component.new(text: "Preview", style: :secondary, href: @preview_path) %>
+      <% end %>
+
+      <%= render RecordingStudioPublishable::EditButtonComponent.new(
+        recording: @press_kit_recording,
+        label: "Draft"
+      ) %>
+    </div>
+
+    <%= form_with url: @update_path, method: :patch, local: true, class: "flex max-w-xl flex-col items-start gap-4" do %>
+      <div class="w-full">
+        <%= render FlatPack::TextInput::Component.new(
+          name: "press_kit[title]",
+          label: "Title",
+          value: kit_title,
+          required: true,
+          placeholder: "Spring launch"
+        ) %>
+      </div>
+
+      <%= render FlatPack::Button::Component.new(
+        text: "Save",
+        style: :primary,
+        type: "submit"
+      ) %>
+    <% end %>
+  <% elsif @preview_path.present? || @public_path.present? || @publish_path.present? || @edit_path.present? %>
+    <div class="flex flex-wrap items-center gap-2">
+      <% if @edit_path.present? %>
+        <%= render FlatPack::Button::Component.new(text: "Edit", style: :secondary, href: @edit_path) %>
+      <% end %>
       <% if @preview_path.present? %>
         <%= render FlatPack::Button::Component.new(text: "Preview", style: :secondary, href: @preview_path) %>
       <% end %>
@@ -19,12 +56,14 @@
   <% end %>
 
   <% if @section_recordings.empty? %>
-    <%= render FlatPack::EmptyState::Component.new(
-      title: "No sections yet",
-      description: "Pick something to drop in. Later addons fill the real parts.",
-      icon: :inbox
-    ) %>
-  <% else %>
+    <% unless editing? %>
+      <%= render FlatPack::EmptyState::Component.new(
+        title: "Nothing to show yet",
+        description: "Sections land here once they add some.",
+        icon: :inbox
+      ) %>
+    <% end %>
+  <% elsif editing? %>
     <%= render FlatPack::List::Component.new(
       orderable: true,
       orderable_url: @reorder_path,
@@ -42,10 +81,16 @@
         ) %>
       <% end %>
     <% end %>
+  <% else %>
+    <% @section_recordings.each do |recording| %>
+      <% component = RecordingStudioPresskits.section_component_for(recording) %>
+      <% if component %>
+        <%= render component.new(recording: recording) %>
+      <% else %>
+        <p class="text-sm font-medium text-(--surface-content-color)">
+          <%= helpers.presskits_title_for(recording) %>
+        </p>
+      <% end %>
+    <% end %>
   <% end %>
-
-  <%= render RecordingStudioPresskits::PressKits::SectionPickerComponent.new(
-    items: picker_items,
-    add_path: @add_path
-  ) %>
 </div>

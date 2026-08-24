@@ -12,7 +12,7 @@ module RecordingStudioPresskits
       apply_reorder
       return if performed?
 
-      redirect_to press_kit_path(@press_kit_recording), notice: "Order saved."
+      redirect_to edit_press_kit_path(@press_kit_recording), notice: "Order saved."
     end
 
     private
@@ -28,7 +28,7 @@ module RecordingStudioPresskits
       return reorder_by_ids if ordered_recording_ids.present?
       return reorder_by_move if move_child.present?
 
-      redirect_to press_kit_path(@press_kit_recording), alert: "Nothing to reorder."
+      redirect_to edit_press_kit_path(@press_kit_recording), alert: "Nothing to reorder."
     end
 
     def reorder_by_ids

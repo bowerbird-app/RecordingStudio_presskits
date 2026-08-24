@@ -5,17 +5,29 @@
     variant: :h1
   ) %>
 
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <%= render FlatPack::SegmentedButtons::Component.new do |group| %>
-      <% group.button(text: "Cards", selected: !table_view?, href: @cards_path) %>
-      <% group.button(text: "Table", selected: table_view?, href: @table_path) %>
-    <% end %>
-
+  <div class="flex flex-wrap items-center gap-3">
     <%= render FlatPack::Button::Component.new(
       text: "New press kit",
       style: :primary,
       href: @new_path
     ) %>
+
+    <%= render FlatPack::ButtonGroup::Component.new do |group| %>
+      <% group.button(FlatPack::Button::Component.new(
+        icon: "squares-2x2",
+        icon_only: true,
+        style: table_view? ? :secondary : :primary,
+        href: @cards_path,
+        aria: { label: "Cards", pressed: !table_view? }
+      )) %>
+      <% group.button(FlatPack::Button::Component.new(
+        icon: "table-cells",
+        icon_only: true,
+        style: table_view? ? :primary : :secondary,
+        href: @table_path,
+        aria: { label: "Table", pressed: table_view? }
+      )) %>
+    <% end %>
   </div>
 
   <% if @press_kit_recordings.empty? %>

@@ -40,10 +40,12 @@ module RecordingStudioPresskits
     # keep a list of section types.
     def picker_types
       parent_type = press_kit_type_name
+      excluded = Array(configuration.excluded_picker_types).map(&:to_s)
 
       RecordingStudio.configuration.recordable_types.filter_map do |type|
         type_name = RecordingStudio.recordable_type_name(type)
         next if type_name.blank?
+        next if excluded.include?(type_name)
         next unless RecordingStudio.declared_allowed_parent_types_for(type_name).include?(parent_type)
 
         type_name

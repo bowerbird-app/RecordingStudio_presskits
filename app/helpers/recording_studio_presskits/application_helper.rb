@@ -13,12 +13,20 @@ module RecordingStudioPresskits
     end
 
     def fill_presskits_page_nav_right
+      recording = presskits_access_recording
+      return unless recording
+      return unless respond_to?(:recording_studio_accessible_avatars)
+
       recording_studio_page_nav_right do
-        if respond_to?(:recording_studio_root_switch_dropdown)
-          concat recording_studio_root_switch_dropdown(style: :ghost, size: :md)
-        end
-        concat presskits_extra_nav if respond_to?(:presskits_extra_nav)
+        concat recording_studio_accessible_avatars(recording, button_style: :ghost, button_size: :md)
       end
+    end
+
+    def presskits_access_recording
+      return current_presskits_root if respond_to?(:current_presskits_root) && current_presskits_root.present?
+      return current_root_recording if respond_to?(:current_root_recording) && current_root_recording.present?
+
+      nil
     end
 
     def presskits_title_for(recording)
@@ -41,15 +49,17 @@ module RecordingStudioPresskits
       engine = presskits_publishable_engine
       return unless engine.respond_to?(:edit_recording_publishable_path)
 
-      engine.edit_recording_publishable_path(recording.id)
+      engine.edit_recording_publishable_path(recording_id: recording.id)
     rescue StandardError
       nil
     end
 
+    def recording_studio_publishable
+      presskits_publishable_engine
+    end
+
     def presskits_publishable_engine
-      return recording_studio_publishable if respond_to?(:recording_studio_publishable)
-      return main_app.recording_studio_publishable if respond_to?(:main_app) &&
-                                                      main_app.respond_to?(:recording_studio_publishable)
+      return RecordingStudioPublishable::Engine.routes.url_helpers if defined?(RecordingStudioPublishable::Engine)
 
       nil
     end

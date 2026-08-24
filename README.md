@@ -160,17 +160,24 @@ RecordingStudioPresskits::PressKit.indexable
 
 Prefer `RecordingStudio::Recording.recording_studio_trashable_active` over a host `default_scope`, unless the host already needs one for queries.
 
-Section addons opt in solely by declaring PressKit as a parent. This gem does not keep a list of block types. The picker lists whatever the host has **declared** — capability children such as Publishable stay off that list:
+Section addons opt in solely by declaring PressKit as a parent. This gem does not keep a list of block types. The add dropdown lists whatever the host has **declared** — capability children such as Publishable stay off that list. Test-only placeholders stay off it too:
 
 ```ruby
+RecordingStudioPresskits.configure do |config|
+  config.excluded_picker_types = ["FakeBlock"]
+end
+
 RecordingStudioPresskits.picker_types
 # => types whose declared allowed_parent_types include RecordingStudioPresskits::PressKit
+#    minus excluded_picker_types
 ```
+
+If nothing real is registered, Add a section is a disabled button. No empty menu box.
 
 The kit page walks children in order and renders each type's component. The public page does the same walk and renders each type's public component. Register a host or addon component; the container does not style the blocks.
 
 ```ruby
-RecordingStudioPresskits.register_section_component("FakeBlock", "FakeBlock::Component")
+RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection::Component")
 ```
 
 Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible. Missing access fails closed.
@@ -179,12 +186,15 @@ Access uses `grant_access` / `authorized?` on recordings. Grants on the workspac
 
 The mounted user slice uses Recording Studio's default layout (back and close). Index, kit, and owner preview pages are ViewComponents you can reuse or replace.
 
-- Index: the current root's live kits. Same list as cards or a table, switched with `FlatPack::SegmentedButtons::Component`.
+- Index: the current root's live kits. **New press kit** is first and left. Cards vs table is icon-only `FlatPack::ButtonGroup::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle. This Flatpack pin's SegmentedButtons is text-only.
 - Empty index: what happened, and a way to make a kit.
-- Kit page: children in order, picker from `picker_types`, remove, reorder. Empty kit still shows the picker. Preview and go-live sit next to the editor, not as a second primary action.
+- Kit show: title, publish, and children. No add card.
+- Kit edit: title plus subtitle, then one row of **Add a section**, **Preview**, and Publishable's Draft / Published action. Then the title form with a normal-size **Save**. Children you can reorder or remove come next. Types come from `picker_types`. No empty-state tray on edit.
 - Owner preview: the same public walk of children, on the default layout, for an authenticated owner. A kit that is not live stays hidden from logged-out visitors.
 
-One primary action per page: **New press kit** on the index, **Create** on the new form, **Add a section** on the kit page via the picker.
+Default-layout chrome is back, close, and page actions. Access stays in the right slot. Do not put Sign in, Sign out, or Root Switchable there — core owns back and close.
+
+One primary action per page: **New press kit** on the index, **Create** on the new form, **Save** on kit edit. Publish state stays on Publishable's own action. Do not hand-roll a second publish system.
 
 ## Public
 
@@ -243,7 +253,7 @@ Dummy kit pins:
 
 Every dummy screen, including logged-out public show, keeps `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, public show, preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, and this gem so that layout is not an unstyled box.
 
-Public live kits use that same default layout. Do not use Publishable's empty TopNav. Do not invent a press-kit public shell. Do not insert Sign in into PageNav — core owns back/close. Cards, table, kit show, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
+Public live kits use that same default layout. Do not use Publishable's empty TopNav. Do not invent a press-kit public shell. Do not insert Sign in, Sign out, or Root Switchable into PageNav — core owns back/close. Access stays in the slot on signed-in workspace screens and owner preview. Logged-out public show is back and close only. Cards, table, kit show, kit edit, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 
 ```bash
 cd test/dummy
@@ -251,7 +261,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one published kit titled **Spring launch** (Hero + Quotes) and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` enables Trashable so remove is testable without a real addon. Dummy `FakeBlock` does not enable Publishable. The seeded admin user gets Accessible owner access on the workspace and the admin root.
+Seeds one published kit titled **Spring launch** and one unpublished kit titled **Autumn recap**. No seeded fake sections. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` stays test-only: it enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
 ## Engine internals
 
