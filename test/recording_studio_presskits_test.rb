@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.7.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.7.1", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_exists

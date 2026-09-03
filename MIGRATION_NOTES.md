@@ -1,5 +1,12 @@
 # Upgrade notes
 
+## 0.7.1
+
+Cloud Agent Builds fetch Cursor skills at Build. Product is unchanged.
+
+- No host or schema changes
+- Rebuild the Cloud Agent environment with Draft off so Build loads the pack
+
 ## 0.7.0
 
 The kit editor is a form plus an add dropdown. Default-layout chrome is page actions only.
