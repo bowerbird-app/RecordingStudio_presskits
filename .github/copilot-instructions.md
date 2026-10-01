@@ -10,8 +10,8 @@
 ## UI Conventions
 
 - FlatPack is the default UI system. Compose Card, Table, Grid, ButtonGroup, EmptyState, Picker, PageTitle, PageNav, Button, and List. Cards vs table on the index is icon-only ButtonGroup. Do not invent a custom view-mode widget.
-- Every screen keeps `UsesDefaultLayout` — including logged-out public show — and puts Flatpack's built-in rounded theme on `<html data-theme="rounded">`. Dummy PageNav passes Flatpack 0.1.133 `anchor_href` so the close X renders. Do not invent a custom theme.
-- Public live kits use `recording_studio/default_layout` via Publishable `.to` `public_layout`. Do not use Publishable's empty TopNav. Do not invent a press-kit public shell. Do not insert Sign in into that layout.
+- Authenticated screens keep `UsesDefaultLayout` and put Flatpack's built-in rounded theme on `<html data-theme="rounded">`. Dummy PageNav passes Flatpack 0.1.133 `anchor_href` so the close X renders. Do not invent a custom theme.
+- The public kit view uses `recording_studio_presskits/blank` via Publishable `.to` `public_layout`. That layout has no page nav. Do not use Publishable's empty TopNav. Do not insert Sign in into that layout. Owner preview stays on `recording_studio/default_layout`.
 - The approved UI reference is the live FlatPack demo app at https://flatpack.bowerbird.io/ when you need to inspect current shared components and patterns.
 - When editing ERB views, prefer `render FlatPack::...` components over custom HTML when an equivalent component exists.
 

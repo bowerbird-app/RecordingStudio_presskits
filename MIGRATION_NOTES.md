@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## Unreleased
+
+The public kit view is a blank layout.
+
+- `PressKit` sets `public_layout: "recording_studio_presskits/blank"`. Do not point it back at `recording_studio/default_layout`.
+- View (`/published/:uuid/:slug`) and the publish-button Preview use that layout. No back, close, or TopNav.
+- The owner Preview button stays on `recording_studio/default_layout`.
+
 ## 0.7.1
 
 Cloud Agent Builds fetch Cursor skills at Build. Product is unchanged.
@@ -19,10 +27,10 @@ The kit editor is a form plus an add dropdown. Default-layout chrome is page act
 
 1. Creating a kit now lands on edit. Add, remove, and reorder return there too. Update any overridden redirects.
 2. Replace the picker card with `RecordingStudioPresskits::PressKits::SectionDropdownComponent` (Flatpack `Button::Dropdown`). Types still come from `picker_types` / `allowed_parent_types`. If no types are registered, the control is a disabled Add a section button — no empty menu box.
-3. On kit edit, keep **Add a section**, **Preview**, and Publishable's Draft / Published action (`RecordingStudioPublishable::EditButtonComponent`) on one row. Do not hand-roll a second publish control. Save stays normal size.
+3. On kit show and kit edit, use `render_publishable_quick_actions` for the publish control. On edit, keep **Add a section**, **Preview**, and that helper on one row. Do not render `EditButtonComponent`. Do not hand-roll a second publish control. Save stays normal size.
 4. Keep test-only children off the dropdown with `config.excluded_picker_types`. Dummy excludes `FakeBlock`.
 5. Put only page actions in `page_nav_right`. Access stays. Do not insert Sign in, Sign out, or Root Switchable into default layout. Core owns back and close.
-6. On the kit index, keep **New press kit** first and left. Switch cards vs table with icon-only `FlatPack::ButtonGroup::Component` (Flatpack's documented icon-only group). Do not put the create button on the right of the toggle. Do not invent a Press kits view-mode helper.
+6. On the kit index, keep **Presskit** with a Heroicons `plus` icon first and left. Switch cards vs table with icon-only `FlatPack::ButtonGroup::Component` (Flatpack's documented icon-only group). Do not put the create button on the right of the toggle. Do not invent a Press kits view-mode helper.
 7. Logged-out public show stays default layout with back and close only.
 8. Re-seed dummy if you still have Hero / Quotes / Notes children. Seed is Spring launch published and Autumn recap unpublished.
 
@@ -46,13 +54,13 @@ Publish the kit, not each block. A live kit has a public page. An owner can prev
 - Orderable `~> 0.2` (dummy GitHub tag `0.2.0`)
 - Trashable `~> 0.4` (dummy GitHub tag `0.4.0`)
 - Duplicatable `~> 0.4` (dummy GitHub tag `0.4.0`)
-- Publishable `~> 0.2` (dummy GitHub tag `v0.2.0`)
+- Publishable `~> 0.3` (dummy GitHub tag `v0.3.1`)
 - FlatPack `>= 0.1.133` (dummy GitHub tag `v0.1.133`)
 - Root Switchable dummy tag `v0.5.0` when the dummy host uses it
 
 ### Host app
 
-1. Add `recording_studio_publishable`, `~> 0.2`.
+1. Add `recording_studio_publishable`, `~> 0.3`.
 2. Run `bin/rails generate recording_studio_publishable:install` and the Publishable migrations generator.
 3. Register `"RecordingStudioPublishable::Publishable"` next to `"RecordingStudioPresskits::PressKit"`.
 4. Mount Publishable at `/` so live kits use `/published/:uuid/:slug`. Point `.to` `public_layout` at `recording_studio/default_layout`. Do not use Publishable's empty TopNav. Do not invent a press-kit public shell.

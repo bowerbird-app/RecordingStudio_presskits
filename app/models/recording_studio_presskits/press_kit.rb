@@ -17,7 +17,7 @@ module RecordingStudioPresskits
     include RecordingStudio::Capabilities::Publishable.to(
       public_controller: "recording_studio_presskits/public_press_kits",
       public_action: :show,
-      public_layout: "recording_studio/default_layout"
+      public_layout: "recording_studio_presskits/blank"
     )
 
     validates :title, presence: true

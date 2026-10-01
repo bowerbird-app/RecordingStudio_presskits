@@ -70,9 +70,8 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_rounded_default_layout
-    assert_public_chrome_only
-    assert_select "a[href='/'][aria-label='Close']", count: 1
+    assert_blank_public_layout
+    assert_select "title", text: "Spring launch"
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "Hero"
     assert_includes response.body, "Quotes"
@@ -89,11 +88,17 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_includes response.body, "Published"
-    assert_includes response.body, "/recordings/#{kit.id}/publishable/edit"
+    assert_publishable_quick_actions(kit, trigger: "Published")
     refute_includes response.body, "Go live"
     refute_includes response.body, "See it live"
+    refute_includes response.body, "EditButtonComponent"
     refute_includes response.body, "No sections yet"
+
+    get recording_studio_presskits.press_kit_path(kit)
+    assert_response :success
+    assert_publishable_quick_actions(kit, trigger: "Published")
+    refute_includes response.body, "Go live"
+    refute_includes response.body, "See it live"
   end
 
   test "logged-out visitors cannot read an unpublished kit" do
@@ -159,6 +164,14 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_publishable_quick_actions(kit, trigger:)
+    assert_select "#publishable_quick_actions_#{kit.id}" do
+      assert_select "button", text: trigger
+    end
+    assert_includes response.body, "/recordings/#{kit.id}/publishable/search"
+    assert_includes response.body, "/recordings/#{kit.id}/publishable/social"
+  end
 
   def switch_to_root(root)
     patch "/recording_studio_root_switchable/v1/root_switch", params: {

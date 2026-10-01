@@ -1,0 +1,24 @@
+<%# Public kit page for now: a document and the kit, with no page nav and no TopNav. %>
+<!DOCTYPE html>
+<html data-theme="rounded">
+  <head>
+    <title><%= content_for(:title).presence || "Press kit" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/variables", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/rich_text", "data-turbo-track": "reload" %>
+    <%= yield :head %>
+    <% if respond_to?(:publishable_head_tags) %>
+      <%= publishable_head_tags %>
+    <% end %>
+    <%= javascript_importmap_tags if respond_to?(:javascript_importmap_tags) %>
+  </head>
+
+  <body class="bg-(--surface-page-background-color) text-(--surface-content-color)" data-theme="rounded" data-presskits-blank-layout="true">
+    <main class="mx-auto min-h-screen w-full max-w-6xl p-6">
+      <%= yield %>
+    </main>
+  </body>
+</html>

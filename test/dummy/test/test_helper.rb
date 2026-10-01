@@ -29,15 +29,22 @@ module RoundedDefaultLayoutAssertions
     refute_includes response.body, 'data-controller="recording-studio-root-switchable'
   end
 
-  def assert_public_chrome_only
-    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='chevron-left']", count: 1
-    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='x-mark']", count: 1
+  def assert_blank_public_layout
+    assert_select "html[data-theme='rounded']", count: 1
+    assert_select "body[data-presskits-blank-layout='true']", count: 1
+    assert_select "body[data-theme='rounded']", count: 1
+    assert_select "body[data-recording-studio-default-layout='true']", count: 0
+    assert_select ".flat-pack-page-nav", count: 0
+    assert_select "nav[aria-label='Page navigation']", count: 0
+    refute_includes response.body, "recording_studio-publishable-layout"
+    refute_includes response.body, "flat-pack--top-nav"
     refute_includes response.body, "Sign in"
     refute_includes response.body, "Sign out"
     refute_includes response.body, "+ Access"
-    refute_select ".flat-pack-page-nav a[href*='accesses']"
-    refute_select ".flat-pack-page-nav a[href*='recording_studio_root_switchable']"
+    assert_includes response.body, "/assets/tailwind"
+    assert_includes response.body, "/assets/flat_pack/variables"
   end
+
 end
 
 class ActionDispatch::IntegrationTest
