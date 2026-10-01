@@ -144,6 +144,10 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.assets" do |app|
+      app.config.assets.paths << root.join("app/javascript") if app.config.respond_to?(:assets)
+    end
+
     initializer "recording_studio_presskits.publishable_views" do
       ActiveSupport.on_load(:action_controller) do
         append_view_path RecordingStudioPresskits::Engine.root.join("app/views")

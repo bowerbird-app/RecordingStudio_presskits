@@ -207,11 +207,18 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}']", text: "Fake block"
     refute_includes response.body, "Fake block: Hero"
     refute_includes response.body, "Fake block: Quotes"
+    assert_select "button", text: "Move up", count: 0
+    assert_select "button", text: "Move down", count: 0
+    cards = css_select("#presskits-section-cards").first
+    assert_equal "recording-studio-presskits--section-order", cards["data-controller"]
+    assert_equal recording_studio_presskits.press_kit_order_path(kit), cards["data-recording-studio-presskits--section-order-url-value"]
     section_cards = css_select("#presskits-section-cards > .rounded-lg")
     assert_equal 2, section_cards.size
     section_cards.each do |card|
       assert_includes card["class"], "border-[var(--card-border-color)]"
       assert_includes card.to_html, 'role="list"'
+      assert_includes card.to_html, 'data-flat-pack--icon-name-value="arrows-up-down"'
+      assert card["data-recording-id"].present?
     end
     preview = css_select("#presskits-editor-preview").first
     assert_includes preview["class"], "border-[var(--card-border-color)]"
@@ -467,6 +474,30 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal [quotes.id, hero.id], kit.recording_studio_orderable_children.map(&:id)
+  end
+
+  test "dragging a section before another uses orderable and leaves a trashed sibling" do
+    kit = record_kit("Spring launch")
+    first = record_block(kit, "Hero")
+    hidden = record_block(kit, "Quotes")
+    second = record_block(kit, "Notes")
+    hidden.recording_studio_trashable_trash!(actor: @user)
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_order_path(kit), params: {
+      recording_id: second.id,
+      before_recording_id: first.id
+    }
+    follow_redirect!
+
+    assert_response :success
+    assert_includes response.body, "Order saved."
+    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id)
+    assert_equal [second.id, first.id, hidden.id], kit.recording_studio_orderable_children.map(&:id)
+    assert hidden.reload.trashed_at.present?
+    assert_select "button", text: "Move up", count: 0
+    assert_select "button", text: "Move down", count: 0
   end
 
   test "creating a kit uses record and lands on the editor" do

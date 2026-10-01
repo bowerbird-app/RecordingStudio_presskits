@@ -30,17 +30,26 @@
         <% end %>
 
         <% if @section_recordings.any? %>
-          <div id="presskits-section-cards" class="flex w-full flex-col gap-6">
-            <% @section_recordings.each_with_index do |recording, index| %>
-              <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
-                <%= render FlatPack::List::Component.new do %>
+          <div
+            id="presskits-section-cards"
+            class="flex w-full flex-col gap-6"
+            data-controller="recording-studio-presskits--section-order"
+            data-recording-studio-presskits--section-order-url-value="<%= @reorder_path %>"
+          >
+            <% @section_recordings.each do |recording| %>
+              <%= render FlatPack::Card::Component.new(
+                style: :default,
+                class: "w-full",
+                data: {
+                  recording_studio_presskits__section_order_target: "item",
+                  recording_id: recording.id
+                }
+              ) do %>
+                <%= render FlatPack::List::Component.new(class: "w-full") do %>
                   <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
                     recording: recording,
                     remove_path: @remove_path.call(recording),
-                    reorder_path: @reorder_path,
-                    edit_path: @edit_path.call(recording),
-                    previous_id: index.positive? ? @section_recordings[index - 1].id : nil,
-                    next_id: @section_recordings[index + 1]&.id
+                    edit_path: @edit_path.call(recording)
                   ) %>
                 <% end %>
               <% end %>
