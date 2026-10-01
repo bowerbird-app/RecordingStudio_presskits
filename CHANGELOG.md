@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Public kit view uses `recording_studio_presskits/blank`. View and the publish-button Preview render the kit with no page nav. Owner preview stays on `recording_studio/default_layout`
+
 ## [0.7.1] - 2026-09-03
 
 Cloud Agent Builds fetch Cursor skills at Build. Product is unchanged.

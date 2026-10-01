@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## Unreleased
+
+The public kit view is a blank layout.
+
+- `PressKit` sets `public_layout: "recording_studio_presskits/blank"`. Do not point it back at `recording_studio/default_layout`.
+- View (`/published/:uuid/:slug`) and the publish-button Preview use that layout. No back, close, or TopNav.
+- The owner Preview button stays on `recording_studio/default_layout`.
+
 ## 0.7.1
 
 Cloud Agent Builds fetch Cursor skills at Build. Product is unchanged.

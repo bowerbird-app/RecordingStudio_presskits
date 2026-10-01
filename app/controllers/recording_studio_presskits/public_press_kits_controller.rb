@@ -2,8 +2,6 @@
 
 module RecordingStudioPresskits
   class PublicPressKitsController < ActionController::Base
-    include RecordingStudio::UsesDefaultLayout
-
     def show
       @press_kit_recording = @parent_recording
       @press_kit = @parent_recordable

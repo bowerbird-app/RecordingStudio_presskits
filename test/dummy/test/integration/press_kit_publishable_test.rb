@@ -70,9 +70,8 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_rounded_default_layout
-    assert_public_chrome_only
-    assert_select "a[href='/'][aria-label='Close']", count: 1
+    assert_blank_public_layout
+    assert_select "title", text: "Spring launch"
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "Hero"
     assert_includes response.body, "Quotes"
