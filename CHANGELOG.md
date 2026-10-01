@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Index primary action is **Presskit** with a Heroicons `plus` icon. It stays first and left, ahead of the cards / table toggle
+
 ## [0.7.1] - 2026-09-03
 
 Cloud Agent Builds fetch Cursor skills at Build. Product is unchanged.
