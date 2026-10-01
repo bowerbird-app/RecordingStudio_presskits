@@ -19,7 +19,7 @@
 
 - The standard root validation command is `bundle exec rake test:all` from the repository root.
 - If a change affects dummy app boot, assets, or migrations, also validate the dummy app setup the same way CI does.
-- Cover Press kit declaration, mount, index cards and table, empty states, kit show with children, picker add, remove, reorder, publish/unpublish, indexable?, public read of a live kit, owner preview of a kit that is not live, Admin live vs not-live widgets, and Accessible 401/403 gates in Minitest.
+- Cover Press kit declaration, mount, index cards and table, empty states, the kit URL redirect into the two-column editor, section edit, picker add, remove, reorder, publish/unpublish, indexable?, public read of a live kit, owner preview of a kit that is not live, Admin live vs not-live widgets, and Accessible 401/403 gates in Minitest.
 
 ## Repo Conventions
 

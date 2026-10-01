@@ -318,7 +318,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("../app/components/recording_studio_presskits/press_kits/index_component.html.erb", __dir__)
     )
     show = File.read(
-      File.expand_path("../app/components/recording_studio_presskits/press_kits/show_component.html.erb", __dir__)
+      File.expand_path("../app/components/recording_studio_presskits/press_kits/kit_editor_component.html.erb", __dir__)
     )
 
     assert_includes index, 'title: "My presskits"'
@@ -340,7 +340,6 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::Table::Component"
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
-    assert_includes show, "FlatPack::EmptyState::Component"
     assert_includes show, "SectionDropdownComponent"
     assert_includes show, "render_publishable_quick_actions"
     refute_includes show, "EditButtonComponent"

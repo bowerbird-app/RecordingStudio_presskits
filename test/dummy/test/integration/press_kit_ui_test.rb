@@ -41,7 +41,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   test "index cards and table show the same kits" do
-    record_kit("Spring launch")
+    kit = record_kit("Spring launch")
+    edit_href = recording_studio_presskits.edit_press_kit_path(kit)
     sign_in @user
     switch_to_root(@root)
 
@@ -49,6 +50,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
+    assert_select "a[href='#{edit_href}']"
     assert_presskit_create_button
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-flat-pack--icon-name-value='photo']", count: 1
@@ -64,6 +66,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
+    assert_select "a[href='#{edit_href}']", text: "Spring launch"
     assert_includes response.body, "<table"
     assert_presskit_create_button
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
@@ -98,7 +101,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Make a press kit"
   end
 
-  test "kit show walks children in order and renders host components" do
+  test "kit show redirects to the editor" do
     kit = record_kit("Spring launch")
     record_block(kit, "Hero")
     record_block(kit, "Quotes")
@@ -106,16 +109,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
 
     get recording_studio_presskits.press_kit_path(kit)
+    assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
+    follow_redirect!
+
     assert_response :success
     assert_rounded_default_layout
-    assert_includes response.body, "Spring launch"
+    assert_includes response.body, "Add a section"
     assert_includes response.body, "Hero"
     assert_includes response.body, "Quotes"
     assert_match(/Hero.*Quotes/m, response.body)
     assert_page_nav_close
     assert_access_slot_only
-    refute_includes response.body, "presskits-section-picker"
-    refute_includes response.body, "Add a section"
     refute_includes response.body, "Dummy host"
   end
 
@@ -139,25 +143,29 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_rounded_default_layout
+    assert_select "title", text: "Spring launch"
     assert_includes response.body, "Spring launch"
-    assert_includes response.body, "Add the bits you need"
     assert_includes response.body, "presskits-section-dropdown"
     assert_includes response.body, "Add a section"
+    assert_select "button#presskits-section-dropdown[disabled]"
     assert_includes response.body, "Preview"
     assert_includes response.body, 'name="press_kit[title]"'
+    refute_select "a[href='#{recording_studio_presskits.preview_press_kit_path(kit)}']"
     refute_includes response.body, "presskits-section-picker"
     refute_includes response.body, "Pick what to drop into this kit."
     refute_includes response.body, "Fake block"
     refute_includes response.body, "No sections yet"
     assert_select "#publishable_quick_actions_#{kit.id} [role=menu]", count: 1
     assert_access_slot_only
+    assert_includes response.body, "md:grid-cols-2"
+    assert_includes response.body, "gap-6"
     assert_includes response.body, "items-start"
     assert_includes response.body, "publishable_quick_actions_"
     assert_includes response.body, "Draft"
     refute_includes response.body, "EditButtonComponent"
   end
 
-  test "empty kit editor keeps add, preview, and publishable on one row" do
+  test "empty kit editor keeps add and the publish control" do
     kit = record_kit("Empty launch")
     sign_in @user
     switch_to_root(@root)
@@ -170,6 +178,130 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "presskits-section-picker"
     refute_includes response.body, "Fake block"
     assert_select "#publishable_quick_actions_#{kit.id} [role=menu]", count: 1
+  end
+
+  test "kit edit links each section and previews both bodies" do
+    kit = record_kit("Spring launch")
+    hero = record_block(kit, "Hero")
+    quotes = record_block(kit, "Quotes")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_includes response.body, "Hero"
+    assert_includes response.body, "Quotes"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}']", text: "Fake block: Hero"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}']", text: "Fake block: Quotes"
+    assert_operator response.body.scan("Hero").size, :>=, 2
+    assert_operator response.body.scan("Quotes").size, :>=, 2
+  end
+
+  test "section edit shows that section and remove" do
+    kit = record_kit("Spring launch")
+    hero = record_block(kit, "Hero")
+    record_block(kit, "Quotes")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_section_path(kit, hero)
+    assert_response :success
+    assert_select "title", text: "Hero"
+    assert_includes response.body, "Hero"
+    assert_includes response.body, "Remove"
+    refute_includes response.body, "Quotes"
+    assert_select "form[action='#{recording_studio_presskits.press_kit_section_path(kit, hero)}']" do
+      assert_select "input[name='_method'][value='delete']"
+      assert_select "button", text: "Remove"
+    end
+  end
+
+  test "adding an allowed section opens that section" do
+    kit = record_kit("Spring launch")
+    configuration = RecordingStudioPresskits.configuration
+    previous = Array(configuration.excluded_picker_types)
+    configuration.excluded_picker_types = previous - ["FakeBlock"]
+    sign_in @user
+    switch_to_root(@root)
+
+    assert_difference -> { FakeBlock.count }, 1 do
+      post recording_studio_presskits.press_kit_sections_path(kit), params: { type: "FakeBlock", title: "Hero" }
+    end
+
+    hero = RecordingStudioPresskits::KitQuery.live_children(kit).find { |child| child.recordable.title == "Hero" }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, hero)
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "Section added."
+    assert_includes response.body, "Hero"
+    assert_includes response.body, "Remove"
+  ensure
+    configuration.excluded_picker_types = previous if defined?(previous) && previous
+  end
+
+  test "section update without an editor does not revise" do
+    kit = record_kit("Spring launch")
+    hero = record_block(kit, "Hero")
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_section_path(kit, hero), params: {
+      fake_block: { title: "Changed" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, hero)
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "Nothing to save here yet."
+    assert_equal "Hero", hero.reload.recordable.title
+  end
+
+  test "section update saves the permitted title and drops a decoy" do
+    kit = record_kit("Spring launch")
+    hero = record_block(kit, "Hero")
+    editor = Class.new(ViewComponent::Base) do
+      def initialize(recording:, update_path:)
+        super()
+        @recording = recording
+        @update_path = update_path
+      end
+
+      def self.param_key
+        :fake_block
+      end
+
+      def self.permitted_attributes
+        [:title]
+      end
+
+      def call
+        ""
+      end
+    end
+    Object.const_set(:PresskitsFakeBlockEditor, editor)
+    RecordingStudioPresskits.register_section_editor("FakeBlock", editor)
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_section_path(kit, hero), params: {
+      fake_block: { title: "", decoy: "nope" }
+    }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Could not save that section."
+    assert_equal "Hero", hero.reload.recordable.title
+
+    patch recording_studio_presskits.press_kit_section_path(kit, hero), params: {
+      fake_block: { title: "Hero, revised", decoy: "nope" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, hero)
+    follow_redirect!
+    assert_response :success
+    assert_equal "Hero, revised", hero.reload.recordable.title
+    refute_includes hero.recordable.attributes.values, "nope"
+    assert_includes response.body, "Hero, revised"
+    refute_includes response.body, "nope"
+  ensure
+    RecordingStudioPresskits.configuration.section_editors.delete("FakeBlock")
+    Object.send(:remove_const, :PresskitsFakeBlockEditor) if Object.const_defined?(:PresskitsFakeBlockEditor, false)
   end
 
   test "dropdown rejects dummy fake block types" do

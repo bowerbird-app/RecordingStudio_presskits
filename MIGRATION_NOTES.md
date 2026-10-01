@@ -1,5 +1,9 @@
 # Upgrade notes
 
+## Unreleased
+
+The kit URL now requires edit access and redirects to the editor. Hosts register section editors with `RecordingStudioPresskits.register_section_editor`.
+
 ## 0.8.0
 
 Index and public page. Publishable is 0.3.

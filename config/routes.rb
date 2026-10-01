@@ -7,7 +7,7 @@ RecordingStudioPresskits::Engine.routes.draw do
     member do
       get :preview
     end
-    resources :sections, only: %i[create destroy]
+    resources :sections, only: %i[create edit update destroy]
     resource :order, only: :update, controller: "orders"
   end
 

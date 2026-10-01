@@ -3,17 +3,18 @@
 module RecordingStudioPresskits
   module PressKits
     class ChildComponent < ViewComponent::Base
-      def initialize(recording:, index:, total:, remove_path:, reorder_path:)
+      def initialize(recording:, index:, total:, remove_path:, reorder_path:, edit_path:) # rubocop:disable Metrics/ParameterLists
         super()
         @recording = recording
         @index = index
         @total = total
         @remove_path = remove_path
         @reorder_path = reorder_path
+        @edit_path = edit_path
       end
 
-      def section_component
-        RecordingStudioPresskits.section_component_for(@recording)
+      def row_label
+        "#{@recording.type_label}: #{helpers.presskits_title_for(@recording)}"
       end
 
       def can_remove?

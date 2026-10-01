@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The kit URL requires edit access and redirects to a two-column editor. Hosts register section editors with `register_section_editor`.
+
 ## [0.8.0] - 2026-10-01
 
 Index and public page. Publishable is 0.3.

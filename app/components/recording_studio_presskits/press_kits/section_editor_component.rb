@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+
+module RecordingStudioPresskits
+  module PressKits
+    class SectionEditorComponent < ViewComponent::Base
+      def initialize(recording:, update_path:, remove_path:)
+        super()
+        @recording = recording
+        @update_path = update_path
+        @remove_path = remove_path
+      end
+    end
+  end
+end

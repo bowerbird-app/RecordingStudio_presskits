@@ -10,10 +10,28 @@ module RecordingStudioPresskits
       return if performed?
       return unless accepted_section_type?
 
-      add_section(section_type_name)
-      redirect_to edit_press_kit_path(@press_kit_recording), notice: "Section added. Drag to change the order."
+      recording = add_section(section_type_name)
+      redirect_to edit_press_kit_section_path(@press_kit_recording, recording), notice: "Section added."
     rescue NameError, ActiveRecord::RecordInvalid
       redirect_to edit_press_kit_path(@press_kit_recording), alert: "Could not add that section. Try another."
+    end
+
+    def edit
+      authorize_recording!(@press_kit_recording, role: :edit)
+      return if performed?
+
+      return head(:not_found) unless section_recording
+    end
+
+    def update
+      authorize_recording!(@press_kit_recording, role: :edit)
+      return if performed?
+      return head :not_found unless section_recording
+
+      revise_section
+    rescue ActiveRecord::RecordInvalid
+      flash.now[:alert] = "Could not save that section."
+      render :edit, status: :unprocessable_entity
     end
 
     def destroy
@@ -31,6 +49,28 @@ module RecordingStudioPresskits
     end
 
     private
+
+    def section_recording
+      return @section_recording if defined?(@section_recording)
+
+      @section_recording = KitQuery.live_child(@press_kit_recording, params[:id])
+    end
+
+    def revise_section
+      editor = RecordingStudioPresskits.section_editor_for(@section_recording)
+      unless editor
+        redirect_to section_edit_path, alert: "Nothing to save here yet."
+        return
+      end
+
+      attrs = params.require(editor.param_key).permit(editor.permitted_attributes)
+      current_presskits_root.revise(@section_recording) { |recordable| recordable.assign_attributes(attrs) }
+      redirect_to section_edit_path, notice: "Saved."
+    end
+
+    def section_edit_path
+      edit_press_kit_section_path(@press_kit_recording, @section_recording)
+    end
 
     def set_press_kit
       @press_kit_recording = load_press_kit(params[:press_kit_id])

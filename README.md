@@ -174,23 +174,28 @@ RecordingStudioPresskits.picker_types
 
 If nothing real is registered, Add a section is a disabled button. No empty menu box.
 
-The kit page walks children in order and renders each type's component. The public page does the same walk and renders each type's public component. Register a host or addon component; the container does not style the blocks.
+The kit editor's preview column and the public page walk children in order and render each type's component. Register a host or addon component. The container does not style the blocks.
 
 ```ruby
 RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection::Component")
+
+RecordingStudioPresskits.register_section_editor("SomeSection", "SomeSection::Editor")
 ```
+
+A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. This gem does not ship one.
 
 Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible. Missing access fails closed.
 
 ## Screens
 
-The mounted user slice uses Recording Studio's default layout (back and close). Index, kit, and owner preview pages are ViewComponents you can reuse or replace.
+The mounted user slice uses Recording Studio's default layout (back and close). Index, the kit editor, the section editor, and owner preview are ViewComponents you can reuse or replace.
 
-- Index: the current root's live kits. The heading is **My presskits**. **Presskit** with a Heroicons `plus` icon is first and left. Cards vs table is icon-only `FlatPack::ButtonGroup::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle. This Flatpack pin's SegmentedButtons is text-only. Each card has a 16/9 cover. `cover_image_url` on the recordable supplies the image. A missing or unsafe URL uses the muted card color and a photo icon. Do not use Publishable's social image as the cover.
+- Index: the current root's live kits. The heading is **My presskits**. **Presskit** with a Heroicons `plus` icon is first and left. Cards vs table is icon-only `FlatPack::ButtonGroup::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle. This Flatpack pin's SegmentedButtons is text-only. Each card has a 16/9 cover. `cover_image_url` on the recordable supplies the image. A missing or unsafe URL uses the muted card color and a photo icon. Do not use Publishable's social image as the cover. Cards and the table open the kit editor.
 - Empty index: what happened, and a way to make a kit.
-- Kit show: title, children, and `render_publishable_quick_actions`. No add card. No hand-rolled Go live button.
-- Kit edit: title plus subtitle, then one row of **Add a section**, **Preview**, and `render_publishable_quick_actions`. Then the title form with a normal-size **Save**. Children you can reorder or remove come next. Types come from `picker_types`. No empty-state tray on edit.
-- Owner preview: the same public walk of children, on the default layout, for an authenticated owner. A kit that is not live stays hidden from logged-out visitors.
+- Kit URL: `GET press_kits/:id` requires edit access and redirects to the kit editor.
+- Kit editor: two columns. Column one is `render_publishable_quick_actions`, **Add a section**, the title form with a normal-size **Save**, then the section list. Each row links to that section. Column two renders every section through `section_component_for`. No in-page Preview button. No page title in the body. The page nav carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. No empty-state tray on edit.
+- Section editor: one section. Column one renders the registered editor, or the type label when none is registered, plus **Remove**. Column two renders that section only.
+- Owner preview: the same public walk of children, on the default layout, for an authenticated owner. Back returns to the kit editor. A kit that is not live stays hidden from logged-out visitors.
 
 Default-layout chrome is back, close, and page actions. Access stays in the right slot. Do not put Sign in, Sign out, or Root Switchable there — core owns back and close.
 
@@ -198,7 +203,7 @@ One primary action per page: **Presskit** (Heroicons plus) on the index, **Creat
 
 ## Public
 
-A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). `.to` sets `public_layout: "recording_studio_presskits/blank"`. That layout is a document and the kit: no back, no close, and no TopNav. View and the publish-button Preview both use it. The owner Preview button stays on `recording_studio/default_layout`.
+A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). `.to` sets `public_layout: "recording_studio_presskits/blank"`. That layout is a document and the kit: no back, no close, and no TopNav. View and the publish menu Preview both use it. Owner preview stays on `recording_studio/default_layout`.
 
 Logged-out visitors get a 404 for a kit that is not currently published. An authenticated owner can still open the owner preview on the default layout.
 
@@ -251,9 +256,9 @@ Dummy kit pins:
 | Duplicatable | `0.4.0` |
 | Publishable | `v0.3.1` |
 
-Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, and this gem so that layout is not an unstyled box.
+Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, and this gem so that layout is not an unstyled box.
 
-The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav — core owns back/close on the default layout. Access stays in the slot on signed-in workspace screens and owner preview. Cards, table, kit show, kit edit, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
+The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav — core owns back/close on the default layout. Access stays in the slot on signed-in workspace screens and owner preview. Cards, table, the kit editor, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 
 ```bash
 cd test/dummy
