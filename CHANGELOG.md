@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `RecordingStudioPresskits::Images` is a press kit section. The field is an optional `caption`. Photos are Attachable image attachments on that section, so one section holds many images. Attachable stays off PressKit. The editor uploads from an Upload button beside Update.
+- `RecordingStudioPresskits::Images` is a press kit section. The field is an optional `caption`. Photos are Attachable image attachments on that section, so one section holds many images. Attachable stays off PressKit. The editor uploads from an Upload button after Cancel.
 
 ### Changed
 - The Images editor no longer shows a drag-and-drop upload area.

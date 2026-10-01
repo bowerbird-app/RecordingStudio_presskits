@@ -41,6 +41,7 @@
           class: "flex flex-col gap-6", **(upload_data ? { data: upload_data } : {}) do %>
       <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
         <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
+        <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
         <% if upload_data %>
           <%= render FlatPack::Button::Component.new(
             text: "Upload",
@@ -50,7 +51,6 @@
             data: { action: "recording-studio-attachable--upload#browse" }
           ) %>
         <% end %>
-        <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
       </div>
 
       <%= grid %>

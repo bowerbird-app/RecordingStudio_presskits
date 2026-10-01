@@ -594,8 +594,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
     actions = css_select("#presskits-section-actions").to_html
-    assert_operator actions.index("Update"), :<, actions.index("Upload")
-    assert_operator actions.index("Upload"), :<, actions.index("Cancel")
+    assert_operator actions.index("Update"), :<, actions.index("Cancel")
+    assert_operator actions.index("Cancel"), :<, actions.index("Upload")
     assert_match(/remove-button-template-value="&lt;button/, response.body)
     refute_includes response.body, ">Remove\">"
     assert_select "#presskits-editor-preview", count: 0
