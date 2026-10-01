@@ -21,7 +21,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.133"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.2"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.3"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_attachable"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
   end
@@ -37,7 +37,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "0.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "0.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "0.4.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.2.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.3.1"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -199,7 +199,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"2.0.0\""
     assert_includes readme, "tag: \"0.2.0\""
     assert_includes readme, "tag: \"0.4.0\""
-    assert_includes readme, "tag: \"v0.2.0\""
+    assert_includes readme, "tag: \"v0.3.1\""
     assert_includes readme, "PressKit.indexable"
     assert_includes readme, "Press kit"
     assert_includes readme, "RecordingStudioPresskits::PressKit"
@@ -321,8 +321,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("../app/components/recording_studio_presskits/press_kits/show_component.html.erb", __dir__)
     )
 
-    assert_includes index, 'text: "New press kit"'
-    assert_match(/New press kit.*FlatPack::ButtonGroup::Component/m, index)
+    assert_includes index, 'title: "My presskits"'
+    assert_includes index, 'text: "Presskit"'
+    assert_includes index, 'icon: "plus"'
+    assert_match(/Presskit.*FlatPack::ButtonGroup::Component/m, index)
     assert_includes index, "FlatPack::ButtonGroup::Component"
     assert_includes index, "icon_only: true"
     assert_includes index, "squares-2x2"
@@ -332,11 +334,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes index, 'text: "Cards"'
     refute_includes index, 'text: "Table"'
     assert_includes index, "FlatPack::Card::Component"
+    assert_includes index, "card.media"
+    assert_includes index, 'name: "photo"'
+    assert_includes index, "presskits_cover_url_for"
     assert_includes index, "FlatPack::Table::Component"
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
     assert_includes show, "FlatPack::EmptyState::Component"
     assert_includes show, "SectionDropdownComponent"
+    assert_includes show, "render_publishable_quick_actions"
+    refute_includes show, "EditButtonComponent"
+    refute_includes show, "Go live"
     refute_includes show, "SectionPickerComponent"
     refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"

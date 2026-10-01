@@ -33,6 +33,15 @@ module RecordingStudioPresskits
       recording.recordable&.try(:title).presence || recording.name.presence || recording.type_label
     end
 
+    # Optional cover for index cards. A recordable supplies one with `cover_image_url`.
+    # Blank and unsafe values fall through to the muted placeholder.
+    def presskits_cover_url_for(recording)
+      recordable = recording&.recordable
+      return unless recordable.respond_to?(:cover_image_url)
+
+      FlatPack::AttributeSanitizer.sanitize_url(recordable.cover_image_url)
+    end
+
     def presskits_index_path(view: nil)
       view.present? ? press_kits_path(view: view) : press_kits_path
     end
