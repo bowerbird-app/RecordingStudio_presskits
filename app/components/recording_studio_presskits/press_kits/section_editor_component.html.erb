@@ -5,11 +5,13 @@
   ) %>
 
   <% editor = editor_class %>
+  <% editor_view = editor&.new(recording: @recording, update_path: @update_path) %>
+  <% upload_data = editor_view.respond_to?(:upload_form_data) ? editor_view.upload_form_data(helpers) : nil %>
   <% grid = capture do %>
     <%= render FlatPack::Grid::Component.new(cols: grid_cols, gap: :lg, align: :start) do %>
       <div class="flex w-full min-w-0 flex-col gap-6">
         <% if editor %>
-          <%= render editor.new(recording: @recording, update_path: @update_path) %>
+          <%= render editor_view %>
         <% else %>
           <p class="text-sm font-medium text-(--surface-content-color)">
             <%= @recording.type_label %>
@@ -35,10 +37,20 @@
   <% end %>
 
   <% if editor %>
-    <%= form_with url: @update_path, method: :patch, local: true, class: "flex flex-col gap-6" do %>
+    <%= form_with url: @update_path, method: :patch, local: true,
+          class: "flex flex-col gap-6", **(upload_data ? { data: upload_data } : {}) do %>
       <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
         <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
         <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
+        <% if upload_data %>
+          <%= render FlatPack::Button::Component.new(
+            text: "Upload",
+            icon: "upload",
+            style: :default,
+            type: "button",
+            data: { action: "recording-studio-attachable--upload#browse" }
+          ) %>
+        <% end %>
       </div>
 
       <%= grid %>

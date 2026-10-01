@@ -32,20 +32,24 @@ module RecordingStudioPresskits
         gallery_image_url(attachment_recording)
       end
 
-      def upload_url
-        helpers.recording_studio_attachable.recording_attachment_imports_path(
+      def upload_form_data(view)
+        {
+          controller: "recording-studio-attachable--upload",
+          recording_studio_attachable__upload_direct_upload_url_value: view.main_app.rails_direct_uploads_path,
+          recording_studio_attachable__upload_finalize_url_value: upload_url_for(view),
+          recording_studio_attachable__upload_max_file_size_value: max_file_size,
+          recording_studio_attachable__upload_max_files_count_value: max_file_count,
+          recording_studio_attachable__upload_allowed_content_types_value: allowed_content_types,
+          recording_studio_attachable__upload_remove_button_template_value: remove_button_template(view)
+        }
+      end
+
+      def upload_url_for(view)
+        view.recording_studio_attachable.recording_attachment_imports_path(
           @recording,
           redirect_mode: "return_to",
-          return_to: return_path
+          return_to: view.edit_press_kit_section_path(@recording.parent_recording, @recording)
         )
-      end
-
-      def direct_upload_url
-        helpers.main_app.rails_direct_uploads_path
-      end
-
-      def return_path
-        helpers.edit_press_kit_section_path(@recording.parent_recording, @recording)
       end
 
       def remove_path_for(image_recording)
@@ -68,8 +72,8 @@ module RecordingStudioPresskits
         Array(capability_options[:allowed_content_types]).join(",")
       end
 
-      def remove_button_template
-        button = helpers.tag.button(
+      def remove_button_template(view)
+        button = view.tag.button(
           "Remove",
           type: "button",
           data: { action: "recording-studio-attachable--upload#remove", id: "__ENTRY_ID__" }

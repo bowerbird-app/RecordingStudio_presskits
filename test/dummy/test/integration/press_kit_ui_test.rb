@@ -379,6 +379,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "li", text: "Photos", count: 0
     assert_select ".flat-pack-richtext--view-mode", count: 0
     assert_select "button", text: "Update"
+    assert_select "#presskits-section-actions button", text: "Upload", count: 0
     assert_select "button", text: "Save", count: 0
     cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node| node.text.include?("Cancel") }
     assert_includes cancel.text, "Cancel"
@@ -587,7 +588,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Images"
     assert_select "label", text: "Caption"
     assert_select "input[name='images[caption]']"
-    assert_select "[data-controller='recording-studio-attachable--upload']", count: 1
+    assert_select "form[data-controller='recording-studio-attachable--upload']", count: 1
+    assert_select "#presskits-section-actions button[type='button']", text: "Upload"
+    assert_select "input[type=file][accept='image/*'][data-recording-studio-attachable--upload-target='input']"
+    refute_includes response.body, "Drag images here"
+    refute_includes response.body, "Choose images"
+    actions = css_select("#presskits-section-actions").to_html
+    assert_operator actions.index("Update"), :<, actions.index("Cancel")
+    assert_operator actions.index("Cancel"), :<, actions.index("Upload")
     assert_match(/remove-button-template-value="&lt;button/, response.body)
     refute_includes response.body, ">Remove\">"
     assert_select "#presskits-editor-preview", count: 0
@@ -604,6 +612,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     assert_select "img[alt='stage']"
+    assert response.body.index("alt=\"stage\"") < response.body.index("name=\"images[caption]\"")
     assert_select "a[href='#{recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)}'][data-turbo-method='delete']"
 
     get recording_studio_presskits.edit_press_kit_path(kit)
@@ -616,6 +625,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Press photos"
     assert_select "img[alt='stage']"
+    assert response.body.index("alt=\"stage\"") < response.body.index("Press photos")
 
     delete recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
