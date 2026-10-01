@@ -13,7 +13,7 @@ This Rails app exists to prove Recording Studio Press Kits in a real host. It is
 - Cards and table views of kits. The heading is **My presskits**. **Presskit** with a Heroicons plus icon is first and left. Cards vs table is icon-only Flatpack ButtonGroup. Cards show a 16/9 cover, or the muted placeholder when `cover_image_url` is absent. Cards and the table open the two-column kit editor. That editor puts + Section first, then the publish control, on a row above the two-column grid. The title form is in column one. There is no in-page Preview button. Publishable's menu still has View and Preview
 - Logged-out public show of a live kit on the blank public layout (no page nav)
 - Owner preview of a kit that is not live, on the default layout. **+ Access** is on the kit editor only
-- + Section offers Text. The Text field is the FlatPack content editor, full width of its column. The preview renders the saved HTML. Dummy FakeBlock stays test-only and stays off the add dropdown
+- + Section offers Text. The Text field is the FlatPack content editor and fills the section page. That editor hides the preview. The kit editor and the public page render the saved HTML. Dummy FakeBlock stays test-only and stays off the add dropdown
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
 
 ## Quick Start

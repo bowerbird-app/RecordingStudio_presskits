@@ -12,6 +12,21 @@ module RecordingStudioPresskits
       def cancel_path
         helpers.edit_press_kit_path(@recording.parent_recording)
       end
+
+      def show_preview?
+        editor = editor_class
+        return true unless editor.respond_to?(:preview?)
+
+        editor.preview?
+      end
+
+      def grid_cols
+        show_preview? ? 2 : 1
+      end
+
+      def editor_class
+        RecordingStudioPresskits.section_editor_for(@recording)
+      end
     end
   end
 end

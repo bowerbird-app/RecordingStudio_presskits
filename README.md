@@ -174,7 +174,7 @@ RecordingStudioPresskits.picker_types
 
 If nothing real is registered, + Section is a disabled button. No empty menu box.
 
-`RecordingStudioPresskits::Text` is the section this gem ships. Add it to the host `recordable_types`, then run `rails generate recording_studio_presskits:migrations` and migrate. The body is HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). The preview and the public page render that HTML. The row label is the first line of text, with tags stripped. Trashable is on. Orderable stays on the kit. Publishable stays off the section. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
+`RecordingStudioPresskits::Text` is the section this gem ships. Add it to the host `recordable_types`, then run `rails generate recording_studio_presskits:migrations` and migrate. The body is HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). The kit editor's preview column and the public page render that HTML. The Text section editor hides its preview. The row label is the first line of text, with tags stripped. Trashable is on. Orderable stays on the kit. Publishable stays off the section. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
 
 The kit editor's preview column and the public page walk children in order and render each type's component. Text is registered. A later addon still registers its own component.
 
@@ -184,7 +184,7 @@ RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection:
 RecordingStudioPresskits.register_section_editor("SomeSection", "SomeSection::Editor")
 ```
 
-A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Text uses `RecordingStudioPresskits::Text::EditComponent` and `param_key` `:text`.
+A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Define `preview?` and return false to hide the preview and use one full-width column. Text uses `RecordingStudioPresskits::Text::EditComponent`, `param_key` `:text`, and `preview?` false.
 
 Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible. Missing access fails closed.
 
@@ -196,7 +196,7 @@ The mounted user slice uses Recording Studio's default layout (back and close). 
 - Empty index: what happened, and a way to make a kit.
 - Kit URL: `GET press_kits/:id` requires edit access and redirects to the kit editor.
 - Kit editor: **+ Section** (Heroicons `plus`, label Section) sits first on a row with `render_publishable_quick_actions`. The two-column grid starts under that row. Column one is the title form with a normal-size **Save**, then the section list. Each row is a `FlatPack::List::Item` inside `FlatPack::List::Component`. Move up and Move down patch the kit order and call `recording_studio_orderable_move!`. Each row links to that section. Column two renders every section through `section_component_for`. No in-page Preview button. No page title in the body. The page nav carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. Text is on that list once the host registers it. No empty-state tray on edit.
-- Section editor: a page heading is the section type, such as **Text**. **Update** (primary) and **Cancel** (default button) sit above the two-column grid. Cancel returns to the kit editor. Column one is the registered editor, full width of that column, or the type label when none is registered. Text uses the FlatPack content WYSIWYG with no field label. Column two renders that section's saved HTML inside a `FlatPack::Card`, lined up with the field. **Remove** stays on the kit list. **+ Access** stays off this page.
+- Section editor: a page heading is the section type, such as **Text**. **Update** (primary) and **Cancel** (default button) sit above the grid. Cancel returns to the kit editor. The default grid is two columns. Column one is the registered editor, full width of that column, or the type label when none is registered. Column two renders that section's saved HTML inside a `FlatPack::Card`, lined up with the field. An editor class can define `preview?` and return false to drop the preview and use one full-width column. Text does that. The Text field is the FlatPack content WYSIWYG with no field label. **Remove** stays on the kit list. **+ Access** stays off this page.
 - Owner preview: the same public walk of children, on the default layout, for an authenticated owner. Back returns to the kit editor. A kit that is not live stays hidden from logged-out visitors.
 
 Default-layout chrome is back, close, and page actions. **+ Access** is in the right slot on the kit editor only. Index, the new form, the section editor, and owner preview leave that slot empty. Do not put Sign in, Sign out, or Root Switchable there. Core owns back and close.

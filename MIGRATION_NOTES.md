@@ -8,6 +8,8 @@ Text is included. Add `"RecordingStudioPresskits::Text"` to `config.recordable_t
 
 **+ Access** is on the kit editor only. Do not put it on the section editor, the index, the new form, or owner preview.
 
+The Text section editor has no preview column. The kit editor and the public page still render the HTML. A custom editor hides its preview with `def self.preview?; false; end`. An editor that says nothing keeps two columns.
+
 ## 0.8.0
 
 Index and public page. Publishable is 0.3.
