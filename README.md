@@ -186,7 +186,7 @@ Access uses `grant_access` / `authorized?` on recordings. Grants on the workspac
 
 The mounted user slice uses Recording Studio's default layout (back and close). Index, kit, and owner preview pages are ViewComponents you can reuse or replace.
 
-- Index: the current root's live kits. **New press kit** is first and left. Cards vs table is icon-only `FlatPack::ButtonGroup::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle. This Flatpack pin's SegmentedButtons is text-only. Each card has a 16/9 cover. `cover_image_url` on the recordable supplies the image. A missing or unsafe URL uses the muted card color and a photo icon. Do not use Publishable's social image as the cover.
+- Index: the current root's live kits. **Presskit** with a Heroicons `plus` icon is first and left. Cards vs table is icon-only `FlatPack::ButtonGroup::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle. This Flatpack pin's SegmentedButtons is text-only. Each card has a 16/9 cover. `cover_image_url` on the recordable supplies the image. A missing or unsafe URL uses the muted card color and a photo icon. Do not use Publishable's social image as the cover.
 - Empty index: what happened, and a way to make a kit.
 - Kit show: title, publish, and children. No add card.
 - Kit edit: title plus subtitle, then one row of **Add a section**, **Preview**, and Publishable's Draft / Published action. Then the title form with a normal-size **Save**. Children you can reorder or remove come next. Types come from `picker_types`. No empty-state tray on edit.
@@ -194,7 +194,7 @@ The mounted user slice uses Recording Studio's default layout (back and close). 
 
 Default-layout chrome is back, close, and page actions. Access stays in the right slot. Do not put Sign in, Sign out, or Root Switchable there — core owns back and close.
 
-One primary action per page: **New press kit** on the index, **Create** on the new form, **Save** on kit edit. Publish state stays on Publishable's own action. Do not hand-roll a second publish system.
+One primary action per page: **Presskit** (Heroicons plus) on the index, **Create** on the new form, **Save** on kit edit. Publish state stays on Publishable's own action. Do not hand-roll a second publish system.
 
 ## Public
 

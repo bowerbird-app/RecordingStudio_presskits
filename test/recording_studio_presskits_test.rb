@@ -317,8 +317,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("../app/components/recording_studio_presskits/press_kits/show_component.html.erb", __dir__)
     )
 
-    assert_includes index, 'text: "New press kit"'
-    assert_match(/New press kit.*FlatPack::ButtonGroup::Component/m, index)
+    assert_includes index, 'text: "Presskit"'
+    assert_includes index, 'icon: "plus"'
+    assert_match(/Presskit.*FlatPack::ButtonGroup::Component/m, index)
     assert_includes index, "FlatPack::ButtonGroup::Component"
     assert_includes index, "icon_only: true"
     assert_includes index, "squares-2x2"

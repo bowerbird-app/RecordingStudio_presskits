@@ -48,8 +48,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
-    assert_includes response.body, "New press kit"
-    assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    assert_presskit_create_button
+    assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-flat-pack--icon-name-value='photo']", count: 1
     assert_includes response.body, "bg-(--card-background-muted-color)"
     assert_select "a[aria-label='Cards'] [data-flat-pack--icon-name-value='squares-2x2']", count: 1
@@ -64,7 +64,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "<table"
-    assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    assert_presskit_create_button
+    assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-flat-pack--icon-name-value='photo']", count: 0
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
@@ -260,6 +261,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_presskit_create_button
+    assert_select "a[href='#{recording_studio_presskits.new_press_kit_path}']" do
+      assert_select "[data-flat-pack--icon-name-value='plus']", count: 1
+      assert_select "span", text: "Presskit"
+    end
+    refute_includes response.body, "New press kit"
+  end
 
   def switch_to_root(root)
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
