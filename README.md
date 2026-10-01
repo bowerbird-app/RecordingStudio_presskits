@@ -17,6 +17,7 @@ gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderab
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "0.4.0"
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "0.4.0"
 gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.3.1"
+gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "0.4.0"
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.133"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
@@ -30,6 +31,7 @@ gem "recording_studio_orderable", "~> 0.2"
 gem "recording_studio_trashable", "~> 0.4"
 gem "recording_studio_duplicatable", "~> 0.4"
 gem "recording_studio_publishable", "~> 0.3"
+gem "recording_studio_attachable", "~> 0.4"
 gem "flat_pack", ">= 0.1.133"
 ```
 
@@ -46,6 +48,9 @@ bin/rails generate recording_studio_trashable:migrations
 bin/rails generate recording_studio_duplicatable:install
 bin/rails generate recording_studio_publishable:install
 bin/rails generate recording_studio_publishable:migrations
+bin/rails generate recording_studio_attachable:install
+bin/rails generate recording_studio_attachable:migrations
+bin/rails active_storage:install
 bin/rails generate recording_studio_admin:install
 bin/rails db:migrate
 ```
@@ -174,9 +179,11 @@ RecordingStudioPresskits.picker_types
 
 If nothing real is registered, + Section is a disabled button. No empty menu box.
 
-`RecordingStudioPresskits::Text` is the section this gem ships. Add it to the host `recordable_types`, then run `rails generate recording_studio_presskits:migrations` and migrate. The body is HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). The kit editor's preview column and the public page render that HTML. The Text section editor hides its preview. The row label is the first line of text, with tags stripped. Trashable is on. Orderable stays on the kit. Publishable stays off the section. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
+`RecordingStudioPresskits::Text` and `RecordingStudioPresskits::Images` are the sections this gem ships. Add both to the host `recordable_types`, then run `rails generate recording_studio_presskits:migrations` and migrate. Text stores HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). The kit editor's preview column and the public page render that HTML. The Text section editor hides its preview. The row label is the first line of text, with tags stripped. Trashable is on. Orderable stays on the kit. Publishable stays off the section. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
 
-The kit editor's preview column and the public page walk children in order and render each type's component. Text is registered. A later addon still registers its own component.
+Images stores an optional caption. Photos are Attachable image attachments under that section recording, so one section holds many images. Attachable stays off PressKit. The editor uses Attachable's direct upload and returns to the section. Removing one photo calls Attachable's remove and stays on the editor. That remove trashes the attachment recording, so Trashable is on `RecordingStudioAttachable::Attachment`. The kit preview and the public page render the caption and the images. Depend on `recording_studio_attachable`, `~> 0.4`, mount that engine, and wire Active Storage direct uploads.
+
+The kit editor's preview column and the public page walk children in order and render each type's component. Text and Images are registered. A later addon still registers its own component.
 
 ```ruby
 RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection::Component")
@@ -184,7 +191,7 @@ RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection:
 RecordingStudioPresskits.register_section_editor("SomeSection", "SomeSection::Editor")
 ```
 
-A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Define `preview?` and return false to hide the preview and use one full-width column. Text uses `RecordingStudioPresskits::Text::EditComponent`, `param_key` `:text`, and `preview?` false.
+A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Define `preview?` and return false to hide the preview and use one full-width column. Text uses `RecordingStudioPresskits::Text::EditComponent`, `param_key` `:text`, and `preview?` false. Images uses `RecordingStudioPresskits::Images::EditComponent`, `param_key` `:images`, and `preview?` false.
 
 Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible. Missing access fails closed.
 

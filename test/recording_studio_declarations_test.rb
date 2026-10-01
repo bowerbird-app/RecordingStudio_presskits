@@ -230,11 +230,41 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "RecordingStudioPresskits::Text cannot be recorded under Workspace", error.message
   end
 
+  test "images is allowed under a press kit and uses attachable" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Images Workspace")))
+    kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::Images",
+      parent_recording: kit_recording
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::Images",
+      parent_recording: root_recording
+    )
+    assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Images")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Text")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
+
+    options = RecordingStudio.capability_options(:attachable, for: "RecordingStudioPresskits::Images").to_h
+    assert_equal ["image/*"], options[:allowed_content_types]
+    assert_equal [:image], options[:enabled_attachment_kinds]
+    assert_equal :edit, options[:auth_roles][:remove]
+
+    images_recording = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording)
+    assert_equal kit_recording, images_recording.parent_recording
+    assert_kind_of RecordingStudioPresskits::Images, images_recording.recordable
+  end
+
   test "picker types skip dummy placeholders and types that do not allow press kit" do
     types = RecordingStudioPresskits.picker_types
 
     refute_includes types, "FakeBlock"
     assert_includes types, "RecordingStudioPresskits::Text"
+    assert_includes types, "RecordingStudioPresskits::Images"
     refute_includes types, "Workspace"
     refute_includes types, "Folder"
     refute_includes types, "Page"
@@ -257,6 +287,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:orderable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:orderable, for: "FakeBlock")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Text")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
 
@@ -271,6 +302,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::PressKit")
     assert RecordingStudio.capability_enabled?(:trashable, for: "FakeBlock")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Text")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Page")
@@ -280,6 +312,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::PressKit")
     refute RecordingStudio.capability_enabled?(:publishable, for: "FakeBlock")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Text")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Page")
@@ -294,6 +327,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::PressKit")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "FakeBlock")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Text")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Page")

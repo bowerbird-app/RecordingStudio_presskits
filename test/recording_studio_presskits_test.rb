@@ -22,7 +22,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.133"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.3"'
-    refute_includes gemspec, 'spec.add_dependency "recording_studio_attachable"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.4"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
   end
 
@@ -38,6 +38,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "0.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "0.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.3.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "0.4.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -167,6 +168,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, '"RecordingStudioPresskits::PressKit"'
     assert_includes initializer_source, '"RecordingStudioPresskits::Text"'
+    assert_includes initializer_source, '"RecordingStudioPresskits::Images"'
     assert_includes initializer_source, '"FakeBlock"'
     presskits_initializer = File.read(
       File.expand_path("dummy/config/initializers/recording_studio_presskits.rb", __dir__)

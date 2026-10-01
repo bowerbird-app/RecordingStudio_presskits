@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   mount RecordingStudioPublishable::Engine, at: "/"
   mount RecordingStudioPresskits::Engine, at: "/recording_studio_presskits"
   mount RecordingStudioAccessible::Engine, at: "/admin/access"
+  mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
   recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits
 
   get "up" => "rails/health#show", as: :rails_health_check

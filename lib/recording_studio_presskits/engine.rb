@@ -51,6 +51,11 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.require_attachable",
+                before: "recording_studio_presskits.before_initialize" do
+      require "recording_studio_attachable"
+    end
+
     initializer "recording_studio_presskits.before_initialize",
                 before: "recording_studio_presskits.load_config" do |_app|
       RecordingStudioPresskits.configuration.hooks.run(:before_initialize, self)
@@ -131,6 +136,15 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.attachment_trash" do
+      config.to_prepare do
+        next unless defined?(RecordingStudioAttachable::Attachment)
+        next if RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
+
+        RecordingStudioAttachable::Attachment.include RecordingStudio::Capabilities::Trashable.to
+      end
+    end
+
     initializer "recording_studio_presskits.text_section" do
       config.to_prepare do
         RecordingStudioPresskits.register_section_component(
@@ -140,6 +154,14 @@ module RecordingStudioPresskits
         RecordingStudioPresskits.register_section_editor(
           "RecordingStudioPresskits::Text",
           "RecordingStudioPresskits::Text::EditComponent"
+        )
+        RecordingStudioPresskits.register_section_component(
+          "RecordingStudioPresskits::Images",
+          "RecordingStudioPresskits::Images::Component"
+        )
+        RecordingStudioPresskits.register_section_editor(
+          "RecordingStudioPresskits::Images",
+          "RecordingStudioPresskits::Images::EditComponent"
         )
       end
     end
