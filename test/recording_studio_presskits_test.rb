@@ -15,7 +15,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_presskits.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.6"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.10"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
@@ -30,7 +30,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.10.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "2.0.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.133"'
@@ -166,6 +166,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, '"RecordingStudioPresskits::PressKit"'
+    assert_includes initializer_source, '"RecordingStudioPresskits::Text"'
     assert_includes initializer_source, '"FakeBlock"'
     presskits_initializer = File.read(
       File.expand_path("dummy/config/initializers/recording_studio_presskits.rb", __dir__)
@@ -195,7 +196,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.2.0"
-    assert_includes readme, "v0.6.1"
+    assert_includes readme, "v0.10.0"
     assert_includes readme, "tag: \"2.0.0\""
     assert_includes readme, "tag: \"0.2.0\""
     assert_includes readme, "tag: \"0.4.0\""
@@ -318,7 +319,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("../app/components/recording_studio_presskits/press_kits/index_component.html.erb", __dir__)
     )
     show = File.read(
-      File.expand_path("../app/components/recording_studio_presskits/press_kits/show_component.html.erb", __dir__)
+      File.expand_path("../app/components/recording_studio_presskits/press_kits/kit_editor_component.html.erb", __dir__)
     )
 
     assert_includes index, 'title: "My presskits"'
@@ -340,7 +341,6 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::Table::Component"
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
-    assert_includes show, "FlatPack::EmptyState::Component"
     assert_includes show, "SectionDropdownComponent"
     assert_includes show, "render_publishable_quick_actions"
     refute_includes show, "EditButtonComponent"

@@ -2,14 +2,14 @@
 
 module RecordingStudioPresskits
   module ApplicationHelper
-    def presskits_page_nav(title:, back_url: nil, back_label: "Go back", close_url: nil)
+    def presskits_page_nav(title:, back_url: nil, back_label: "Go back", close_url: nil, access: false)
       recording_studio_page_nav(
         title: title,
         page_nav_back_url: back_url,
         page_nav_back_label: back_label,
         page_nav_anchor_url: close_url
       )
-      fill_presskits_page_nav_right
+      fill_presskits_page_nav_right if access
     end
 
     def fill_presskits_page_nav_right

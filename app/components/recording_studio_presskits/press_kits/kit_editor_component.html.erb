@@ -1,0 +1,61 @@
+<div class="flex flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: helpers.presskits_title_for(@press_kit_recording),
+    variant: :h1
+  ) %>
+
+  <div id="presskits-editor-actions" class="flex flex-wrap items-center gap-3">
+    <%= render RecordingStudioPresskits::PressKits::SectionDropdownComponent.new(
+      items: picker_items,
+      add_path: @add_path
+    ) %>
+
+    <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
+  </div>
+
+  <div id="presskits-editor-grid">
+    <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
+      <div class="flex min-w-0 flex-col gap-6">
+        <% if @section_recordings.any? %>
+          <div
+            id="presskits-section-list"
+            data-controller="recording-studio-presskits--section-order"
+            data-action="list:reordered->recording-studio-presskits--section-order#save"
+            data-recording-studio-presskits--section-order-url-value="<%= @reorder_path %>"
+          >
+            <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+              <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
+                <% @section_recordings.each do |recording| %>
+                  <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
+                    recording: recording,
+                    remove_path: @remove_path.call(recording),
+                    edit_path: @edit_path.call(recording)
+                  ) %>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="min-w-0">
+        <% if @section_recordings.any? %>
+          <%= render FlatPack::Card::Component.new(style: :default, id: "presskits-editor-preview", class: "w-full") do %>
+            <div class="flex min-w-0 flex-col gap-6">
+              <% @section_recordings.each do |recording| %>
+                <% component = RecordingStudioPresskits.section_component_for(recording) %>
+                <% if component %>
+                  <%= render component.new(recording: recording) %>
+                <% else %>
+                  <p class="text-sm font-medium text-(--surface-content-color)">
+                    <%= helpers.presskits_title_for(recording) %>
+                  </p>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -24,8 +24,11 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "Workspace", "Folder" ], RecordingStudio.allowed_parent_types_for("Page")
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
     assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("FakeBlock")
+    assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
+    assert_equal "Text", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Text)
     assert_equal "Press kit", RecordingStudio.recordable_type_label(RecordingStudioPresskits::PressKit)
     refute_includes RecordingStudioPresskits.picker_types, "FakeBlock"
+    assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Text"
     assert_includes RecordingStudioPresskits.configuration.excluded_picker_types, "FakeBlock"
   end
 
@@ -38,6 +41,9 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.table_exists?(:admin_roots)
     assert connection.column_exists?(:recording_studio_press_kits, :title)
     refute connection.column_exists?(:recording_studio_press_kits, :updated_at)
+    assert connection.table_exists?(:recording_studio_texts)
+    assert connection.column_exists?(:recording_studio_texts, :body)
+    refute connection.column_exists?(:recording_studio_texts, :updated_at)
     assert connection.table_exists?(:fake_blocks)
     assert connection.column_exists?(:fake_blocks, :title)
     refute connection.column_exists?(:fake_blocks, :updated_at)

@@ -14,10 +14,10 @@ module RecordingStudioPresskits
     end
 
     def show
-      authorize_recording!(@press_kit_recording, role: :view)
+      authorize_recording!(@press_kit_recording, role: :edit)
       return if performed?
 
-      @section_recordings = KitQuery.live_children(@press_kit_recording)
+      redirect_to edit_press_kit_path(@press_kit_recording)
     end
 
     def preview

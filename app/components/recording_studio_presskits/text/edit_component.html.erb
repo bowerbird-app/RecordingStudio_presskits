@@ -1,0 +1,12 @@
+<%= render FlatPack::TextArea::Component.new(
+  name: "text[body]",
+  value: @text.body,
+  required: true,
+  class: "w-full",
+  rich_text: true,
+  rich_text_options: {
+    preset: :content,
+    toolbar: :standard,
+    character_count: true
+  }
+) %>

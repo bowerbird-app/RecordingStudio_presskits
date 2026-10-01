@@ -37,6 +37,8 @@ class ConfigurationTest < Minitest::Test
     assert_equal :authenticate_user!, configuration.authentication_method
     assert_equal :current_user, configuration.current_actor_method
     assert_equal({}, configuration.section_components)
+    assert_equal({}, configuration.section_editors)
+    assert_equal({}, configuration.to_h.fetch(:section_editors))
     assert_equal [], configuration.excluded_picker_types
     assert_instance_of RecordingStudio::Hooks, configuration.hooks
   end
@@ -70,5 +72,38 @@ class ConfigurationTest < Minitest::Test
     assert_equal "FakeBlock::Component", RecordingStudioPresskits.configuration.section_components["FakeBlock"]
   ensure
     RecordingStudioPresskits.configuration.section_components.delete("FakeBlock")
+  end
+
+  def test_section_editors_register_string_and_class_and_miss_returns_nil
+    assert_equal({}, RecordingStudioPresskits.configuration.section_editors)
+
+    editor_class = Class.new
+    Object.const_set(:PresskitsStringEditor, Class.new)
+    Object.const_set(:MissingSection, Module.new)
+    MissingSection.const_set(:Component, Class.new)
+    MissingSection.const_set(:EditComponent, Class.new)
+    RecordingStudioPresskits.register_section_editor("StringedSection", "PresskitsStringEditor")
+    RecordingStudioPresskits.register_section_editor("ClassedSection", editor_class)
+
+    assert_equal "PresskitsStringEditor", RecordingStudioPresskits.configuration.section_editors["StringedSection"]
+    assert_equal editor_class, RecordingStudioPresskits.configuration.section_editors["ClassedSection"]
+    assert_equal PresskitsStringEditor, RecordingStudioPresskits.section_editor_for("StringedSection")
+    assert_equal editor_class, RecordingStudioPresskits.section_editor_for("ClassedSection")
+    typed = Struct.new(:recordable_type).new("ClassedSection")
+    assert_equal editor_class, RecordingStudioPresskits.section_editor_for(typed)
+    assert_nil RecordingStudioPresskits.section_editor_for("MissingSection")
+    assert_equal MissingSection::Component, RecordingStudioPresskits.section_component_for("MissingSection")
+
+    exported = RecordingStudioPresskits.configuration.to_h.fetch(:section_editors)
+    assert_equal "PresskitsStringEditor", exported.fetch("StringedSection")
+    assert_equal editor_class, exported.fetch("ClassedSection")
+    exported["Extra"] = "nope"
+    refute RecordingStudioPresskits.configuration.section_editors.key?("Extra")
+  ensure
+    editors = RecordingStudioPresskits.configuration.section_editors
+    editors.delete("StringedSection")
+    editors.delete("ClassedSection")
+    Object.send(:remove_const, :PresskitsStringEditor) if Object.const_defined?(:PresskitsStringEditor, false)
+    Object.send(:remove_const, :MissingSection) if Object.const_defined?(:MissingSection, false)
   end
 end

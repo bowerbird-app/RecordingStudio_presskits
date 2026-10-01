@@ -95,6 +95,8 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "No sections yet"
 
     get recording_studio_presskits.press_kit_path(kit)
+    assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
+    follow_redirect!
     assert_response :success
     assert_publishable_quick_actions(kit, trigger: "Published")
     refute_includes response.body, "Go live"
@@ -120,7 +122,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_page_nav_close
-    assert_access_slot_only
+    assert_page_nav_without_access
     assert_includes response.body, "Autumn recap"
     assert_includes response.body, "This is just for you"
     assert_includes response.body, "Notes"

@@ -43,8 +43,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_rounded_default_layout
-    assert_access_slot_only
-    refute_includes response.body, "Sign out"
+    assert_page_nav_without_access
   end
 
   test "root switch page renders with the host default layout" do
