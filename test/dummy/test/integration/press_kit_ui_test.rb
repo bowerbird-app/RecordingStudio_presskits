@@ -570,7 +570,86 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
+  test "images section saves a caption and shows attached photos" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    assert_difference -> { RecordingStudioPresskits::Images.count }, 1 do
+      post recording_studio_presskits.press_kit_sections_path(kit),
+           params: { type: "RecordingStudioPresskits::Images" }
+    end
+    assert_response :redirect
+    follow_redirect!
+    assert_response :success
+
+    section = images_section(kit)
+    assert_select "h1", text: "Images"
+    assert_select "label", text: "Caption"
+    assert_select "input[name='images[caption]']"
+    assert_select "[data-controller='recording-studio-attachable--upload']", count: 1
+    assert_select "#presskits-editor-preview", count: 0
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      images: { caption: "Press photos", decoy: "nope" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    follow_redirect!
+    assert_equal "Press photos", section.reload.recordable.caption
+    refute_includes section.recordable.attributes.values, "nope"
+
+    attachment = attach_image(section, "stage.jpg")
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    assert_select "img[alt='stage']"
+    assert_select "a[href='#{recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)}'][data-turbo-method='delete']"
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-editor-preview img[alt='stage']"
+    assert_select "#presskits-editor-preview", text: /Press photos/
+
+    publish_images_kit!(kit)
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-images"
+    assert_response :success
+    assert_includes response.body, "Press photos"
+    assert_select "img[alt='stage']"
+
+    delete recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    follow_redirect!
+    assert_select "img[alt='stage']", count: 0
+    assert attachment.reload.trashed_at.present?
+    assert_nil section.reload.trashed_at
+  end
+
   private
+
+  def images_section(kit)
+    RecordingStudioPresskits::KitQuery.live_children(kit).find do |child|
+      child.recordable.is_a?(RecordingStudioPresskits::Images)
+    end
+  end
+
+  def attach_image(section, filename)
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new("image-bytes"),
+      filename: filename,
+      content_type: "image/jpeg"
+    )
+    section.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user)
+  end
+
+  def publish_images_kit!(kit)
+    result = RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: kit,
+      actor: @user,
+      attributes: { slug: "spring-launch-images", status: "published", meta_robots: "index,follow" }
+    )
+    raise result.error if result.failure?
+
+    result.value
+  end
 
   def assert_presskit_create_button
     assert_select "a[href='#{recording_studio_presskits.new_press_kit_path}']" do

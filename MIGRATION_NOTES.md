@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## Unreleased
+
+Images is a press kit section. Add `"RecordingStudioPresskits::Images"` to `config.recordable_types`. Run `rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new table is `recording_studio_images` (`caption`, `created_at`).
+
+The section includes Attachable for images only. Depend on `recording_studio_attachable`, `~> 0.4`, mount it, and keep Active Storage direct uploads wired. Do not enable Attachable on PressKit. Each photo is an attachment recording under the Images section. Removing one photo calls Attachable's remove and stays on the section editor. That remove trashes the attachment, so this gem enables Trashable on `RecordingStudioAttachable::Attachment`. Trashing the section still uses Trashable on the section.
+
 ## 0.9.0
 
 Two-column kit editor and the Text section. Accessible is 0.10.

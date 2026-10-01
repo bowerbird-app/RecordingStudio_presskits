@@ -2,4 +2,7 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import { application } from "controllers/application"
+import * as ActiveStorage from "@rails/activestorage"
+
+ActiveStorage.start()
 

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `RecordingStudioPresskits::Images` is a press kit section. The field is an optional `caption`. Photos are Attachable image attachments on that section, so one section holds many images. Attachable stays off PressKit.
+
 ## [0.9.0] - 2026-10-01
 
 Two-column kit editor and the Text section. Accessible is 0.10.

@@ -8,6 +8,7 @@ RecordingStudio.configure do |config|
     "AdminRoot",
     "RecordingStudioPresskits::PressKit",
     "RecordingStudioPresskits::Text",
+    "RecordingStudioPresskits::Images",
     "RecordingStudioPublishable::Publishable",
     "RecordingStudioAttachable::Attachment",
     "FakeBlock"
