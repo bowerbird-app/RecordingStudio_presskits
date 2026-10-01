@@ -1,4 +1,9 @@
 <%= form_with url: @update_path, method: :patch, local: true, class: "flex w-full flex-col items-start gap-4" do %>
+  <div class="flex flex-wrap items-center gap-3">
+    <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
+    <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
+  </div>
+
   <%= render FlatPack::TextArea::Component.new(
     name: "text[body]",
     label: "Text",
@@ -12,6 +17,4 @@
       character_count: true
     }
   ) %>
-
-  <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
 <% end %>

@@ -216,6 +216,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, hero)
     assert_response :success
     assert_select "title", text: "Hero"
+    assert_select "h1", text: "Fake block"
     assert_includes response.body, "Hero"
     refute_includes response.body, "Quotes"
     assert_page_nav_without_access
@@ -334,9 +335,19 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[type=hidden][name='text[body]'][value=?]", RecordingStudioPresskits::Text.opening_body
     assert_includes response.body, "&quot;preset&quot;:&quot;content&quot;"
     assert_includes response.body, "&quot;toolbar&quot;:&quot;standard&quot;"
+    assert_select "h1", text: "Text"
     assert_select "h2", text: "Launch notes"
     assert_select "strong", text: "one-sheet"
     assert_select "li", text: "Photos"
+    assert_select "button", text: "Update"
+    assert_select "button", text: "Save", count: 0
+    cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node| node.text.include?("Cancel") }
+    assert_includes cancel.text, "Cancel"
+    assert_includes cancel["class"], "bg-[var(--button-default-background-color)]"
+    form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
+    assert_operator form_html.index("Update"), :<, form_html.index("name=\"text[body]\"")
+    preview_card = css_select(".rounded-lg").find { |node| node.to_html.include?("flat-pack-richtext--view-mode") }
+    assert_includes preview_card["class"], "border-[var(--card-border-color)]"
     assert_select "button", text: "Remove", count: 0
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {

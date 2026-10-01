@@ -196,12 +196,12 @@ The mounted user slice uses Recording Studio's default layout (back and close). 
 - Empty index: what happened, and a way to make a kit.
 - Kit URL: `GET press_kits/:id` requires edit access and redirects to the kit editor.
 - Kit editor: **+ Section** (Heroicons `plus`, label Section) sits first on a row with `render_publishable_quick_actions`. The two-column grid starts under that row. Column one is the title form with a normal-size **Save**, then the section list. Each row is a `FlatPack::List::Item` inside `FlatPack::List::Component`. Move up and Move down patch the kit order and call `recording_studio_orderable_move!`. Each row links to that section. Column two renders every section through `section_component_for`. No in-page Preview button. No page title in the body. The page nav carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. Text is on that list once the host registers it. No empty-state tray on edit.
-- Section editor: one section. Column one is the registered editor, full width of that column, or the type label when none is registered. Text uses the FlatPack content WYSIWYG. Column two renders that section's saved HTML. **Remove** stays on the kit list. **+ Access** stays off this page.
+- Section editor: a page heading is the section type, such as **Text**. Column one is the registered editor, full width of that column, or the type label when none is registered. Text uses the FlatPack content WYSIWYG. **Update** (primary) and **Cancel** (default button) sit above the field. Cancel returns to the kit editor. Column two renders that section's saved HTML inside a `FlatPack::Card`. **Remove** stays on the kit list. **+ Access** stays off this page.
 - Owner preview: the same public walk of children, on the default layout, for an authenticated owner. Back returns to the kit editor. A kit that is not live stays hidden from logged-out visitors.
 
 Default-layout chrome is back, close, and page actions. **+ Access** is in the right slot on the kit editor only. Index, the new form, the section editor, and owner preview leave that slot empty. Do not put Sign in, Sign out, or Root Switchable there. Core owns back and close.
 
-One primary action per page: **Presskit** (Heroicons plus) on the index, **Create** on the new form, **Save** on kit edit. Publish state stays on Publishable's own action. Do not hand-roll a second publish system.
+One primary action per page: **Presskit** (Heroicons plus) on the index, **Create** on the new form, **Save** on kit edit, **Update** on a section editor. Publish state stays on Publishable's own action. Do not hand-roll a second publish system.
 
 ## Public
 
