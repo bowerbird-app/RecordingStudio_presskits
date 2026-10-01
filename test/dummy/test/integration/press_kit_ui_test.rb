@@ -346,6 +346,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes cancel["class"], "bg-[var(--button-default-background-color)]"
     form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
     assert_operator form_html.index("Update"), :<, form_html.index("name=\"text[body]\"")
+    grid_html = css_select("#presskits-section-actions ~ .grid").to_html
+    refute_includes grid_html, ">Update<"
+    refute_includes grid_html, ">Cancel<"
     preview_card = css_select(".rounded-lg").find { |node| node.to_html.include?("flat-pack-richtext--view-mode") }
     assert_includes preview_card["class"], "border-[var(--card-border-color)]"
     assert_select "button", text: "Remove", count: 0

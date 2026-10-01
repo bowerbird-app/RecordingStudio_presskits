@@ -8,6 +8,10 @@ module RecordingStudioPresskits
         @recording = recording
         @update_path = update_path
       end
+
+      def cancel_path
+        helpers.edit_press_kit_path(@recording.parent_recording)
+      end
     end
   end
 end

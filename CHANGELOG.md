@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - On the kit editor, + Section and the publish control share one row above the two-column grid. + Section is first. The label is Section with a Heroicons plus icon.
 - The Text field is FlatPack's content WYSIWYG and spans its column. The preview renders the saved HTML. A new Text section opens with a heading, a paragraph, and a list. The section editor has no Remove button.
 - **+ Access** is on the kit editor only. The index, the new form, the section editor, and owner preview leave the page-nav right slot empty.
-- A section editor shows the type as a page heading. Update and Cancel sit above the fields. Cancel uses the default button and returns to the kit. The preview sits in a card.
+- A section editor shows the type as a page heading. Update and Cancel sit above the two-column grid. Cancel uses the default button and returns to the kit. The preview sits in a card lined up with the field.
 
 ## [0.8.0] - 2026-10-01
 
