@@ -1,11 +1,4 @@
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::TextInput::Component.new(
-    name: "images[caption]",
-    value: @images.caption,
-    label: "Caption",
-    class: "w-full"
-  ) %>
-
   <% if image_recordings.any? %>
     <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
       <% image_recordings.each do |image_recording| %>
@@ -31,6 +24,13 @@
       <% end %>
     <% end %>
   <% end %>
+
+  <%= render FlatPack::TextInput::Component.new(
+    name: "images[caption]",
+    value: @images.caption,
+    label: "Caption",
+    class: "w-full"
+  ) %>
 
   <div
     data-controller="recording-studio-attachable--upload"

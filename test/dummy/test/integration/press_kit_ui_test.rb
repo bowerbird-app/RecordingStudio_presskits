@@ -604,6 +604,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     assert_select "img[alt='stage']"
+    assert response.body.index("alt=\"stage\"") < response.body.index("name=\"images[caption]\"")
     assert_select "a[href='#{recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)}'][data-turbo-method='delete']"
 
     get recording_studio_presskits.edit_press_kit_path(kit)
@@ -616,6 +617,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Press photos"
     assert_select "img[alt='stage']"
+    assert response.body.index("alt=\"stage\"") < response.body.index("Press photos")
 
     delete recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
