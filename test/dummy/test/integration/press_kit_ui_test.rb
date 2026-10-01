@@ -34,7 +34,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_rounded_default_layout
-    assert_includes response.body, "Press kits"
+    assert_select "h1", text: "My presskits"
+    assert_select "title", text: "My presskits"
     assert_access_slot_only
     refute_includes response.body, "Dummy host"
   end
@@ -48,8 +49,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
-    assert_includes response.body, "New press kit"
-    assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    assert_presskit_create_button
+    assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
+    assert_select "[data-flat-pack--icon-name-value='photo']", count: 1
+    assert_includes response.body, "bg-(--card-background-muted-color)"
     assert_select "a[aria-label='Cards'] [data-flat-pack--icon-name-value='squares-2x2']", count: 1
     assert_select "a[aria-label='Table'] [data-flat-pack--icon-name-value='table-cells']", count: 1
     refute_includes response.body, ">Cards<"
@@ -62,9 +65,27 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "<table"
-    assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    assert_presskit_create_button
+    assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
+    assert_select "[data-flat-pack--icon-name-value='photo']", count: 0
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
+  end
+
+  test "card view renders a cover image when the kit provides a safe url" do
+    record_kit("Spring launch")
+    RecordingStudioPresskits::PressKit.define_method(:cover_image_url) { "https://cdn.example/cover.jpg" }
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.press_kits_path
+    assert_response :success
+    assert_select "img[src='https://cdn.example/cover.jpg'][alt='']", count: 1
+    assert_select "[data-flat-pack--icon-name-value='photo']", count: 0
+  ensure
+    if RecordingStudioPresskits::PressKit.method_defined?(:cover_image_url)
+      RecordingStudioPresskits::PressKit.remove_method(:cover_image_url)
+    end
   end
 
   test "empty index explains what to do next" do
@@ -128,10 +149,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Pick what to drop into this kit."
     refute_includes response.body, "Fake block"
     refute_includes response.body, "No sections yet"
-    refute_includes response.body, "role=\"menu\""
+    assert_select "#publishable_quick_actions_#{kit.id} [role=menu]", count: 1
     assert_access_slot_only
     assert_includes response.body, "items-start"
-    assert_match(/EditButtonComponent|Published|Draft/, response.body)
+    assert_includes response.body, "publishable_quick_actions_"
+    assert_includes response.body, "Draft"
+    refute_includes response.body, "EditButtonComponent"
   end
 
   test "empty kit editor keeps add, preview, and publishable on one row" do
@@ -146,7 +169,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "No sections yet"
     refute_includes response.body, "presskits-section-picker"
     refute_includes response.body, "Fake block"
-    refute_includes response.body, "role=\"menu\""
+    assert_select "#publishable_quick_actions_#{kit.id} [role=menu]", count: 1
   end
 
   test "dropdown rejects dummy fake block types" do
@@ -241,6 +264,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_presskit_create_button
+    assert_select "a[href='#{recording_studio_presskits.new_press_kit_path}']" do
+      assert_select "[data-flat-pack--icon-name-value='plus']", count: 1
+      assert_select "span", text: "Presskit"
+    end
+    refute_includes response.body, "New press kit"
+  end
 
   def switch_to_root(root)
     patch "/recording_studio_root_switchable/v1/root_switch", params: {

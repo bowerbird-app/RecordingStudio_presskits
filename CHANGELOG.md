@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Kit cards show a 16/9 cover. A recordable can supply `cover_image_url`. A missing or unsafe URL uses the muted card color and a photo icon
+
+### Changed
+- Index primary action is **Presskit** with a Heroicons `plus` icon. It stays first and left, ahead of the cards / table toggle
+- Index page title is **My presskits**
+- Publishable is `~> 0.3` (dummy tag `v0.3.1`). Kit show and kit edit use `render_publishable_quick_actions` for the publish control
+
 ## [0.7.1] - 2026-09-03
 
 Cloud Agent Builds fetch Cursor skills at Build. Product is unchanged.
