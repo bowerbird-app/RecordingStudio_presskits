@@ -4,7 +4,7 @@
 
 The kit URL now requires edit access and redirects to the editor. Hosts register section editors with `RecordingStudioPresskits.register_section_editor`.
 
-Text is included. Add `"RecordingStudioPresskits::Text"` to `config.recordable_types`. Run `rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new table is `recording_studio_texts` (`body`, `created_at`). FakeBlock stays a dummy test double and stays off the add menu.
+Text is included. Add `"RecordingStudioPresskits::Text"` to `config.recordable_types`. Run `rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new table is `recording_studio_texts` (`body`, `created_at`). `body` stores HTML from the FlatPack content editor. FlatPack's engine importmap pins TipTap. A host that skips that importmap has to pin the content preset itself. FakeBlock stays a dummy test double and stays off the add menu.
 
 ## 0.8.0
 

@@ -206,7 +206,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_operator response.body.scan("Quotes").size, :>=, 2
   end
 
-  test "section edit shows that section and remove" do
+  test "section edit shows that section" do
     kit = record_kit("Spring launch")
     hero = record_block(kit, "Hero")
     record_block(kit, "Quotes")
@@ -217,12 +217,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "title", text: "Hero"
     assert_includes response.body, "Hero"
-    assert_includes response.body, "Remove"
     refute_includes response.body, "Quotes"
-    assert_select "form[action='#{recording_studio_presskits.press_kit_section_path(kit, hero)}']" do
-      assert_select "input[name='_method'][value='delete']"
-      assert_select "button", text: "Remove"
-    end
+    assert_select "button", text: "Remove", count: 0
+    assert_select "input[name='_method'][value='delete']", count: 0
   end
 
   test "adding an allowed section opens that section" do
@@ -243,7 +240,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Section added."
     assert_includes response.body, "Hero"
-    assert_includes response.body, "Remove"
+    assert_select "button", text: "Remove", count: 0
   ensure
     configuration.excluded_picker_types = previous if defined?(previous) && previous
   end
@@ -330,31 +327,46 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_includes response.body, "Section added."
-    assert_select "textarea[name='text[body]']", text: "Text"
-    assert_equal "Text", section.recordable.body
+    assert_equal RecordingStudioPresskits::Text.opening_body, section.recordable.body
+    assert_select "input[type=hidden][name='text[body]'][value=?]", RecordingStudioPresskits::Text.opening_body
+    assert_includes response.body, "&quot;preset&quot;:&quot;content&quot;"
+    assert_includes response.body, "&quot;toolbar&quot;:&quot;standard&quot;"
+    assert_select "h2", text: "Launch notes"
+    assert_select "strong", text: "one-sheet"
+    assert_select "li", text: "Photos"
+    assert_select "button", text: "Remove", count: 0
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
       text: { body: "", decoy: "nope" }
     }
     assert_response :unprocessable_entity
     assert_includes response.body, "Could not save that section."
-    assert_equal "Text", section.reload.recordable.body
+    assert_equal RecordingStudioPresskits::Text.opening_body, section.reload.recordable.body
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
-      text: { body: "Line one\nLine two", decoy: "nope" }
+      text: {
+        body: "<h2>Set list</h2><p>Line two</p><script>alert(1)</script>",
+        decoy: "nope"
+      }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     follow_redirect!
     assert_response :success
-    assert_equal "Line one\nLine two", section.reload.recordable.body
+    assert_includes section.reload.recordable.body, "<h2>Set list</h2>"
+    assert_includes section.recordable.body, "<p>Line two</p>"
+    refute_match(/<script/i, section.recordable.body)
+    refute_includes section.recordable.body, "alert(1)"
     refute_includes section.recordable.attributes.values, "nope"
-    assert_includes response.body, "Line one\nLine two"
+    assert_select "h2", text: "Set list"
+    assert_select "p", text: "Line two"
+    assert_select ".ProseMirror script", count: 0
     refute_includes response.body, "nope"
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text: Line one"
-    assert_includes response.body, "Line two"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text: Set list"
+    assert_select "h2", text: "Set list"
+    assert_select "p", text: "Line two"
   end
 
   test "dropdown rejects dummy fake block types" do

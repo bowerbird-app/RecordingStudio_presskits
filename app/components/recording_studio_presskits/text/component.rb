@@ -7,6 +7,10 @@ module RecordingStudioPresskits
         super()
         @text = recording.recordable
       end
+
+      def body_html
+        FlatPack::RichTextSanitizer.sanitize(@text.body.to_s)
+      end
     end
   end
 end

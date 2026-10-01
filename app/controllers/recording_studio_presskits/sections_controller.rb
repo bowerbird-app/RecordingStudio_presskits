@@ -104,7 +104,11 @@ module RecordingStudioPresskits
       return unless recordable.respond_to?(:body=)
       return if recordable.body.present?
 
-      recordable.body = params[:body].presence || label
+      recordable.body = params[:body].presence || opening_body_for(recordable) || label
+    end
+
+    def opening_body_for(recordable)
+      recordable.class.opening_body if recordable.class.respond_to?(:opening_body)
     end
   end
 end
