@@ -39,9 +39,10 @@ module RecordingStudioPresskits
     end
 
     def reorder_by_move
+      child = move_child
       @press_kit_recording.recording_studio_orderable_move!(
-        move_child,
-        to_index: move_index,
+        child,
+        to_index: orderable_insertion_index(child),
         actor: presskits_actor
       )
     end
@@ -60,6 +61,29 @@ module RecordingStudioPresskits
     def move_index
       value = params[:to_index].presence || params[:position].presence
       Integer(value, exception: false) || 0
+    end
+
+    def orderable_insertion_index(child)
+      sibling_ids = sibling_ids_without(child)
+      return index_after(sibling_ids, params[:after_recording_id]) if params[:after_recording_id].present?
+      return index_before(sibling_ids, params[:before_recording_id]) if params[:before_recording_id].present?
+
+      move_index
+    end
+
+    def sibling_ids_without(child)
+      ids = @press_kit_recording.recording_studio_orderable_children.map { |recording| recording.id.to_s }
+      ids.delete(child.id.to_s)
+      ids
+    end
+
+    def index_after(sibling_ids, recording_id)
+      anchor = sibling_ids.index(recording_id.to_s)
+      anchor ? anchor + 1 : sibling_ids.length
+    end
+
+    def index_before(sibling_ids, recording_id)
+      sibling_ids.index(recording_id.to_s) || 0
     end
   end
 end

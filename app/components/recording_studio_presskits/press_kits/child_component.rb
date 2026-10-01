@@ -3,14 +3,14 @@
 module RecordingStudioPresskits
   module PressKits
     class ChildComponent < ViewComponent::Base
-      def initialize(recording:, index:, total:, remove_path:, reorder_path:, edit_path:) # rubocop:disable Metrics/ParameterLists
+      def initialize(recording:, remove_path:, reorder_path:, edit_path:, previous_id: nil, next_id: nil) # rubocop:disable Metrics/ParameterLists
         super()
         @recording = recording
-        @index = index
-        @total = total
         @remove_path = remove_path
         @reorder_path = reorder_path
         @edit_path = edit_path
+        @previous_id = previous_id
+        @next_id = next_id
       end
 
       def row_label
@@ -22,11 +22,11 @@ module RecordingStudioPresskits
       end
 
       def can_move_up?
-        @index.positive?
+        @previous_id.present?
       end
 
       def can_move_down?
-        @index < (@total - 1)
+        @next_id.present?
       end
     end
   end

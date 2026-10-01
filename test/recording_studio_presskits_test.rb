@@ -166,6 +166,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, '"RecordingStudioPresskits::PressKit"'
+    assert_includes initializer_source, '"RecordingStudioPresskits::Text"'
     assert_includes initializer_source, '"FakeBlock"'
     presskits_initializer = File.read(
       File.expand_path("dummy/config/initializers/recording_studio_presskits.rb", __dir__)

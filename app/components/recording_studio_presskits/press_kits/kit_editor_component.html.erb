@@ -36,11 +36,11 @@
         <% @section_recordings.each_with_index do |recording, index| %>
           <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
             recording: recording,
-            index: index,
-            total: @section_recordings.size,
             remove_path: @remove_path.call(recording),
             reorder_path: @reorder_path,
-            edit_path: @edit_path.call(recording)
+            edit_path: @edit_path.call(recording),
+            previous_id: index.positive? ? @section_recordings[index - 1].id : nil,
+            next_id: @section_recordings[index + 1]&.id
           ) %>
         <% end %>
       <% end %>

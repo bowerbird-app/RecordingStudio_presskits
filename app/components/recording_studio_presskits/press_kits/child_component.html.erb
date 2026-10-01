@@ -8,14 +8,14 @@
       <% if can_move_up? %>
         <%= form_with url: @reorder_path, method: :patch, local: true do %>
           <%= hidden_field_tag :recording_id, @recording.id %>
-          <%= hidden_field_tag :to_index, @index - 1 %>
+          <%= hidden_field_tag :before_recording_id, @previous_id %>
           <%= render FlatPack::Button::Component.new(text: "Move up", style: :ghost, size: :sm, type: "submit") %>
         <% end %>
       <% end %>
       <% if can_move_down? %>
         <%= form_with url: @reorder_path, method: :patch, local: true do %>
           <%= hidden_field_tag :recording_id, @recording.id %>
-          <%= hidden_field_tag :to_index, @index + 1 %>
+          <%= hidden_field_tag :after_recording_id, @next_id %>
           <%= render FlatPack::Button::Component.new(text: "Move down", style: :ghost, size: :sm, type: "submit") %>
         <% end %>
       <% end %>

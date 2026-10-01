@@ -1,0 +1,11 @@
+<%= form_with url: @update_path, method: :patch, local: true, class: "flex w-full max-w-xl flex-col items-start gap-4" do %>
+  <%= render FlatPack::TextArea::Component.new(
+    name: "text[body]",
+    label: "Text",
+    value: @text.body,
+    required: true,
+    rows: 8
+  ) %>
+
+  <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
+<% end %>

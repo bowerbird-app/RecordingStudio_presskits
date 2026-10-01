@@ -131,6 +131,19 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.text_section" do
+      config.to_prepare do
+        RecordingStudioPresskits.register_section_component(
+          "RecordingStudioPresskits::Text",
+          "RecordingStudioPresskits::Text::Component"
+        )
+        RecordingStudioPresskits.register_section_editor(
+          "RecordingStudioPresskits::Text",
+          "RecordingStudioPresskits::Text::EditComponent"
+        )
+      end
+    end
+
     initializer "recording_studio_presskits.publishable_views" do
       ActiveSupport.on_load(:action_controller) do
         append_view_path RecordingStudioPresskits::Engine.root.join("app/views")

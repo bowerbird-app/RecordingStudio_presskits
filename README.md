@@ -174,7 +174,9 @@ RecordingStudioPresskits.picker_types
 
 If nothing real is registered, Add a section is a disabled button. No empty menu box.
 
-The kit editor's preview column and the public page walk children in order and render each type's component. Register a host or addon component. The container does not style the blocks.
+`RecordingStudioPresskits::Text` is the section this gem ships. Add it to the host `recordable_types`, then run `rails generate recording_studio_presskits:migrations` and migrate. The body is plain text. The row label is the first line. Trashable is on. Orderable stays on the kit. Publishable stays off the section.
+
+The kit editor's preview column and the public page walk children in order and render each type's component. Text is registered. A later addon still registers its own component.
 
 ```ruby
 RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection::Component")
@@ -182,7 +184,7 @@ RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection:
 RecordingStudioPresskits.register_section_editor("SomeSection", "SomeSection::Editor")
 ```
 
-A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. This gem does not ship one.
+A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Text uses `RecordingStudioPresskits::Text::EditComponent` and `param_key` `:text`.
 
 Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible. Missing access fails closed.
 
@@ -193,7 +195,7 @@ The mounted user slice uses Recording Studio's default layout (back and close). 
 - Index: the current root's live kits. The heading is **My presskits**. **Presskit** with a Heroicons `plus` icon is first and left. Cards vs table is icon-only `FlatPack::ButtonGroup::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle. This Flatpack pin's SegmentedButtons is text-only. Each card has a 16/9 cover. `cover_image_url` on the recordable supplies the image. A missing or unsafe URL uses the muted card color and a photo icon. Do not use Publishable's social image as the cover. Cards and the table open the kit editor.
 - Empty index: what happened, and a way to make a kit.
 - Kit URL: `GET press_kits/:id` requires edit access and redirects to the kit editor.
-- Kit editor: two columns. Column one is `render_publishable_quick_actions`, **Add a section**, the title form with a normal-size **Save**, then the section list. Each row links to that section. Column two renders every section through `section_component_for`. No in-page Preview button. No page title in the body. The page nav carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. No empty-state tray on edit.
+- Kit editor: two columns. Column one is `render_publishable_quick_actions`, **Add a section**, the title form with a normal-size **Save**, then the section list. Each row is a `FlatPack::List::Item` inside `FlatPack::List::Component`. Move up and Move down patch the kit order and call `recording_studio_orderable_move!`. Each row links to that section. Column two renders every section through `section_component_for`. No in-page Preview button. No page title in the body. The page nav carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. Text is on that list once the host registers it. No empty-state tray on edit.
 - Section editor: one section. Column one renders the registered editor, or the type label when none is registered, plus **Remove**. Column two renders that section only.
 - Owner preview: the same public walk of children, on the default layout, for an authenticated owner. Back returns to the kit editor. A kit that is not live stays hidden from logged-out visitors.
 

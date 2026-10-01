@@ -147,7 +147,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "presskits-section-dropdown"
     assert_includes response.body, "Add a section"
-    assert_select "button#presskits-section-dropdown[disabled]"
+    refute_select "button#presskits-section-dropdown[disabled]"
+    assert_select "a[href*='type=RecordingStudioPresskits%3A%3AText']", text: "Text"
     assert_includes response.body, "Preview"
     assert_includes response.body, 'name="press_kit[title]"'
     refute_select "a[href='#{recording_studio_presskits.preview_press_kit_path(kit)}']"
@@ -304,6 +305,50 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     Object.send(:remove_const, :PresskitsFakeBlockEditor) if Object.const_defined?(:PresskitsFakeBlockEditor, false)
   end
 
+  test "adding a text section saves the body and drops a decoy" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    assert_difference -> { RecordingStudioPresskits::Text.count }, 1 do
+      post recording_studio_presskits.press_kit_sections_path(kit),
+           params: { type: "RecordingStudioPresskits::Text" }
+    end
+
+    section = RecordingStudioPresskits::KitQuery.live_children(kit).find { |child|
+      child.recordable.is_a?(RecordingStudioPresskits::Text)
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "Section added."
+    assert_select "textarea[name='text[body]']", text: "Text"
+    assert_equal "Text", section.recordable.body
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      text: { body: "", decoy: "nope" }
+    }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Could not save that section."
+    assert_equal "Text", section.reload.recordable.body
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      text: { body: "Line one\nLine two", decoy: "nope" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    follow_redirect!
+    assert_response :success
+    assert_equal "Line one\nLine two", section.reload.recordable.body
+    refute_includes section.recordable.attributes.values, "nope"
+    assert_includes response.body, "Line one\nLine two"
+    refute_includes response.body, "nope"
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text: Line one"
+    assert_includes response.body, "Line two"
+  end
+
   test "dropdown rejects dummy fake block types" do
     kit = record_kit("Spring launch")
     sign_in @user
@@ -331,6 +376,27 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Hero"
     refute_includes RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id), hero.id
     assert hero.reload.trashed_at.present?
+  end
+
+  test "move down swaps visible sections and leaves a trashed sibling in place" do
+    kit = record_kit("Spring launch")
+    first = record_block(kit, "Hero")
+    hidden = record_block(kit, "Quotes")
+    second = record_block(kit, "Notes")
+    hidden.recording_studio_trashable_trash!(actor: @user)
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_order_path(kit), params: {
+      recording_id: first.id,
+      after_recording_id: second.id
+    }
+    follow_redirect!
+
+    assert_response :success
+    assert_includes response.body, "Order saved."
+    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id)
+    assert hidden.reload.trashed_at.present?
   end
 
   test "reorder moves children through orderable" do

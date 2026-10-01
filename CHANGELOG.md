@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `RecordingStudioPresskits::Text` is a press kit section. The field is `body`. Hosts add the class to `recordable_types` and run the migrations generator.
+
 ### Changed
-- The kit URL requires edit access and redirects to a two-column editor. Hosts register section editors with `register_section_editor`.
+- The kit URL requires edit access and redirects to a two-column editor. Hosts register section editors with `register_section_editor`. Text registers its own editor.
 
 ## [0.8.0] - 2026-10-01
 

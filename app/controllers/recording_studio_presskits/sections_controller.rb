@@ -92,11 +92,19 @@ module RecordingStudioPresskits
 
     def add_section(type_name)
       klass = type_name.constantize
-      title = params[:title].presence || RecordingStudio.recordable_type_label(type_name)
+      label = params[:title].presence || RecordingStudio.recordable_type_label(type_name)
 
       @press_kit_recording.record(klass, parent_recording: @press_kit_recording) do |recordable|
-        recordable.title = title if recordable.respond_to?(:title=)
+        recordable.title = label if recordable.respond_to?(:title=)
+        assign_opening_body(recordable, label)
       end
+    end
+
+    def assign_opening_body(recordable, label)
+      return unless recordable.respond_to?(:body=)
+      return if recordable.body.present?
+
+      recordable.body = params[:body].presence || label
     end
   end
 end
