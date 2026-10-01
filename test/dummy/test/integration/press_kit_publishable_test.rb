@@ -122,7 +122,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_page_nav_close
-    assert_access_slot_only
+    assert_page_nav_without_access
     assert_includes response.body, "Autumn recap"
     assert_includes response.body, "This is just for you"
     assert_includes response.body, "Notes"

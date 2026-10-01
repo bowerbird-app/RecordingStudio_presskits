@@ -12,7 +12,7 @@ This Rails app exists to prove Recording Studio Press Kits in a real host. It is
 - Authenticated `/` redirects to the press kit index on Recording Studio's default layout
 - Cards and table views of kits. The heading is **My presskits**. **Presskit** with a Heroicons plus icon is first and left. Cards vs table is icon-only Flatpack ButtonGroup. Cards show a 16/9 cover, or the muted placeholder when `cover_image_url` is absent. Cards and the table open the two-column kit editor. That editor puts + Section first, then the publish control, on a row above the two-column grid. The title form is in column one. There is no in-page Preview button. Publishable's menu still has View and Preview
 - Logged-out public show of a live kit on the blank public layout (no page nav)
-- Owner preview of a kit that is not live, on the default layout, with Access in the slot
+- Owner preview of a kit that is not live, on the default layout. **+ Access** is on the kit editor only
 - + Section offers Text. The Text field is the FlatPack content editor, full width of its column. The preview renders the saved HTML. Dummy FakeBlock stays test-only and stays off the add dropdown
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
 
@@ -52,6 +52,6 @@ Then open the app and sign in with:
 
 Use this app to verify press kits boot in a host. If a layout, route, asset source, or Recording Studio initializer change breaks here, the gem likely needs adjustment before reuse.
 
-Authenticated screens keep `RecordingStudio::UsesDefaultLayout`. Dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps those screens (index, kit editor, section editor, owner preview, Admin). That is Flatpack's built-in rounded theme from `flat_pack/variables`. The same override passes Flatpack 0.1.133 `anchor_href` so the close X renders next to back. Devise sign-in keeps `layouts/application`, which already has the same html attribute. Default-layout chrome is back, close, and page actions. Access stays in the slot. Sign out and Root Switchable stay out. The logged-out public kit uses `recording_studio_presskits/blank` (no page nav, no TopNav) and does not invent a Dummy host landing.
+Authenticated screens keep `RecordingStudio::UsesDefaultLayout`. Dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps those screens (index, kit editor, section editor, owner preview, Admin). That is Flatpack's built-in rounded theme from `flat_pack/variables`. The same override passes Flatpack 0.1.133 `anchor_href` so the close X renders next to back. Devise sign-in keeps `layouts/application`, which already has the same html attribute. Default-layout chrome is back, close, and page actions. **+ Access** is in the slot on the kit editor only. Sign out and Root Switchable stay out. The logged-out public kit uses `recording_studio_presskits/blank` (no page nav, no TopNav) and does not invent a Dummy host landing.
 
 Dummy Tailwind must scan FlatPack components, Recording Studio's default layout, Admin, Publishable, and this gem, or the host looks unstyled. `bin/rails tailwindcss:build` writes gem `@source` paths first. After changing views or gems, run that build (or `bin/dev`) so CSS is not an empty shell.

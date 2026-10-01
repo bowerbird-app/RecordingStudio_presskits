@@ -36,7 +36,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_select "h1", text: "My presskits"
     assert_select "title", text: "My presskits"
-    assert_access_slot_only
+    assert_page_nav_without_access
     refute_includes response.body, "Dummy host"
   end
 
@@ -60,7 +60,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
     assert_page_nav_close
-    assert_access_slot_only
+    assert_page_nav_without_access
 
     get recording_studio_presskits.press_kits_path(view: "table")
     assert_response :success
@@ -132,7 +132,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_includes response.body, "New press kit"
     assert_page_nav_close
-    assert_access_slot_only
+    assert_page_nav_without_access
   end
 
   test "kit edit shows the title form and add dropdown without the picker card" do
@@ -218,6 +218,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "title", text: "Hero"
     assert_includes response.body, "Hero"
     refute_includes response.body, "Quotes"
+    assert_page_nav_without_access
     assert_select "button", text: "Remove", count: 0
     assert_select "input[name='_method'][value='delete']", count: 0
   end
@@ -241,6 +242,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Section added."
     assert_includes response.body, "Hero"
     assert_select "button", text: "Remove", count: 0
+    assert_page_nav_without_access
   ensure
     configuration.excluded_picker_types = previous if defined?(previous) && previous
   end
@@ -327,6 +329,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_includes response.body, "Section added."
+    assert_page_nav_without_access
     assert_equal RecordingStudioPresskits::Text.opening_body, section.recordable.body
     assert_select "input[type=hidden][name='text[body]'][value=?]", RecordingStudioPresskits::Text.opening_body
     assert_includes response.body, "&quot;preset&quot;:&quot;content&quot;"

@@ -6,6 +6,8 @@ The kit URL now requires edit access and redirects to the editor. Hosts register
 
 Text is included. Add `"RecordingStudioPresskits::Text"` to `config.recordable_types`. Run `rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new table is `recording_studio_texts` (`body`, `created_at`). `body` stores HTML from the FlatPack content editor. FlatPack's engine importmap pins TipTap. A host that skips that importmap has to pin the content preset itself. FakeBlock stays a dummy test double and stays off the add menu.
 
+**+ Access** is on the kit editor only. Do not put it on the section editor, the index, the new form, or owner preview.
+
 ## 0.8.0
 
 Index and public page. Publishable is 0.3.
