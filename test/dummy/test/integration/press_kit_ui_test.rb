@@ -226,6 +226,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes card["class"], "border-[var(--card-border-color)]"
     list = css_select("#presskits-section-list [role='list']").first
     assert_equal "flat-pack--list-orderable", list["data-controller"]
+    assert_includes list["class"], "divide-y"
     items = css_select("#presskits-section-list [role='listitem']")
     assert_equal [hero.id, quotes.id], items.map { |item| item["id"] }
     items.each do |item|

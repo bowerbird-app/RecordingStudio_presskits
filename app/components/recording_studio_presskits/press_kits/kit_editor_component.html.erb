@@ -24,7 +24,7 @@
             data-recording-studio-presskits--section-order-url-value="<%= @reorder_path %>"
           >
             <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
-              <%= render FlatPack::List::Component.new(orderable: true, class: "w-full") do %>
+              <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
                 <% @section_recordings.each do |recording| %>
                   <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
                     recording: recording,
