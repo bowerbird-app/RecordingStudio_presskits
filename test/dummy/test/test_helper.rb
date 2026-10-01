@@ -29,6 +29,7 @@ module RoundedDefaultLayoutAssertions
   end
 
   def assert_access_slot_only
+    assert_select "a[href*='/accesses']", text: "+ Access"
     assert_includes response.body, "+ Access"
     assert_includes response.body, "/accesses"
     refute_includes response.body, "Sign out"

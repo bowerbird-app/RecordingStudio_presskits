@@ -8,6 +8,8 @@ Text is included. Add `"RecordingStudioPresskits::Text"` to `config.recordable_t
 
 **+ Access** is on the kit editor only. Do not put it on the section editor, the index, the new form, or owner preview.
 
+Bump `recording_studio_accessible` to `~> 0.10` (dummy tag `v0.10.0`). Run `bin/rails generate recording_studio_accessible:migrations`, then `bin/rails db:migrate`. 0.8.0 adds `depends_on_recording_id` on accesses. 0.10.0 adds access invitations. + Access links to the workspace manage-access page.
+
 The Text section editor has no preview column. The kit editor and the public page still render the HTML. A custom editor hides its preview with `def self.preview?; false; end`. An editor that says nothing keeps two columns.
 
 On the kit editor, the page heading is the kit name. There is no title form and no Save on that page. + Section is a primary button. Each section row is a list inside a card, and the link text is the section type. Remove is a trash icon. It posts delete, and the section controller calls `recording_studio_trashable_trash!`. Do not hard-delete the child. The preview column is a card. Drag the `arrows-up-down` list icon to reorder. That posts `recording_id` and `before_recording_id` or `after_recording_id` to the kit order route, which calls `recording_studio_orderable_move!`. Pin the engine controller:

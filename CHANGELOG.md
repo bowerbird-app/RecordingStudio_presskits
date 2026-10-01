@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Section order uses the `arrows-up-down` icon in the list icon slot. Dropping it calls `recording_studio_orderable_move!`. Move up and Move down are gone. Hosts pin `controllers/recording_studio_presskits` from the engine JavaScript.
 - The Text field is FlatPack's content WYSIWYG. The kit editor and the public page render the saved HTML. A new Text section opens with a heading, a paragraph, and a list. The section editor has no Remove button.
 - **+ Access** is on the kit editor only. The index, the new form, the section editor, and owner preview leave the page-nav right slot empty.
+- Accessible is `~> 0.10` (dummy tag `v0.10.0`). + Access is a FlatPack link (`href:`) to manage access.
 - A section editor shows the type as a page heading. Update and Cancel sit above the grid. Cancel uses the default button and returns to the kit. The default layout is two columns, with the preview in a card lined up with the field. The text field has no label of its own. Text hides that preview and uses one full-width column. An editor opts out by defining `preview?` and returning false.
 
 ## [0.8.0] - 2026-10-01
