@@ -6,6 +6,7 @@
 - Preserve engine namespace isolation under `RecordingStudioPresskits`.
 - Treat `docs/gem_template/` as architectural reference material. The public README is the product. The dummy app is a host that proves the gem.
 - Keep changes small and scoped. This slice ships the authenticated editor, a public page for a live kit, an owner preview, and Admin live vs not-live widgets. Do not enable Publishable on section children.
+- When the task is the kit editor, a section edit page, or the kit show and kit edit pair, follow `.github/skills/recording-studio-presskit-editor/SKILL.md`. On any other task, leave `ShowComponent` and `PressKitsController#show` as they are.
 
 ## UI Conventions
 
