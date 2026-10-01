@@ -34,7 +34,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_rounded_default_layout
-    assert_includes response.body, "Press kits"
+    assert_select "h1", text: "My presskits"
+    assert_select "title", text: "My presskits"
     assert_access_slot_only
     refute_includes response.body, "Dummy host"
   end
