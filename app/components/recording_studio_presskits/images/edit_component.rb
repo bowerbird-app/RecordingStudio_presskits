@@ -69,11 +69,12 @@ module RecordingStudioPresskits
       end
 
       def remove_button_template
-        helpers.tag.button(
+        button = helpers.tag.button(
           "Remove",
           type: "button",
           data: { action: "recording-studio-attachable--upload#remove", id: "__ENTRY_ID__" }
         )
+        String.new(button)
       end
     end
   end

@@ -588,6 +588,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "label", text: "Caption"
     assert_select "input[name='images[caption]']"
     assert_select "[data-controller='recording-studio-attachable--upload']", count: 1
+    assert_match(/remove-button-template-value="&lt;button/, response.body)
+    refute_includes response.body, ">Remove\">"
     assert_select "#presskits-editor-preview", count: 0
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
