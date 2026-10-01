@@ -11,7 +11,7 @@ Next steps:
 7. Register `"RecordingStudioPresskits::PressKit"` next to your workspace type and keep `recording_studio_recordable(...)` on every configured type before running `RecordingStudio.validate_recordable_declarations!`.
 8. Add `recording_studio_orderable`, `recording_studio_trashable`, `recording_studio_duplicatable`, and `recording_studio_publishable`. Run each mixin's install and migrations generators. PressKit already opts in. Register `RecordingStudioPublishable::Publishable` in `recordable_types` and mount Publishable at `/`.
 9. Install Recording Studio Admin 2.0, mount it under an admin root, and enable `section :press_kits`. Access is Accessible grants on that admin root, not `user.admin?`.
-10. Pin the press kit section-order controller so the kit editor drag handle can save:
+10. Pin the press kit section-order controller. FlatPack list-orderable drags the rows. This controller saves the drop:
 
 ```ruby
 pin_all_from RecordingStudioPresskits::Engine.root.join("app/javascript/recording_studio_presskits/controllers"), under: "controllers/recording_studio_presskits", to: "recording_studio_presskits/controllers"

@@ -1,60 +1,32 @@
 import { Controller } from "@hotwired/stimulus"
 
+// FlatPack list-orderable owns the drag. This pin's saveOrder checks
+// hasOrderablePathValue, and that value is not defined, so the fetch never runs.
+// list:reordered still fires. This posts the new neighbor to Orderable.
 export default class extends Controller {
-  static targets = ["item"]
   static values = { url: String }
 
-  connect() {
-    this.draggedItem = null
-    this.itemTargets.forEach((item) => {
-      const handle = item.querySelector("[data-flat-pack--icon-name-value='arrows-up-down']")
-      if (!handle) return
+  save(event) {
+    if (this.submitted || !this.hasUrlValue) return
 
-      const grip = handle.closest("span") || handle
-      grip.draggable = true
-      grip.style.cursor = "grab"
-      grip.addEventListener("dragstart", (event) => this.start(event, item))
-      grip.addEventListener("dragend", () => this.end())
-      item.addEventListener("dragover", (event) => event.preventDefault())
-      item.addEventListener("drop", (event) => this.drop(event, item))
-    })
-  }
+    const recordingId = event.detail?.id
+    if (!recordingId) return
 
-  start(event, item) {
-    this.draggedItem = item
-    event.dataTransfer.effectAllowed = "move"
-    event.dataTransfer.setData("text/plain", item.dataset.recordingId || "")
-    item.style.opacity = "0.7"
-  }
+    const items = [...this.element.querySelectorAll("li[role='listitem']")]
+    const index = items.findIndex((item) => item.id === recordingId || item.dataset.id === recordingId)
+    if (index < 0) return
 
-  end() {
-    const item = this.draggedItem
-    requestAnimationFrame(() => {
-      if (item) item.style.opacity = ""
-      if (this.draggedItem === item) this.draggedItem = null
-    })
-  }
+    const fields = { recording_id: recordingId }
+    const next = items[index + 1]
+    const previous = items[index - 1]
+    if (next) fields.before_recording_id = next.id || next.dataset.id
+    else if (previous) fields.after_recording_id = previous.id || previous.dataset.id
 
-  drop(event, target) {
-    event.preventDefault()
-    const dragged = this.draggedItem
-    if (!dragged || dragged === target || this.submitted) return
-
-    const from = this.itemTargets.indexOf(dragged)
-    const to = this.itemTargets.indexOf(target)
-    if (from < 0 || to < 0) return
-
-    if (from < to) this.element.insertBefore(dragged, target.nextSibling)
-    else this.element.insertBefore(dragged, target)
-
-    const fields = { recording_id: dragged.dataset.recordingId }
-    if (from < to) fields.after_recording_id = target.dataset.recordingId
-    else fields.before_recording_id = target.dataset.recordingId
     this.submit(fields)
   }
 
   submit(fields) {
-    if (!fields.recording_id || !this.hasUrlValue) return
+    if (!fields.recording_id) return
 
     this.submitted = true
     const form = document.createElement("form")

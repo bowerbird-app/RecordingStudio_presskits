@@ -192,7 +192,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Save", count: 0
     assert_includes response.body, "presskits-section-dropdown"
     assert_includes css_select("#presskits-section-dropdown button").first["class"], "bg-[var(--button-primary-background-color)]"
-    assert_select "#presskits-section-cards", count: 0
+    assert_select "#presskits-section-list", count: 0
     assert_select "#presskits-editor-preview", count: 0
     assert_includes response.body, "Preview"
     refute_includes response.body, "No sections yet"
@@ -216,19 +216,23 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Fake block: Quotes"
     assert_select "button", text: "Move up", count: 0
     assert_select "button", text: "Move down", count: 0
-    cards = css_select("#presskits-section-cards").first
-    assert_equal "recording-studio-presskits--section-order", cards["data-controller"]
-    assert_equal recording_studio_presskits.press_kit_order_path(kit), cards["data-recording-studio-presskits--section-order-url-value"]
-    section_cards = css_select("#presskits-section-cards > .rounded-lg")
-    assert_equal 2, section_cards.size
-    section_cards.each do |card|
-      assert_includes card["class"], "border-[var(--card-border-color)]"
-      assert_includes card.to_html, 'role="list"'
-      assert_includes card.to_html, 'data-flat-pack--icon-name-value="arrows-up-down"'
-      assert_includes card.to_html, 'data-flat-pack--icon-name-value="trash"'
-      assert_select card, "button[aria-label='Remove']", count: 1
-      assert_select card, "input[name='_method'][value='delete']", count: 1
-      assert card["data-recording-id"].present?
+    shell = css_select("#presskits-section-list").first
+    assert_equal "recording-studio-presskits--section-order", shell["data-controller"]
+    assert_includes shell["data-action"], "list:reordered->recording-studio-presskits--section-order#save"
+    assert_equal recording_studio_presskits.press_kit_order_path(kit), shell["data-recording-studio-presskits--section-order-url-value"]
+    section_cards = css_select("#presskits-section-list > .rounded-lg")
+    assert_equal 1, section_cards.size
+    card = section_cards.first
+    assert_includes card["class"], "border-[var(--card-border-color)]"
+    list = css_select("#presskits-section-list [role='list']").first
+    assert_equal "flat-pack--list-orderable", list["data-controller"]
+    items = css_select("#presskits-section-list [role='listitem']")
+    assert_equal [hero.id, quotes.id], items.map { |item| item["id"] }
+    items.each do |item|
+      assert_includes item.to_html, 'data-flat-pack--icon-name-value="arrows-up-down"'
+      assert_includes item.to_html, 'data-flat-pack--icon-name-value="trash"'
+      assert_select item, "button[aria-label='Remove']", count: 1
+      assert_select item, "input[name='_method'][value='delete']", count: 1
     end
     preview = css_select("#presskits-editor-preview").first
     assert_includes preview["class"], "border-[var(--card-border-color)]"
