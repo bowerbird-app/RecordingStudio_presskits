@@ -1,9 +1,11 @@
 # Upgrade notes
 
-## Unreleased
+## 0.8.0
 
-The public kit view is a blank layout.
+Index and public page. Publishable is 0.3.
 
+- Bump `recording_studio_publishable` to `~> 0.3` (dummy tag `v0.3.1`). Run its install and migrations generators if the host is still on 0.2.
+- Kit show and kit edit use `render_publishable_quick_actions`. Do not render `EditButtonComponent` or a hand-rolled Go live button.
 - `PressKit` sets `public_layout: "recording_studio_presskits/blank"`. Do not point it back at `recording_studio/default_layout`.
 - View (`/published/:uuid/:slug`) and the publish-button Preview use that layout. No back, close, or TopNav.
 - The owner Preview button stays on `recording_studio/default_layout`.

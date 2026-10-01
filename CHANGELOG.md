@@ -7,14 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-01
+
+Index and public page. Publishable is 0.3.
+
 ### Added
 - Kit cards show a 16/9 cover. A recordable can supply `cover_image_url`. A missing or unsafe URL uses the muted card color and a photo icon
 
 ### Changed
+- Version `0.8.0`
 - Index primary action is **Presskit** with a Heroicons `plus` icon. It stays first and left, ahead of the cards / table toggle
 - Index page title is **My presskits**
 - Publishable is `~> 0.3` (dummy tag `v0.3.1`). Kit show and kit edit use `render_publishable_quick_actions` for the publish control
 - Public kit view uses `recording_studio_presskits/blank`. View and the publish-button Preview render the kit with no page nav. Owner preview stays on `recording_studio/default_layout`
+
+### Upgrade notes
+- Bump `recording_studio_publishable` to `~> 0.3`
+- Public kits use `recording_studio_presskits/blank`. Do not point `public_layout` back at `recording_studio/default_layout`
 
 ## [0.7.1] - 2026-09-03
 
@@ -242,7 +251,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.8.0
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.6.0
