@@ -4,7 +4,7 @@ module RecordingStudioPresskits
   module PressKits
     class KitEditorComponent < ViewComponent::Base
       def initialize(press_kit_recording:, section_recordings:, picker_types:, add_path:, remove_path:, # rubocop:disable Metrics/ParameterLists
-                     reorder_path:, update_path:, edit_path:)
+                     reorder_path:, edit_path:)
         super()
         @press_kit_recording = press_kit_recording
         @section_recordings = section_recordings
@@ -12,7 +12,6 @@ module RecordingStudioPresskits
         @add_path = add_path
         @remove_path = remove_path
         @reorder_path = reorder_path
-        @update_path = update_path
         @edit_path = edit_path
       end
 

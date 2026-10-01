@@ -6,7 +6,15 @@
 
     <% if can_remove? %>
       <%= form_with url: @remove_path, method: :delete, local: true, html: { draggable: "false" } do %>
-        <%= render FlatPack::Button::Component.new(text: "Remove", style: :ghost, size: :sm, type: "submit", draggable: "false") %>
+        <%= render FlatPack::Button::Component.new(
+          icon: "trash",
+          icon_only: true,
+          style: :ghost,
+          size: :sm,
+          type: "submit",
+          draggable: "false",
+          aria: { label: "Remove" }
+        ) %>
       <% end %>
     <% end %>
   </div>

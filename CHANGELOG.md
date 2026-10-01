@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The kit URL requires edit access and redirects to a two-column editor. Hosts register section editors with `register_section_editor`. Text registers its own editor.
-- On the kit editor, + Section and the publish control share one row above the two-column grid. + Section is first and uses the primary button. The label is Section with a Heroicons plus icon.
+- On the kit editor, the page heading is the kit name. + Section and the publish control share one row above the two-column grid. + Section is first and uses the primary button. The label is Section with a Heroicons plus icon. The title form and Save are gone from this page.
+- Each section's remove control is a trash icon. Destroy calls `recording_studio_trashable_trash!`.
 - Each kit section is its own list inside a card. The link is the section type. The preview column is one card.
 - Section order uses the `arrows-up-down` icon in the list icon slot. Dropping it calls `recording_studio_orderable_move!`. Move up and Move down are gone. Hosts pin `controllers/recording_studio_presskits` from the engine JavaScript.
 - The Text field is FlatPack's content WYSIWYG. The kit editor and the public page render the saved HTML. A new Text section opens with a heading, a paragraph, and a list. The section editor has no Remove button.

@@ -135,7 +135,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_page_nav_without_access
   end
 
-  test "kit edit shows the title form and add dropdown without the picker card" do
+  test "kit edit shows the kit name and add dropdown without the picker card" do
     kit = record_kit("Spring launch")
     sign_in @user
     switch_to_root(@root)
@@ -144,6 +144,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_select "title", text: "Spring launch"
+    assert_select "h1", text: "Spring launch"
+    assert_select "#presskits-editor-grid h1", count: 0
+    assert_select "input[name='press_kit[title]']", count: 0
+    assert_select "button", text: "Save", count: 0
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "presskits-section-dropdown"
     assert_select "#presskits-editor-actions span", text: "Section"
@@ -156,11 +160,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_operator actions_html.index("presskits-section-dropdown"), :<, actions_html.index("publishable_quick_actions_")
     grid_html = css_select("#presskits-editor-grid").to_html
     assert_includes grid_html, "md:grid-cols-2"
-    assert_includes grid_html, 'name="press_kit[title]"'
+    refute_includes grid_html, 'name="press_kit[title]"'
     refute_includes grid_html, "presskits-section-dropdown"
     refute_includes grid_html, "publishable_quick_actions_"
     assert_includes response.body, "Preview"
-    assert_includes response.body, 'name="press_kit[title]"'
+    refute_includes response.body, 'name="press_kit[title]"'
     refute_select "a[href='#{recording_studio_presskits.preview_press_kit_path(kit)}']"
     refute_includes response.body, "presskits-section-picker"
     refute_includes response.body, "Pick what to drop into this kit."
@@ -183,6 +187,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
+    assert_select "h1", text: "Empty launch"
+    assert_select "input[name='press_kit[title]']", count: 0
+    assert_select "button", text: "Save", count: 0
     assert_includes response.body, "presskits-section-dropdown"
     assert_includes css_select("#presskits-section-dropdown button").first["class"], "bg-[var(--button-primary-background-color)]"
     assert_select "#presskits-section-cards", count: 0
@@ -218,6 +225,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       assert_includes card["class"], "border-[var(--card-border-color)]"
       assert_includes card.to_html, 'role="list"'
       assert_includes card.to_html, 'data-flat-pack--icon-name-value="arrows-up-down"'
+      assert_includes card.to_html, 'data-flat-pack--icon-name-value="trash"'
+      assert_select card, "button[aria-label='Remove']", count: 1
+      assert_select card, "input[name='_method'][value='delete']", count: 1
       assert card["data-recording-id"].present?
     end
     preview = css_select("#presskits-editor-preview").first
@@ -430,6 +440,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     sign_in @user
     switch_to_root(@root)
 
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "button[aria-label='Remove'] [data-flat-pack--icon-name-value='trash']", count: 1
+    assert_select "button", text: "Remove", count: 0
+
     delete recording_studio_presskits.press_kit_section_path(kit, hero)
     follow_redirect!
 
@@ -437,6 +452,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Hero"
     refute_includes RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id), hero.id
     assert hero.reload.trashed_at.present?
+    assert_equal true, hero.trash_root
+    assert_nil kit.reload.trashed_at
+    assert_equal 1, hero.events.where(action: "trashed").count
   end
 
   test "move down swaps visible sections and leaves a trashed sibling in place" do
@@ -525,6 +543,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_includes response.body, "Spring launch, take two"
+    assert_select "h1", text: "Spring launch, take two"
     assert_equal "Spring launch, take two", kit.reload.recordable.title
   end
 

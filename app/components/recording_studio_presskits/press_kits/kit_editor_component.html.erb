@@ -1,4 +1,9 @@
 <div class="flex flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: helpers.presskits_title_for(@press_kit_recording),
+    variant: :h1
+  ) %>
+
   <div id="presskits-editor-actions" class="flex flex-wrap items-center gap-3">
     <%= render RecordingStudioPresskits::PressKits::SectionDropdownComponent.new(
       items: picker_items,
@@ -11,24 +16,6 @@
   <div id="presskits-editor-grid">
     <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
       <div class="flex min-w-0 flex-col gap-6">
-        <%= form_with url: @update_path, method: :patch, local: true, class: "flex max-w-xl flex-col items-start gap-4" do %>
-          <div class="w-full">
-            <%= render FlatPack::TextInput::Component.new(
-              name: "press_kit[title]",
-              label: "Title",
-              value: helpers.presskits_title_for(@press_kit_recording),
-              required: true,
-              placeholder: "Spring launch"
-            ) %>
-          </div>
-
-          <%= render FlatPack::Button::Component.new(
-            text: "Save",
-            style: :primary,
-            type: "submit"
-          ) %>
-        <% end %>
-
         <% if @section_recordings.any? %>
           <div
             id="presskits-section-cards"
