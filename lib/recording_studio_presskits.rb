@@ -57,17 +57,34 @@ module RecordingStudioPresskits
     end
 
     def section_component_for(recording_or_type)
-      type_name = if recording_or_type.respond_to?(:recordable_type)
-                    recording_or_type.recordable_type.to_s
-                  else
-                    recording_or_type.to_s
-                  end
-
+      type_name = section_type_name(recording_or_type)
       registered = configuration.section_components[type_name]
       return registered if registered.is_a?(Class)
       return registered.constantize if registered.present?
 
       "#{type_name}::Component".safe_constantize
+    end
+
+    def register_section_editor(type_name, component)
+      configuration.section_editors[type_name.to_s] = component
+    end
+
+    def section_editor_for(recording_or_type)
+      registered = configuration.section_editors[section_type_name(recording_or_type)]
+      return registered if registered.is_a?(Class)
+      return registered.constantize if registered.present?
+
+      nil
+    end
+
+    private
+
+    def section_type_name(recording_or_type)
+      if recording_or_type.respond_to?(:recordable_type)
+        recording_or_type.recordable_type.to_s
+      else
+        recording_or_type.to_s
+      end
     end
   end
 end
