@@ -16,10 +16,7 @@
         <%= render FlatPack::Button::Component.new(text: "Preview", style: :secondary, href: @preview_path) %>
       <% end %>
 
-      <%= render RecordingStudioPublishable::EditButtonComponent.new(
-        recording: @press_kit_recording,
-        label: "Draft"
-      ) %>
+      <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
     </div>
 
     <%= form_with url: @update_path, method: :patch, local: true, class: "flex max-w-xl flex-col items-start gap-4" do %>
@@ -47,11 +44,7 @@
       <% if @preview_path.present? %>
         <%= render FlatPack::Button::Component.new(text: "Preview", style: :secondary, href: @preview_path) %>
       <% end %>
-      <% if live? && @public_path.present? %>
-        <%= render FlatPack::Button::Component.new(text: "See it live", style: :ghost, href: @public_path) %>
-      <% elsif @publish_path.present? %>
-        <%= render FlatPack::Button::Component.new(text: "Go live", style: :ghost, href: @publish_path) %>
-      <% end %>
+      <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
     </div>
   <% end %>
 

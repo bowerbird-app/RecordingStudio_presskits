@@ -21,7 +21,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.133"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.2"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.3"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_attachable"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
   end
@@ -37,7 +37,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "0.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "0.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "0.4.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.2.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.3.1"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -199,7 +199,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"2.0.0\""
     assert_includes readme, "tag: \"0.2.0\""
     assert_includes readme, "tag: \"0.4.0\""
-    assert_includes readme, "tag: \"v0.2.0\""
+    assert_includes readme, "tag: \"v0.3.1\""
     assert_includes readme, "PressKit.indexable"
     assert_includes readme, "Press kit"
     assert_includes readme, "RecordingStudioPresskits::PressKit"
@@ -338,6 +338,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::EmptyState::Component"
     assert_includes show, "FlatPack::EmptyState::Component"
     assert_includes show, "SectionDropdownComponent"
+    assert_includes show, "render_publishable_quick_actions"
+    refute_includes show, "EditButtonComponent"
+    refute_includes show, "Go live"
     refute_includes show, "SectionPickerComponent"
     refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"

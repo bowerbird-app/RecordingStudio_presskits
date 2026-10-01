@@ -149,10 +149,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Pick what to drop into this kit."
     refute_includes response.body, "Fake block"
     refute_includes response.body, "No sections yet"
-    refute_includes response.body, "role=\"menu\""
+    assert_select "#publishable_quick_actions_#{kit.id} [role=menu]", count: 1
     assert_access_slot_only
     assert_includes response.body, "items-start"
-    assert_match(/EditButtonComponent|Published|Draft/, response.body)
+    assert_includes response.body, "publishable_quick_actions_"
+    assert_includes response.body, "Draft"
+    refute_includes response.body, "EditButtonComponent"
   end
 
   test "empty kit editor keeps add, preview, and publishable on one row" do
@@ -167,7 +169,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "No sections yet"
     refute_includes response.body, "presskits-section-picker"
     refute_includes response.body, "Fake block"
-    refute_includes response.body, "role=\"menu\""
+    assert_select "#publishable_quick_actions_#{kit.id} [role=menu]", count: 1
   end
 
   test "dropdown rejects dummy fake block types" do
