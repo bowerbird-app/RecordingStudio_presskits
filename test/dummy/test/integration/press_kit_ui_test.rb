@@ -128,7 +128,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_includes response.body, "New press kit"
     assert_page_nav_close
-    assert_access_slot_only
+    refute_includes response.body, "+ Access"
+    refute_includes response.body, "/accesses"
   end
 
   test "kit edit shows the title form and add dropdown without the picker card" do
