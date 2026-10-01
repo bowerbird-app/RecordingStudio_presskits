@@ -192,7 +192,7 @@ The mounted user slice uses Recording Studio's default layout (back and close). 
 - Kit edit: title plus subtitle, then one row of **Add a section**, **Preview**, and `render_publishable_quick_actions`. Then the title form with a normal-size **Save**. Children you can reorder or remove come next. Types come from `picker_types`. No empty-state tray on edit.
 - Owner preview: the same public walk of children, on the default layout, for an authenticated owner. A kit that is not live stays hidden from logged-out visitors.
 
-Default-layout chrome is back, close, and page actions. Access stays in the right slot. Do not put Sign in, Sign out, or Root Switchable there — core owns back and close.
+Default-layout chrome is back, close, and page actions. Access stays in the right slot on the index, kit show, kit edit, and owner preview. The new press kit page does not show it. Do not put Sign in, Sign out, or Root Switchable there — core owns back and close.
 
 One primary action per page: **Presskit** (Heroicons plus) on the index, **Create** on the new form, **Save** on kit edit. Publish state stays on Publishable's own action. Do not hand-roll a second publish system.
 
@@ -253,7 +253,7 @@ Dummy kit pins:
 
 Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, kit show, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack 0.1.133 `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, and this gem so that layout is not an unstyled box.
 
-The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav — core owns back/close on the default layout. Access stays in the slot on signed-in workspace screens and owner preview. Cards, table, kit show, kit edit, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
+The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav — core owns back/close on the default layout. Access stays in the slot on the index, kit show, kit edit, and owner preview. The new press kit page does not show it. Cards, table, kit show, kit edit, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 
 ```bash
 cd test/dummy

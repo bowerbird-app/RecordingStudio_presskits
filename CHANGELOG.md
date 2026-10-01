@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The new press kit page does not show the Access control
+
 ## [0.8.0] - 2026-10-01
 
 Index and public page. Publishable is 0.3.
