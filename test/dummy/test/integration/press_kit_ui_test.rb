@@ -336,6 +336,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "&quot;preset&quot;:&quot;content&quot;"
     assert_includes response.body, "&quot;toolbar&quot;:&quot;standard&quot;"
     assert_select "h1", text: "Text"
+    assert_select "label", text: "Text", count: 0
     assert_select "h2", text: "Launch notes"
     assert_select "strong", text: "one-sheet"
     assert_select "li", text: "Photos"
