@@ -20,7 +20,7 @@ module RecordingStudioPresskits
       authorize_recording!(@press_kit_recording, role: :edit)
       return if performed?
 
-      return head(:not_found) unless section_recording
+      head(:not_found) unless section_recording
     end
 
     def update

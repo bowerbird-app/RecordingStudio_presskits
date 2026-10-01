@@ -207,8 +207,14 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
       press_kit.title = unique_name("Spring launch")
     end
 
-    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Text", parent_recording: kit_recording)
-    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Text", parent_recording: root_recording)
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::Text",
+      parent_recording: kit_recording
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::Text",
+      parent_recording: root_recording
+    )
 
     text_recording = kit_recording.record(RecordingStudioPresskits::Text, parent_recording: kit_recording) do |text|
       text.body = "Opening line\nMore"
