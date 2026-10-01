@@ -10,6 +10,8 @@ Text is included. Add `"RecordingStudioPresskits::Text"` to `config.recordable_t
 
 The Text section editor has no preview column. The kit editor and the public page still render the HTML. A custom editor hides its preview with `def self.preview?; false; end`. An editor that says nothing keeps two columns.
 
+On the kit editor, + Section is a primary button. Each section row is a list inside a card, and the link text is the section type. The preview column is a card.
+
 ## 0.8.0
 
 Index and public page. Publishable is 0.3.

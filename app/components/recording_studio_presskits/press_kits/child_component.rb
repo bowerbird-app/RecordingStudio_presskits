@@ -14,7 +14,7 @@ module RecordingStudioPresskits
       end
 
       def row_label
-        "#{@recording.type_label}: #{helpers.presskits_title_for(@recording)}"
+        @recording.type_label
       end
 
       def can_remove?

@@ -148,6 +148,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "presskits-section-dropdown"
     assert_select "#presskits-editor-actions span", text: "Section"
     assert_select "#presskits-editor-actions [data-flat-pack--icon-name-value='plus']", count: 1
+    section_button = css_select("#presskits-section-dropdown button").first
+    assert_includes section_button["class"], "bg-[var(--button-primary-background-color)]"
     refute_select "button#presskits-section-dropdown[disabled]"
     assert_select "a[href*='type=RecordingStudioPresskits%3A%3AText']", text: "Text"
     actions_html = css_select("#presskits-editor-actions").to_html
@@ -182,6 +184,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_includes response.body, "presskits-section-dropdown"
+    assert_includes css_select("#presskits-section-dropdown button").first["class"], "bg-[var(--button-primary-background-color)]"
+    assert_select "#presskits-section-cards", count: 0
+    assert_select "#presskits-editor-preview", count: 0
     assert_includes response.body, "Preview"
     refute_includes response.body, "No sections yet"
     refute_includes response.body, "presskits-section-picker"
@@ -198,12 +203,20 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_includes response.body, "Hero"
-    assert_includes response.body, "Quotes"
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}']", text: "Fake block: Hero"
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}']", text: "Fake block: Quotes"
-    assert_operator response.body.scan("Hero").size, :>=, 2
-    assert_operator response.body.scan("Quotes").size, :>=, 2
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}']", text: "Fake block"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}']", text: "Fake block"
+    refute_includes response.body, "Fake block: Hero"
+    refute_includes response.body, "Fake block: Quotes"
+    section_cards = css_select("#presskits-section-cards > .rounded-lg")
+    assert_equal 2, section_cards.size
+    section_cards.each do |card|
+      assert_includes card["class"], "border-[var(--card-border-color)]"
+      assert_includes card.to_html, 'role="list"'
+    end
+    preview = css_select("#presskits-editor-preview").first
+    assert_includes preview["class"], "border-[var(--card-border-color)]"
+    assert_includes preview.text, "Hero"
+    assert_includes preview.text, "Quotes"
   end
 
   test "section edit shows that section" do
@@ -385,7 +398,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text: Set list"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text"
     assert_select "h2", text: "Set list"
     assert_select "p", text: "Line two"
   end
