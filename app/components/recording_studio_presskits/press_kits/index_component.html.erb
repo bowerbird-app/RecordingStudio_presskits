@@ -49,6 +49,17 @@
           clickable: true,
           href: @show_path.call(recording)
         ) do |card| %>
+          <% card.media(aspect_ratio: "16/9", padding: :none, class: "relative bg-(--card-background-muted-color)") do %>
+            <% cover_url = helpers.presskits_cover_url_for(recording) %>
+            <% if cover_url.present? %>
+              <%= image_tag cover_url, alt: "", class: "absolute inset-0 h-full w-full object-cover" %>
+            <% else %>
+              <div class="absolute inset-0 flex items-center justify-center text-(--surface-muted-content-color)" aria-hidden="true">
+                <%= render FlatPack::Shared::IconComponent.new(name: "photo", size: :xl) %>
+              </div>
+            <% end %>
+          <% end %>
+
           <% card.body do %>
             <p class="text-base font-semibold text-(--surface-content-color)">
               <%= helpers.presskits_title_for(recording) %>

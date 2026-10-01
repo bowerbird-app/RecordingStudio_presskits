@@ -50,6 +50,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "New press kit"
     assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    assert_select "[data-flat-pack--icon-name-value='photo']", count: 1
+    assert_includes response.body, "bg-(--card-background-muted-color)"
     assert_select "a[aria-label='Cards'] [data-flat-pack--icon-name-value='squares-2x2']", count: 1
     assert_select "a[aria-label='Table'] [data-flat-pack--icon-name-value='table-cells']", count: 1
     refute_includes response.body, ">Cards<"
@@ -63,8 +65,25 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "<table"
     assert_match(/New press kit.*squares-2x2.*table-cells/m, response.body)
+    assert_select "[data-flat-pack--icon-name-value='photo']", count: 0
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
+  end
+
+  test "card view renders a cover image when the kit provides a safe url" do
+    record_kit("Spring launch")
+    RecordingStudioPresskits::PressKit.define_method(:cover_image_url) { "https://cdn.example/cover.jpg" }
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.press_kits_path
+    assert_response :success
+    assert_select "img[src='https://cdn.example/cover.jpg'][alt='']", count: 1
+    assert_select "[data-flat-pack--icon-name-value='photo']", count: 0
+  ensure
+    if RecordingStudioPresskits::PressKit.method_defined?(:cover_image_url)
+      RecordingStudioPresskits::PressKit.remove_method(:cover_image_url)
+    end
   end
 
   test "empty index explains what to do next" do

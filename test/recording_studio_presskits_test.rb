@@ -328,6 +328,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes index, 'text: "Cards"'
     refute_includes index, 'text: "Table"'
     assert_includes index, "FlatPack::Card::Component"
+    assert_includes index, "card.media"
+    assert_includes index, 'name: "photo"'
+    assert_includes index, "presskits_cover_url_for"
     assert_includes index, "FlatPack::Table::Component"
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
