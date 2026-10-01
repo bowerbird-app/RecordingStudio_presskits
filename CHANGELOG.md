@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-01
+
+Two-column kit editor and the Text section. Accessible is 0.10.
+
 ### Added
 - `RecordingStudioPresskits::Text` is a press kit section. The field is `body`. Hosts add the class to `recordable_types` and run the migrations generator.
 
 ### Changed
+- Version `0.9.0`
 - The kit URL requires edit access and redirects to a two-column editor. Hosts register section editors with `register_section_editor`. Text registers its own editor.
 - On the kit editor, the page heading is the kit name. + Section and the publish control share one row above the two-column grid. + Section is first and uses the primary button. The label is Section with a Heroicons plus icon. The title form and Save are gone from this page.
 - Each section's remove control is a trash icon. Destroy calls `recording_studio_trashable_trash!`.
@@ -20,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **+ Access** is on the kit editor only. The index, the new form, the section editor, and owner preview leave the page-nav right slot empty.
 - Accessible is `~> 0.10` (dummy tag `v0.10.0`). + Access is a FlatPack link (`href:`) to manage access.
 - A section editor shows the type as a page heading. Update and Cancel sit above the grid. Cancel uses the default button and returns to the kit. The default layout is two columns, with the preview in a card lined up with the field. The text field has no label of its own. Text hides that preview and uses one full-width column. An editor opts out by defining `preview?` and returning false.
+
+### Upgrade notes
+- Add `"RecordingStudioPresskits::Text"` to `recordable_types` and run `rails generate recording_studio_presskits:migrations`
+- Bump `recording_studio_accessible` to `~> 0.10` and run its migrations generator
+- Pin `controllers/recording_studio_presskits` so a section drop can save
 
 ## [0.8.0] - 2026-10-01
 
@@ -265,7 +275,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.8.0
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.7.0

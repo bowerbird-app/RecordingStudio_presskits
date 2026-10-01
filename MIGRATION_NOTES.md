@@ -1,6 +1,8 @@
 # Upgrade notes
 
-## Unreleased
+## 0.9.0
+
+Two-column kit editor and the Text section. Accessible is 0.10.
 
 The kit URL now requires edit access and redirects to the editor. Hosts register section editors with `RecordingStudioPresskits.register_section_editor`.
 
