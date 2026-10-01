@@ -7,11 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-01
+
+Images section. Attachable is 0.4.
+
 ### Added
 - `RecordingStudioPresskits::Images` is a press kit section. The field is an optional `caption`. Photos are Attachable image attachments on that section, so one section holds many images. Attachable stays off PressKit. The editor uploads from an Upload button after Cancel.
 
 ### Changed
+- Version `0.10.0`
 - The Images editor no longer shows a drag-and-drop upload area.
+
+### Upgrade notes
+- Add `"RecordingStudioPresskits::Images"` to `recordable_types` and run `rails generate recording_studio_presskits:migrations`
+- Depend on `recording_studio_attachable`, `~> 0.4`, mount that engine, and wire Active Storage direct uploads
 
 ## [0.9.0] - 2026-10-01
 
@@ -281,7 +290,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.10.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.8.0
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.7.1

@@ -1,6 +1,8 @@
 # Upgrade notes
 
-## Unreleased
+## 0.10.0
+
+Images section. Attachable is 0.4.
 
 Images is a press kit section. Add `"RecordingStudioPresskits::Images"` to `config.recordable_types`. Run `rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new table is `recording_studio_images` (`caption`, `created_at`).
 
