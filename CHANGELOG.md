@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The kit URL requires edit access and redirects to a two-column editor. Hosts register section editors with `register_section_editor`. Text registers its own editor.
+- On the kit editor, + Section and the publish control share one row above the two-column grid. + Section is first. The label is Section with a Heroicons plus icon.
 
 ## [0.8.0] - 2026-10-01
 

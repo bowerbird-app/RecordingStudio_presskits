@@ -1,6 +1,7 @@
 <% if @items.any? %>
   <%= render FlatPack::Button::Dropdown::Component.new(
-    text: "Add a section",
+    text: "Section",
+    icon: "plus",
     style: :secondary,
     placement: :bottom_left,
     id: "presskits-section-dropdown"
@@ -15,7 +16,8 @@
   <% end %>
 <% else %>
   <%= render FlatPack::Button::Component.new(
-    text: "Add a section",
+    text: "Section",
+    icon: "plus",
     style: :secondary,
     disabled: true,
     id: "presskits-section-dropdown"

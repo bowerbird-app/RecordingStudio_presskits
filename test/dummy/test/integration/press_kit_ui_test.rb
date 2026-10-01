@@ -114,7 +114,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_rounded_default_layout
-    assert_includes response.body, "Add a section"
+    assert_select "#presskits-editor-actions span", text: "Section"
     assert_includes response.body, "Hero"
     assert_includes response.body, "Quotes"
     assert_match(/Hero.*Quotes/m, response.body)
@@ -146,9 +146,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "title", text: "Spring launch"
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "presskits-section-dropdown"
-    assert_includes response.body, "Add a section"
+    assert_select "#presskits-editor-actions span", text: "Section"
+    assert_select "#presskits-editor-actions [data-flat-pack--icon-name-value='plus']", count: 1
     refute_select "button#presskits-section-dropdown[disabled]"
     assert_select "a[href*='type=RecordingStudioPresskits%3A%3AText']", text: "Text"
+    actions_html = css_select("#presskits-editor-actions").to_html
+    assert_operator actions_html.index("presskits-section-dropdown"), :<, actions_html.index("publishable_quick_actions_")
+    grid_html = css_select("#presskits-editor-grid").to_html
+    assert_includes grid_html, "md:grid-cols-2"
+    assert_includes grid_html, 'name="press_kit[title]"'
+    refute_includes grid_html, "presskits-section-dropdown"
+    refute_includes grid_html, "publishable_quick_actions_"
     assert_includes response.body, "Preview"
     assert_includes response.body, 'name="press_kit[title]"'
     refute_select "a[href='#{recording_studio_presskits.preview_press_kit_path(kit)}']"

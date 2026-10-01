@@ -1,62 +1,68 @@
-<%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
-  <div class="flex min-w-0 flex-col gap-6">
-    <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
-
+<div class="flex flex-col gap-6">
+  <div id="presskits-editor-actions" class="flex flex-wrap items-center gap-3">
     <%= render RecordingStudioPresskits::PressKits::SectionDropdownComponent.new(
       items: picker_items,
       add_path: @add_path
     ) %>
 
-    <%= form_with url: @update_path, method: :patch, local: true, class: "flex max-w-xl flex-col items-start gap-4" do %>
-      <div class="w-full">
-        <%= render FlatPack::TextInput::Component.new(
-          name: "press_kit[title]",
-          label: "Title",
-          value: helpers.presskits_title_for(@press_kit_recording),
-          required: true,
-          placeholder: "Spring launch"
-        ) %>
-      </div>
+    <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
+  </div>
 
-      <%= render FlatPack::Button::Component.new(
-        text: "Save",
-        style: :primary,
-        type: "submit"
-      ) %>
-    <% end %>
+  <div id="presskits-editor-grid">
+    <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
+      <div class="flex min-w-0 flex-col gap-6">
+        <%= form_with url: @update_path, method: :patch, local: true, class: "flex max-w-xl flex-col items-start gap-4" do %>
+          <div class="w-full">
+            <%= render FlatPack::TextInput::Component.new(
+              name: "press_kit[title]",
+              label: "Title",
+              value: helpers.presskits_title_for(@press_kit_recording),
+              required: true,
+              placeholder: "Spring launch"
+            ) %>
+          </div>
 
-    <% if @section_recordings.any? %>
-      <%= render FlatPack::List::Component.new(
-        orderable: true,
-        orderable_url: @reorder_path,
-        orderable_method: :patch,
-        param_uuid_name: "recording_id",
-        param_target_position_name: "to_index"
-      ) do %>
-        <% @section_recordings.each_with_index do |recording, index| %>
-          <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
-            recording: recording,
-            remove_path: @remove_path.call(recording),
-            reorder_path: @reorder_path,
-            edit_path: @edit_path.call(recording),
-            previous_id: index.positive? ? @section_recordings[index - 1].id : nil,
-            next_id: @section_recordings[index + 1]&.id
+          <%= render FlatPack::Button::Component.new(
+            text: "Save",
+            style: :primary,
+            type: "submit"
           ) %>
         <% end %>
-      <% end %>
-    <% end %>
-  </div>
 
-  <div class="flex min-w-0 flex-col gap-6">
-    <% @section_recordings.each do |recording| %>
-      <% component = RecordingStudioPresskits.section_component_for(recording) %>
-      <% if component %>
-        <%= render component.new(recording: recording) %>
-      <% else %>
-        <p class="text-sm font-medium text-(--surface-content-color)">
-          <%= helpers.presskits_title_for(recording) %>
-        </p>
-      <% end %>
+        <% if @section_recordings.any? %>
+          <%= render FlatPack::List::Component.new(
+            orderable: true,
+            orderable_url: @reorder_path,
+            orderable_method: :patch,
+            param_uuid_name: "recording_id",
+            param_target_position_name: "to_index"
+          ) do %>
+            <% @section_recordings.each_with_index do |recording, index| %>
+              <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
+                recording: recording,
+                remove_path: @remove_path.call(recording),
+                reorder_path: @reorder_path,
+                edit_path: @edit_path.call(recording),
+                previous_id: index.positive? ? @section_recordings[index - 1].id : nil,
+                next_id: @section_recordings[index + 1]&.id
+              ) %>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="flex min-w-0 flex-col gap-6">
+        <% @section_recordings.each do |recording| %>
+          <% component = RecordingStudioPresskits.section_component_for(recording) %>
+          <% if component %>
+            <%= render component.new(recording: recording) %>
+          <% else %>
+            <p class="text-sm font-medium text-(--surface-content-color)">
+              <%= helpers.presskits_title_for(recording) %>
+            </p>
+          <% end %>
+        <% end %>
+      </div>
     <% end %>
   </div>
-<% end %>
+</div>
