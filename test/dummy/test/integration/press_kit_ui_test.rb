@@ -595,6 +595,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Images"
     assert_select "label", text: "Caption"
     assert_select "input[name='images[caption]']"
+    assert_includes response.body, "No images yet."
+    refute_includes response.body, ">Save<"
     assert_select "form[data-controller='recording-studio-attachable--upload']", count: 1
     assert_select "#presskits-section-actions button[type='button']", text: "Upload"
     assert_select "input[type=file][accept='image/*'][data-recording-studio-attachable--upload-target='input']"
@@ -619,8 +621,40 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     assert_select "img[alt='stage']"
-    assert response.body.index("alt=\"stage\"") < response.body.index("name=\"images[caption]\"")
-    assert_select "a[href='#{recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)}'][data-turbo-method='delete']"
+    assert response.body.index("name=\"images[caption]\"") < response.body.index("alt=\"stage\"")
+    upload_form = css_select("form[data-controller='recording-studio-attachable--upload']").first.to_html
+    refute_includes upload_form, "attachment_collection"
+    assert_select "form#attachment-collection-#{section.id}"
+    assert_select "input[name='attachment_collection[rows][][caption]'][form='attachment-collection-#{section.id}']"
+    assert_select "input[name='attachment_collection[rows][][credit]']"
+    assert_select "input[name='attachment_collection[rows][][alt_text]']"
+    assert_select "label", text: "Credit"
+    assert_select "label", text: "Alt text"
+    assert_select "button", text: "Save"
+    assert_select "button", text: "Trash"
+    refute_includes response.body, "No images yet."
+
+    signed = css_select("input[name='attachment_collection[signed_editor]']").first["value"]
+    return_to = recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    patch recording_studio_attachable.recording_attachment_collection_path(section), params: {
+      redirect_mode: "return_to",
+      return_to: return_to,
+      attachment_collection: {
+        signed_editor: signed,
+        rows: [{
+          recording_id: attachment.id,
+          caption: "Stage left",
+          credit: "Ada",
+          alt_text: "The stage"
+        }]
+      }
+    }
+    assert_redirected_to return_to
+    follow_redirect!
+    attachment.reload
+    assert_equal "Stage left", attachment.recordable.caption
+    assert_equal "Ada", attachment.recordable.credit
+    assert_equal "The stage", attachment.recordable.alt_text
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
@@ -655,7 +689,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     section = quote_section(kit)
     assert_select "h1", text: "Quotes"
-    assert_select "button", text: "Add quote"
+    assert_select "#presskits-section-actions button[type=submit]" do
+      assert_select "span", text: "Quote"
+      assert_select "[data-flat-pack--icon-name-value='plus']", count: 1
+    end
+    assert_select "button", text: "Add quote", count: 0
     assert_select "button", text: "Update", count: 0
     assert_select "textarea[name='quote[body]']", count: 0
     refute_includes response.body, "Drag images here"
@@ -665,11 +703,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     }
     assert_includes cancel.text, "Cancel"
     actions = css_select("#presskits-section-actions").to_html
-    assert_operator actions.index("Add quote"), :<, actions.index("Cancel")
+    assert_operator actions.index(">Quote<"), :<, actions.index("Cancel")
     grid = quotes_editor_grid
     assert grid
     assert_equal 2, grid.element_children.size
-    refute_includes grid.text, "Add quote"
+    refute_includes grid.to_html, 'data-flat-pack--icon-name-value="plus"'
     refute_includes grid.text, "Cancel"
     assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
 
@@ -715,24 +753,29 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)}']", text: "Ada Lovelace"
+    quote_link = css_select("a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)}']").first
+    quote_lines = quote_link.css("span").map { |node| node.text.strip }
+    assert_equal ["A line worth printing", "Ada Lovelace"], quote_lines
+    assert_includes quote_link.css("span").first["class"], "truncate"
+    assert_includes quote_link.css("span").last["class"], "text-(--surface-muted-content-color)"
     assert_select "textarea[name='quote[body]']", count: 0
     assert_select "button[aria-label='Remove quote']"
     grid = quotes_editor_grid
     columns = grid.element_children
     assert_equal 2, columns.size
-    refute_includes columns.first.text, "Add quote"
-    refute_includes columns.last.text, "Add quote"
-    refute_includes columns.first.text, "A line worth printing"
-    assert_includes columns.last.text, "A line worth printing"
-    assert_includes columns.last.text, "Ada Lovelace"
-    assert_includes columns.last.text, "Editor, Press"
+    refute_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
+    refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
+    assert_operator columns.first.text.index("A line worth printing"), :<, columns.first.text.index("Ada Lovelace")
+    assert_select columns.last, "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
+    assert_select columns.last, "figcaption", text: "— Ada Lovelace, Editor, Press"
+    assert_includes columns.last.at_css("figure.fp-quote")["class"], "[&>blockquote]:border-l-[length:var(--quote-border-width)]"
 
     publish_quote_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-quotes"
     assert_response :success
-    assert_operator response.body.index("A line worth printing"), :<, response.body.index("Ada Lovelace")
-    assert_includes response.body, "Editor, Press"
+    assert_select "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
+    assert_select "figcaption", text: "— Ada Lovelace, Editor, Press"
+    assert_includes css_select("figure.fp-quote").first["class"], "[&>blockquote]:border-l-[length:var(--quote-border-width)]"
 
     assert_difference -> { RecordingStudioPresskits::Quote.count }, 1 do
       post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
@@ -755,15 +798,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert second.reload.trashed_at.present?
     assert_nil section.reload.trashed_at
     assert_nil first.reload.trashed_at
-    assert_select "a", text: "Ada Lovelace"
+    assert_includes response.body, "A line worth printing"
+    assert_includes response.body, "Ada Lovelace"
     refute_includes response.body, "Grace Hopper"
+    refute_includes response.body, "Second line"
 
     post recording_studio_presskits.press_kit_sections_path(kit),
          params: { type: "RecordingStudioPresskits::Text" }
     follow_redirect!
     assert_response :success
     assert_select "button", text: "Update"
-    assert_select "button", text: "Add quote", count: 0
+    assert_select "button", text: "Quote", count: 0
 
     post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
     blank = section.child_recordings.where(
@@ -781,9 +826,24 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     columns = quotes_editor_grid.element_children
-    assert_includes columns.first.text, "Hidden byline"
+    hidden_link = css_select("a").find { |node| node.text.include?("Hidden byline") }
+    hidden_lines = hidden_link.css("span").map { |node| node.text.strip }
+    assert_equal ["Quote", "Hidden byline"], hidden_lines
     refute_includes columns.last.text, "Hidden byline"
     assert_includes columns.last.text, "A line worth printing"
+
+    post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
+    nameless = section.child_recordings.where(
+      recordable_type: "RecordingStudioPresskits::Quote",
+      trashed_at: nil
+    ).order(:created_at).last
+    patch recording_studio_presskits.press_kit_section_quote_path(kit, section, nameless), params: {
+      quote: { body: "No byline here", name: "" }
+    }
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    nameless_lines = css_select("a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, nameless)}']").first.css("span").map { |node| node.text.strip }
+    assert_equal ["No byline here"], nameless_lines
   end
 
   private

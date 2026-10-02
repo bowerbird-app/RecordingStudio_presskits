@@ -3,8 +3,6 @@
 module RecordingStudioPresskits
   class Images
     class EditComponent < ViewComponent::Base
-      include Gallery
-
       def initialize(recording:, update_path:)
         super()
         @recording = recording
@@ -24,12 +22,12 @@ module RecordingStudioPresskits
         false
       end
 
-      def image_recordings
-        gallery_images_for(@recording)
-      end
-
-      def image_url_for(attachment_recording)
-        gallery_image_url(attachment_recording)
+      def attachment_collection_options
+        {
+          association: :images,
+          fields: %i[caption credit alt_text],
+          preview: :natural
+        }
       end
 
       def upload_form_data(view)
@@ -50,10 +48,6 @@ module RecordingStudioPresskits
           redirect_mode: "return_to",
           return_to: view.edit_press_kit_section_path(@recording.parent_recording, @recording)
         )
-      end
-
-      def remove_path_for(image_recording)
-        helpers.press_kit_section_image_path(@recording.parent_recording, @recording, image_recording)
       end
 
       def capability_options

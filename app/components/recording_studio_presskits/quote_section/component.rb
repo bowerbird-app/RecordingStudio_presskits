@@ -12,20 +12,20 @@ module RecordingStudioPresskits
         ordered_quotes.select { |child| child.recordable.body.to_s.strip.present? }
       end
 
-      def attribution(recordable)
-        parts = [recordable.role, recordable.organisation]
-        parts.filter_map { |value| value.to_s.strip.presence }.join(", ")
+      def cite(recordable)
+        [recordable.name, recordable.role, recordable.organisation].filter_map do |value|
+          value.to_s.strip.presence
+        end.join(", ")
       end
 
-      def avatar_url(quote_recording)
-        file = avatar_file(quote_recording)
-        return unless file&.attached?
-
-        helpers.main_app.url_for(file)
-      end
-
-      def avatar_alt(recordable)
-        recordable.name.to_s.strip.presence || "Quote"
+      # FlatPack's border-l-[var(--quote-border-width)] compiles as a color, so the
+      # left rule never paints. These figure classes restore the quote tokens.
+      def quote_frame_classes
+        [
+          "[&>blockquote]:border-l-[length:var(--quote-border-width)]",
+          "[&>blockquote]:border-solid",
+          "[&>blockquote]:border-[var(--quote-border-color)]"
+        ].join(" ")
       end
 
       private
@@ -36,10 +36,6 @@ module RecordingStudioPresskits
 
       def skip?(child)
         child.trashed_at.present? || !child.recordable.is_a?(Quote)
-      end
-
-      def avatar_file(quote_recording)
-        quote_recording.images(per_page: 1).first&.recordable&.file
       end
     end
   end

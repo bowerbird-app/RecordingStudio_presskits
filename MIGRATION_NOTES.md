@@ -1,5 +1,17 @@
 # Upgrade notes
 
+## 0.13.0
+
+Images editor uses Attachable's collection editor for each photo.
+
+Bump `recording_studio_attachable` to `~> 0.7` (dummy tag `v0.7.0`) and FlatPack to `>= 0.1.135` (dummy tag `v0.1.135`). Run `bin/rails generate recording_studio_attachable:migrations`, then `bin/rails db:migrate`. Attachment rows gain `root_recording_id`, `caption`, `credit`, and `alt_text`. The section caption stays on `recording_studio_images`. Do not enable Attachable on PressKit.
+
+## 0.12.0
+
+Quote display.
+
+No host or schema changes. A quote row shows the quote, truncated to the column, with the name underneath. The quotes action is + Quote. Column two, the kit preview, and the public page render each quote with FlatPack's quote component at large size. The citation is the name, role, and organisation.
+
 ## 0.11.0
 
 Quotes section.
