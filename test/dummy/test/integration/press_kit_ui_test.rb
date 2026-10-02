@@ -725,15 +725,16 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
     refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
     assert_operator columns.first.text.index("A line worth printing"), :<, columns.first.text.index("Ada Lovelace")
-    assert_includes columns.last.text, "A line worth printing"
-    assert_includes columns.last.text, "Ada Lovelace"
-    assert_includes columns.last.text, "Editor, Press"
+    assert_select columns.last, "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
+    assert_select columns.last, "figcaption", text: "— Ada Lovelace, Editor, Press"
+    assert_includes columns.last.at_css("figure.fp-quote")["class"], "[&>blockquote]:border-l-[length:var(--quote-border-width)]"
 
     publish_quote_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-quotes"
     assert_response :success
-    assert_operator response.body.index("A line worth printing"), :<, response.body.index("Ada Lovelace")
-    assert_includes response.body, "Editor, Press"
+    assert_select "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
+    assert_select "figcaption", text: "— Ada Lovelace, Editor, Press"
+    assert_includes css_select("figure.fp-quote").first["class"], "[&>blockquote]:border-l-[length:var(--quote-border-width)]"
 
     assert_difference -> { RecordingStudioPresskits::Quote.count }, 1 do
       post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
