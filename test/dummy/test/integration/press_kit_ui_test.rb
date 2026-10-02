@@ -657,6 +657,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       node.text.include?("Cancel")
     }
     assert_includes cancel.text, "Cancel"
+    grid = quotes_editor_grid
+    assert grid
+    assert_equal 2, grid.element_children.size
+    assert_includes grid.element_children.first.text, "Add quote"
+    refute_includes grid.element_children.last.text, "Add quote"
 
     assert_difference -> { RecordingStudioPresskits::Quote.count }, 1 do
       post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
@@ -703,6 +708,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)}']", text: "Ada Lovelace"
     assert_select "textarea[name='quote[body]']", count: 0
     assert_select "button[aria-label='Remove quote']"
+    grid = quotes_editor_grid
+    columns = grid.element_children
+    assert_equal 2, columns.size
+    refute_includes columns.first.text, "A line worth printing"
+    assert_includes columns.last.text, "A line worth printing"
+    assert_includes columns.last.text, "Ada Lovelace"
+    assert_includes columns.last.text, "Editor, Press"
 
     publish_quote_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-quotes"
@@ -753,9 +765,20 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_operator response.body.index("A line worth printing"), :<, response.body.index("Ada Lovelace")
     refute_includes response.body, "Hidden byline"
+
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    columns = quotes_editor_grid.element_children
+    assert_includes columns.first.text, "Hidden byline"
+    refute_includes columns.last.text, "Hidden byline"
+    assert_includes columns.last.text, "A line worth printing"
   end
 
   private
+
+  def quotes_editor_grid
+    css_select(".grid").find { |node| node["class"].to_s.include?("md:grid-cols-2") }
+  end
 
   def quote_section(kit)
     RecordingStudioPresskits::KitQuery.live_children(kit).find do |child|
