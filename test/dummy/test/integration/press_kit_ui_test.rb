@@ -657,11 +657,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       node.text.include?("Cancel")
     }
     assert_includes cancel.text, "Cancel"
+    actions = css_select("#presskits-section-actions").to_html
+    assert_operator actions.index("Add quote"), :<, actions.index("Cancel")
     grid = quotes_editor_grid
     assert grid
     assert_equal 2, grid.element_children.size
-    assert_includes grid.element_children.first.text, "Add quote"
-    refute_includes grid.element_children.last.text, "Add quote"
+    refute_includes grid.text, "Add quote"
+    refute_includes grid.text, "Cancel"
+    assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
 
     assert_difference -> { RecordingStudioPresskits::Quote.count }, 1 do
       post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
@@ -711,6 +714,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     grid = quotes_editor_grid
     columns = grid.element_children
     assert_equal 2, columns.size
+    refute_includes columns.first.text, "Add quote"
+    refute_includes columns.last.text, "Add quote"
     refute_includes columns.first.text, "A line worth printing"
     assert_includes columns.last.text, "A line worth printing"
     assert_includes columns.last.text, "Ada Lovelace"

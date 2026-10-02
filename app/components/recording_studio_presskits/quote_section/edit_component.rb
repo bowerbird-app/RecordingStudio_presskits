@@ -31,12 +31,8 @@ module RecordingStudioPresskits
         @recording.recording_studio_orderable_children.reject { |child| hidden_quote?(child) }
       end
 
-      def add_path
-        helpers.press_kit_section_quotes_path(kit_recording, @recording)
-      end
-
-      def cancel_path
-        helpers.edit_press_kit_path(kit_recording)
+      def section_actions
+        ActionsComponent.new(recording: @recording)
       end
 
       def order_path

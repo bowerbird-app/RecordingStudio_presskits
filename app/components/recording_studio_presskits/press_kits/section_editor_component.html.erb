@@ -59,6 +59,11 @@
       <%= grid %>
     <% end %>
   <% else %>
+    <% if editor_view&.respond_to?(:section_actions) %>
+      <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
+        <%= render editor_view.section_actions %>
+      </div>
+    <% end %>
     <%= grid %>
   <% end %>
 </div>

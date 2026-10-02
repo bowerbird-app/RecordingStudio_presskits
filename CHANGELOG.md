@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `RecordingStudioPresskits::QuoteSection` is a press kit section. Each quote is a child recording with body, name, and optional role and organisation. The section editor is an orderable list in column one, and column two previews the saved quotes. Each quote has its own edit screen. Orderable is on the quote section. Attachable is on the quote for one image. A blank body stays off the preview and the public page.
+- `RecordingStudioPresskits::QuoteSection` is a press kit section. Each quote is a child recording with body, name, and optional role and organisation. The section editor is an orderable list in column one, and column two previews the saved quotes. Add quote and Cancel sit above that grid. Each quote has its own edit screen. Orderable is on the quote section. Attachable is on the quote for one image. A blank body stays off the preview and the public page.
 
 ## [0.10.0] - 2026-10-01
 
