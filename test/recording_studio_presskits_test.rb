@@ -29,7 +29,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
   def test_dummy_gemfile_pins_verified_4x_github_tags
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.2.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.10.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "2.0.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.0"'
@@ -198,7 +198,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     readme = File.read(File.expand_path("../README.md", __dir__))
 
     assert_includes readme, "Recording Studio Press Kits"
-    assert_includes readme, "v4.2.0"
+    assert_includes readme, "v4.2.2"
     assert_includes readme, "v0.10.0"
     assert_includes readme, "tag: \"2.0.0\""
     assert_includes readme, "tag: \"0.2.0\""
