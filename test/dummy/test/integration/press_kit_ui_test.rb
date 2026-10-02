@@ -588,6 +588,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Images"
     assert_select "label", text: "Caption"
     assert_select "input[name='images[caption]']"
+    assert_includes response.body, "No images yet."
+    refute_includes response.body, ">Save<"
     assert_select "form[data-controller='recording-studio-attachable--upload']", count: 1
     assert_select "#presskits-section-actions button[type='button']", text: "Upload"
     assert_select "input[type=file][accept='image/*'][data-recording-studio-attachable--upload-target='input']"
@@ -612,8 +614,40 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     assert_select "img[alt='stage']"
-    assert response.body.index("alt=\"stage\"") < response.body.index("name=\"images[caption]\"")
-    assert_select "a[href='#{recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)}'][data-turbo-method='delete']"
+    assert response.body.index("name=\"images[caption]\"") < response.body.index("alt=\"stage\"")
+    upload_form = css_select("form[data-controller='recording-studio-attachable--upload']").first.to_html
+    refute_includes upload_form, "attachment_collection"
+    assert_select "form#attachment-collection-#{section.id}"
+    assert_select "input[name='attachment_collection[rows][][caption]'][form='attachment-collection-#{section.id}']"
+    assert_select "input[name='attachment_collection[rows][][credit]']"
+    assert_select "input[name='attachment_collection[rows][][alt_text]']"
+    assert_select "label", text: "Credit"
+    assert_select "label", text: "Alt text"
+    assert_select "button", text: "Save"
+    assert_select "button", text: "Trash"
+    refute_includes response.body, "No images yet."
+
+    signed = css_select("input[name='attachment_collection[signed_editor]']").first["value"]
+    return_to = recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    patch recording_studio_attachable.recording_attachment_collection_path(section), params: {
+      redirect_mode: "return_to",
+      return_to: return_to,
+      attachment_collection: {
+        signed_editor: signed,
+        rows: [{
+          recording_id: attachment.id,
+          caption: "Stage left",
+          credit: "Ada",
+          alt_text: "The stage"
+        }]
+      }
+    }
+    assert_redirected_to return_to
+    follow_redirect!
+    attachment.reload
+    assert_equal "Stage left", attachment.recordable.caption
+    assert_equal "Ada", attachment.recordable.credit
+    assert_equal "The stage", attachment.recordable.alt_text
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success

@@ -66,4 +66,12 @@
     <% end %>
     <%= grid %>
   <% end %>
+
+  <% if editor_view&.respond_to?(:attachment_collection_options) %>
+    <%= helpers.attachment_collection_editor(
+          @recording,
+          **editor_view.attachment_collection_options,
+          return_to: helpers.edit_press_kit_section_path(@recording.parent_recording, @recording)
+        ) %>
+  <% end %>
 </div>

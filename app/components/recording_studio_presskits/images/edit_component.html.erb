@@ -1,30 +1,4 @@
 <div class="flex w-full flex-col gap-6">
-  <% if image_recordings.any? %>
-    <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
-      <% image_recordings.each do |image_recording| %>
-        <% url = image_url_for(image_recording) %>
-        <figure class="flex flex-col gap-2">
-          <% if url.present? %>
-            <%= image_tag url,
-                  alt: image_recording.recordable.name,
-                  class: "aspect-video w-full rounded-lg object-cover" %>
-          <% end %>
-          <div>
-            <%= render FlatPack::Button::Component.new(
-              icon: "trash",
-              icon_only: true,
-              style: :ghost,
-              size: :sm,
-              href: remove_path_for(image_recording),
-              data: { turbo_method: :delete },
-              aria: { label: "Remove image" }
-            ) %>
-          </div>
-        </figure>
-      <% end %>
-    <% end %>
-  <% end %>
-
   <%= render FlatPack::TextInput::Component.new(
     name: "images[caption]",
     value: @images.caption,

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The Images editor edits each photo with Attachable's `attachment_collection_editor`: caption, credit, and alt text, then Save. Trash on a photo returns to the section. The section caption and the Upload button stay.
+- Attachable is `~> 0.7` (dummy tag `v0.7.0`). FlatPack is `>= 0.1.135` (dummy tag `v0.1.135`).
+
+### Upgrade notes
+- Bump `recording_studio_attachable` to `~> 0.7` and FlatPack to at least `0.1.135`.
+- Run `bin/rails generate recording_studio_attachable:migrations` and `bin/rails db:migrate`. Attachment rows gain `root_recording_id`, `caption`, `credit`, and `alt_text`.
+
 ## [0.12.0] - 2026-10-02
 
 Quote display.
