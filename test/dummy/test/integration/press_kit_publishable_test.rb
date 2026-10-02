@@ -73,8 +73,11 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_blank_public_layout
     assert_select "title", text: "Spring launch"
     assert_includes response.body, "Spring launch"
-    assert_includes response.body, "Hero"
-    assert_includes response.body, "Quotes"
+    assert_select "h2", text: "Hero"
+    assert_select "h2", text: "Quotes"
+    assert_select "[role=separator]", count: 1
+    assert_operator response.body.index(">Hero<"), :<, response.body.index('role="separator"')
+    assert_operator response.body.index('role="separator"'), :<, response.body.index(">Quotes<")
     refute_includes response.body, "recording_studio-publishable-layout"
     refute_includes response.body, "flat-pack--top-nav"
     refute_includes response.body, "Dummy host"

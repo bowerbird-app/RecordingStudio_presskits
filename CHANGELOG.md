@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The public kit and the owner preview put FlatPack's section title on each section and FlatPack's divider between sections. The title is the recordable title, the recording name, or the type label.
+- FlatPack `>= 0.1.150`. The dummy pins `v0.1.150`, which includes the divider.
+
+### Upgrade notes
+- Bump FlatPack to at least `0.1.150`. The divider between public sections comes from that release.
+
 ## [0.12.0] - 2026-10-02
 
 Quote display.
