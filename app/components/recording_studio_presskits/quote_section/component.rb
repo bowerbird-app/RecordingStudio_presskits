@@ -13,9 +13,9 @@ module RecordingStudioPresskits
       end
 
       def cite(recordable)
-        [recordable.name, recordable.role, recordable.organisation].filter_map { |value|
+        [recordable.name, recordable.role, recordable.organisation].filter_map do |value|
           value.to_s.strip.presence
-        }.join(", ")
+        end.join(", ")
       end
 
       # FlatPack's border-l-[var(--quote-border-width)] compiles as a color, so the
