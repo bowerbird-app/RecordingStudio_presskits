@@ -179,11 +179,13 @@ RecordingStudioPresskits.picker_types
 
 If nothing real is registered, + Section is a disabled button. No empty menu box.
 
-`RecordingStudioPresskits::Text` and `RecordingStudioPresskits::Images` are the sections this gem ships. Add both to the host `recordable_types`, then run `rails generate recording_studio_presskits:migrations` and migrate. Text stores HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). The kit editor's preview column and the public page render that HTML. The Text section editor hides its preview. The row label is the first line of text, with tags stripped. Trashable is on. Orderable stays on the kit. Publishable stays off the section. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
+`RecordingStudioPresskits::Text`, `RecordingStudioPresskits::Images`, and `RecordingStudioPresskits::QuoteSection` are the sections this gem ships. Add them to the host `recordable_types`, then run `rails generate recording_studio_presskits:migrations` and migrate. Text stores HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). The kit editor's preview column and the public page render that HTML. The Text section editor hides its preview. The row label is the first line of text, with tags stripped. Trashable is on. Orderable stays on the kit. Publishable stays off the section. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
 
 Images stores an optional caption. Photos are Attachable image attachments under that section recording, so one section holds many images. Attachable stays off PressKit. The editor uploads from an Upload button after Cancel and returns to the section. Removing one photo calls Attachable's remove and stays on the editor. That remove trashes the attachment recording, so Trashable is on `RecordingStudioAttachable::Attachment`. The kit preview and the public page render the caption and the images. Depend on `recording_studio_attachable`, `~> 0.4`, mount that engine, and wire Active Storage direct uploads.
 
-The kit editor's preview column and the public page walk children in order and render each type's component. Text and Images are registered. A later addon still registers its own component.
+Quotes stores nothing on the section. Each quote is a child recording with `body`, `name`, and optional `role` and `organisation`. Orderable is on the quote section for its quotes. Attachable is on Quote for one image. Publishable stays off both. A blank body is left off the public page. Add `"RecordingStudioPresskits::QuoteSection"` and `"RecordingStudioPresskits::Quote"` to `recordable_types` and migrate. Quote stays off the + Section menu because its parent is the quote section.
+
+The kit editor's preview column and the public page walk children in order and render each type's component. Text, Images, and Quotes are registered. A later addon still registers its own component.
 
 ```ruby
 RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection::Component")
@@ -191,7 +193,7 @@ RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection:
 RecordingStudioPresskits.register_section_editor("SomeSection", "SomeSection::Editor")
 ```
 
-A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Define `preview?` and return false to hide the preview and use one full-width column. Text uses `RecordingStudioPresskits::Text::EditComponent`, `param_key` `:text`, and `preview?` false. Images uses `RecordingStudioPresskits::Images::EditComponent`, `param_key` `:images`, and `preview?` false.
+A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Define `preview?` and return false to hide the preview and use one full-width column. Define `form?` and return false to skip the shared section form and the Update button. Text uses `RecordingStudioPresskits::Text::EditComponent`, `param_key` `:text`, and `preview?` false. Images uses `RecordingStudioPresskits::Images::EditComponent`, `param_key` `:images`, and `preview?` false. Quotes uses `RecordingStudioPresskits::QuoteSection::EditComponent`, `param_key` `:quote_section`, `preview?` false, and `form?` false.
 
 Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible. Missing access fails closed.
 

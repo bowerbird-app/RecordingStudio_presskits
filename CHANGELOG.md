@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `RecordingStudioPresskits::QuoteSection` is a press kit section. Each quote is a child recording with body, name, and optional role and organisation. Orderable is on the quote section. Attachable is on the quote for one image. A blank body stays off the public page.
+
 ## [0.10.0] - 2026-10-01
 
 Images section. Attachable is 0.4.

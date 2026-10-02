@@ -9,6 +9,10 @@ RecordingStudioPresskits::Engine.routes.draw do
     end
     resources :sections, only: %i[create edit update destroy] do
       resources :images, only: :destroy, controller: "section_images"
+      resources :quotes, only: %i[create update destroy] do
+        resource :image, only: :destroy, controller: "quote_images"
+      end
+      resource :quote_order, only: :update, controller: "quote_orders"
     end
     resource :order, only: :update, controller: "orders"
   end
