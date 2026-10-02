@@ -39,12 +39,16 @@ module RecordingStudioPresskits
         view.recording_studio_attachable.recording_attachment_imports_path(
           quote_recording,
           redirect_mode: "return_to",
-          return_to: section_path
+          return_to: quote_edit_path
         )
       end
 
-      def section_path
-        view.edit_press_kit_section_path(section_recording.parent_recording, section_recording)
+      def quote_edit_path
+        view.edit_press_kit_section_quote_path(
+          section_recording.parent_recording,
+          section_recording,
+          quote_recording
+        )
       end
 
       def remove_button_template

@@ -650,6 +650,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Quotes"
     assert_select "button", text: "Add quote"
     assert_select "button", text: "Update", count: 0
+    assert_select "textarea[name='quote[body]']", count: 0
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
     cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node|
@@ -663,6 +664,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_includes response.body, "Quote added."
+    assert_select "h1", text: "Quote"
     assert_select "label", text: "Quote"
     assert_select "textarea[name='quote[body]']"
     assert_select "label", text: "Name"
@@ -672,10 +674,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "label", text: "Organisation"
     assert_select "input[name='quote[organisation]']"
     assert_select "button", text: "Save"
-    assert_select "a[aria-label='Remove quote']"
+    assert_select "a[aria-label='Remove quote']", count: 0
     assert_select "button", text: "Upload"
     assert_select "form[data-controller='recording-studio-attachable--upload']"
     assert_match(/remove-button-template-value="&lt;button/, response.body)
+    cancel = css_select("a").find { |node| node.text.include?("Cancel") }
+    assert_equal recording_studio_presskits.edit_press_kit_section_path(kit, section), cancel["href"]
 
     first = live_quotes(section).first
     patch recording_studio_presskits.press_kit_section_quote_path(kit, section, first), params: {
@@ -687,11 +691,18 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
         decoy: "nope"
       }
     }
-    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)
     follow_redirect!
     assert_equal "A line worth printing", first.reload.recordable.body
     assert_equal "Ada Lovelace", first.recordable.name
     refute_includes first.recordable.attributes.values, "nope"
+    assert_equal recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first), path
+
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)}']", text: "Ada Lovelace"
+    assert_select "textarea[name='quote[body]']", count: 0
+    assert_select "button[aria-label='Remove quote']"
 
     publish_quote_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-quotes"
@@ -720,7 +731,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert second.reload.trashed_at.present?
     assert_nil section.reload.trashed_at
     assert_nil first.reload.trashed_at
-    assert_includes response.body, "A line worth printing"
+    assert_select "a", text: "Ada Lovelace"
     refute_includes response.body, "Grace Hopper"
 
     post recording_studio_presskits.press_kit_sections_path(kit),

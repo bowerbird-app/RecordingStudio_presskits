@@ -10,8 +10,15 @@ module RecordingStudioPresskits
       authorize_recording!(@press_kit_recording, role: :edit)
       return if performed?
 
-      add_quote
-      redirect_to section_edit_path, notice: "Quote added."
+      recording = add_quote
+      redirect_to quote_edit_path(recording), notice: "Quote added."
+    end
+
+    def edit
+      authorize_recording!(@press_kit_recording, role: :edit)
+      return if performed?
+
+      head :not_found unless quote_recording
     end
 
     def update
@@ -20,7 +27,7 @@ module RecordingStudioPresskits
       return head :not_found unless quote_recording
 
       revise_quote
-      redirect_to section_edit_path
+      redirect_to quote_edit_path(quote_recording), notice: "Saved."
     end
 
     def destroy
@@ -73,6 +80,10 @@ module RecordingStudioPresskits
 
     def section_edit_path
       edit_press_kit_section_path(@press_kit_recording, section_recording)
+    end
+
+    def quote_edit_path(recording)
+      edit_press_kit_section_quote_path(@press_kit_recording, section_recording, recording)
     end
 
     def set_section

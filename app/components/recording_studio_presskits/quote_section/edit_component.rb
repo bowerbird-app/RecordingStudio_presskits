@@ -43,27 +43,17 @@ module RecordingStudioPresskits
         helpers.press_kit_section_quote_order_path(kit_recording, @recording)
       end
 
-      def quote_path(quote_recording)
+      def edit_path(quote_recording)
+        helpers.edit_press_kit_section_quote_path(kit_recording, @recording, quote_recording)
+      end
+
+      def remove_path(quote_recording)
         helpers.press_kit_section_quote_path(kit_recording, @recording, quote_recording)
       end
 
-      def image_path(quote_recording)
-        helpers.press_kit_section_quote_image_path(kit_recording, @recording, quote_recording)
-      end
-
-      def upload_data_for(quote_recording)
-        Upload.new(helpers, @recording, quote_recording).data
-      end
-
-      def avatar_url(quote_recording)
-        file = avatar_file(quote_recording)
-        return unless file&.attached?
-
-        helpers.main_app.url_for(file)
-      end
-
-      def avatar_alt(quote_recording)
-        quote_recording.recordable.name.to_s.strip.presence || "Quote"
+      def row_label(quote_recording)
+        quote = quote_recording.recordable
+        quote.name.to_s.strip.presence || quote.body.to_s.strip.truncate(80).presence || "Quote"
       end
 
       private
@@ -74,14 +64,6 @@ module RecordingStudioPresskits
 
       def kit_recording
         @recording.parent_recording
-      end
-
-      def avatar_file(quote_recording)
-        avatar_recording(quote_recording)&.recordable&.file
-      end
-
-      def avatar_recording(quote_recording)
-        quote_recording.images(per_page: 1).first
       end
     end
   end

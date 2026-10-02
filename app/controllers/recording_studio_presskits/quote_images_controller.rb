@@ -27,9 +27,9 @@ module RecordingStudioPresskits
 
     def redirect_after_remove(result)
       if result.success?
-        redirect_to section_edit_path, notice: "Image removed."
+        redirect_to quote_edit_path, notice: "Image removed."
       else
-        redirect_to section_edit_path, alert: result.error.presence || "Could not remove that image."
+        redirect_to quote_edit_path, alert: result.error.presence || "Could not remove that image."
       end
     end
 
@@ -62,8 +62,8 @@ module RecordingStudioPresskits
       { trashed_at: nil, recordable_type: "RecordingStudioAttachable::Attachment" }
     end
 
-    def section_edit_path
-      edit_press_kit_section_path(@press_kit_recording, section_recording)
+    def quote_edit_path
+      edit_press_kit_section_quote_path(@press_kit_recording, section_recording, quote_recording)
     end
 
     def set_section
