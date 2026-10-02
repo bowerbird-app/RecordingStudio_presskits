@@ -10,11 +10,18 @@
         <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
           <% quotes.each do |quote_recording| %>
             <%= render FlatPack::List::Item.new(id: quote_recording.id, icon: "arrows-up-down", hover: true) do %>
-              <div class="flex w-full flex-wrap items-center justify-between gap-3">
+              <div class="flex w-full items-center justify-between gap-3">
                 <div class="min-w-0 flex-1">
-                  <%= link_to row_label(quote_recording), edit_path(quote_recording),
-                        draggable: "false",
-                        class: "text-sm font-medium text-(--surface-content-color)" %>
+                  <%= link_to edit_path(quote_recording), draggable: "false", class: "block min-w-0" do %>
+                    <span class="block truncate text-sm font-medium text-(--surface-content-color)">
+                      <%= quote_snippet(quote_recording) %>
+                    </span>
+                    <% if (name = quote_name(quote_recording)) %>
+                      <span class="block truncate text-sm text-(--surface-muted-content-color)">
+                        <%= name %>
+                      </span>
+                    <% end %>
+                  <% end %>
                 </div>
                 <%= form_with url: remove_path(quote_recording), method: :delete, local: true, html: { draggable: "false" } do %>
                   <%= render FlatPack::Button::Component.new(

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- A quote row shows the quote, truncated to the column, with the name on the line below.
+- The quotes action is + Quote: a Heroicons plus icon and the label Quote.
+- Column two, the kit preview, and the public page render each quote with FlatPack's quote component at large size. The citation is the name, role, and organisation.
+
 ## [0.11.0] - 2026-10-02
 
 Quotes section.

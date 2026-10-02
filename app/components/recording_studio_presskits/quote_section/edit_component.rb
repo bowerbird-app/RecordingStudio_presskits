@@ -47,9 +47,12 @@ module RecordingStudioPresskits
         helpers.press_kit_section_quote_path(kit_recording, @recording, quote_recording)
       end
 
-      def row_label(quote_recording)
-        quote = quote_recording.recordable
-        quote.name.to_s.strip.presence || quote.body.to_s.strip.truncate(80).presence || "Quote"
+      def quote_snippet(quote_recording)
+        quote_recording.recordable.body.to_s.strip.presence || "Quote"
+      end
+
+      def quote_name(quote_recording)
+        quote_recording.recordable.name.to_s.strip.presence
       end
 
       private
