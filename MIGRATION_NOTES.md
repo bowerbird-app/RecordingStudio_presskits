@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## Unreleased
+## 0.13.0
 
 Images editor uses Attachable's collection editor for each photo.
 

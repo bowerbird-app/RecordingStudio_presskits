@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-10-02
+
+Images editor.
+
 ### Changed
 - The Images editor edits each photo with Attachable's `attachment_collection_editor`: caption, credit, and alt text, then Save. Trash on a photo returns to the section. The section caption and the Upload button stay.
 - Attachable is `~> 0.7` (dummy tag `v0.7.0`). FlatPack is `>= 0.1.135` (dummy tag `v0.1.135`).
+- Version `0.13.0`
 
 ### Upgrade notes
 - Bump `recording_studio_attachable` to `~> 0.7` and FlatPack to at least `0.1.135`.
@@ -324,7 +329,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.12.0
 [0.11.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.11.0
 [0.10.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.10.0
