@@ -708,7 +708,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)}']", text: "Ada Lovelace"
+    quote_link = css_select("a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)}']").first
+    quote_lines = quote_link.css("span").map { |node| node.text.strip }
+    assert_equal ["A line worth printing", "Ada Lovelace"], quote_lines
+    assert_includes quote_link.css("span").first["class"], "truncate"
+    assert_includes quote_link.css("span").last["class"], "text-(--surface-muted-content-color)"
     assert_select "textarea[name='quote[body]']", count: 0
     assert_select "button[aria-label='Remove quote']"
     grid = quotes_editor_grid
@@ -716,7 +720,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal 2, columns.size
     refute_includes columns.first.text, "Add quote"
     refute_includes columns.last.text, "Add quote"
-    refute_includes columns.first.text, "A line worth printing"
+    assert_operator columns.first.text.index("A line worth printing"), :<, columns.first.text.index("Ada Lovelace")
     assert_includes columns.last.text, "A line worth printing"
     assert_includes columns.last.text, "Ada Lovelace"
     assert_includes columns.last.text, "Editor, Press"
@@ -748,8 +752,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert second.reload.trashed_at.present?
     assert_nil section.reload.trashed_at
     assert_nil first.reload.trashed_at
-    assert_select "a", text: "Ada Lovelace"
+    assert_includes response.body, "A line worth printing"
+    assert_includes response.body, "Ada Lovelace"
     refute_includes response.body, "Grace Hopper"
+    refute_includes response.body, "Second line"
 
     post recording_studio_presskits.press_kit_sections_path(kit),
          params: { type: "RecordingStudioPresskits::Text" }
@@ -774,9 +780,24 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     columns = quotes_editor_grid.element_children
-    assert_includes columns.first.text, "Hidden byline"
+    hidden_link = css_select("a").find { |node| node.text.include?("Hidden byline") }
+    hidden_lines = hidden_link.css("span").map { |node| node.text.strip }
+    assert_equal ["Quote", "Hidden byline"], hidden_lines
     refute_includes columns.last.text, "Hidden byline"
     assert_includes columns.last.text, "A line worth printing"
+
+    post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
+    nameless = section.child_recordings.where(
+      recordable_type: "RecordingStudioPresskits::Quote",
+      trashed_at: nil
+    ).order(:created_at).last
+    patch recording_studio_presskits.press_kit_section_quote_path(kit, section, nameless), params: {
+      quote: { body: "No byline here", name: "" }
+    }
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    nameless_lines = css_select("a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, nameless)}']").first.css("span").map { |node| node.text.strip }
+    assert_equal ["No byline here"], nameless_lines
   end
 
   private
