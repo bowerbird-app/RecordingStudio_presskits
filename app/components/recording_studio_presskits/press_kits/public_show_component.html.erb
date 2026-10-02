@@ -18,14 +18,16 @@
       icon: :inbox
     ) %>
   <% else %>
-    <% section_recordings.each do |recording| %>
+    <% section_recordings.each_with_index do |recording, index| %>
+      <% if index.positive? %>
+        <%= render FlatPack::Divider::Component.new %>
+      <% end %>
+      <% if (title = section_title(recording)).present? %>
+        <%= render FlatPack::SectionTitle::Component.new(title: title) %>
+      <% end %>
       <% component = section_component_for(recording) %>
       <% if component %>
         <%= render component.new(recording: recording) %>
-      <% else %>
-        <p class="text-sm font-medium text-(--surface-content-color)">
-          <%= section_title(recording) %>
-        </p>
       <% end %>
     <% end %>
   <% end %>

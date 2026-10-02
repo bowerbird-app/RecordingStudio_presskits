@@ -220,7 +220,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal "recording-studio-presskits--section-order", shell["data-controller"]
     assert_includes shell["data-action"], "list:reordered->recording-studio-presskits--section-order#save"
     assert_equal recording_studio_presskits.press_kit_order_path(kit), shell["data-recording-studio-presskits--section-order-url-value"]
-    section_cards = css_select("#presskits-section-list > .rounded-lg")
+    section_cards = css_select("#presskits-section-list").first.element_children.select { |node|
+      node["class"].to_s.include?("rounded-[var(--radius-lg)]")
+    }
     assert_equal 1, section_cards.size
     card = section_cards.first
     assert_includes card["class"], "border-[var(--card-border-color)]"
@@ -623,9 +625,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     publish_images_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-images"
     assert_response :success
-    assert_includes response.body, "Press photos"
+    assert_select "h2", text: "Press photos"
+    assert_select "[role=separator]", count: 0
     assert_select "img[alt='stage']"
-    assert response.body.index("alt=\"stage\"") < response.body.index("Press photos")
+    assert response.body.index("alt=\"stage\"") < response.body.index(">Press photos</p>")
 
     delete recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
@@ -732,6 +735,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     publish_quote_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-quotes"
     assert_response :success
+    assert_select "h2", text: "Quotes"
+    assert_select "[role=separator]", count: 0
     assert_select "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
     assert_select "figcaption", text: "— Ada Lovelace, Editor, Press"
     assert_includes css_select("figure.fp-quote").first["class"], "[&>blockquote]:border-l-[length:var(--quote-border-width)]"
