@@ -232,7 +232,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     list = css_select("#presskits-section-list [role='list']").first
     assert_equal "flat-pack--list-orderable", list["data-controller"]
     assert_includes list["class"], "flat-pack-list--orderable"
-    assert_includes list["class"], "divide-y"
+    assert_includes list["class"], "flat-pack-list-divided"
     items = css_select("#presskits-section-list [role='listitem']")
     assert_equal [hero.id, quotes.id], items.map { |item| item["id"] }
     items.each do |item|
