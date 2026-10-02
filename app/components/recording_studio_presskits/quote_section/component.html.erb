@@ -1,0 +1,19 @@
+<% if quotes.any? %>
+  <div class="flex flex-col gap-6">
+    <% quotes.each do |quote_recording| %>
+      <% quote = quote_recording.recordable %>
+      <div class="flex flex-col gap-2">
+        <p class="text-lg"><%= quote.body %></p>
+        <p class="font-medium"><%= quote.name %></p>
+        <% line = attribution(quote) %>
+        <% if line.present? %>
+          <p><%= line %></p>
+        <% end %>
+        <% url = avatar_url(quote_recording) %>
+        <% if url.present? %>
+          <%= image_tag url, alt: avatar_alt(quote), class: "h-10 w-10 rounded object-cover" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -247,6 +247,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PressKit")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Text")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::QuoteSection")
+    assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Quote")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
 
     options = RecordingStudio.capability_options(:attachable, for: "RecordingStudioPresskits::Images").to_h
@@ -265,6 +267,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute_includes types, "FakeBlock"
     assert_includes types, "RecordingStudioPresskits::Text"
     assert_includes types, "RecordingStudioPresskits::Images"
+    assert_includes types, "RecordingStudioPresskits::QuoteSection"
+    refute_includes types, "RecordingStudioPresskits::Quote"
     refute_includes types, "Workspace"
     refute_includes types, "Folder"
     refute_includes types, "Page"
@@ -288,11 +292,16 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:orderable, for: "FakeBlock")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Images")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Quote")
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
 
     press_kit_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::PressKit").to_h
     refute press_kit_options.key?(:allows)
+
+    quote_section_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::QuoteSection").to_h
+    assert_equal ["RecordingStudioPresskits::Quote"], Array(quote_section_options[:allows]).map(&:to_s)
 
     workspace_options = RecordingStudio.capability_options(:orderable, for: "Workspace").to_h
     assert_equal ["RecordingStudioPresskits::PressKit"], Array(workspace_options[:allows]).map(&:to_s)
@@ -303,6 +312,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "FakeBlock")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Text")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Images")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::QuoteSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Quote")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Page")
@@ -313,6 +324,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:publishable, for: "FakeBlock")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Images")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::QuoteSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Quote")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Page")
@@ -328,6 +341,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "FakeBlock")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Images")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::QuoteSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Quote")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Page")
@@ -335,6 +350,77 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     options = RecordingStudio.capability_options(:duplicatable, for: "RecordingStudioPresskits::PressKit").to_h
     assert_equal " (Copy)", options[:suffix]
     assert_equal [], options[:exclude_children]
+  end
+
+  test "quote section parent is press kit and quote parent is the section" do
+    root, kit, section = quote_tree
+
+    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::QuoteSection", parent_recording: kit)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::QuoteSection", parent_recording: root)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Quote", parent_recording: kit)
+    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Quote", parent_recording: section)
+    assert_equal "Quotes", section.recordable.title
+    refute section.recordable.respond_to?(:title=)
+    refute section.recordable.respond_to?(:body=)
+  end
+
+  test "quote attachable allows one image" do
+    options = RecordingStudio.capability_options(:attachable, for: "RecordingStudioPresskits::Quote").to_h
+
+    assert_equal ["image/*"], options[:allowed_content_types]
+    assert_equal [:image], options[:enabled_attachment_kinds]
+    assert_equal :edit, options[:auth_roles][:remove]
+  end
+
+  test "recording a quote stores the words on that recordable" do
+    _root, _kit, section = quote_tree
+    first = record_quote(section, body: "First line", name: "Ada", role: "Editor", organisation: "Press")
+    second = record_quote(section, body: "Second line", name: "Grace", role: nil, organisation: nil)
+
+    assert_kind_of RecordingStudio::Recording, first
+    assert_equal section.id, first.parent_recording_id
+    assert_equal "First line", first.recordable.body
+    assert_equal "Ada", first.recordable.name
+    assert_equal "Editor", first.recordable.role
+    assert_equal "Press", first.recordable.organisation
+    assert_equal "Ada", first.recordable.title
+    assert_nil second.recordable.role
+    assert_nil second.recordable.organisation
+  end
+
+  test "revise changes one quote and leaves the other" do
+    root, _kit, section = quote_tree
+    first = record_quote(section, body: "First line", name: "Ada", role: "Editor", organisation: "Press")
+    second = record_quote(section, body: "Second line", name: "Grace", role: nil, organisation: nil)
+
+    root.revise(first) { |quote| quote.body = "Revised line" }
+
+    assert_equal "Revised line", first.reload.recordable.body
+    assert_equal "Second line", second.reload.recordable.body
+  end
+
+  test "moving a quote changes the section order" do
+    root, _kit, section = quote_tree
+    user = quote_owner(root)
+    first = record_quote(section, body: "First line", name: "Ada", role: nil, organisation: nil)
+    second = record_quote(section, body: "Second line", name: "Grace", role: nil, organisation: nil)
+
+    section.recording_studio_orderable_move!(second, to_index: 0, actor: user)
+
+    assert_equal [second.id, first.id], section.recording_studio_orderable_children.map(&:id)
+  end
+
+  test "trashing a quote leaves the section and the other quote" do
+    root, _kit, section = quote_tree
+    user = quote_owner(root)
+    first = record_quote(section, body: "First line", name: "Ada", role: nil, organisation: nil)
+    second = record_quote(section, body: "Second line", name: "Grace", role: nil, organisation: nil)
+
+    first.recording_studio_trashable_trash!(actor: user)
+
+    assert first.reload.trashed_at.present?
+    assert_nil section.reload.trashed_at
+    assert_nil second.reload.trashed_at
   end
 
   private
@@ -350,5 +436,39 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   def unique_name(prefix)
     "#{prefix} #{SecureRandom.hex(4)}"
+  end
+
+  def quote_tree
+    root = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Quote Workspace")))
+    kit = root.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+    section = kit.record(RecordingStudioPresskits::QuoteSection, parent_recording: kit)
+    [root, kit, section]
+  end
+
+  def quote_owner(root_recording)
+    previous = Current.actor
+    user = User.create!(
+      email: "quote-#{SecureRandom.hex(4)}@example.com",
+      password: "Password123!",
+      password_confirmation: "Password123!"
+    )
+    Current.actor = user
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: root_recording, actor: user)
+    raise result.error if result.failure?
+
+    user
+  ensure
+    Current.actor = previous
+  end
+
+  def record_quote(section, body:, name:, role:, organisation:)
+    section.record(RecordingStudioPresskits::Quote, parent_recording: section) do |quote|
+      quote.body = body
+      quote.name = name
+      quote.role = role
+      quote.organisation = organisation
+    end
   end
 end

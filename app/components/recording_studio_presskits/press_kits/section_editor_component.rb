@@ -20,6 +20,14 @@ module RecordingStudioPresskits
         editor.preview?
       end
 
+      def form?
+        editor = editor_class
+        return false unless editor
+        return true unless editor.respond_to?(:form?)
+
+        editor.form?
+      end
+
       def grid_cols
         show_preview? ? 2 : 1
       end

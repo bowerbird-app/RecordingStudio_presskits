@@ -1,0 +1,37 @@
+<div class="flex w-full flex-col gap-6">
+  <% if quotes.any? %>
+    <div
+      id="presskits-quote-list"
+      data-controller="recording-studio-presskits--section-order"
+      data-action="list:reordered->recording-studio-presskits--section-order#save"
+      data-recording-studio-presskits--section-order-url-value="<%= order_path %>"
+    >
+      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+        <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
+          <% quotes.each do |quote_recording| %>
+            <%= render FlatPack::List::Item.new(id: quote_recording.id, icon: "arrows-up-down", hover: true) do %>
+              <div class="flex w-full flex-wrap items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <%= link_to row_label(quote_recording), edit_path(quote_recording),
+                        draggable: "false",
+                        class: "text-sm font-medium text-(--surface-content-color)" %>
+                </div>
+                <%= form_with url: remove_path(quote_recording), method: :delete, local: true, html: { draggable: "false" } do %>
+                  <%= render FlatPack::Button::Component.new(
+                    icon: "trash",
+                    icon_only: true,
+                    style: :ghost,
+                    size: :sm,
+                    type: "submit",
+                    draggable: "false",
+                    aria: { label: "Remove quote" }
+                  ) %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

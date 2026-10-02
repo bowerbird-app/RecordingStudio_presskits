@@ -1,0 +1,4 @@
+<%= form_with url: add_path, method: :post, local: true, class: "inline-flex" do %>
+  <%= render FlatPack::Button::Component.new(text: "Add quote", style: :primary, type: "submit") %>
+<% end %>
+<%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>

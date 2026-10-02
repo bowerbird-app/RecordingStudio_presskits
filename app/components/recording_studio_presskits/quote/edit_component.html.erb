@@ -1,0 +1,69 @@
+<div class="flex flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(title: "Quote", variant: :h1) %>
+
+  <%= form_with url: update_path, method: :patch, local: true, class: "flex flex-col gap-6", data: upload_data do %>
+    <div id="presskits-quote-actions" class="flex flex-wrap items-center gap-3">
+      <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
+      <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
+      <%= render FlatPack::Button::Component.new(
+        text: "Upload",
+        icon: "upload",
+        style: :default,
+        type: "button",
+        data: { action: "recording-studio-attachable--upload#browse" }
+      ) %>
+    </div>
+
+    <% if avatar_url.present? %>
+      <div class="flex items-center gap-3">
+        <%= image_tag avatar_url, alt: avatar_alt, class: "h-16 w-16 rounded object-cover" %>
+        <%= render FlatPack::Button::Component.new(
+          icon: "trash",
+          icon_only: true,
+          style: :ghost,
+          size: :sm,
+          href: image_path,
+          data: { turbo_method: :delete },
+          aria: { label: "Remove image" }
+        ) %>
+      </div>
+    <% end %>
+
+    <%= render FlatPack::TextArea::Component.new(
+      name: "quote[body]",
+      value: quote.body,
+      label: "Quote",
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "quote[name]",
+      value: quote.name,
+      label: "Name",
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "quote[role]",
+      value: quote.role,
+      label: "Role",
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "quote[organisation]",
+      value: quote.organisation,
+      label: "Organisation",
+      class: "w-full"
+    ) %>
+
+    <div class="hidden" data-recording-studio-attachable--upload-target="dropzone"></div>
+    <input
+      type="file"
+      accept="image/*"
+      class="hidden"
+      data-recording-studio-attachable--upload-target="input"
+      data-action="change->recording-studio-attachable--upload#filesSelected">
+    <template data-recording-studio-attachable--upload-target="progressTemplate">
+      <%= render FlatPack::Progress::Component.new(value: 0, max: 100, label: "Progress") %>
+    </template>
+    <div class="hidden space-y-4" data-recording-studio-attachable--upload-target="queue"></div>
+  <% end %>
+</div>

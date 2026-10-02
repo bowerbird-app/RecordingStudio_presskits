@@ -13,6 +13,12 @@ module RecordingStudioPresskits
         apply_extensions(target, extensions_for(:controller, extension_keys_for(target)))
       end
 
+      def register_builtin_sections
+        register_text_section
+        register_images_section
+        register_quote_section
+      end
+
       private
 
       def extensions_for(kind, names)
@@ -48,6 +54,23 @@ module RecordingStudioPresskits
 
       def identity_hash
         {}.compare_by_identity
+      end
+
+      def register_text_section
+        register_section("RecordingStudioPresskits::Text", "RecordingStudioPresskits::Text")
+      end
+
+      def register_images_section
+        register_section("RecordingStudioPresskits::Images", "RecordingStudioPresskits::Images")
+      end
+
+      def register_quote_section
+        register_section("RecordingStudioPresskits::QuoteSection", "RecordingStudioPresskits::QuoteSection")
+      end
+
+      def register_section(type_name, component_name)
+        RecordingStudioPresskits.register_section_component(type_name, "#{component_name}::Component")
+        RecordingStudioPresskits.register_section_editor(type_name, "#{component_name}::EditComponent")
       end
     end
 
@@ -147,22 +170,13 @@ module RecordingStudioPresskits
 
     initializer "recording_studio_presskits.text_section" do
       config.to_prepare do
-        RecordingStudioPresskits.register_section_component(
-          "RecordingStudioPresskits::Text",
-          "RecordingStudioPresskits::Text::Component"
-        )
-        RecordingStudioPresskits.register_section_editor(
-          "RecordingStudioPresskits::Text",
-          "RecordingStudioPresskits::Text::EditComponent"
-        )
-        RecordingStudioPresskits.register_section_component(
-          "RecordingStudioPresskits::Images",
-          "RecordingStudioPresskits::Images::Component"
-        )
-        RecordingStudioPresskits.register_section_editor(
-          "RecordingStudioPresskits::Images",
-          "RecordingStudioPresskits::Images::EditComponent"
-        )
+        RecordingStudioPresskits::Engine.register_builtin_sections
+      end
+    end
+
+    initializer "recording_studio_presskits.api" do
+      config.to_prepare do
+        RecordingStudioPresskits::Api.register!
       end
     end
 

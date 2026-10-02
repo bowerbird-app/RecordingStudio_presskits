@@ -635,7 +635,176 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_nil section.reload.trashed_at
   end
 
+  test "adding a quotes section shows quotes and omits a blank body" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    assert_difference -> { RecordingStudioPresskits::QuoteSection.count }, 1 do
+      post recording_studio_presskits.press_kit_sections_path(kit),
+           params: { type: "RecordingStudioPresskits::QuoteSection" }
+    end
+    follow_redirect!
+    assert_response :success
+    section = quote_section(kit)
+    assert_select "h1", text: "Quotes"
+    assert_select "button", text: "Add quote"
+    assert_select "button", text: "Update", count: 0
+    assert_select "textarea[name='quote[body]']", count: 0
+    refute_includes response.body, "Drag images here"
+    refute_includes response.body, "Choose images"
+    cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node|
+      node.text.include?("Cancel")
+    }
+    assert_includes cancel.text, "Cancel"
+    actions = css_select("#presskits-section-actions").to_html
+    assert_operator actions.index("Add quote"), :<, actions.index("Cancel")
+    grid = quotes_editor_grid
+    assert grid
+    assert_equal 2, grid.element_children.size
+    refute_includes grid.text, "Add quote"
+    refute_includes grid.text, "Cancel"
+    assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
+
+    assert_difference -> { RecordingStudioPresskits::Quote.count }, 1 do
+      post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
+    end
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "Quote added."
+    assert_select "h1", text: "Quote"
+    assert_select "label", text: "Quote"
+    assert_select "textarea[name='quote[body]']"
+    assert_select "label", text: "Name"
+    assert_select "input[name='quote[name]']"
+    assert_select "label", text: "Role"
+    assert_select "input[name='quote[role]']"
+    assert_select "label", text: "Organisation"
+    assert_select "input[name='quote[organisation]']"
+    assert_select "button", text: "Save"
+    assert_select "a[aria-label='Remove quote']", count: 0
+    assert_select "button", text: "Upload"
+    assert_select "form[data-controller='recording-studio-attachable--upload']"
+    assert_match(/remove-button-template-value="&lt;button/, response.body)
+    cancel = css_select("a").find { |node| node.text.include?("Cancel") }
+    assert_equal recording_studio_presskits.edit_press_kit_section_path(kit, section), cancel["href"]
+
+    first = live_quotes(section).first
+    patch recording_studio_presskits.press_kit_section_quote_path(kit, section, first), params: {
+      quote: {
+        body: "A line worth printing",
+        name: "Ada Lovelace",
+        role: "Editor",
+        organisation: "Press",
+        decoy: "nope"
+      }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)
+    follow_redirect!
+    assert_equal "A line worth printing", first.reload.recordable.body
+    assert_equal "Ada Lovelace", first.recordable.name
+    refute_includes first.recordable.attributes.values, "nope"
+    assert_equal recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first), path
+
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_quote_path(kit, section, first)}']", text: "Ada Lovelace"
+    assert_select "textarea[name='quote[body]']", count: 0
+    assert_select "button[aria-label='Remove quote']"
+    grid = quotes_editor_grid
+    columns = grid.element_children
+    assert_equal 2, columns.size
+    refute_includes columns.first.text, "Add quote"
+    refute_includes columns.last.text, "Add quote"
+    refute_includes columns.first.text, "A line worth printing"
+    assert_includes columns.last.text, "A line worth printing"
+    assert_includes columns.last.text, "Ada Lovelace"
+    assert_includes columns.last.text, "Editor, Press"
+
+    publish_quote_kit!(kit)
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-quotes"
+    assert_response :success
+    assert_operator response.body.index("A line worth printing"), :<, response.body.index("Ada Lovelace")
+    assert_includes response.body, "Editor, Press"
+
+    assert_difference -> { RecordingStudioPresskits::Quote.count }, 1 do
+      post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
+    end
+    second = live_quotes(section).last
+    patch recording_studio_presskits.press_kit_section_quote_path(kit, section, second), params: {
+      quote: { body: "Second line", name: "Grace Hopper" }
+    }
+    patch recording_studio_presskits.press_kit_section_quote_order_path(kit, section), params: {
+      recording_id: second.id,
+      before_recording_id: first.id
+    }
+    follow_redirect!
+    assert_response :success
+    assert_equal [second.id, first.id], live_quotes(section).map(&:id)
+
+    delete recording_studio_presskits.press_kit_section_quote_path(kit, section, second)
+    follow_redirect!
+    assert_response :success
+    assert second.reload.trashed_at.present?
+    assert_nil section.reload.trashed_at
+    assert_nil first.reload.trashed_at
+    assert_select "a", text: "Ada Lovelace"
+    refute_includes response.body, "Grace Hopper"
+
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::Text" }
+    follow_redirect!
+    assert_response :success
+    assert_select "button", text: "Update"
+    assert_select "button", text: "Add quote", count: 0
+
+    post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
+    blank = section.child_recordings.where(
+      recordable_type: "RecordingStudioPresskits::Quote",
+      trashed_at: nil
+    ).order(:created_at).last
+    patch recording_studio_presskits.press_kit_section_quote_path(kit, section, blank), params: {
+      quote: { body: "   ", name: "Hidden byline" }
+    }
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-quotes"
+    assert_response :success
+    assert_operator response.body.index("A line worth printing"), :<, response.body.index("Ada Lovelace")
+    refute_includes response.body, "Hidden byline"
+
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    columns = quotes_editor_grid.element_children
+    assert_includes columns.first.text, "Hidden byline"
+    refute_includes columns.last.text, "Hidden byline"
+    assert_includes columns.last.text, "A line worth printing"
+  end
+
   private
+
+  def quotes_editor_grid
+    css_select(".grid").find { |node| node["class"].to_s.include?("md:grid-cols-2") }
+  end
+
+  def quote_section(kit)
+    RecordingStudioPresskits::KitQuery.live_children(kit).find do |child|
+      child.recordable.is_a?(RecordingStudioPresskits::QuoteSection)
+    end
+  end
+
+  def live_quotes(section)
+    section.recording_studio_orderable_children.reject { |child| child.trashed_at.present? }
+  end
+
+  def publish_quote_kit!(kit)
+    result = RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: kit,
+      actor: @user,
+      attributes: { slug: "spring-launch-quotes", status: "published", meta_robots: "index,follow" }
+    )
+    raise result.error if result.failure?
+
+    result.value
+  end
 
   def images_section(kit)
     RecordingStudioPresskits::KitQuery.live_children(kit).find do |child|
