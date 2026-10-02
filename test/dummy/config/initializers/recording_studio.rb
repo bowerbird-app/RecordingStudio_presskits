@@ -9,6 +9,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::PressKit",
     "RecordingStudioPresskits::Text",
     "RecordingStudioPresskits::Images",
+    "RecordingStudioPresskits::QuoteSection",
+    "RecordingStudioPresskits::Quote",
     "RecordingStudioPublishable::Publishable",
     "RecordingStudioAttachable::Attachment",
     "FakeBlock"

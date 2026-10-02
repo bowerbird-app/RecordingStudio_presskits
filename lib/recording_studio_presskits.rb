@@ -13,6 +13,8 @@ require "recording_studio_presskits/engine"
 require "recording_studio_presskits/configuration"
 require "recording_studio_presskits/kit_query"
 require "recording_studio_presskits/admin"
+require "recording_studio_presskits/api"
+require "recording_studio_presskits/quote_order"
 
 module RecordingStudioPresskits
   class << self
