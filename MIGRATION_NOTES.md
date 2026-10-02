@@ -1,6 +1,8 @@
 # Upgrade notes
 
-## Unreleased
+## 0.11.0
+
+Quotes section.
 
 Add `"RecordingStudioPresskits::QuoteSection"` and `"RecordingStudioPresskits::Quote"` to `config.recordable_types`. Run `rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. Orderable is on the quote section for its quotes. Attachable is on Quote for one image. Publishable stays off both.
 
