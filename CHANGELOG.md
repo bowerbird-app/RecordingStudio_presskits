@@ -7,10 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-02
+
+Quote display.
+
 ### Changed
 - A quote row shows the quote, truncated to the column, with the name on the line below.
 - The quotes action is + Quote: a Heroicons plus icon and the label Quote.
 - Column two, the kit preview, and the public page render each quote with FlatPack's quote component at large size. The citation is the name, role, and organisation.
+- Version `0.12.0`
+
+### Upgrade notes
+- No host or schema changes
 
 ## [0.11.0] - 2026-10-02
 
@@ -308,7 +316,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.12.0
 [0.11.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.11.0
 [0.10.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.10.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.9.0

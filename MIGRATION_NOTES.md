@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.12.0
+
+Quote display.
+
+No host or schema changes. A quote row shows the quote, truncated to the column, with the name underneath. The quotes action is + Quote. Column two, the kit preview, and the public page render each quote with FlatPack's quote component at large size. The citation is the name, role, and organisation.
+
 ## 0.11.0
 
 Quotes section.
