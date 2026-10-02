@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - A quote row shows the quote, truncated to the column, with the name on the line below.
+- The quotes action is + Quote: a Heroicons plus icon and the label Quote.
 
 ## [0.11.0] - 2026-10-02
 

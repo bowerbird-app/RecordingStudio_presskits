@@ -648,7 +648,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     section = quote_section(kit)
     assert_select "h1", text: "Quotes"
-    assert_select "button", text: "Add quote"
+    assert_select "#presskits-section-actions button[type=submit]" do
+      assert_select "span", text: "Quote"
+      assert_select "[data-flat-pack--icon-name-value='plus']", count: 1
+    end
+    assert_select "button", text: "Add quote", count: 0
     assert_select "button", text: "Update", count: 0
     assert_select "textarea[name='quote[body]']", count: 0
     refute_includes response.body, "Drag images here"
@@ -658,11 +662,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     }
     assert_includes cancel.text, "Cancel"
     actions = css_select("#presskits-section-actions").to_html
-    assert_operator actions.index("Add quote"), :<, actions.index("Cancel")
+    assert_operator actions.index(">Quote<"), :<, actions.index("Cancel")
     grid = quotes_editor_grid
     assert grid
     assert_equal 2, grid.element_children.size
-    refute_includes grid.text, "Add quote"
+    refute_includes grid.to_html, 'data-flat-pack--icon-name-value="plus"'
     refute_includes grid.text, "Cancel"
     assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
 
@@ -718,8 +722,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     grid = quotes_editor_grid
     columns = grid.element_children
     assert_equal 2, columns.size
-    refute_includes columns.first.text, "Add quote"
-    refute_includes columns.last.text, "Add quote"
+    refute_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
+    refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
     assert_operator columns.first.text.index("A line worth printing"), :<, columns.first.text.index("Ada Lovelace")
     assert_includes columns.last.text, "A line worth printing"
     assert_includes columns.last.text, "Ada Lovelace"
@@ -762,7 +766,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_select "button", text: "Update"
-    assert_select "button", text: "Add quote", count: 0
+    assert_select "button", text: "Quote", count: 0
 
     post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
     blank = section.child_recordings.where(
