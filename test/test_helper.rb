@@ -14,27 +14,35 @@ module PresskitsMinitestStub
   def stub(name, val = nil)
     name = name.to_sym
     singleton = singleton_class
-    had_singleton = singleton.method_defined?(name, false) || singleton.private_method_defined?(name, false)
-    original = begin
-      method(name)
-    rescue NameError
-      nil
-    end
+    original = PresskitsMinitestStub.copy_if_owned(self, singleton, name)
 
     define_singleton_method(name) do |*args, **kwargs, &block|
-      if val.respond_to?(:call)
-        val.call(*args, **kwargs, &block)
-      else
-        val
-      end
+      PresskitsMinitestStub.invoke(val, args, kwargs, block)
     end
-
     yield
   ensure
-    if singleton.method_defined?(name, false) || singleton.private_method_defined?(name, false)
-      singleton.remove_method(name)
-    end
-    define_singleton_method(name, original) if had_singleton && original
+    PresskitsMinitestStub.restore(self, singleton, name, original)
+  end
+
+  def self.owned?(singleton, name)
+    singleton.method_defined?(name, false) || singleton.private_method_defined?(name, false)
+  end
+
+  def self.copy_if_owned(object, singleton, name)
+    return unless owned?(singleton, name)
+
+    object.method(name)
+  rescue NameError
+    nil
+  end
+
+  def self.invoke(val, args, kwargs, block)
+    val.respond_to?(:call) ? val.call(*args, **kwargs, &block) : val
+  end
+
+  def self.restore(object, singleton, name, original)
+    singleton.remove_method(name) if owned?(singleton, name)
+    object.define_singleton_method(name, original) if original
   end
 end
 
