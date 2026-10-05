@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-05
+
+Kit header.
+
+### Added
+- A press kit has an optional short description, 280 characters at most. A blank one is stored as nothing. The kit editor shows Title and Short description above the section list, with Save. The header is the kit, so it cannot be removed or reordered. The preview, the public page, and owner preview show the description under the title when it is present.
+
 ### Changed
+- Version `0.14.0`
 - Point host and dummy Gemfiles at Recording Studio `v4.2.2`
 - Point sibling Recording Studio gems at current tags: Accessible `v0.11.1`, Admin `v2.0.4`, Attachable `v0.7.1`, Duplicatable `v0.4.3`, Orderable `v0.2.5`, Publishable `v0.4.2`, Trashable `v0.4.4`, and dummy Root Switchable `v0.5.3`. Leave FlatPack and this gem's version alone.
 - Gemspec constraints: Accessible `~> 0.11`, Publishable `~> 0.4`
@@ -15,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gem tests keep a tiny `Object#stub` helper because Minitest 6 dropped `minitest/mock`.
 
 ### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. `recording_studio_press_kits` gains a nullable `description`. Existing kits keep their title and start with no description.
 - Bump `recording_studio_accessible` to `~> 0.11` and run `bin/rails generate recording_studio_accessible:migrations`. Access `role` becomes a string.
 - Bump `recording_studio_publishable` to `~> 0.4`.
 - Pin Admin, Attachable, Duplicatable, Orderable, Trashable, and Root Switchable to the tags above.
@@ -341,7 +350,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.14.0
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.12.0
 [0.11.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.11.0

@@ -13,5 +13,7 @@
   add_path: press_kit_sections_path(@press_kit_recording),
   remove_path: ->(recording) { press_kit_section_path(@press_kit_recording, recording) },
   reorder_path: press_kit_order_path(@press_kit_recording),
-  edit_path: ->(recording) { edit_press_kit_section_path(@press_kit_recording, recording) }
+  edit_path: ->(recording) { edit_press_kit_section_path(@press_kit_recording, recording) },
+  header_title: @header_title,
+  header_description: @header_description
 ) %>

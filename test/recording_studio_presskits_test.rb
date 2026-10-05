@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.13.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.14.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_exists
@@ -346,6 +346,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::EmptyState::Component"
     assert_includes show, "SectionDropdownComponent"
     assert_includes show, "render_publishable_quick_actions"
+    assert_includes show, 'id="presskits-kit-header"'
+    assert_includes show, 'name: "press_kit[title]"'
+    assert_includes show, 'name: "press_kit[description]"'
+    assert_includes show, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
+    assert_includes show, 'text: "Save", style: :default'
+    assert_operator show.index('id="presskits-kit-header"'), :<, show.index('id="presskits-section-list"')
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
     refute_includes show, "SectionPickerComponent"

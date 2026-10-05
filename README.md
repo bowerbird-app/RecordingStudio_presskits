@@ -120,10 +120,13 @@ end
 
 root.revise(kit_recording) do |kit|
   kit.title = "Spring launch, take two"
+  kit.description = "Doors at noon."
 end
 
 kit_recording.log_event!(action: "noted")
 ```
+
+The header is the press kit. `title` is required. `description` is an optional short line, 280 characters at most, and a blank one is stored as nothing. It is not a child recording, so it cannot be trashed or reordered. Creating a kit still sets the title only.
 
 Core `record` defaults the parent to the workspace root. Nest a section under the kit by passing the kit as `parent_recording`:
 
@@ -204,9 +207,9 @@ The mounted user slice uses Recording Studio's default layout (back and close). 
 - Index: the current root's live kits. The heading is **My presskits**. **Presskit** with a Heroicons `plus` icon is first and left. Cards vs table is icon-only `FlatPack::ButtonGroup::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle. This Flatpack pin's SegmentedButtons is text-only. Each card has a 16/9 cover. `cover_image_url` on the recordable supplies the image. A missing or unsafe URL uses the muted card color and a photo icon. Do not use Publishable's social image as the cover. Cards and the table open the kit editor.
 - Empty index: what happened, and a way to make a kit.
 - Kit URL: `GET press_kits/:id` requires edit access and redirects to the kit editor.
-- Kit editor: the page heading is the kit name. **+ Section** (Heroicons `plus`, label Section, primary button) sits first on a row with `render_publishable_quick_actions`. The two-column grid starts under that row. There is no title form and no **Save** on this page. Column one is one `FlatPack::Card` around one `FlatPack::List` (`orderable: true`, `divider: true`). Each section is a `FlatPack::List::Item`. The link text is the section type, such as **Text**, and it opens that section. The list icon slot is Heroicons `arrows-up-down`. FlatPack's `flat-pack--list-orderable` controller does the drag. This FlatPack pin's `saveOrder` checks `hasOrderablePathValue`, which is never defined, so the fetch does not run. `list:reordered` posts `recording_id` and `before_recording_id` or `after_recording_id`, and that calls `recording_studio_orderable_move!`. Remove is an icon-only trash button. It posts delete and `SectionsController#destroy` calls `recording_studio_trashable_trash!`. Column two renders every section through `section_component_for` inside one `FlatPack::Card`. No in-page Preview button. The page nav also carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. Text is on that list once the host registers it. No empty-state tray on edit.
+- Kit editor: the page heading is the kit name. **+ Section** (Heroicons `plus`, label Section, primary button) sits first on a row with `render_publishable_quick_actions`. The two-column grid starts under that row. Column one opens with the kit header: Title, Short description, and Save. Save uses the default button so + Section stays the only primary action. The header is the press kit itself. It sits above the section list and is not a list row, so it cannot be dragged or removed. A blank description is stored as nothing. 280 characters is the limit. Creating a kit still asks only for the name. When there are sections, the rest of column one is one `FlatPack::Card` around one `FlatPack::List` (`orderable: true`, `divider: true`). Each section is a `FlatPack::List::Item`. The link text is the section type, such as **Text**, and it opens that section. The list icon slot is Heroicons `arrows-up-down`. FlatPack's `flat-pack--list-orderable` controller does the drag. This FlatPack pin's `saveOrder` checks `hasOrderablePathValue`, which is never defined, so the fetch does not run. `list:reordered` posts `recording_id` and `before_recording_id` or `after_recording_id`, and that calls `recording_studio_orderable_move!`. Remove is an icon-only trash button. It posts delete and `SectionsController#destroy` calls `recording_studio_trashable_trash!`. Column two is one `FlatPack::Card` when there is a short description or at least one section. The description comes first, then every section through `section_component_for`. A kit with neither has no preview card. No in-page Preview button. The page nav also carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. Text is on that list once the host registers it. No empty-state tray on edit.
 - Section editor: a page heading is the section type, such as **Text**. **Update** (primary) and **Cancel** (default button) sit above the grid. Cancel returns to the kit editor. The default grid is two columns. Column one is the registered editor, full width of that column, or the type label when none is registered. Column two renders that section's saved HTML inside a `FlatPack::Card`, lined up with the field. An editor class can define `preview?` and return false to drop the preview and use one full-width column. Text does that. An editor with no section form can define `section_actions`. Quotes does, so **+ Quote** (Heroicons `plus`, label Quote, primary button) and **Cancel** sit above the grid and the list stays in column one. The Text field is the FlatPack content WYSIWYG with no field label. The kit list trashes a section with the trash icon through `recording_studio_trashable_trash!`. **+ Access** stays off this page.
-- Owner preview: the same public walk of children, on the default layout, for an authenticated owner. Back returns to the kit editor. A kit that is not live stays hidden from logged-out visitors.
+- Owner preview: the same public page, on the default layout, for an authenticated owner. Back returns to the kit editor. A kit that is not live stays hidden from logged-out visitors.
 
 Default-layout chrome is back, close, and page actions. **+ Access** is in the right slot on the kit editor only. Index, the new form, the section editor, and owner preview leave that slot empty. Do not put Sign in, Sign out, or Root Switchable there. Core owns back and close.
 
@@ -214,7 +217,7 @@ Primary buttons: **Presskit** (Heroicons plus) on the index, **Create** on the n
 
 ## Public
 
-A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). `.to` sets `public_layout: "recording_studio_presskits/blank"`. That layout is a document and the kit: no back, no close, and no TopNav. View and the publish menu Preview both use it. Owner preview stays on `recording_studio/default_layout`.
+A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). `.to` sets `public_layout: "recording_studio_presskits/blank"`. That layout is a document and the kit: no back, no close, and no TopNav. The page title is the kit name. A short description, when the kit has one, sits under that title. View and the publish menu Preview both use it. Owner preview stays on `recording_studio/default_layout`.
 
 Logged-out visitors get a 404 for a kit that is not currently published. An authenticated owner can still open the owner preview on the default layout.
 
@@ -280,7 +283,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one published kit titled **Spring launch** and one unpublished kit titled **Autumn recap**. No seeded fake sections. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` stays test-only: it enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. The seeded admin user gets Accessible owner access on the workspace and the admin root.
+Seeds one published kit titled **Spring launch**, with a short description, and one unpublished kit titled **Autumn recap**. No seeded fake sections. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` stays test-only: it enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
 ## Cloud Agent boot
 

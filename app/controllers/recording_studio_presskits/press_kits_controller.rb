@@ -33,19 +33,14 @@ module RecordingStudioPresskits
 
       @section_recordings = KitQuery.live_children(@press_kit_recording)
       @picker_types = RecordingStudioPresskits.picker_types
+      assign_header_fields
     end
 
     def update
       authorize_recording!(@press_kit_recording, role: :edit)
       return if performed?
 
-      title = press_kit_params[:title].to_s.strip
-      return render_missing_edit_title if title.blank?
-
-      current_presskits_root.revise(@press_kit_recording) { |press_kit| press_kit.title = title }
-      redirect_to edit_press_kit_path(@press_kit_recording), notice: "Saved. That's the name people will see."
-    rescue ActiveRecord::RecordInvalid
-      render_missing_edit_title(title)
+      save_header
     end
 
     def new
@@ -82,7 +77,34 @@ module RecordingStudioPresskits
     end
 
     def press_kit_params
-      params.fetch(:press_kit, {}).permit(:title)
+      params.fetch(:press_kit, {}).permit(:title, :description)
+    end
+
+    def save_header
+      title, description = header_fields
+      return render_missing_edit_title(title, description) if title.blank?
+
+      revise_header(title, description)
+      redirect_to edit_press_kit_path(@press_kit_recording), notice: "Saved. That's what people see first."
+    rescue ActiveRecord::RecordInvalid
+      render_invalid_header(title, description)
+    end
+
+    def header_fields
+      submitted = press_kit_params
+      [submitted[:title].to_s.strip, submitted[:description].to_s.strip.presence]
+    end
+
+    def revise_header(title, description)
+      current_presskits_root.revise(@press_kit_recording) do |press_kit|
+        press_kit.assign_attributes(title: title, description: description)
+      end
+    end
+
+    def assign_header_fields(title: :saved, description: :saved)
+      recordable = @press_kit_recording.recordable
+      @header_title = title == :saved ? recordable.title : title
+      @header_description = description == :saved ? recordable.description : description
     end
 
     def render_missing_title(title = nil)
@@ -91,11 +113,22 @@ module RecordingStudioPresskits
       render :new, status: :unprocessable_entity
     end
 
-    def render_missing_edit_title(_title = nil)
-      @section_recordings = KitQuery.live_children(@press_kit_recording)
-      @picker_types = RecordingStudioPresskits.picker_types
+    def render_missing_edit_title(title = nil, description = nil)
+      prepare_header_edit(title, description)
       flash.now[:alert] = "Give it a name so you can find it later."
       render :edit, status: :unprocessable_entity
+    end
+
+    def render_invalid_header(title, description)
+      prepare_header_edit(title, description)
+      flash.now[:alert] = "Keep that description short. 280 characters is the limit."
+      render :edit, status: :unprocessable_entity
+    end
+
+    def prepare_header_edit(title, description)
+      @section_recordings = KitQuery.live_children(@press_kit_recording)
+      @picker_types = RecordingStudioPresskits.picker_types
+      assign_header_fields(title: title, description: description)
     end
   end
 end

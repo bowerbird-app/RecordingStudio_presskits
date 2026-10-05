@@ -146,8 +146,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "title", text: "Spring launch"
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-editor-grid h1", count: 0
-    assert_select "input[name='press_kit[title]']", count: 0
-    assert_select "button", text: "Save", count: 0
+    assert_select "#presskits-kit-header input[name='press_kit[title]']"
+    assert_select "#presskits-kit-header textarea[name='press_kit[description]']"
+    assert_includes response.body, "0/280 characters"
+    assert_select "#presskits-kit-header button", text: "Save"
+    assert_select "#presskits-section-list button", text: "Save", count: 0
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "presskits-section-dropdown"
     assert_select "#presskits-editor-actions span", text: "Section"
@@ -160,11 +163,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_operator actions_html.index("presskits-section-dropdown"), :<, actions_html.index("publishable_quick_actions_")
     grid_html = css_select("#presskits-editor-grid").to_html
     assert_includes grid_html, "md:grid-cols-2"
-    refute_includes grid_html, 'name="press_kit[title]"'
+    assert_includes grid_html, 'name="press_kit[title]"'
+    assert_includes grid_html, "presskits-kit-header"
+    refute_includes css_select("#presskits-section-list").to_html, 'name="press_kit[title]"' if css_select("#presskits-section-list").any?
     refute_includes grid_html, "presskits-section-dropdown"
     refute_includes grid_html, "publishable_quick_actions_"
     assert_includes response.body, "Preview"
-    refute_includes response.body, 'name="press_kit[title]"'
+    assert response.body.index('id="presskits-editor-actions"') < response.body.index('id="presskits-editor-grid"')
+    assert response.body.index('id="presskits-editor-grid"') < response.body.index('id="presskits-kit-header"')
+    header_save = css_select("#presskits-kit-header button[type=submit]").first
+    assert_includes header_save["class"], "bg-[var(--button-default-background-color)]"
+    refute_includes header_save["class"], "bg-[var(--button-primary-background-color)]"
     refute_select "a[href='#{recording_studio_presskits.preview_press_kit_path(kit)}']"
     refute_includes response.body, "presskits-section-picker"
     refute_includes response.body, "Pick what to drop into this kit."
@@ -188,8 +197,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "h1", text: "Empty launch"
-    assert_select "input[name='press_kit[title]']", count: 0
-    assert_select "button", text: "Save", count: 0
+    assert_select "#presskits-kit-header input[name='press_kit[title]']"
+    assert_select "#presskits-kit-header textarea[name='press_kit[description]']"
+    assert_includes response.body, "0/280 characters"
+    assert_select "#presskits-kit-header button", text: "Save"
     assert_includes response.body, "presskits-section-dropdown"
     assert_includes css_select("#presskits-section-dropdown button").first["class"], "bg-[var(--button-primary-background-color)]"
     assert_select "#presskits-section-list", count: 0
@@ -239,6 +250,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes preview["class"], "border-[var(--card-border-color)]"
     assert_includes preview.text, "Hero"
     assert_includes preview.text, "Quotes"
+    assert_select "#presskits-header-preview", count: 0
+    assert response.body.index('id="presskits-kit-header"') < response.body.index('id="presskits-section-list"')
+    refute_includes css_select("#presskits-section-list").to_html, "presskits-kit-header"
+    refute_includes css_select("#presskits-section-list").to_html, 'name="press_kit[description]"'
   end
 
   test "section edit shows that section" do
@@ -530,27 +545,116 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     title = "Winter brief #{SecureRandom.hex(4)}"
     assert_difference -> { RecordingStudioPresskits::PressKit.count }, 1 do
-      post recording_studio_presskits.press_kits_path, params: { press_kit: { title: title } }
+      post recording_studio_presskits.press_kits_path, params: {
+        press_kit: { title: title, description: "Not on the create form" }
+      }
     end
 
     press_kit = RecordingStudioPresskits::PressKit.where(title: title).order(:created_at).last
     kit = RecordingStudioPresskits::KitQuery.for_root(@root).find { |recording| recording.recordable_id == press_kit.id }
     assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
     assert_equal @root, kit.parent_recording
+    assert_nil press_kit.description
   end
 
-  test "saving the kit title uses revise" do
+  test "saving the kit header uses revise" do
     kit = record_kit("Spring launch")
+    original_id = kit.recordable_id
     sign_in @user
     switch_to_root(@root)
 
-    patch recording_studio_presskits.press_kit_path(kit), params: { press_kit: { title: "Spring launch, take two" } }
+    patch recording_studio_presskits.press_kit_path(kit), params: {
+      press_kit: {
+        title: "Spring launch, take two",
+        description: "Doors at noon.",
+        decoy: "nope"
+      }
+    }
     assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
     follow_redirect!
     assert_response :success
+    assert_select "p", text: "Saved. That's what people see first."
     assert_includes response.body, "Spring launch, take two"
     assert_select "h1", text: "Spring launch, take two"
-    assert_equal "Spring launch, take two", kit.reload.recordable.title
+    assert_select "#presskits-header-preview", text: "Doors at noon."
+    assert_select "#presskits-editor-preview", count: 1
+    assert_select "#presskits-section-list", count: 0
+    kit.reload
+    assert_not_equal original_id, kit.recordable_id
+    assert_equal "Spring launch, take two", kit.recordable.title
+    assert_equal "Doors at noon.", kit.recordable.description
+    refute_includes kit.recordable.attributes.values, "nope"
+    original = RecordingStudioPresskits::PressKit.find(original_id)
+    assert_equal "Spring launch", original.title
+    assert_nil original.description
+  end
+
+  test "a blank kit title stays unsaved" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Keep this." }
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_path(kit), params: {
+      press_kit: { title: "  ", description: "New words" }
+    }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Give it a name so you can find it later."
+    assert_includes response.body, "New words"
+    kit.reload
+    assert_equal "Spring launch", kit.recordable.title
+    assert_equal "Keep this.", kit.recordable.description
+  end
+
+  test "a description past 280 characters stays unsaved" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Keep this." }
+    too_long = "a" * 281
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_path(kit), params: {
+      press_kit: { title: "Spring launch", description: too_long }
+    }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Keep that description short. 280 characters is the limit."
+    assert_includes response.body, too_long
+    kit.reload
+    assert_equal "Spring launch", kit.recordable.title
+    assert_equal "Keep this.", kit.recordable.description
+  end
+
+  test "a blank description clears and drops the preview" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_path(kit), params: {
+      press_kit: { title: "Spring launch", description: "   " }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
+    follow_redirect!
+    assert_response :success
+    assert_nil kit.reload.recordable.description
+    assert_select "#presskits-header-preview", count: 0
+    assert_select "#presskits-editor-preview", count: 0
+    assert_select "#presskits-kit-header textarea[name='press_kit[description]']"
+  end
+
+  test "a short description previews above the sections" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
+    record_block(kit, "Hero")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-header-preview", text: "Doors at noon."
+    preview = css_select("#presskits-editor-preview").first
+    assert_operator preview.text.index("Doors at noon."), :<, preview.text.index("Hero")
+    refute_includes css_select("#presskits-section-list").to_html, "Doors at noon."
   end
 
   test "unauthenticated visitors are sent to sign in" do

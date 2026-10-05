@@ -16,6 +16,28 @@
   <div id="presskits-editor-grid">
     <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
       <div class="flex min-w-0 flex-col gap-6">
+        <div id="presskits-kit-header">
+          <%= form_with url: helpers.press_kit_path(@press_kit_recording), method: :patch, local: true,
+                class: "flex w-full flex-col gap-4" do %>
+            <%= render FlatPack::TextInput::Component.new(
+              name: "press_kit[title]",
+              label: "Title",
+              value: header_title,
+              required: true
+            ) %>
+            <%= render FlatPack::TextArea::Component.new(
+              name: "press_kit[description]",
+              label: "Short description",
+              value: header_description,
+              placeholder: "One or two lines for the people who open this.",
+              character_count: true,
+              max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT,
+              class: "w-full"
+            ) %>
+            <%= render FlatPack::Button::Component.new(text: "Save", style: :default, type: "submit") %>
+          <% end %>
+        </div>
+
         <% if @section_recordings.any? %>
           <div
             id="presskits-section-list"
@@ -39,9 +61,14 @@
       </div>
 
       <div class="min-w-0">
-        <% if @section_recordings.any? %>
+        <% if show_preview? %>
           <%= render FlatPack::Card::Component.new(style: :default, id: "presskits-editor-preview", class: "w-full") do %>
             <div class="flex min-w-0 flex-col gap-6">
+              <% if show_header_preview? %>
+                <p id="presskits-header-preview" class="text-sm font-medium text-(--surface-content-color)">
+                  <%= header_description %>
+                </p>
+              <% end %>
               <% @section_recordings.each do |recording| %>
                 <% component = RecordingStudioPresskits.section_component_for(recording) %>
                 <% if component %>

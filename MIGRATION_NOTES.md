@@ -1,6 +1,10 @@
 # Upgrade notes
 
-## Unreleased
+## 0.14.0
+
+The kit header is the press kit: required `title`, optional `description`. It is not a child section.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. `recording_studio_press_kits` gains a nullable `description` text column. Existing kits keep their title and start with no description. Creating a kit still asks only for the name. The editor saves both fields with `revise`. A blank description is stored as nothing. 280 characters is the limit.
 
 Bump Accessible to `~> 0.11` (dummy tag `v0.11.1`). Run `bin/rails generate recording_studio_accessible:migrations`, then `bin/rails db:migrate`. Access `role` is a string (`view`, `edit`, `admin`). 0.8.0 adds `depends_on_recording_id`. 0.10.0 adds access invitations. Grant through `bootstrap_owner_access!` / `grant_access`; `RecordingStudio::Access` is readonly.
 
