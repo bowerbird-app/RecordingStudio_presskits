@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## Unreleased
+
+Bump Accessible to `~> 0.11` (dummy tag `v0.11.1`). Run `bin/rails generate recording_studio_accessible:migrations`, then `bin/rails db:migrate`. Access `role` is a string (`view`, `edit`, `admin`). 0.8.0 adds `depends_on_recording_id`. 0.10.0 adds access invitations. Grant through `bootstrap_owner_access!` / `grant_access`; `RecordingStudio::Access` is readonly.
+
+Bump Publishable to `~> 0.4` (dummy tag `v0.4.2`). Admin dummy tag `v2.0.4`. Attachable `v0.7.1`. Duplicatable `v0.4.3`. Orderable `v0.2.5`. Trashable `v0.4.4`. Root Switchable (dummy) `v0.5.3`. Recording Studio stays `v4.2.2`. FlatPack stays `v0.1.135`.
+
 ## 0.13.0
 
 Images editor uses Attachable's collection editor for each photo.

@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Point host and dummy Gemfiles at Recording Studio `v4.2.2`
+- Point sibling Recording Studio gems at current tags: Accessible `v0.11.1`, Admin `v2.0.4`, Attachable `v0.7.1`, Duplicatable `v0.4.3`, Orderable `v0.2.5`, Publishable `v0.4.2`, Trashable `v0.4.4`, and dummy Root Switchable `v0.5.3`. Leave FlatPack and this gem's version alone.
+- Gemspec constraints: Accessible `~> 0.11`, Publishable `~> 0.4`
+- Dummy Accessible roles are strings (`view` / `edit` / `admin`). Grants still go through `bootstrap_owner_access!` / `grant_access`. Accessible 0.8–0.11 migrations are in `test/dummy`.
+- Gem tests keep a tiny `Object#stub` helper because Minitest 6 dropped `minitest/mock`.
+
+### Upgrade notes
+- Bump `recording_studio_accessible` to `~> 0.11` and run `bin/rails generate recording_studio_accessible:migrations`. Access `role` becomes a string.
+- Bump `recording_studio_publishable` to `~> 0.4`.
+- Pin Admin, Attachable, Duplicatable, Orderable, Trashable, and Root Switchable to the tags above.
 
 ## [0.13.0] - 2026-10-02
 
