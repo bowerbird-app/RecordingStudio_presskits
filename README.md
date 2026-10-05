@@ -6,18 +6,18 @@ Kits sit under your workspace. You can have many. You publish the kit, not each 
 
 ## Install
 
-Add the gem next to Recording Studio 4.2, Accessible, Admin 2.0, Publishable 0.3, and the three mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.2, Accessible 0.11, Admin 2.0, Publishable 0.4, and the three mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
 gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.2"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.10.0"
-gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "2.0.0"
-gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "0.2.0"
-gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "0.4.0"
-gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "0.4.0"
-gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.3.1"
-gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"
+gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"
+gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"
+gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"
+gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"
+gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.4.2"
+gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.135"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
@@ -25,12 +25,12 @@ gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presski
 ```ruby
 # gemspec / host Gemfile constraints
 gem "recording_studio", "~> 4.2"
-gem "recording_studio_accessible", "~> 0.10"
+gem "recording_studio_accessible", "~> 0.11"
 gem "recording_studio_admin", "~> 2.0"
 gem "recording_studio_orderable", "~> 0.2"
 gem "recording_studio_trashable", "~> 0.4"
 gem "recording_studio_duplicatable", "~> 0.4"
-gem "recording_studio_publishable", "~> 0.3"
+gem "recording_studio_publishable", "~> 0.4"
 gem "recording_studio_attachable", "~> 0.7"
 gem "flat_pack", ">= 0.1.135"
 ```
@@ -258,15 +258,15 @@ Dummy kit pins:
 | Gem | Pin |
 |-----|-----|
 | Recording Studio | `v4.2.2` |
-| Accessible | `v0.10.0` |
-| Admin | `2.0.0` |
-| Root Switchable | `v0.5.0` |
+| Accessible | `v0.11.1` |
+| Admin | `v2.0.4` |
+| Root Switchable | `v0.5.3` |
 | FlatPack | `v0.1.135` |
-| Attachable | `v0.7.0` |
-| Orderable | `0.2.0` |
-| Trashable | `0.4.0` |
-| Duplicatable | `0.4.0` |
-| Publishable | `v0.3.1` |
+| Attachable | `v0.7.1` |
+| Orderable | `v0.2.5` |
+| Trashable | `v0.4.4` |
+| Duplicatable | `v0.4.3` |
+| Publishable | `v0.4.2` |
 
 Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The same override passes Flatpack `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, and this gem so that layout is not an unstyled box.
 
