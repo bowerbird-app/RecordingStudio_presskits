@@ -8,7 +8,7 @@
       <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
     </div>
 
-    <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg, align: :start) do %>
+    <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
       <div class="flex w-full min-w-0 flex-col gap-6">
         <%= render FlatPack::TextInput::Component.new(
           name: "press_kit[title]",
@@ -25,6 +25,20 @@
           max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT,
           class: "w-full"
         ) %>
+      </div>
+
+      <div class="min-w-0">
+        <%= render FlatPack::Card::Component.new(style: :default, id: "presskits-header-edit-preview", class: "w-full") do %>
+          <% if header_title.present? %>
+            <%= render FlatPack::PageTitle::Component.new(
+              title: header_title,
+              subtitle: header_description.presence,
+              variant: :h2
+            ) %>
+          <% elsif header_description.present? %>
+            <p class="text-sm font-medium text-(--surface-content-color)"><%= header_description %></p>
+          <% end %>
+        <% end %>
       </div>
     <% end %>
   <% end %>

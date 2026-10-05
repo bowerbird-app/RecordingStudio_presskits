@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Kit header.
 
 ### Added
-- A press kit has an optional short description, 280 characters at most. A blank one is stored as nothing. The kit editor lists Header with the sections. That row opens a screen for the title and short description. The row cannot be removed or reordered. The preview, the public page, and owner preview show the description under the title when it is present.
+- A press kit has an optional short description, 280 characters at most. A blank one is stored as nothing. The kit editor lists Header with the sections. That row opens a screen for the title and short description. The screen is a two-column grid: the fields, then a preview. The row cannot be removed or reordered. The kit preview, the public page, and owner preview show the description under the title when it is present.
 
 ### Changed
 - Renaming a kit moves from `PATCH press_kits/:id` to `PATCH press_kits/:press_kit_id/header`, which also saves the short description.

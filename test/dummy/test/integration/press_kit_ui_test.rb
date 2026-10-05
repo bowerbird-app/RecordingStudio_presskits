@@ -594,8 +594,20 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_operator form_html.index("Update"), :<, form_html.index('name="press_kit[title]"')
     grid_html = css_select("#presskits-header-actions ~ .grid").to_html
     assert_includes grid_html, "grid-cols-1"
-    refute_includes grid_html, "md:grid-cols-2"
-    refute_includes grid_html, "presskits-editor-preview"
+    assert_includes grid_html, "md:grid-cols-2"
+    columns = css_select("#presskits-header-actions ~ .grid > *")
+    assert_equal 2, columns.size
+    assert_includes columns.first.to_html, 'name="press_kit[title]"'
+    assert_includes columns.first.to_html, 'name="press_kit[description]"'
+    refute_includes columns.first.to_html, "presskits-header-edit-preview"
+    refute_includes columns.last.to_html, 'name="press_kit[title]"'
+    assert_includes columns.last.to_html, "presskits-header-edit-preview"
+    preview = css_select("#presskits-header-edit-preview").first
+    assert_includes preview["class"], "border-[var(--card-border-color)]"
+    assert_select "#presskits-header-edit-preview h2", text: "Spring launch"
+    assert_select "#presskits-header-edit-preview p", text: "Doors at noon."
+    refute_includes grid_html, ">Update<"
+    refute_includes grid_html, ">Cancel<"
     assert_select "button", text: "Remove", count: 0
   end
 

@@ -363,7 +363,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, 'text: "Update", style: :primary'
     assert_includes header, 'text: "Cancel", style: :default'
-    refute_includes header, "presskits-editor-preview"
+    assert_includes header, "cols: 2"
+    assert_includes header, 'id: "presskits-header-edit-preview"'
+    assert_operator header.index('name: "press_kit[title]"'), :<, header.index('id: "presskits-header-edit-preview"')
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
     refute_includes show, "SectionPickerComponent"
