@@ -12,9 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Kit header.
 
 ### Added
-- A press kit has an optional short description, 280 characters at most. A blank one is stored as nothing. The kit editor shows Title and Short description above the section list, with Save. The header is the kit, so it cannot be removed or reordered. The preview, the public page, and owner preview show the description under the title when it is present.
+- A press kit has an optional short description, 280 characters at most. A blank one is stored as nothing. The kit editor lists Header with the sections. That row opens a screen for the title and short description. The row cannot be removed or reordered. The preview, the public page, and owner preview show the description under the title when it is present.
 
 ### Changed
+- Renaming a kit moves from `PATCH press_kits/:id` to `PATCH press_kits/:press_kit_id/header`, which also saves the short description.
 - Version `0.14.0`
 - Point host and dummy Gemfiles at Recording Studio `v4.2.2`
 - Point sibling Recording Studio gems at current tags: Accessible `v0.11.1`, Admin `v2.0.4`, Attachable `v0.7.1`, Duplicatable `v0.4.3`, Orderable `v0.2.5`, Publishable `v0.4.2`, Trashable `v0.4.4`, and dummy Root Switchable `v0.5.3`. Leave FlatPack and this gem's version alone.

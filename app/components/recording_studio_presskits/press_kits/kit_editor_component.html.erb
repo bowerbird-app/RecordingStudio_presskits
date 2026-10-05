@@ -16,45 +16,33 @@
   <div id="presskits-editor-grid">
     <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
       <div class="flex min-w-0 flex-col gap-6">
-        <div id="presskits-kit-header">
-          <%= form_with url: helpers.press_kit_path(@press_kit_recording), method: :patch, local: true,
-                class: "flex w-full flex-col gap-4" do %>
-            <%= render FlatPack::TextInput::Component.new(
-              name: "press_kit[title]",
-              label: "Title",
-              value: header_title,
-              required: true
-            ) %>
-            <%= render FlatPack::TextArea::Component.new(
-              name: "press_kit[description]",
-              label: "Short description",
-              value: header_description,
-              placeholder: "One or two lines for the people who open this.",
-              character_count: true,
-              max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT,
-              class: "w-full"
-            ) %>
-            <%= render FlatPack::Button::Component.new(text: "Save", style: :default, type: "submit") %>
-          <% end %>
-        </div>
-
-        <% if @section_recordings.any? %>
-          <div
-            id="presskits-section-list"
-            data-controller="recording-studio-presskits--section-order"
-            data-action="list:reordered->recording-studio-presskits--section-order#save"
-            data-recording-studio-presskits--section-order-url-value="<%= @reorder_path %>"
-          >
-            <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
-              <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
-                <% @section_recordings.each do |recording| %>
-                  <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
-                    recording: recording,
-                    remove_path: @remove_path.call(recording),
-                    edit_path: @edit_path.call(recording)
-                  ) %>
-                <% end %>
+        <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+          <div id="presskits-kit-rows" class="<%= header_rule_class %>">
+            <div id="presskits-kit-header">
+              <%= render FlatPack::List::Component.new(class: "w-full") do %>
+                <%= render RecordingStudioPresskits::PressKits::HeaderRowComponent.new(
+                  edit_path: @header_edit_path
+                ) %>
               <% end %>
+            </div>
+
+            <% if @section_recordings.any? %>
+              <div
+                id="presskits-section-list"
+                data-controller="recording-studio-presskits--section-order"
+                data-action="list:reordered->recording-studio-presskits--section-order#save"
+                data-recording-studio-presskits--section-order-url-value="<%= @reorder_path %>"
+              >
+                <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
+                  <% @section_recordings.each do |recording| %>
+                    <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
+                      recording: recording,
+                      remove_path: @remove_path.call(recording),
+                      edit_path: @edit_path.call(recording)
+                    ) %>
+                  <% end %>
+                <% end %>
+              </div>
             <% end %>
           </div>
         <% end %>

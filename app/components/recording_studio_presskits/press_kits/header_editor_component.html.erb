@@ -1,0 +1,31 @@
+<div class="flex flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(title: "Header", variant: :h1) %>
+
+  <%= form_with url: helpers.press_kit_header_path(@press_kit_recording), method: :patch, local: true,
+        class: "flex flex-col gap-6" do %>
+    <div id="presskits-header-actions" class="flex flex-wrap items-center gap-3">
+      <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
+      <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
+    </div>
+
+    <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg, align: :start) do %>
+      <div class="flex w-full min-w-0 flex-col gap-6">
+        <%= render FlatPack::TextInput::Component.new(
+          name: "press_kit[title]",
+          label: "Title",
+          value: header_title,
+          required: true
+        ) %>
+        <%= render FlatPack::TextArea::Component.new(
+          name: "press_kit[description]",
+          label: "Short description",
+          value: header_description,
+          placeholder: "One or two lines for the people who open this.",
+          character_count: true,
+          max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT,
+          class: "w-full"
+        ) %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

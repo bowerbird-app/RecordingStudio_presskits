@@ -321,9 +321,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     index = File.read(
       File.expand_path("../app/components/recording_studio_presskits/press_kits/index_component.html.erb", __dir__)
     )
-    show = File.read(
-      File.expand_path("../app/components/recording_studio_presskits/press_kits/kit_editor_component.html.erb", __dir__)
-    )
+    components = File.expand_path("../app/components/recording_studio_presskits", __dir__)
+    show = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
 
     assert_includes index, 'title: "My presskits"'
     assert_includes index, 'text: "Presskit"'
@@ -344,14 +343,27 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::Table::Component"
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
+    header = File.read(File.expand_path("press_kits/header_editor_component.html.erb", components))
+    row = File.read(File.expand_path("press_kits/header_row_component.html.erb", components))
+
     assert_includes show, "SectionDropdownComponent"
     assert_includes show, "render_publishable_quick_actions"
+    assert_includes show, "HeaderRowComponent"
     assert_includes show, 'id="presskits-kit-header"'
-    assert_includes show, 'name: "press_kit[title]"'
-    assert_includes show, 'name: "press_kit[description]"'
-    assert_includes show, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
-    assert_includes show, 'text: "Save", style: :default'
     assert_operator show.index('id="presskits-kit-header"'), :<, show.index('id="presskits-section-list"')
+    refute_includes show, 'name: "press_kit[title]"'
+    refute_includes show, 'name: "press_kit[description]"'
+    refute_includes show, 'text: "Save"'
+    assert_includes row, 'id: "presskits-header-row"'
+    assert_includes row, 'link_to "Header"'
+    refute_includes row, "arrows-up-down"
+    refute_includes row, "trash"
+    assert_includes header, 'name: "press_kit[title]"'
+    assert_includes header, 'name: "press_kit[description]"'
+    assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
+    assert_includes header, 'text: "Update", style: :primary'
+    assert_includes header, 'text: "Cancel", style: :default'
+    refute_includes header, "presskits-editor-preview"
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
     refute_includes show, "SectionPickerComponent"
