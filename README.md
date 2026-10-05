@@ -10,7 +10,7 @@ Add the gem next to Recording Studio 4.2, Accessible, Admin 2.0, Publishable 0.3
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.2"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.10.0"
 gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "2.0.0"
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "0.2.0"
@@ -257,7 +257,7 @@ Dummy kit pins:
 
 | Gem | Pin |
 |-----|-----|
-| Recording Studio | `v4.2.0` |
+| Recording Studio | `v4.2.2` |
 | Accessible | `v0.10.0` |
 | Admin | `2.0.0` |
 | Root Switchable | `v0.5.0` |

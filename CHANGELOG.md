@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Point host and dummy Gemfiles at Recording Studio `v4.2.2`
+
 ## [0.13.0] - 2026-10-02
 
 Images editor.
