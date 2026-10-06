@@ -153,6 +153,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header button", count: 0
     refute_includes response.body, "0/280 characters"
     header_row = css_select("#presskits-header-row").first
+    assert_includes header_row.to_html, 'data-flat-pack--icon-name-value="bars-3-bottom-left"'
     refute_includes header_row.to_html, "arrows-up-down"
     refute_includes header_row.to_html, "trash"
     refute_includes css_select("#presskits-kit-rows").first["class"].to_s, "divide-y"
@@ -249,6 +250,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes css_select("#presskits-kit-rows").first["class"], "divide-y"
     header_row = css_select("#presskits-header-row").first
     assert_select header_row, "a", text: "Header"
+    assert_includes header_row.to_html, 'data-flat-pack--icon-name-value="bars-3-bottom-left"'
     refute_includes header_row.to_html, "arrows-up-down"
     refute_includes header_row.to_html, "trash"
     assert_select header_row, "button", count: 0

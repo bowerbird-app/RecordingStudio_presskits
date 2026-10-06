@@ -393,6 +393,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'name: "press_kit[description]"'
     refute_includes show, 'text: "Save"'
     assert_includes row, 'id: "presskits-header-row"'
+    assert_includes row, 'icon: "bars-3-bottom-left"'
     assert_includes row, 'link_to "Header"'
     refute_includes row, "arrows-up-down"
     refute_includes row, "trash"

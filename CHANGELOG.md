@@ -17,12 +17,14 @@ Kit sections.
 - The kit editor, the preview, and the public page walk kit sections. `SectionFrameComponent` renders the kit section title and subtitle, then the content component.
 - Reordering or removing a section targets the kit section. Duplicating a kit copies each kit section and the content under it.
 - When Recording Studio API is loaded, `create_section` and `reorder_sections` are press kit actions, and `remove_section` is a kit section action. They call `create_section!`, `recording_studio_orderable_reorder!`, and `recording_studio_trashable_trash!`.
+- The kit editor Header row uses Heroicon `bars-3-bottom-left`. Section rows keep `arrows-up-down`. Header still cannot be reordered or removed.
 - Version `0.17.0`
 
 ### Upgrade notes
 - Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. The migration is irreversible. It wraps legacy press-kit children in kit sections, copies their order, and drops the text title column and the images title and subtitle columns. A migrated quote section gets the kit section title Quotes. See `MIGRATION_NOTES.md`.
 - Add `RecordingStudioPresskits::KitSection` to `recordable_types`. Point content `allowed_parent_types` at `RecordingStudioPresskits::KitSection`.
 - Create sections with `RecordingStudioPresskits.create_section!`. API clients use the press kit action `create_section`, reorder with `reorder_sections`, and remove a kit section with `remove_section`. There is still no generic kit section create or destroy.
+- The Header row icon is `bars-3-bottom-left`. Hosts do not configure it.
 
 ## [0.16.0] - 2026-10-06
 
