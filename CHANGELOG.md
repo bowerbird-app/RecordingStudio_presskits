@@ -13,10 +13,12 @@ Images section heading.
 
 ### Changed
 - An images section has an optional title and subtitle instead of a section caption. A blank one is stored as nothing. The editor shows Title and Subtitle, each with its name, in column one. Column two is a preview of that section inside a FlatPack card, with no card header. The kit row stays Images. The kit preview and the public page show the title with FlatPack's section title and its anchor, and the subtitle under that title, when the title is set. Each photo still has its own caption, credit, and alt text.
+- A kit section is a type registered with `register_section`. Declaring the press kit as a parent does not make a recording a section. The editor, the preview, and the public page show registered sections. Other children stay under the kit. Reordering a section leaves those other children in place.
 - Version `0.16.0`
 
 ### Upgrade notes
 - Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. `recording_studio_images` drops `caption` and gains nullable `title` and `subtitle`. An existing section caption is copied into `title`. Subtitle starts empty. Photo captions stay on the attachment.
+- Register each host section with `RecordingStudioPresskits.register_section`. Keep `allowed_parent_types` so the recording can live under the kit. `excluded_picker_types` only hides a registered section from + Section.
 
 ## [0.15.0] - 2026-10-06
 

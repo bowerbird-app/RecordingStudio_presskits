@@ -57,20 +57,27 @@ module RecordingStudioPresskits
       end
 
       def register_text_section
-        register_section("RecordingStudioPresskits::Text", "RecordingStudioPresskits::Text")
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::Text",
+          component: "RecordingStudioPresskits::Text::Component",
+          editor: "RecordingStudioPresskits::Text::EditComponent"
+        )
       end
 
       def register_images_section
-        register_section("RecordingStudioPresskits::Images", "RecordingStudioPresskits::Images")
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::Images",
+          component: "RecordingStudioPresskits::Images::Component",
+          editor: "RecordingStudioPresskits::Images::EditComponent"
+        )
       end
 
       def register_quote_section
-        register_section("RecordingStudioPresskits::QuoteSection", "RecordingStudioPresskits::QuoteSection")
-      end
-
-      def register_section(type_name, component_name)
-        RecordingStudioPresskits.register_section_component(type_name, "#{component_name}::Component")
-        RecordingStudioPresskits.register_section_editor(type_name, "#{component_name}::EditComponent")
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::QuoteSection",
+          component: "RecordingStudioPresskits::QuoteSection::Component",
+          editor: "RecordingStudioPresskits::QuoteSection::EditComponent"
+        )
       end
     end
 

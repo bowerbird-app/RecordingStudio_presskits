@@ -571,6 +571,35 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal [quotes.id, hero.id], kit.recording_studio_orderable_children.map(&:id)
   end
 
+  test "dragging a section leaves a non-section child where it sits" do
+    kit = record_kit("Spring launch")
+    first = record_block(kit, "Hero")
+    result = RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: kit,
+      actor: @user,
+      attributes: { slug: "section-order-#{SecureRandom.hex(4)}", status: "published", meta_robots: "index,follow" }
+    )
+    raise result.error if result.failure?
+
+    second = record_block(kit, "Notes")
+    publishable = kit.recording_studio_orderable_children.find do |child|
+      child.recordable_type == "RecordingStudioPublishable::Publishable"
+    end
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_order_path(kit), params: {
+      recording_id: second.id,
+      before_recording_id: first.id
+    }
+    follow_redirect!
+
+    assert_response :success
+    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id)
+    assert_equal [second.id, publishable.id, first.id], kit.recording_studio_orderable_children.map(&:id)
+    refute_includes RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id), publishable.id
+  end
+
   test "dragging a section before another uses orderable and leaves a trashed sibling" do
     kit = record_kit("Spring launch")
     first = record_block(kit, "Hero")

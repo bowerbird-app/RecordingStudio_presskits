@@ -99,6 +99,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes source, "def press_kit_type_name"
     assert_includes source, "def picker_types"
+    assert_includes source, "def register_section"
+    assert_includes source, "def section_types"
+    assert_includes source, "def section?"
     assert_includes source, "RecordingStudio.recordable_type_name"
     assert_includes source, "RecordingStudio.declared_allowed_parent_types_for"
     assert_includes source, "excluded_picker_types"
@@ -191,6 +194,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("dummy/config/initializers/recording_studio_presskits.rb", __dir__)
     )
     assert_includes presskits_initializer, "excluded_picker_types"
+    assert_includes presskits_initializer, 'register_section("FakeBlock"'
     assert_includes presskits_initializer, '"FakeBlock"'
     assert_includes initializer_source, '"AdminRoot"'
     assert_includes initializer_source, '"RecordingStudioPublishable::Publishable"'
@@ -328,6 +332,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     query = File.read(File.expand_path("../lib/recording_studio_presskits/kit_query.rb", __dir__))
     assert_includes query, "recording_studio_trashable_active"
     assert_includes query, "def live_children"
+    assert_includes query, "def child_ids_with_section_order"
+    assert_includes query, "section_types"
+    refute_includes query, "RecordingStudioPublishable::Publishable"
     assert_includes query, "def live_child"
     assert_includes query, "def published_kits"
     assert_includes query, "PressKit.indexable"

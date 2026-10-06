@@ -36,6 +36,7 @@ class ConfigurationTest < Minitest::Test
     assert_equal "Workspace", configuration.parent_root_type
     assert_equal :authenticate_user!, configuration.authentication_method
     assert_equal :current_user, configuration.current_actor_method
+    assert_equal [], configuration.section_types
     assert_equal({}, configuration.section_components)
     assert_equal({}, configuration.section_editors)
     assert_equal({}, configuration.to_h.fetch(:section_editors))
@@ -64,6 +65,18 @@ class ConfigurationTest < Minitest::Test
     RecordingStudioPresskits.configure
 
     assert_kind_of RecordingStudioPresskits::Configuration, RecordingStudioPresskits.configuration
+  end
+
+  def test_register_section_keeps_the_type_on_the_configuration
+    RecordingStudioPresskits.register_section("PresskitsRegisteredSection", component: "PresskitsRegisteredSection::Component")
+
+    assert_includes RecordingStudioPresskits.section_types, "PresskitsRegisteredSection"
+    assert_equal "PresskitsRegisteredSection::Component",
+                 RecordingStudioPresskits.configuration.section_components["PresskitsRegisteredSection"]
+    assert_includes RecordingStudioPresskits.configuration.to_h.fetch(:section_types), "PresskitsRegisteredSection"
+  ensure
+    RecordingStudioPresskits.configuration.section_types.delete("PresskitsRegisteredSection")
+    RecordingStudioPresskits.configuration.section_components.delete("PresskitsRegisteredSection")
   end
 
   def test_section_components_can_be_registered

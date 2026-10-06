@@ -37,21 +37,37 @@ module RecordingStudioPresskits
       RecordingStudio.recordable_type_name(PressKit)
     end
 
-    # Host-registered types whose allowed_parent_types include PressKit.
-    # Later addons opt in solely via their declaration. This gem does not
-    # keep a list of section types.
+    # Registered section types that can be recorded under a press kit.
+    # Declaring the kit as a parent does not make a type a section.
     def picker_types
       parent_type = press_kit_type_name
       excluded = Array(configuration.excluded_picker_types).map(&:to_s)
-
-      RecordingStudio.configuration.recordable_types.filter_map do |type|
-        type_name = RecordingStudio.recordable_type_name(type)
-        next if type_name.blank?
-        next if excluded.include?(type_name)
-        next unless RecordingStudio.declared_allowed_parent_types_for(type_name).include?(parent_type)
-
-        type_name
+      registered = RecordingStudio.configuration.recordable_types.filter_map do |type|
+        RecordingStudio.recordable_type_name(type)
       end
+
+      section_types.select do |type_name|
+        next false if excluded.include?(type_name)
+        next false unless registered.include?(type_name)
+
+        RecordingStudio.declared_allowed_parent_types_for(type_name).include?(parent_type)
+      end
+    end
+
+    def section_types
+      Array(configuration.section_types).filter_map { |type| RecordingStudio.recordable_type_name(type) }.uniq
+    end
+
+    def section?(recording_or_type)
+      section_types.include?(section_type_name(recording_or_type))
+    end
+
+    def register_section(type_name, component: nil, editor: nil)
+      name = RecordingStudio.recordable_type_name(type_name).to_s
+      configuration.section_types = (section_types + [name]).uniq
+      register_section_component(name, component) if component.present?
+      register_section_editor(name, editor) if editor.present?
+      name
     end
 
     def register_section_component(type_name, component)

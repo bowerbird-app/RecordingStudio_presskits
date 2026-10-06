@@ -25,7 +25,7 @@
 
 - Writes go through `record`, `revise`, and `log_event!`. Reorder, trash, and duplicate go through the mixin APIs. Publish through Publishable's services.
 - Do not invent an ACL. Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits. Mixin writes authorize through Accessible.
-- Later section addons opt in via `allowed_parent_types: ["RecordingStudioPresskits::PressKit"]`. Do not keep a hardcoded picker list. Picker uses declared parent types only. Text is `RecordingStudioPresskits::Text`. Images is `RecordingStudioPresskits::Images`.
+- A section is registered with `RecordingStudioPresskits.register_section`. Declaring `allowed_parent_types: ["RecordingStudioPresskits::PressKit"]` only lets the recording live under the kit. The picker is registered sections that declare that parent, minus `excluded_picker_types`. Text is `RecordingStudioPresskits::Text`. Images is `RecordingStudioPresskits::Images`.
 - Orderable is on PressKit (the parent). Trashable is on PressKit, Text, Images, Attachment, and dummy FakeBlock. Duplicatable and Publishable are on PressKit only. Attachable is on Images only.
 - Enable those mixins with `include RecordingStudio::Capabilities::<Name>.to(...)` only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path.
 - Public lists use `PressKit.indexable`. Do not invent a second published query.

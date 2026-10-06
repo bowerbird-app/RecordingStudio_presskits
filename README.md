@@ -168,15 +168,21 @@ RecordingStudioPresskits::PressKit.indexable
 
 Prefer `RecordingStudio::Recording.recording_studio_trashable_active` over a host `default_scope`, unless the host already needs one for queries.
 
-Section addons opt in solely by declaring PressKit as a parent. This gem does not keep a list of block types. The add dropdown lists whatever the host has **declared** — capability children such as Publishable stay off that list. Test-only placeholders stay off it too:
+A section is a registered type. Declaring the press kit as a parent lets a recording live under the kit. It does not make that recording a section. Text, Images, and Quotes are registered by this gem. A later addon registers its own type and still names the press kit as a parent so it can be recorded there. + Section lists registered sections that declare that parent, minus `excluded_picker_types`. The kit editor, the preview, and the public page show registered sections only. A comment, an access grant, a photo, and the publish recording can sit under the kit and stay off that list.
 
 ```ruby
+RecordingStudioPresskits.register_section(
+  "SomeSection",
+  component: "SomeSection::Component",
+  editor: "SomeSection::Editor"
+)
+
 RecordingStudioPresskits.configure do |config|
   config.excluded_picker_types = ["FakeBlock"]
 end
 
 RecordingStudioPresskits.picker_types
-# => types whose declared allowed_parent_types include RecordingStudioPresskits::PressKit
+# => registered section types whose declared allowed_parent_types include the press kit
 #    minus excluded_picker_types
 ```
 
@@ -188,13 +194,7 @@ Images stores an optional title and subtitle. A blank one is stored as nothing. 
 
 Quotes stores nothing on the section. Each quote is a child recording with `body`, `name`, and optional `role` and `organisation`. The section page uses the shared section editor. + Quote and Cancel sit in that action row, above the grid. + Quote is a primary button with a Heroicons plus icon and the label Quote. Column one is an orderable list. Column two, the kit preview, and the public page render each saved quote with `FlatPack::Quote::Component` at `size: :lg`. The citation is the name, role, and organisation. The row shows the quote, truncated to the column, with the name underneath. A blank quote uses Quote on the first line. A blank name leaves the second line off. + Quote opens that quote's edit screen. Orderable is on the quote section for its quotes. Attachable is on Quote for one image, and the upload stays on the quote screen. Publishable stays off both. A blank body is left off the preview and the public page. Add `"RecordingStudioPresskits::QuoteSection"` and `"RecordingStudioPresskits::Quote"` to `recordable_types` and migrate. Quote stays off the + Section menu because its parent is the quote section.
 
-The kit editor's preview column and the public page walk children in order and render each type's component. Text, Images, and Quotes are registered. A later addon still registers its own component.
-
-```ruby
-RecordingStudioPresskits.register_section_component("SomeSection", "SomeSection::Component")
-
-RecordingStudioPresskits.register_section_editor("SomeSection", "SomeSection::Editor")
-```
+The kit editor's preview column and the public page walk registered sections in order and render each type's component. Text, Images, and Quotes are registered. A later addon registers its own section with `register_section`.
 
 A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Define `preview?` and return false to hide the preview and use one full-width column. Define `form?` and return false to skip the shared section form and the Update button. An editor can still define `section_actions` and return a component. The section editor renders that in the action row above the grid. Text uses `RecordingStudioPresskits::Text::EditComponent`, `param_key` `:text`, and `preview?` false. Images uses `RecordingStudioPresskits::Images::EditComponent`, `param_key` `:images`, and `preview?` true. The preview card has no header. Quotes uses `RecordingStudioPresskits::QuoteSection::EditComponent`, `param_key` `:quote_section`, and `form?` false. It keeps the default two-column preview. `section_actions` returns + Quote and Cancel.
 

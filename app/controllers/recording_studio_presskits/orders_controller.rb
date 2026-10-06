@@ -32,19 +32,30 @@ module RecordingStudioPresskits
     end
 
     def reorder_by_ids
+      save_section_order(ordered_recording_ids)
+    end
+
+    def reorder_by_move
+      save_section_order(moved_section_ids(move_child))
+    end
+
+    def save_section_order(section_ids)
       @press_kit_recording.recording_studio_orderable_reorder!(
-        ordered_recording_ids: ordered_recording_ids,
+        ordered_recording_ids: KitQuery.child_ids_with_section_order(@press_kit_recording, section_ids),
         actor: presskits_actor
       )
     end
 
-    def reorder_by_move
-      child = move_child
-      @press_kit_recording.recording_studio_orderable_move!(
-        child,
-        to_index: orderable_insertion_index(child),
-        actor: presskits_actor
-      )
+    def moved_section_ids(child)
+      ids = section_sibling_ids
+      ids.delete(child.id.to_s)
+      ids.insert(insertion_index(ids), child.id.to_s)
+    end
+
+    def section_sibling_ids
+      @press_kit_recording.recording_studio_orderable_children.filter_map do |recording|
+        recording.id.to_s if RecordingStudioPresskits.section?(recording)
+      end
     end
 
     def ordered_recording_ids
@@ -63,18 +74,11 @@ module RecordingStudioPresskits
       Integer(value, exception: false) || 0
     end
 
-    def orderable_insertion_index(child)
-      sibling_ids = sibling_ids_without(child)
+    def insertion_index(sibling_ids)
       return index_after(sibling_ids, params[:after_recording_id]) if params[:after_recording_id].present?
       return index_before(sibling_ids, params[:before_recording_id]) if params[:before_recording_id].present?
 
       move_index
-    end
-
-    def sibling_ids_without(child)
-      ids = @press_kit_recording.recording_studio_orderable_children.map { |recording| recording.id.to_s }
-      ids.delete(child.id.to_s)
-      ids
     end
 
     def index_after(sibling_ids, recording_id)
