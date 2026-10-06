@@ -1,12 +1,21 @@
-<%= render FlatPack::TextArea::Component.new(
-  name: "text[body]",
-  value: @text.body,
-  required: true,
-  class: "w-full",
-  rich_text: true,
-  rich_text_options: {
-    preset: :content,
-    toolbar: :standard,
-    character_count: true
-  }
-) %>
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::TextInput::Component.new(
+    name: "text[title]",
+    value: @text.title,
+    label: "Title",
+    class: "w-full"
+  ) %>
+  <%= render FlatPack::TextArea::Component.new(
+    name: "text[body]",
+    value: @text.body,
+    label: "Body",
+    required: true,
+    class: "w-full",
+    rich_text: true,
+    rich_text_options: {
+      preset: :content,
+      toolbar: :standard,
+      character_count: true
+    }
+  ) %>
+</div>

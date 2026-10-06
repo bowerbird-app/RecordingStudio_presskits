@@ -222,12 +222,32 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
     assert_equal kit_recording, text_recording.parent_recording
     assert_kind_of RecordingStudioPresskits::Text, text_recording.recordable
-    assert_equal "Opening line", text_recording.recordable.title
+    assert_nil text_recording.recordable.title
 
     error = assert_raises(RecordingStudio::InvalidParent) do
       root_recording.record(RecordingStudioPresskits::Text) { |text| text.body = "Wrong parent" }
     end
     assert_equal "RecordingStudioPresskits::Text cannot be recorded under Workspace", error.message
+  end
+
+  test "text title is stored and a blank title is nothing" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Text Title Workspace")))
+    kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+
+    named = kit_recording.record(RecordingStudioPresskits::Text, parent_recording: kit_recording) do |text|
+      text.title = "Bio"
+      text.body = "Opening line\nMore"
+    end
+    blank = kit_recording.record(RecordingStudioPresskits::Text, parent_recording: kit_recording) do |text|
+      text.title = "   "
+      text.body = "Still here"
+    end
+
+    assert_equal "Bio", named.recordable.title
+    refute_equal "Opening line", named.recordable.title
+    assert_nil blank.recordable.title
   end
 
   test "images is allowed under a press kit and uses attachable" do

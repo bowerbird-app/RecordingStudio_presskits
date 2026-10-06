@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.13.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.14.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_exists
@@ -351,5 +351,25 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, "SectionPickerComponent"
     refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"
+  end
+
+  def test_text_editor_names_title_and_body
+    editor = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/edit_component.html.erb", __dir__)
+    )
+    component = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/edit_component.rb", __dir__)
+    )
+    show = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/component.html.erb", __dir__)
+    )
+
+    assert_includes editor, 'label: "Title"'
+    assert_includes editor, 'label: "Body"'
+    assert_includes editor, 'name: "text[title]"'
+    assert_includes editor, 'name: "text[body]"'
+    assert_operator editor.index('name: "text[title]"'), :<, editor.index('name: "text[body]"')
+    assert_includes component, "%i[title body]"
+    assert_includes show, 'id="presskits-text-title"'
   end
 end

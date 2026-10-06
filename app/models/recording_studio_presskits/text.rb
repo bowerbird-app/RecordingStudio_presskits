@@ -18,27 +18,22 @@ module RecordingStudioPresskits
 
     validates :body, presence: true
 
+    before_validation :clear_blank_title
     before_validation :sanitize_body
 
     def self.opening_body
       OPENING_BODY
     end
 
-    def title
-      plain = ActionController::Base.helpers.strip_tags(body_with_breaks)
-      plain.strip.lines.first.to_s.strip.truncate(80).presence
-    end
-
     private
+
+    def clear_blank_title
+      self.title = title.to_s.strip.presence
+    end
 
     def sanitize_body
       cleaned = body.to_s.gsub(%r{<(script|style)\b[^>]*>.*?</\1>}mi, "")
       self.body = FlatPack::RichTextSanitizer.sanitize(cleaned).to_s
-    end
-
-    def body_with_breaks
-      with_breaks = body.to_s.gsub(%r{</(?:h[1-6]|p|li|div|blockquote)>}i, "\n")
-      with_breaks.gsub(%r{<br\s*/?>}i, "\n")
     end
   end
 end
