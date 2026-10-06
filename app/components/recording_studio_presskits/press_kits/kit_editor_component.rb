@@ -19,9 +19,16 @@ module RecordingStudioPresskits
         @picker_types.map do |type_name|
           {
             id: type_name,
-            label: RecordingStudio.recordable_type_label(type_name)
+            label: RecordingStudio.recordable_type_label(type_name),
+            icon: section_menu_icon_for(type_name)
           }
         end
+      end
+
+      private
+
+      def section_menu_icon_for(type_name)
+        type_name.to_s.safe_constantize.try(:section_menu_icon).presence
       end
     end
   end

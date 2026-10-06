@@ -8,6 +8,10 @@ module RecordingStudioPresskits
                                 root: false,
                                 allowed_parent_types: ["RecordingStudioPresskits::PressKit"]
 
+    def self.section_menu_icon
+      "photo"
+    end
+
     include RecordingStudio::Capabilities::Trashable.to
     include RecordingStudio::Capabilities::Attachable.to(
       allowed_content_types: ["image/*"],

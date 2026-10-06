@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.13.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.14.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_exists
@@ -351,5 +351,47 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, "SectionPickerComponent"
     refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"
+  end
+
+  def test_section_dropdown_passes_a_menu_icon
+    dropdown = File.read(presskits_path(
+                           "app/components/recording_studio_presskits/press_kits/section_dropdown_component.html.erb"
+                         ))
+    editor = File.read(presskits_path("app/components/recording_studio_presskits/press_kits/kit_editor_component.rb"))
+    text = File.read(presskits_path("app/models/recording_studio_presskits/text.rb"))
+    images = File.read(presskits_path("app/models/recording_studio_presskits/images.rb"))
+    quotes = File.read(presskits_path("app/models/recording_studio_presskits/quote_section.rb"))
+
+    assert_includes dropdown, "icon: item[:icon]"
+    assert_includes editor, "section_menu_icon_for"
+    assert_includes text, '"document-text"'
+    assert_includes images, '"photo"'
+    assert_includes quotes, '"chat-bubble-bottom-center-text"'
+  end
+
+  def presskits_path(relative)
+    File.expand_path("../#{relative}", __dir__)
+  end
+
+  def test_text_editor_names_title_and_body
+    editor = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/edit_component.html.erb", __dir__)
+    )
+    component = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/edit_component.rb", __dir__)
+    )
+    show = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/component.html.erb", __dir__)
+    )
+
+    assert_includes editor, 'label: "Title"'
+    assert_includes editor, 'label: "Body"'
+    assert_includes editor, 'name: "text[title]"'
+    assert_includes editor, 'name: "text[body]"'
+    assert_operator editor.index('name: "text[title]"'), :<, editor.index('name: "text[body]"')
+    assert_includes component, "%i[title body]"
+    assert_includes show, "FlatPack::SectionTitle::Component"
+    assert_includes show, "anchor_link: true"
+    refute_includes show, "gap-4"
   end
 end
