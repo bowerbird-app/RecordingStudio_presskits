@@ -191,6 +191,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     controller = File.read(Rails.root.join("app/controllers/application_controller.rb"))
 
     assert_includes layout, '<html data-theme="rounded">'
+    assert_includes layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes layout, "page_nav_options[:anchor_href]"
     assert_includes layout, "anchor_tooltip:"
     refute_includes layout, "page_nav_options[:anchor_url]"

@@ -10,7 +10,7 @@ The kit editor lists Header with the sections. That row opens `GET press_kits/:p
 
 A dummy database migrated on 0.14.0 already has `20261006120000` (text section title). This release keeps that migration file, so migrate and rollback can see it. Do not delete it to clear the error.
 
-Bump FlatPack to `>= 0.1.198` (dummy tag `v0.1.198`).
+Bump FlatPack to `>= 0.1.198` (dummy tag `v0.1.198`). Link `stylesheet_link_tag "flat_pack/application"` beside `flat_pack/variables` on host layouts. FlatPack 0.1.198 paints a primary button from that sheet. The public blank layout already links it. Dummy sign-in and the default layout do too.
 
 Bump Accessible to `~> 0.11` (dummy tag `v0.11.1`). Run `bin/rails generate recording_studio_accessible:migrations`, then `bin/rails db:migrate`. Access `role` is a string (`view`, `edit`, `admin`). 0.8.0 adds `depends_on_recording_id`. 0.10.0 adds access invitations. Grant through `bootstrap_owner_access!` / `grant_access`; `RecordingStudio::Access` is readonly.
 

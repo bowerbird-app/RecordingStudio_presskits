@@ -123,6 +123,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes default_layout, "Sign in"
     refute_includes default_layout, "root_switch"
     assert_includes default_layout, '<html data-theme="rounded">'
+    assert_includes default_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
     assert_includes default_layout, "anchor_tooltip:"
     refute_includes default_layout, "page_nav_options[:anchor_url]"
@@ -147,6 +148,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes application_layout, '<html data-theme="rounded">'
     assert_includes application_layout, 'stylesheet_link_tag "flat_pack/variables"'
+    assert_includes application_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes application_layout, "javascript_importmap_tags"
     assert_includes application_layout, "min-h-screen"
     refute_includes application_layout, "mt-28"
@@ -261,9 +263,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes public_show, "recording_studio_page_nav"
     refute_includes public_show, "page_nav"
     refute_includes public_show, "Sign in"
-    assert File.exist?(
+    blank_layout = File.read(
       File.expand_path("../app/views/layouts/recording_studio_presskits/blank.html.erb", __dir__)
     )
+    assert_includes blank_layout, 'stylesheet_link_tag "flat_pack/application"'
 
     helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/application_helper.rb", __dir__))
     assert_includes helper, "recording_studio_accessible_avatars"

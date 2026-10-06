@@ -26,7 +26,7 @@ Kit header.
 
 ### Upgrade notes
 - Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. `recording_studio_press_kits` gains a nullable `description`. Existing kits keep their title and start with no description. If the dummy database was migrated on 0.14.0, this also restores `20261006120000` (text section title) so migrate and rollback can see that file.
-- Bump FlatPack to at least `0.1.198`.
+- Bump FlatPack to at least `0.1.198`. Link `stylesheet_link_tag "flat_pack/application"` beside `flat_pack/variables` on host layouts. That sheet paints primary buttons. The public blank layout already links it.
 - Bump `recording_studio_accessible` to `~> 0.11` and run `bin/rails generate recording_studio_accessible:migrations`. Access `role` becomes a string.
 - Bump `recording_studio_publishable` to `~> 0.4`.
 - Pin Admin, Attachable, Duplicatable, Orderable, Trashable, and Root Switchable to the tags above.
