@@ -297,6 +297,13 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute_includes types, "RecordingStudioAttachable::Attachment"
   end
 
+  test "shipped sections name a menu icon" do
+    assert_equal "document-text", RecordingStudioPresskits::Text.section_menu_icon
+    assert_equal "photo", RecordingStudioPresskits::Images.section_menu_icon
+    assert_equal "chat-bubble-bottom-center-text", RecordingStudioPresskits::QuoteSection.section_menu_icon
+    assert_nil FakeBlock.try(:section_menu_icon)
+  end
+
   test "accessible is enabled on workspace and admin root" do
     assert RecordingStudio.capability_enabled?(:accessible, for: "Workspace")
     assert RecordingStudio.capability_enabled?(:accessible, for: "AdminRoot")

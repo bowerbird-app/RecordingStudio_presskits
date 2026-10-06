@@ -353,6 +353,26 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes index, "Dummy host"
   end
 
+  def test_section_dropdown_passes_a_menu_icon
+    dropdown = File.read(presskits_path(
+                           "app/components/recording_studio_presskits/press_kits/section_dropdown_component.html.erb"
+                         ))
+    editor = File.read(presskits_path("app/components/recording_studio_presskits/press_kits/kit_editor_component.rb"))
+    text = File.read(presskits_path("app/models/recording_studio_presskits/text.rb"))
+    images = File.read(presskits_path("app/models/recording_studio_presskits/images.rb"))
+    quotes = File.read(presskits_path("app/models/recording_studio_presskits/quote_section.rb"))
+
+    assert_includes dropdown, "icon: item[:icon]"
+    assert_includes editor, "section_menu_icon_for"
+    assert_includes text, '"document-text"'
+    assert_includes images, '"photo"'
+    assert_includes quotes, '"chat-bubble-bottom-center-text"'
+  end
+
+  def presskits_path(relative)
+    File.expand_path("../#{relative}", __dir__)
+  end
+
   def test_text_editor_names_title_and_body
     editor = File.read(
       File.expand_path("../app/components/recording_studio_presskits/text/edit_component.html.erb", __dir__)

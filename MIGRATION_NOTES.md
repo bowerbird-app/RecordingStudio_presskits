@@ -4,6 +4,8 @@
 
 A text section has an optional `title`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. `recording_studio_texts` gains a nullable `title` text column. Existing sections start with no title. A blank title is stored as nothing. The editor labels are Title and Body. The kit row stays the section type. The kit preview and the public page show the title with FlatPack's section title and its anchor when it is present. The title is no longer taken from the first line of the body.
 
+The + Section menu shows a Heroicon beside Text (`document-text`), Images (`photo`), and Quotes (`chat-bubble-bottom-center-text`). A host section can define `self.section_menu_icon`. No migration for the icons.
+
 ## Unreleased
 
 Bump Accessible to `~> 0.11` (dummy tag `v0.11.1`). Run `bin/rails generate recording_studio_accessible:migrations`, then `bin/rails db:migrate`. Access `role` is a string (`view`, `edit`, `admin`). 0.8.0 adds `depends_on_recording_id`. 0.10.0 adds access invitations. Grant through `bootstrap_owner_access!` / `grant_access`; `RecordingStudio::Access` is readonly.

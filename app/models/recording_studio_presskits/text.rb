@@ -14,6 +14,10 @@ module RecordingStudioPresskits
                                 root: false,
                                 allowed_parent_types: ["RecordingStudioPresskits::PressKit"]
 
+    def self.section_menu_icon
+      "document-text"
+    end
+
     include RecordingStudio::Capabilities::Trashable.to
 
     validates :body, presence: true

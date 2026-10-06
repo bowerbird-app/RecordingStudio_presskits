@@ -156,6 +156,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes section_button["class"], "bg-[var(--button-primary-background-color)]"
     refute_select "button#presskits-section-dropdown[disabled]"
     assert_select "a[href*='type=RecordingStudioPresskits%3A%3AText']", text: "Text"
+    assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
+    assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
+    assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")
     actions_html = css_select("#presskits-editor-actions").to_html
     assert_operator actions_html.index("presskits-section-dropdown"), :<, actions_html.index("publishable_quick_actions_")
     grid_html = css_select("#presskits-editor-grid").to_html
@@ -876,6 +879,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_section_menu_icon(type_name, icon_name)
+    link = css_select("a[href*='type=#{ERB::Util.url_encode(type_name)}']").first
+    assert link, "expected a + Section item for #{type_name}"
+    assert_select link, "[data-flat-pack--icon-name-value='#{icon_name}']"
+  end
 
   def quotes_editor_grid
     css_select(".grid").find { |node| node["class"].to_s.include?("md:grid-cols-2") }

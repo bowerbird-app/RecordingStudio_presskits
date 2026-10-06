@@ -27,6 +27,7 @@ Text section title.
 - A text section has an optional title. A blank one is stored as nothing. The text editor shows Title and Body, each with its name. The kit preview and the public page show that title with FlatPack's section title and its anchor when it is set. The kit row stays Text.
 
 ### Changed
+- + Section menu items show a Heroicon beside Text, Images, and Quotes.
 - Version `0.14.0`
 
 ### Upgrade notes
