@@ -372,5 +372,6 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes component, "%i[title body]"
     assert_includes show, "FlatPack::SectionTitle::Component"
     assert_includes show, "anchor_link: true"
+    refute_includes show, "gap-4"
   end
 end
