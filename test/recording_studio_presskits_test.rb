@@ -4,7 +4,19 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.14.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.15.0", ::RecordingStudioPresskits::VERSION
+  end
+
+  def test_engine_and_dummy_keep_header_and_text_title_migrations
+    root = File.expand_path("..", __dir__)
+    [
+      "db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
+      "db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
+      "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb"
+    ].each do |path|
+      assert File.exist?(File.join(root, path)), path
+    end
   end
 
   def test_engine_exists
@@ -20,7 +32,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.135"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.198"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
@@ -33,7 +45,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.135"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.198"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -371,5 +383,47 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, "SectionPickerComponent"
     refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"
+  end
+
+  def test_section_dropdown_passes_a_menu_icon
+    dropdown = File.read(presskits_path(
+                           "app/components/recording_studio_presskits/press_kits/section_dropdown_component.html.erb"
+                         ))
+    editor = File.read(presskits_path("app/components/recording_studio_presskits/press_kits/kit_editor_component.rb"))
+    text = File.read(presskits_path("app/models/recording_studio_presskits/text.rb"))
+    images = File.read(presskits_path("app/models/recording_studio_presskits/images.rb"))
+    quotes = File.read(presskits_path("app/models/recording_studio_presskits/quote_section.rb"))
+
+    assert_includes dropdown, "icon: item[:icon]"
+    assert_includes editor, "section_menu_icon_for"
+    assert_includes text, '"document-text"'
+    assert_includes images, '"photo"'
+    assert_includes quotes, '"chat-bubble-bottom-center-text"'
+  end
+
+  def presskits_path(relative)
+    File.expand_path("../#{relative}", __dir__)
+  end
+
+  def test_text_editor_names_title_and_body
+    editor = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/edit_component.html.erb", __dir__)
+    )
+    component = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/edit_component.rb", __dir__)
+    )
+    show = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/text/component.html.erb", __dir__)
+    )
+
+    assert_includes editor, 'label: "Title"'
+    assert_includes editor, 'label: "Body"'
+    assert_includes editor, 'name: "text[title]"'
+    assert_includes editor, 'name: "text[body]"'
+    assert_operator editor.index('name: "text[title]"'), :<, editor.index('name: "text[body]"')
+    assert_includes component, "%i[title body]"
+    assert_includes show, "FlatPack::SectionTitle::Component"
+    assert_includes show, "anchor_link: true"
+    refute_includes show, "gap-4"
   end
 end

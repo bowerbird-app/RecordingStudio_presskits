@@ -14,8 +14,9 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     css = Rails.root.join("app/assets/builds/tailwind.css").read
 
     assert_includes css, "max-w-6xl"
-    assert_includes css, "button-ghost-background-color"
+    assert_includes css, "button-focus-ring-color"
     assert_includes css, "surface-subtle-background-color"
+    assert_includes css, "radius-lg"
   end
 
   test "dummy app validates recordable declarations" do
@@ -47,6 +48,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute connection.column_exists?(:recording_studio_press_kits, :updated_at)
     assert connection.table_exists?(:recording_studio_texts)
     assert connection.column_exists?(:recording_studio_texts, :body)
+    assert connection.column_exists?(:recording_studio_texts, :title)
     assert connection.table_exists?(:recording_studio_images)
     assert connection.column_exists?(:recording_studio_images, :caption)
     refute connection.column_exists?(:recording_studio_images, :updated_at)

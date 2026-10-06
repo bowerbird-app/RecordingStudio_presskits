@@ -161,9 +161,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-editor-actions span", text: "Section"
     assert_select "#presskits-editor-actions [data-flat-pack--icon-name-value='plus']", count: 1
     section_button = css_select("#presskits-section-dropdown button").first
-    assert_includes section_button["class"], "bg-[var(--button-primary-background-color)]"
+    assert_equal "primary", section_button["data-fp-style"]
+    assert_includes section_button["class"], "fp-button"
     refute_select "button#presskits-section-dropdown[disabled]"
     assert_select "a[href*='type=RecordingStudioPresskits%3A%3AText']", text: "Text"
+    assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
+    assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
+    assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")
     actions_html = css_select("#presskits-editor-actions").to_html
     assert_operator actions_html.index("presskits-section-dropdown"), :<, actions_html.index("publishable_quick_actions_")
     grid_html = css_select("#presskits-editor-grid").to_html
@@ -204,8 +208,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header a[href='#{header_path}']", text: "Header"
     assert_select "#presskits-kit-header input", count: 0
     assert_select "#presskits-kit-header textarea", count: 0
+    assert_select "input[name='press_kit[title]']", count: 0
+    assert_select "button", text: "Save", count: 0
+    assert_includes response.body, "presskits-section-dropdown"
+    empty_section_button = css_select("#presskits-section-dropdown button").first
+    assert_equal "primary", empty_section_button["data-fp-style"]
+    assert_includes empty_section_button["class"], "fp-button"
     assert_select "#presskits-section-list", count: 0
-    assert_includes css_select("#presskits-section-dropdown button").first["class"], "bg-[var(--button-primary-background-color)]"
     assert_select "#presskits-editor-preview", count: 0
     assert_includes response.body, "Preview"
     refute_includes response.body, "No sections yet"
@@ -233,7 +242,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal "recording-studio-presskits--section-order", shell["data-controller"]
     assert_includes shell["data-action"], "list:reordered->recording-studio-presskits--section-order#save"
     assert_equal recording_studio_presskits.press_kit_order_path(kit), shell["data-recording-studio-presskits--section-order-url-value"]
-    list_card = css_select("#presskits-editor-grid .rounded-lg").find { |node| node.at_css("#presskits-kit-header") }
+    list_card = css_select("#presskits-editor-grid [class*='rounded-']").find { |node| node.at_css("#presskits-kit-header") }
     assert list_card
     assert_includes list_card["class"], "border-[var(--card-border-color)]"
     assert list_card.at_css("#presskits-section-list")
@@ -246,7 +255,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute css_select("#presskits-section-list #presskits-header-row").any?
     list = css_select("#presskits-section-list [role='list']").first
     assert_equal "flat-pack--list-orderable", list["data-controller"]
-    assert_includes list["class"], "divide-y"
+    assert_includes list["class"], "flat-pack-list--orderable"
+    assert_includes list["class"], "flat-pack-list-divided"
     items = css_select("#presskits-section-list [role='listitem']")
     assert_equal [hero.id, quotes.id], items.map { |item| item["id"] }
     items.each do |item|
@@ -392,7 +402,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Section added."
     assert_page_nav_without_access
+    assert_nil section.recordable.title
     assert_equal RecordingStudioPresskits::Text.opening_body, section.recordable.body
+    assert_select "label", text: "Title"
+    assert_select "label", text: "Body"
+    assert_select "input[name='text[title]']"
+    assert_nil css_select("input[name='text[title]']").first["value"]
     assert_select "input[type=hidden][name='text[body]'][value=?]", RecordingStudioPresskits::Text.opening_body
     assert_includes response.body, "&quot;preset&quot;:&quot;content&quot;"
     assert_includes response.body, "&quot;toolbar&quot;:&quot;standard&quot;"
@@ -407,9 +422,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Save", count: 0
     cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node| node.text.include?("Cancel") }
     assert_includes cancel.text, "Cancel"
-    assert_includes cancel["class"], "bg-[var(--button-default-background-color)]"
+    assert_equal "default", cancel["data-fp-style"]
+    assert_includes cancel["class"], "fp-button"
     form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
-    assert_operator form_html.index("Update"), :<, form_html.index("name=\"text[body]\"")
+    assert_operator form_html.index("Update"), :<, form_html.index("name=\"text[title]\"")
+    assert_operator form_html.index(">Title<"), :<, form_html.index(">Body<")
+    assert_operator form_html.index("name=\"text[title]\""), :<, form_html.index("name=\"text[body]\"")
     grid_html = css_select("#presskits-section-actions ~ .grid").to_html
     assert_includes grid_html, "grid-cols-1"
     refute_includes grid_html, "md:grid-cols-2"
@@ -424,8 +442,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Could not save that section."
     assert_equal RecordingStudioPresskits::Text.opening_body, section.reload.recordable.body
 
+    original_id = section.recordable_id
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
       text: {
+        title: "Launch notes",
         body: "<h2>Set list</h2><p>Line two</p><script>alert(1)</script>",
         decoy: "nope"
       }
@@ -433,11 +453,21 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     follow_redirect!
     assert_response :success
-    assert_includes section.reload.recordable.body, "<h2>Set list</h2>"
+    section.reload
+    refute_equal original_id, section.recordable_id
+    assert_equal "Launch notes", section.recordable.title
+    assert_nil RecordingStudioPresskits::Text.find(original_id).title
+    assert_includes section.recordable.body, "<h2>Set list</h2>"
     assert_includes section.recordable.body, "<p>Line two</p>"
     refute_match(/<script/i, section.recordable.body)
     refute_includes section.recordable.body, "alert(1)"
     refute_includes section.recordable.attributes.values, "nope"
+    assert_select "title", text: "Launch notes"
+    assert_select "h1", text: "Text"
+    assert_select "input[name='text[title]'][value=?]", "Launch notes"
+    assert_select "label", text: "Title"
+    assert_select "label", text: "Body"
+    assert_select "h2", text: "Launch notes", count: 0
     assert_select "h2", text: "Set list", count: 0
     assert_select "p", text: "Line two", count: 0
     assert_select ".flat-pack-richtext--view-mode", count: 0
@@ -446,8 +476,25 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text"
+    assert_select ".fp-section-title#launch-notes h2", text: "Launch notes"
+    assert_select ".fp-section-title#launch-notes" do |titles|
+      refute_includes titles.first.parent["class"].to_s, "gap-4"
+    end
+    assert_select "a[href='#launch-notes'][aria-label='Copy link to Launch notes']"
+    assert_select "[data-controller='flat-pack--section-title-anchor']"
     assert_select "h2", text: "Set list"
     assert_select "p", text: "Line two"
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      text: { title: "   ", body: section.recordable.body }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_nil section.reload.recordable.title
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select ".fp-section-title", count: 0
+    assert_select "h2", text: "Set list"
   end
 
   test "dropdown rejects dummy fake block types" do
@@ -584,11 +631,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "/280 characters"
     update = css_select("#presskits-header-actions button[type=submit]").first
     assert_equal "Update", update.text.squish
-    assert_includes update["class"], "bg-[var(--button-primary-background-color)]"
+    assert_equal "primary", update["data-fp-style"]
+    assert_includes update["class"], "fp-button"
     cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node|
       node.text.include?("Cancel")
     }
-    assert_includes cancel["class"], "bg-[var(--button-default-background-color)]"
+    assert_equal "default", cancel["data-fp-style"]
+    assert_includes cancel["class"], "fp-button"
     form = css_select("form[action='#{recording_studio_presskits.press_kit_header_path(kit)}']").first
     form_html = form.to_html
     assert_operator form_html.index("Update"), :<, form_html.index('name="press_kit[title]"')
@@ -1038,6 +1087,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_section_menu_icon(type_name, icon_name)
+    link = css_select("a[href*='type=#{ERB::Util.url_encode(type_name)}']").first
+    assert link, "expected a + Section item for #{type_name}"
+    assert_select link, "[data-flat-pack--icon-name-value='#{icon_name}']"
+  end
 
   def quotes_editor_grid
     css_select(".grid").find { |node| node["class"].to_s.include?("md:grid-cols-2") }

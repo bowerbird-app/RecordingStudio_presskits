@@ -95,9 +95,16 @@ module RecordingStudioPresskits
       label = params[:title].presence || RecordingStudio.recordable_type_label(type_name)
 
       @press_kit_recording.record(klass, parent_recording: @press_kit_recording) do |recordable|
-        recordable.title = label if recordable.respond_to?(:title=)
+        assign_section_title(recordable, label)
         assign_opening_body(recordable, label)
       end
+    end
+
+    def assign_section_title(recordable, label)
+      return unless recordable.respond_to?(:title=)
+      return if recordable.is_a?(Text) && params[:title].blank?
+
+      recordable.title = params[:title].presence || label
     end
 
     def assign_opening_body(recordable, label)
