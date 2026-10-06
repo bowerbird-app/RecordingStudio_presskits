@@ -640,7 +640,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes columns.first.to_html, 'name="images[title]"'
     assert_includes columns.first.to_html, 'name="images[subtitle]"'
     refute_includes columns.last.to_html, 'name="images[title]"'
-    assert_select "#presskits-section-preview h2", text: "Preview"
+    refute_select "#presskits-section-preview h2", text: "Preview"
+    refute_includes columns.last.text, "Preview"
     assert_includes response.body, "No images yet."
     refute_includes response.body, ">Save<"
     assert_select "form[data-controller='recording-studio-attachable--upload']", count: 1
@@ -668,7 +669,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Images"
     assert_select "input[name='images[title]'][value='Press photos']"
     assert_select "input[name='images[subtitle]'][value='Doors at noon']"
-    assert_select "#presskits-section-preview h2", text: "Preview"
+    refute_select "#presskits-section-preview h2", text: "Preview"
     assert_select "#presskits-section-preview .fp-section-title h2", text: "Press photos"
     assert_select "#presskits-section-preview .fp-section-title", text: /Doors at noon/
 

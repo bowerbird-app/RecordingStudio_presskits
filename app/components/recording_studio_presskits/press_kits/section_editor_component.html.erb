@@ -23,7 +23,7 @@
 
       <% if show_preview? %>
         <div class="min-w-0" id="presskits-section-preview">
-          <% section_preview = capture do %>
+          <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
             <% component = RecordingStudioPresskits.section_component_for(@recording) %>
             <% if component %>
               <%= render component.new(recording: @recording) %>
@@ -31,21 +31,6 @@
               <p class="text-sm font-medium text-(--surface-content-color)">
                 <%= helpers.presskits_title_for(@recording) %>
               </p>
-            <% end %>
-          <% end %>
-          <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do |card| %>
-            <% if preview_card_title.present? %>
-              <% card.header do %>
-                <%= render FlatPack::PageTitle::Component.new(
-                  title: preview_card_title,
-                  variant: :h2
-                ) %>
-              <% end %>
-              <% card.body do %>
-                <%= section_preview %>
-              <% end %>
-            <% else %>
-              <%= section_preview %>
             <% end %>
           <% end %>
         </div>

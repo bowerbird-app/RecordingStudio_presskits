@@ -32,13 +32,6 @@ module RecordingStudioPresskits
         show_preview? ? 2 : 1
       end
 
-      def preview_card_title
-        return unless editor_class
-        return unless editor_view.respond_to?(:preview_card_title)
-
-        editor_view.preview_card_title
-      end
-
       def editor_view
         @editor_view ||= editor_class&.new(recording: @recording, update_path: @update_path)
       end

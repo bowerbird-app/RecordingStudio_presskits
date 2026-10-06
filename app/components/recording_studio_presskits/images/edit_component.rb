@@ -22,10 +22,6 @@ module RecordingStudioPresskits
         true
       end
 
-      def preview_card_title
-        "Preview"
-      end
-
       def attachment_collection_options
         {
           association: :images,
