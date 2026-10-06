@@ -1,8 +1,5 @@
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: kit_title,
-    variant: :h1
-  ) %>
+  <%= render FlatPack::PageTitle::Component.new(**page_title_options) %>
 
   <% if preview? && !live? %>
     <%= render FlatPack::Alert::Component.new(

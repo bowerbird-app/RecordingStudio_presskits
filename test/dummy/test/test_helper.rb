@@ -12,6 +12,7 @@ module RoundedDefaultLayoutAssertions
     assert_select "body[data-theme='rounded']", count: 1
     assert_includes response.body, "/assets/tailwind"
     assert_includes response.body, "/assets/flat_pack/variables"
+    assert_includes response.body, "/assets/flat_pack/application"
   end
 
   def assert_page_nav_close(href: "/recording_studio_presskits/press_kits")
@@ -52,6 +53,7 @@ module RoundedDefaultLayoutAssertions
     refute_includes response.body, "+ Access"
     assert_includes response.body, "/assets/tailwind"
     assert_includes response.body, "/assets/flat_pack/variables"
+    assert_includes response.body, "/assets/flat_pack/application"
   end
 
 end

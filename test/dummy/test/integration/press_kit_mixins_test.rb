@@ -148,6 +148,8 @@ class PressKitMixinsTest < ActiveSupport::TestCase
 
   test "duplicate a press kit in place including its fake block child" do
     kit = record_press_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
+    kit.reload
     record_fake_block(kit, "Hero")
 
     original_title = kit.recordable.title
@@ -157,6 +159,8 @@ class PressKitMixinsTest < ActiveSupport::TestCase
     assert_equal @root, duplicate.root_recording
     assert_kind_of RecordingStudioPresskits::PressKit, duplicate.recordable
     assert_equal "#{original_title} (Copy)", duplicate.recordable.title
+    assert_equal "Doors at noon.", duplicate.recordable.description
+    assert_equal "Doors at noon.", kit.reload.recordable.description
     refute_equal kit.id, duplicate.id
     assert_equal 1, duplicate.events.where(action: "duplicated").count
 

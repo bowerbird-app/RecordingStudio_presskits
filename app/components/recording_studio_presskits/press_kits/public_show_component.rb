@@ -15,6 +15,16 @@ module RecordingStudioPresskits
         recordable&.try(:title).presence || @press_kit_recording&.try(:name).presence || "Press kit"
       end
 
+      def kit_description
+        @press_kit_recording&.recordable&.try(:description).to_s.strip.presence
+      end
+
+      def page_title_options
+        options = { title: kit_title, variant: :h1 }
+        options[:subtitle] = kit_description if kit_description.present?
+        options
+      end
+
       def section_title(recording)
         recordable = recording&.recordable
         recordable&.try(:title).presence || recording&.try(:name).presence || recording&.type_label

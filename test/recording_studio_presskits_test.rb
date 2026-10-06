@@ -4,7 +4,21 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.15.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.16.0", ::RecordingStudioPresskits::VERSION
+  end
+
+  def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
+    root = File.expand_path("..", __dir__)
+    [
+      "db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
+      "db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
+      "db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
+      "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
+      "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb"
+    ].each do |path|
+      assert File.exist?(File.join(root, path)), path
+    end
   end
 
   def test_engine_exists
@@ -20,7 +34,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.135"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.198"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
@@ -33,7 +47,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.135"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.198"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -111,6 +125,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes default_layout, "Sign in"
     refute_includes default_layout, "root_switch"
     assert_includes default_layout, '<html data-theme="rounded">'
+    assert_includes default_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
     assert_includes default_layout, "anchor_tooltip:"
     refute_includes default_layout, "page_nav_options[:anchor_url]"
@@ -135,6 +150,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes application_layout, '<html data-theme="rounded">'
     assert_includes application_layout, 'stylesheet_link_tag "flat_pack/variables"'
+    assert_includes application_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes application_layout, "javascript_importmap_tags"
     assert_includes application_layout, "min-h-screen"
     refute_includes application_layout, "mt-28"
@@ -249,9 +265,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes public_show, "recording_studio_page_nav"
     refute_includes public_show, "page_nav"
     refute_includes public_show, "Sign in"
-    assert File.exist?(
+    blank_layout = File.read(
       File.expand_path("../app/views/layouts/recording_studio_presskits/blank.html.erb", __dir__)
     )
+    assert_includes blank_layout, 'stylesheet_link_tag "flat_pack/application"'
 
     helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/application_helper.rb", __dir__))
     assert_includes helper, "recording_studio_accessible_avatars"
@@ -321,9 +338,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     index = File.read(
       File.expand_path("../app/components/recording_studio_presskits/press_kits/index_component.html.erb", __dir__)
     )
-    show = File.read(
-      File.expand_path("../app/components/recording_studio_presskits/press_kits/kit_editor_component.html.erb", __dir__)
-    )
+    components = File.expand_path("../app/components/recording_studio_presskits", __dir__)
+    show = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
 
     assert_includes index, 'title: "My presskits"'
     assert_includes index, 'text: "Presskit"'
@@ -344,8 +360,29 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::Table::Component"
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
+    header = File.read(File.expand_path("press_kits/header_editor_component.html.erb", components))
+    row = File.read(File.expand_path("press_kits/header_row_component.html.erb", components))
+
     assert_includes show, "SectionDropdownComponent"
     assert_includes show, "render_publishable_quick_actions"
+    assert_includes show, "HeaderRowComponent"
+    assert_includes show, 'id="presskits-kit-header"'
+    assert_operator show.index('id="presskits-kit-header"'), :<, show.index('id="presskits-section-list"')
+    refute_includes show, 'name: "press_kit[title]"'
+    refute_includes show, 'name: "press_kit[description]"'
+    refute_includes show, 'text: "Save"'
+    assert_includes row, 'id: "presskits-header-row"'
+    assert_includes row, 'link_to "Header"'
+    refute_includes row, "arrows-up-down"
+    refute_includes row, "trash"
+    assert_includes header, 'name: "press_kit[title]"'
+    assert_includes header, 'name: "press_kit[description]"'
+    assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
+    assert_includes header, 'text: "Update", style: :primary'
+    assert_includes header, 'text: "Cancel", style: :default'
+    assert_includes header, "cols: 2"
+    assert_includes header, 'id: "presskits-header-edit-preview"'
+    assert_operator header.index('name: "press_kit[title]"'), :<, header.index('id: "presskits-header-edit-preview"')
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
     refute_includes show, "SectionPickerComponent"

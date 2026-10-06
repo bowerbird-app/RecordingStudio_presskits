@@ -1,0 +1,7 @@
+<%= render FlatPack::List::Item.new(id: "presskits-header-row", hover: true) do %>
+  <div class="flex w-full flex-wrap items-center justify-between gap-3">
+    <div class="min-w-0 flex-1">
+      <%= link_to "Header", @edit_path, class: "text-sm font-medium text-(--surface-content-color)" %>
+    </div>
+  </div>
+<% end %>

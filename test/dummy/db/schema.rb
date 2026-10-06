@@ -145,6 +145,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_140000) do
   create_table "recording_studio_press_kits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "title", null: false
+    t.text "description"
   end
 
   create_table "recording_studio_publishable_publishables", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
