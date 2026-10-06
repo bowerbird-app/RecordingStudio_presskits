@@ -1,8 +1,9 @@
 <div class="flex flex-col gap-4">
   <% if section_title.present? %>
-    <div id="presskits-text-title">
-      <%= render FlatPack::PageTitle::Component.new(title: section_title, variant: :h2) %>
-    </div>
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: section_title,
+      anchor_link: true
+    ) %>
   <% end %>
 
   <div class="flat-pack-richtext--view-mode">

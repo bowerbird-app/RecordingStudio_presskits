@@ -370,6 +370,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, 'name: "text[body]"'
     assert_operator editor.index('name: "text[title]"'), :<, editor.index('name: "text[body]"')
     assert_includes component, "%i[title body]"
-    assert_includes show, 'id="presskits-text-title"'
+    assert_includes show, "FlatPack::SectionTitle::Component"
+    assert_includes show, "anchor_link: true"
   end
 end

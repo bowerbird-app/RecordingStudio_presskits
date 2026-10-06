@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Text section title.
 
 ### Added
-- A text section has an optional title. A blank one is stored as nothing. The text editor shows Title and Body, each with its name. The kit preview and the public page show that title above the text when it is set. The kit row stays Text.
+- A text section has an optional title. A blank one is stored as nothing. The text editor shows Title and Body, each with its name. The kit preview and the public page show that title with FlatPack's section title and its anchor when it is set. The kit row stays Text.
 
 ### Changed
 - Version `0.14.0`

@@ -2,7 +2,7 @@
 
 ## 0.14.0
 
-A text section has an optional `title`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. `recording_studio_texts` gains a nullable `title` text column. Existing sections start with no title. A blank title is stored as nothing. The editor labels are Title and Body. The kit row stays the section type. The kit preview and the public page show the title above the body when it is present. The title is no longer taken from the first line of the body.
+A text section has an optional `title`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. `recording_studio_texts` gains a nullable `title` text column. Existing sections start with no title. A blank title is stored as nothing. The editor labels are Title and Body. The kit row stays the section type. The kit preview and the public page show the title with FlatPack's section title and its anchor when it is present. The title is no longer taken from the first line of the body.
 
 ## Unreleased
 

@@ -441,7 +441,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text"
-    assert_select "#presskits-text-title h2", text: "Launch notes"
+    assert_select ".fp-section-title#launch-notes h2", text: "Launch notes"
+    assert_select "a[href='#launch-notes'][aria-label='Copy link to Launch notes']"
+    assert_select "[data-controller='flat-pack--section-title-anchor']"
     assert_select "h2", text: "Set list"
     assert_select "p", text: "Line two"
 
@@ -453,7 +455,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "#presskits-text-title", count: 0
+    assert_select ".fp-section-title", count: 0
     assert_select "h2", text: "Set list"
   end
 
