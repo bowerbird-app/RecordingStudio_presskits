@@ -19,7 +19,11 @@ module RecordingStudioPresskits
       end
 
       def self.preview?
-        false
+        true
+      end
+
+      def preview_card_title
+        "Preview"
       end
 
       def attachment_collection_options

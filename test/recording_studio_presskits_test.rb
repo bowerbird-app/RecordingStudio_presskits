@@ -388,6 +388,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "FlatPack::SectionTitle::Component"
     assert_includes show, "anchor_link: true"
     assert_includes show, "subtitle: subtitle"
+    assert_includes component, "def self.preview?"
+    assert_includes component, "true"
+    assert_includes component, "preview_card_title"
+    assert_includes component, '"Preview"'
   end
 
   def test_text_editor_names_title_and_body

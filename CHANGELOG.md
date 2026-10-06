@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Images section heading.
 
 ### Changed
-- An images section has an optional title and subtitle instead of a section caption. A blank one is stored as nothing. The editor shows Title and Subtitle, each with its name. The kit row stays Images. The kit preview and the public page show the title with FlatPack's section title and its anchor, and the subtitle under that title, when the title is set. Each photo still has its own caption, credit, and alt text.
+- An images section has an optional title and subtitle instead of a section caption. A blank one is stored as nothing. The editor shows Title and Subtitle, each with its name, in column one. Column two is a preview of that section inside a FlatPack card titled Preview. The kit row stays Images. The kit preview and the public page show the title with FlatPack's section title and its anchor, and the subtitle under that title, when the title is set. Each photo still has its own caption, credit, and alt text.
 - Version `0.15.0`
 
 ### Upgrade notes

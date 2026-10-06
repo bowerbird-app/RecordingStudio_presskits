@@ -633,6 +633,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[name='images[subtitle]']"
     refute_select "input[name='images[caption]']"
     assert_operator response.body.index('name="images[title]"'), :<, response.body.index('name="images[subtitle]"')
+    assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
+    grid = images_editor_grid
+    columns = grid.element_children
+    assert_equal 2, columns.size
+    assert_includes columns.first.to_html, 'name="images[title]"'
+    assert_includes columns.first.to_html, 'name="images[subtitle]"'
+    refute_includes columns.last.to_html, 'name="images[title]"'
+    assert_select "#presskits-section-preview h2", text: "Preview"
     assert_includes response.body, "No images yet."
     refute_includes response.body, ">Save<"
     assert_select "form[data-controller='recording-studio-attachable--upload']", count: 1
@@ -660,6 +668,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Images"
     assert_select "input[name='images[title]'][value='Press photos']"
     assert_select "input[name='images[subtitle]'][value='Doors at noon']"
+    assert_select "#presskits-section-preview h2", text: "Preview"
+    assert_select "#presskits-section-preview .fp-section-title h2", text: "Press photos"
+    assert_select "#presskits-section-preview .fp-section-title", text: /Doors at noon/
 
     attachment = attach_image(section, "stage.jpg")
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
@@ -904,6 +915,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
   def quotes_editor_grid
     css_select(".grid").find { |node| node["class"].to_s.include?("md:grid-cols-2") }
+  end
+
+  def images_editor_grid
+    css_select(".grid").find do |node|
+      node["id"] != "presskits-editor-grid" && node["class"].to_s.include?("md:grid-cols-2")
+    end
   end
 
   def quote_section(kit)
