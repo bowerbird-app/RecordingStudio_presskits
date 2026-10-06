@@ -60,7 +60,10 @@ module RecordingStudioPresskits
         RecordingStudioPresskits.register_section(
           "RecordingStudioPresskits::Text",
           component: "RecordingStudioPresskits::Text::Component",
-          editor: "RecordingStudioPresskits::Text::EditComponent"
+          editor: "RecordingStudioPresskits::Text::EditComponent",
+          prepare: lambda { |recordable, **|
+            recordable.body = RecordingStudioPresskits::Text.opening_body if recordable.body.blank?
+          }
         )
       end
 

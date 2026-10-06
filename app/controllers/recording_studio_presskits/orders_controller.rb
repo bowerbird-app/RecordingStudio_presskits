@@ -41,7 +41,7 @@ module RecordingStudioPresskits
 
     def save_section_order(section_ids)
       @press_kit_recording.recording_studio_orderable_reorder!(
-        ordered_recording_ids: KitQuery.child_ids_with_section_order(@press_kit_recording, section_ids),
+        ordered_recording_ids: section_ids,
         actor: presskits_actor
       )
     end
@@ -66,7 +66,7 @@ module RecordingStudioPresskits
       child_id = params[:recording_id].presence || params[:id].presence
       return if child_id.blank?
 
-      KitQuery.live_child(@press_kit_recording, child_id)
+      KitQuery.section_for(@press_kit_recording, child_id)
     end
 
     def move_index

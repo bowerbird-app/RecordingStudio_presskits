@@ -7,4 +7,10 @@ RecordingStudioPresskits.configure do |config|
   config.excluded_picker_types = ["FakeBlock"]
 end
 
-RecordingStudioPresskits.register_section("FakeBlock", component: "FakeBlock::Component")
+RecordingStudioPresskits.register_section(
+  "FakeBlock",
+  component: "FakeBlock::Component",
+  prepare: lambda { |recordable, title: nil, **|
+    recordable.title = title.presence || recordable.title.presence || "Block"
+  }
+)

@@ -8,7 +8,7 @@ module RecordingStudioPresskits
                                 root: false,
                                 allowed_parent_types: [RecordingStudioPresskits.parent_root_type]
 
-    include RecordingStudio::Capabilities::Orderable.to
+    include RecordingStudio::Capabilities::Orderable.to(allows: ["RecordingStudioPresskits::KitSection"])
     include RecordingStudio::Capabilities::Trashable.to
     include RecordingStudio::Capabilities::Duplicatable.to(
       suffix: " (Copy)",

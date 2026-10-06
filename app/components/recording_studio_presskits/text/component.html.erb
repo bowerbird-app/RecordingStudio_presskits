@@ -1,16 +1,7 @@
-<div>
-  <% if section_title.present? %>
-    <%= render FlatPack::SectionTitle::Component.new(
-      title: section_title,
-      anchor_link: true
-    ) %>
-  <% end %>
-
-  <div class="flat-pack-richtext--view-mode">
-    <div class="flat-pack-richtext-editor">
-      <div class="ProseMirror">
-        <%= body_html %>
-      </div>
+<div class="flat-pack-richtext--view-mode">
+  <div class="flat-pack-richtext-editor">
+    <div class="ProseMirror">
+      <%= body_html %>
     </div>
   </div>
 </div>

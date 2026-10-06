@@ -15,10 +15,10 @@ module RecordingStudioPresskits
 
     private
 
-    attr_reader :section_recording
+    attr_reader :section_recording, :quote_section_recording
 
     def apply_reorder
-      if QuoteOrder.new(section_recording, params).apply(presskits_actor)
+      if QuoteOrder.new(quote_section_recording, params).apply(presskits_actor)
         redirect_to section_edit_path, notice: "Order saved."
       else
         redirect_to section_edit_path, alert: "Nothing to reorder."
@@ -32,8 +32,9 @@ module RecordingStudioPresskits
     def set_section
       return if performed?
 
-      @section_recording = KitQuery.live_child(@press_kit_recording, params[:section_id])
-      return if @section_recording&.recordable.is_a?(QuoteSection)
+      @section_recording = KitQuery.section_for(@press_kit_recording, params[:section_id])
+      @quote_section_recording = KitQuery.section_content(@section_recording)
+      return if @quote_section_recording&.recordable.is_a?(QuoteSection)
 
       head :not_found
     end

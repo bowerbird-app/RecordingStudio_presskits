@@ -5,7 +5,7 @@ module RecordingStudioPresskits
     def show
       @press_kit_recording = @parent_recording
       @press_kit = @parent_recordable
-      @section_recordings = KitQuery.live_children(@press_kit_recording)
+      @section_recordings = KitQuery.sections_for(@press_kit_recording)
     end
   end
 end

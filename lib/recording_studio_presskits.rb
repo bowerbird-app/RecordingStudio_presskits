@@ -12,6 +12,9 @@ require "recording_studio_presskits/version"
 require "recording_studio_presskits/engine"
 require "recording_studio_presskits/configuration"
 require "recording_studio_presskits/kit_query"
+require "recording_studio_presskits/section_composer"
+require "recording_studio_presskits/legacy_section_tree"
+require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/admin"
 require "recording_studio_presskits/api"
 require "recording_studio_presskits/quote_order"
@@ -31,16 +34,12 @@ module RecordingStudioPresskits
       configuration.parent_root_type.presence || "Workspace"
     end
 
-    # Core 4.2 stores type names as the class name. There is no declaration alias,
-    # so later section addons must use this exact string as a parent.
     def press_kit_type_name
       RecordingStudio.recordable_type_name(PressKit)
     end
 
-    # Registered section types that can be recorded under a press kit.
-    # Declaring the kit as a parent does not make a type a section.
     def picker_types
-      parent_type = press_kit_type_name
+      parent_type = KitSection.name
       excluded = Array(configuration.excluded_picker_types).map(&:to_s)
       registered = RecordingStudio.configuration.recordable_types.filter_map do |type|
         RecordingStudio.recordable_type_name(type)
@@ -59,15 +58,33 @@ module RecordingStudioPresskits
     end
 
     def section?(recording_or_type)
-      section_types.include?(section_type_name(recording_or_type))
+      section_type_name(recording_or_type) == KitSection.name
     end
 
-    def register_section(type_name, component: nil, editor: nil)
+    def create_section!(press_kit_recording:, content_type:, actor: nil, title: nil, subtitle: nil)
+      SectionComposer.create!(
+        press_kit_recording: press_kit_recording,
+        content_type: content_type,
+        actor: actor,
+        title: title,
+        subtitle: subtitle
+      )
+    end
+
+    def register_section(type_name, component: nil, editor: nil, prepare: nil)
       name = RecordingStudio.recordable_type_name(type_name).to_s
       configuration.section_types = (section_types + [name]).uniq
       register_section_component(name, component) if component.present?
       register_section_editor(name, editor) if editor.present?
+      configuration.section_prepares[name] = prepare if prepare
       name
+    end
+
+    def prepare_section_content(type_name, recordable, title: nil)
+      handler = configuration.section_prepares[section_type_name(type_name)]
+      return unless handler
+
+      handler.call(recordable, title: title)
     end
 
     def register_section_component(type_name, component)

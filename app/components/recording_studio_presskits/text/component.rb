@@ -8,10 +8,6 @@ module RecordingStudioPresskits
         @text = recording.recordable
       end
 
-      def section_title
-        @text.title.to_s.strip.presence
-      end
-
       def body_html
         FlatPack::RichTextSanitizer.sanitize(@text.body.to_s)
       end

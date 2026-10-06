@@ -6,7 +6,6 @@ module RecordingStudioPresskits
       def initialize(recording:, update_path:)
         super()
         @recording = recording
-        @images = recording.recordable
         @update_path = update_path
       end
 
@@ -15,7 +14,7 @@ module RecordingStudioPresskits
       end
 
       def self.permitted_attributes
-        %i[title subtitle]
+        []
       end
 
       def self.preview?
@@ -46,8 +45,16 @@ module RecordingStudioPresskits
         view.recording_studio_attachable.recording_attachment_imports_path(
           @recording,
           redirect_mode: "return_to",
-          return_to: view.edit_press_kit_section_path(@recording.parent_recording, @recording)
+          return_to: view.edit_press_kit_section_path(press_kit_recording, kit_section_recording)
         )
+      end
+
+      def kit_section_recording
+        @recording.parent_recording
+      end
+
+      def press_kit_recording
+        kit_section_recording.parent_recording
       end
 
       def capability_options

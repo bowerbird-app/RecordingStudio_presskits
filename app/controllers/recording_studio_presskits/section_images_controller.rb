@@ -33,7 +33,7 @@ module RecordingStudioPresskits
     def section_recording
       return @section_recording if defined?(@section_recording)
 
-      @section_recording = KitQuery.live_child(@press_kit_recording, params[:section_id])
+      @section_recording = KitQuery.section_for(@press_kit_recording, params[:section_id])
     end
 
     def attachment_recording
@@ -43,13 +43,19 @@ module RecordingStudioPresskits
     end
 
     def find_attachment_recording
-      return unless section_recording
+      images = images_recording
+      return unless images
 
-      section_recording.recordings_query(
+      images.recordings_query(
         include_children: true,
         type: "RecordingStudioAttachable::Attachment",
-        parent_id: section_recording.id
+        parent_id: images.id
       ).where(trashed_at: nil).find_by(id: params[:id])
+    end
+
+    def images_recording
+      content = KitQuery.section_content(section_recording)
+      content if content&.recordable.is_a?(Images)
     end
 
     def section_edit_path

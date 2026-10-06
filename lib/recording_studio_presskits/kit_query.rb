@@ -30,46 +30,38 @@ module RecordingStudioPresskits
                  .reorder(created_at: :desc)
       end
 
-      def live_children(parent_recording)
-        return RecordingStudio::Recording.none if parent_recording.blank?
+      def sections_for(press_kit_recording)
+        return RecordingStudio::Recording.none if press_kit_recording.blank?
 
-        types = RecordingStudioPresskits.section_types
-        return RecordingStudio::Recording.none if types.empty?
-
-        parent_recording.recording_studio_orderable_children.merge(
-          RecordingStudio::Recording.recording_studio_trashable_active
-        ).where(recordable_type: types)
+        ordered_active_children(press_kit_recording).where(recordable_type: KitSection.name)
       end
 
-      # Section ids in the requested order, with every other child left in its slot.
-      def child_ids_with_section_order(parent_recording, section_ids)
-        children = parent_recording.recording_studio_orderable_children.to_a
-        queue = ordered_sections(children, section_ids)
-
-        children.map { |child| child_id_in_section_order(child, queue) }
-      end
-
-      def ordered_sections(children, section_ids)
-        sections = children.select { |child| RecordingStudioPresskits.section?(child) }
-        sections_by_id = sections.index_by { |child| child.id.to_s }
-        requested = requested_section_ids(section_ids, sections_by_id)
-        requested.map { |id| sections_by_id.fetch(id) } + sections.reject { |child| requested.include?(child.id.to_s) }
-      end
-
-      def requested_section_ids(section_ids, sections_by_id)
-        Array(section_ids).map(&:to_s).uniq.select { |id| sections_by_id.key?(id) }
-      end
-
-      def child_id_in_section_order(child, queue)
-        return queue.shift.id.to_s if RecordingStudioPresskits.section?(child)
-
-        child.id.to_s
-      end
-
-      def live_child(parent_recording, id)
+      def section_for(press_kit_recording, id)
         return if id.blank?
 
-        live_children(parent_recording).find_by(id: id)
+        sections_for(press_kit_recording).find_by(id: id)
+      end
+
+      def section_content(section_recording)
+        return if section_recording.blank?
+
+        children = active_children(section_recording)
+        registered = children.where(recordable_type: RecordingStudioPresskits.section_types)
+        registered.first || children.first
+      end
+
+      private
+
+      def ordered_active_children(parent_recording)
+        parent_recording.recording_studio_orderable_children.merge(
+          RecordingStudio::Recording.recording_studio_trashable_active
+        )
+      end
+
+      def active_children(parent_recording)
+        parent_recording.child_recordings
+                        .merge(RecordingStudio::Recording.recording_studio_trashable_active)
+                        .order(:recording_studio_orderable_position, :created_at, :id)
       end
     end
   end

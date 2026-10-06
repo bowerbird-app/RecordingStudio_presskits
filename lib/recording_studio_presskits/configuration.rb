@@ -3,7 +3,7 @@
 module RecordingStudioPresskits
   class Configuration
     attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
-                  :section_components, :section_editors, :excluded_picker_types
+                  :section_components, :section_editors, :section_prepares, :excluded_picker_types
     attr_reader :hooks
 
     def initialize
@@ -13,6 +13,7 @@ module RecordingStudioPresskits
       @section_types = []
       @section_components = {}
       @section_editors = {}
+      @section_prepares = {}
       @excluded_picker_types = []
       @hooks = RecordingStudio::Hooks.new
     end

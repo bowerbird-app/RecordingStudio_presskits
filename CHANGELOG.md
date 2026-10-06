@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-10-06
+
+Kit sections.
+
+### Changed
+- A press kit's ordered children are kit sections. Each kit section has an optional title and subtitle, and one content recording under it. Text keeps its body. Images keep their attachments. A quote section stays the parent of its quotes, and the quote section sits under the kit section.
+- `register_section` registers a content type for the + Section menu, plus its component, editor, and optional `prepare` hook. `section?` is true only for a kit section.
+- The kit editor, the preview, and the public page walk kit sections. `SectionFrameComponent` renders the kit section title and subtitle, then the content component.
+- Reordering or removing a section targets the kit section. Duplicating a kit copies each kit section and the content under it.
+- Version `0.17.0`
+
+### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. The migration is irreversible. It wraps legacy press-kit children in kit sections, copies their order, and drops the text title column and the images title and subtitle columns. A migrated quote section gets the kit section title Quotes. See `MIGRATION_NOTES.md`.
+- Add `RecordingStudioPresskits::KitSection` to `recordable_types`. Point content `allowed_parent_types` at `RecordingStudioPresskits::KitSection`.
+- Create sections with `RecordingStudioPresskits.create_section!`.
+
 ## [0.16.0] - 2026-10-06
 
 Images section heading.

@@ -1,5 +1,27 @@
 # Upgrade notes
 
+## 0.17.0
+
+A press kit section is a kit section. The content recording sits under it.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration is irreversible. `down` raises `ActiveRecord::IrreversibleMigration`.
+
+`recording_studio_kit_sections` is a new table with nullable `title` and `subtitle`. The migration wraps each direct child of a press kit whose type is Text, Images, QuoteSection, or another type already passed to `register_section`. It records a kit section, copies `recording_studio_orderable_position` onto that kit section, and sets the content recording's parent with `Recording#update!`. `record!` ignores `parent_recording` on an existing recording, so the move cannot use `record` or `revise`. `update!` still checks that the declared parent allows the content type. The copy of the position is not an Orderable reorder. Reorder needs an actor, and the kit's `allows` list is only kit sections, so a publishable sibling would be left out of a reorder anyway.
+
+Text titles move onto the kit section. `recording_studio_texts` then drops `title`. The body stays. Image titles and subtitles move onto the kit section. `recording_studio_images` then drops `title` and `subtitle`. Photo attachments stay on the images recording. A quote section has no stored heading. The migration sets that kit section's title to Quotes, which is the heading the public page showed before. A quotes section created after this release starts with a blank title. Nested quotes stay under the quote section. Trashed content stays trashed. If that content recording was the trash root, the new kit section becomes the trash root and the content recording clears `trash_root`. Running the migration again does not wrap a recording that already sits under a kit section.
+
+Add `"RecordingStudioPresskits::KitSection"` to `config.recordable_types`. Change content `allowed_parent_types` from the press kit to the kit section.
+
+```ruby
+allowed_parent_types: ["RecordingStudioPresskits::KitSection"]
+```
+
+Create a section with `RecordingStudioPresskits.create_section!`. Stop calling `kit.record(SomeSection, parent_recording: kit)` for section content. `register_section` registers content that can live inside a kit section. It accepts `component`, `editor`, and `prepare`. `KitQuery.live_children` is gone. Use `KitQuery.sections_for` for the kit sections under a press kit, and `KitQuery.section_content` for the content child.
+
+Orderable on the press kit allows only kit sections. Reorder those recordings. Do not reorder text, images, or quote sections as children of the press kit. A publishable child under the kit is no longer mixed into that order.
+
+When Recording Studio API is loaded, update `title` and `subtitle` on the kit section. The show payload also has `content_type` and `content_id`. Update a text body on the text recording. There is no kit section create operation and no kit section destroy operation. The editor removes a section by trashing the kit section.
+
 ## 0.16.0
 
 An images section has an optional `title` and `subtitle` instead of a section caption. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. `recording_studio_images` drops `caption` and gains nullable `title` and `subtitle` text columns. An existing section caption is copied into `title`. Subtitle starts empty. A blank title or subtitle is stored as nothing. The editor labels are Title and Subtitle, in column one. Column two is a preview of that section inside a FlatPack card, with no card header. The kit row stays Images. The kit preview and the public page show the title with FlatPack's section title and its anchor, and the subtitle under that title, when the title is present. Each photo still keeps caption, credit, and alt text on the attachment.

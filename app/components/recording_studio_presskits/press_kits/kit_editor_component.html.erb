@@ -58,14 +58,7 @@
                 </p>
               <% end %>
               <% @section_recordings.each do |recording| %>
-                <% component = RecordingStudioPresskits.section_component_for(recording) %>
-                <% if component %>
-                  <%= render component.new(recording: recording) %>
-                <% else %>
-                  <p class="text-sm font-medium text-(--surface-content-color)">
-                    <%= helpers.presskits_title_for(recording) %>
-                  </p>
-                <% end %>
+                <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: recording) %>
               <% end %>
             </div>
           <% end %>

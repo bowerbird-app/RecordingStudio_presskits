@@ -41,10 +41,10 @@ module RecordingStudioPresskits
 
     private
 
-    attr_reader :section_recording
+    attr_reader :section_recording, :quote_section_recording
 
     def add_quote
-      section_recording.record(Quote, parent_recording: section_recording) do |quote|
+      quote_section_recording.record(Quote, parent_recording: quote_section_recording) do |quote|
         quote.body = ""
         quote.name = ""
       end
@@ -71,7 +71,7 @@ module RecordingStudioPresskits
     end
 
     def find_quote(id)
-      section_recording.child_recordings.where(quote_scope).find_by(id: id)
+      quote_section_recording.child_recordings.where(quote_scope).find_by(id: id)
     end
 
     def quote_scope
@@ -89,14 +89,11 @@ module RecordingStudioPresskits
     def set_section
       return if performed?
 
-      @section_recording = KitQuery.live_child(@press_kit_recording, params[:section_id])
-      return if quote_section?
+      @section_recording = KitQuery.section_for(@press_kit_recording, params[:section_id])
+      @quote_section_recording = KitQuery.section_content(@section_recording)
+      return if @quote_section_recording&.recordable.is_a?(QuoteSection)
 
       head :not_found
-    end
-
-    def quote_section?
-      @section_recording&.recordable.is_a?(QuoteSection)
     end
 
     def set_press_kit

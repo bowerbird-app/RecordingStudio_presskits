@@ -1,8 +1,8 @@
 # Recording Studio Press Kits
 
-A press kit is the folder you fill. Later addons drop in the sections — bio, downloads, logos. This gem is the container only.
+A press kit holds ordered sections. Each section is a `RecordingStudioPresskits::KitSection` recording. The child under that recording is the content, such as text, images, or quotes. A later addon registers its own content type under a kit section.
 
-Kits sit under your workspace. You can have many. You publish the kit, not each block. This slice ships the authenticated editor, a public page for a live kit, an owner preview of a kit that is not live yet, and Admin widgets for live vs not-live work.
+Kits sit under your workspace. You can have many. You publish the kit, not each block. This gem ships the authenticated editor, a public page for a live kit, an owner preview of a kit that is not live yet, and Admin widgets for live vs not-live work.
 
 ## Install
 
@@ -68,6 +68,11 @@ RecordingStudio.configure do |config|
   config.recordable_types = [
     "Workspace",
     "RecordingStudioPresskits::PressKit",
+    "RecordingStudioPresskits::KitSection",
+    "RecordingStudioPresskits::Text",
+    "RecordingStudioPresskits::Images",
+    "RecordingStudioPresskits::QuoteSection",
+    "RecordingStudioPresskits::Quote",
     "RecordingStudioPublishable::Publishable"
   ]
   config.require_recordable_declarations = true
@@ -100,14 +105,14 @@ include RecordingStudio::Capabilities::Publishable.to(
 )
 ```
 
-Orderable is enabled on the kit, not on its children. Omit `allows:` so every direct child type can sort — dummy `FakeBlock` now, later section addons later. Position is a column on the child recording. Reorder history is an event on the parent.
+Orderable on the kit allows only `RecordingStudioPresskits::KitSection`. Position is a column on the kit section recording. Reorder history is an event on the kit. A quote section orders its own quotes. Content recordings are not ordered as kit children.
 
-Duplicatable's README takes `include_children` as an array of types, not `true`. Leaving both include and exclude unset copies nothing. `exclude_children: []` copies every direct child without listing dummy types in this gem.
+Duplicatable's README takes `include_children` as an array of types, not `true`. Leaving both include and exclude unset copies nothing. `exclude_children: []` copies the kit section and everything under it, including nested quotes.
 
-Core 4.2 stores type names as the class name. There is no public alias, so later section addons must use:
+Core 4.2 stores type names as the class name. There is no public alias. A content recordable that belongs in a press kit names the kit section as its parent.
 
 ```ruby
-allowed_parent_types: ["RecordingStudioPresskits::PressKit"]
+allowed_parent_types: ["RecordingStudioPresskits::KitSection"]
 ```
 
 Create kits and change them with public helpers. Do not insert Recording or Event rows by hand.
@@ -128,12 +133,16 @@ kit_recording.log_event!(action: "noted")
 
 The header is the press kit. `title` is required. `description` is an optional short line, 280 characters at most, and a blank one is stored as nothing. It is not a child recording, so it cannot be trashed or reordered. The kit editor lists it as Header and links to the header screen, which saves both fields with `revise`. Creating a kit still sets the title only.
 
-Core `record` defaults the parent to the workspace root. Nest a section under the kit by passing the kit as `parent_recording`:
+Create a section with `RecordingStudioPresskits.create_section!`. That call records a kit section under the kit, then records the chosen content type under the kit section, in one transaction. A failed content write leaves no kit section behind. Title and subtitle belong to the kit section. A content default belongs to the registered `prepare` hook.
 
 ```ruby
-kit_recording.record(SomeSection, parent_recording: kit_recording) do |section|
-  section.title = "Hero"
-end
+RecordingStudioPresskits.create_section!(
+  press_kit_recording: kit_recording,
+  content_type: "RecordingStudioPresskits::Text",
+  actor: current_user,
+  title: "The story",
+  subtitle: "A short line"
+)
 ```
 
 Reorder, trash, and duplicate through the mixin APIs. Do not write `recording_studio_orderable_position` by hand.
@@ -168,35 +177,38 @@ RecordingStudioPresskits::PressKit.indexable
 
 Prefer `RecordingStudio::Recording.recording_studio_trashable_active` over a host `default_scope`, unless the host already needs one for queries.
 
-A section is a registered type. Declaring the press kit as a parent lets a recording live under the kit. It does not make that recording a section. Text, Images, and Quotes are registered by this gem. A later addon registers its own type and still names the press kit as a parent so it can be recorded there. + Section lists registered sections that declare that parent, minus `excluded_picker_types`. The kit editor, the preview, and the public page show registered sections only. A comment, an access grant, a photo, and the publish recording can sit under the kit and stay off that list.
+A section is always a kit section. `section?` is true only for `RecordingStudioPresskits::KitSection`. `register_section` puts a content type on the + Section menu and stores its component, its editor, and an optional `prepare` hook. Registering the type does not make that type a section.
 
 ```ruby
 RecordingStudioPresskits.register_section(
-  "SomeSection",
-  component: "SomeSection::Component",
-  editor: "SomeSection::Editor"
+  "SomeContent",
+  component: "SomeContent::Component",
+  editor: "SomeContent::Editor",
+  prepare: lambda { |recordable, title: nil, **|
+    recordable.body = "Opening line." if recordable.body.blank?
+  }
 )
 
 RecordingStudioPresskits.configure do |config|
   config.excluded_picker_types = ["FakeBlock"]
 end
-
-RecordingStudioPresskits.picker_types
-# => registered section types whose declared allowed_parent_types include the press kit
-#    minus excluded_picker_types
 ```
 
-If nothing real is registered, + Section is a disabled button. No empty menu box.
+The content class still declares that parent, and the host still lists the class in `recordable_types`. If `picker_types` is empty, + Section is a disabled button. No empty menu box.
 
-`RecordingStudioPresskits::Text`, `RecordingStudioPresskits::Images`, and `RecordingStudioPresskits::QuoteSection` are the sections this gem ships. Add them to the host `recordable_types`, then run `rails generate recording_studio_presskits:migrations` and migrate. Text stores an optional title and HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). A blank title is stored as nothing. The text editor shows Title and Body, each with its name, and hides its preview. The kit row stays Text. The kit editor's preview column and the public page show the title with FlatPack's section title and its anchor when the title is present. Trashable is on. Orderable stays on the kit. Publishable stays off the section. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
+`KitQuery.sections_for` returns the ordered kit sections under a press kit. `KitQuery.section_for` finds one of those by id. `KitQuery.section_content` returns the content child of a kit section. The kit editor, the preview, and the public page walk kit sections in order. `SectionFrameComponent` renders the kit section title and subtitle, then the component registered for the content type. The content component does not render that title or subtitle. A subtitle with no title is a muted line above the content. A publish recording under the kit is not a section and is not in the kit's orderable children.
 
-Images stores an optional title and subtitle. A blank one is stored as nothing. The editor shows Title and Subtitle, each with its name, in column one. Column two is a preview of the section inside a FlatPack card, with no card header. The kit row stays Images. The kit preview and the public page show the title with FlatPack's section title and its anchor, and the subtitle under that title, when the title is present. A subtitle with no title is a line above the photos. Photos are Attachable image attachments under that section recording, so one section holds many images. Attachable stays off PressKit. The editor uploads from an Upload button after Cancel and returns to the section. `attachment_collection_editor` edits each photo's caption, credit, and alt text in one Save. The row preview keeps the file's proportions. Trash on a photo uses Attachable's remove and returns to the section. That remove trashes the attachment recording, so Trashable is on `RecordingStudioAttachable::Attachment`. Depend on `recording_studio_attachable`, `~> 0.7`, mount that engine, and wire Active Storage direct uploads.
+`RecordingStudioPresskits::Text` stores HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). A new text section starts with `Text.opening_body` when the body is blank. The text editor shows the body only. Title and Subtitle are the kit section fields on the same screen. The text editor hides its preview. Trashable is on the text recording and on the kit section. Orderable stays on the kit for kit sections. Publishable stays off both. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
 
-Quotes stores nothing on the section. Each quote is a child recording with `body`, `name`, and optional `role` and `organisation`. The section page uses the shared section editor. + Quote and Cancel sit in that action row, above the grid. + Quote is a primary button with a Heroicons plus icon and the label Quote. Column one is an orderable list. Column two, the kit preview, and the public page render each saved quote with `FlatPack::Quote::Component` at `size: :lg`. The citation is the name, role, and organisation. The row shows the quote, truncated to the column, with the name underneath. A blank quote uses Quote on the first line. A blank name leaves the second line off. + Quote opens that quote's edit screen. Orderable is on the quote section for its quotes. Attachable is on Quote for one image, and the upload stays on the quote screen. Publishable stays off both. A blank body is left off the preview and the public page. Add `"RecordingStudioPresskits::QuoteSection"` and `"RecordingStudioPresskits::Quote"` to `recordable_types` and migrate. Quote stays off the + Section menu because its parent is the quote section.
+`RecordingStudioPresskits::Images` stores no heading of its own. Photos are Attachable image attachments under the images recording, so one section holds many images. Attachable stays off PressKit and off KitSection. The editor shows Title and Subtitle on the kit section, then an Upload button after Cancel, and returns to the section. `attachment_collection_editor` edits each photo's caption, credit, and alt text on the images recording. The row preview keeps the file's proportions. Trash on a photo uses Attachable's remove and returns to the section. That remove trashes the attachment recording, so Trashable is on `RecordingStudioAttachable::Attachment`. Depend on `recording_studio_attachable`, `~> 0.7`, mount that engine, and wire Active Storage direct uploads. The images editor keeps a preview column. The preview card has no card header.
 
-The kit editor's preview column and the public page walk registered sections in order and render each type's component. Text, Images, and Quotes are registered. A later addon registers its own section with `register_section`.
+Quotes use two recordings under the kit section. `RecordingStudioPresskits::QuoteSection` orders its quotes and stores no heading. Each `RecordingStudioPresskits::Quote` has `body`, `name`, and optional `role` and `organisation`. A new quotes section leaves the kit section title blank. A kit migrated from 0.16 copies the heading Quotes onto the kit section, because that is the heading the public page showed before. The section page uses the shared section editor. Title and Subtitle save with their own Update button, because the quotes editor sets `form?` to false. + Quote and Cancel sit in the action row under that, above the grid. + Quote is a primary button with a Heroicons plus icon and the label Quote. Column one is an orderable list of quotes. Column two, the kit preview, and the public page render each saved quote with `FlatPack::Quote::Component` at `size: :lg`. The citation is the name, role, and organisation. The row shows the quote, truncated to the column, with the name underneath. A blank quote uses Quote on the first line. A blank name leaves the second line off. + Quote opens that quote's edit screen. Orderable is on the quote section for its quotes. Attachable is on Quote for one image, and the upload stays on the quote screen. Publishable stays off the quote section and the quote. A blank body is left off the preview and the public page. Quote stays off the + Section menu because its parent is the quote section.
 
-A section editor is a ViewComponent. `initialize` takes `recording:` and `update_path:`. The class defines `param_key` and `permitted_attributes`. Define `preview?` and return false to hide the preview and use one full-width column. Define `form?` and return false to skip the shared section form and the Update button. An editor can still define `section_actions` and return a component. The section editor renders that in the action row above the grid. Text uses `RecordingStudioPresskits::Text::EditComponent`, `param_key` `:text`, and `preview?` false. Images uses `RecordingStudioPresskits::Images::EditComponent`, `param_key` `:images`, and `preview?` true. The preview card has no header. Quotes uses `RecordingStudioPresskits::QuoteSection::EditComponent`, `param_key` `:quote_section`, and `form?` false. It keeps the default two-column preview. `section_actions` returns + Quote and Cancel.
+The kit list row label is the content type, such as Text, Images, or Quotes. The kit section title is the heading on the preview and the public page. The page nav title of a section editor is the kit section title when one is set, and the content type label otherwise. The heading on the section editor page is the content type label.
+
+A content editor is a ViewComponent. `initialize` takes the content recording as `recording` and the form path as `update_path`. The class defines `param_key` and `permitted_attributes`. Define `preview?` and return false to hide the preview and use one full-width column. Define `form?` and return false when the content editor cannot share a form with the kit section fields. The section editor then saves Title and Subtitle on their own, and renders `section_actions` under that form. Text uses `RecordingStudioPresskits::Text::EditComponent`, `param_key` `:text`, permitted attribute `:body`, and `preview?` false. Images uses `RecordingStudioPresskits::Images::EditComponent`, `param_key` `:images`, no permitted attributes, and `preview?` true. Quotes uses `RecordingStudioPresskits::QuoteSection::EditComponent`, `param_key` `:quote_section`, and `form?` false.
+
+When Recording Studio API is loaded, a kit section exposes index, show, and update. The payload keys are `title`, `subtitle`, `content_type`, and `content_id`. Create a section with `create_section!`. There is no generic kit section create, because a kit section without content would break the one-content rule. Text exposes show and update for `body`. Removing a section from the editor trashes the kit section. Trashable then trashes the content under it.
 
 Access uses `grant_access` / `authorized?` on recordings. Grants on the workspace root cover kits underneath. This gem does not invent its own ACL. Mixin writes authorize through Accessible. Missing access fails closed.
 
@@ -207,9 +219,9 @@ The mounted user slice uses Recording Studio's default layout (back and close). 
 - Index: the current root's live kits. The heading is **My presskits**. **Presskit** with a Heroicons `plus` icon is first and left. Cards vs table is icon-only `FlatPack::ButtonGroup::Component` (`squares-2x2` / `table-cells`, aria labels only). Do not mint a Press kits toggle. This Flatpack pin's SegmentedButtons is text-only. Each card has a 16/9 cover. `cover_image_url` on the recordable supplies the image. A missing or unsafe URL uses the muted card color and a photo icon. Do not use Publishable's social image as the cover. Cards and the table open the kit editor.
 - Empty index: what happened, and a way to make a kit.
 - Kit URL: `GET press_kits/:id` requires edit access and redirects to the kit editor.
-- Kit editor: the page heading is the kit name. **+ Section** (Heroicons `plus`, label Section, primary button) sits first on a row with `render_publishable_quick_actions`. Each menu item shows a Heroicon beside the name. Text uses `document-text`, Images uses `photo`, and Quotes uses `chat-bubble-bottom-center-text`. A host section defines `self.section_menu_icon` to supply its own. A type without one stays a label. The two-column grid starts under that row. There is no title form and no **Save** on this page. Column one is one `FlatPack::Card`. **Header** is the first row. It is a `FlatPack::List::Item` with no icon and no remove, and it opens the header screen. The header is the press kit itself, so it cannot be dragged or removed. A blank description is stored as nothing. 280 characters is the limit. Creating a kit still asks only for the name. + Section stays the only primary button on this page. When there are sections, they follow in that same card as one `FlatPack::List` (`orderable: true`, `divider: true`). Header stays outside that list. Each section is a `FlatPack::List::Item`. The link text is the section type, such as **Text**, and it opens that section. The list icon slot is Heroicons `arrows-up-down`. FlatPack's `flat-pack--list-orderable` controller does the drag. This FlatPack pin's `saveOrder` checks `hasOrderablePathValue`, which is never defined, so the fetch does not run. `list:reordered` posts `recording_id` and `before_recording_id` or `after_recording_id`, and that calls `recording_studio_orderable_move!`. Remove is an icon-only trash button. It posts delete and `SectionsController#destroy` calls `recording_studio_trashable_trash!`. Column two is one `FlatPack::Card` when there is a short description or at least one section. The description comes first, then every section through `section_component_for`. A kit with neither has no preview card. No in-page Preview button. The page nav also carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. Text is on that list once the host registers it. No empty-state tray on edit.
+- Kit editor. The page heading is the kit name. **+ Section** (Heroicons `plus`, label Section, primary button) sits first on a row with `render_publishable_quick_actions`. Each menu item is a registered content type. Text uses `document-text`, Images uses `photo`, and Quotes uses `chat-bubble-bottom-center-text`. A host content type defines `self.section_menu_icon` to supply its own. A type without one stays a label. Choosing one calls `create_section!` and opens the new kit section. The two-column grid starts under that row. There is no title form and no **Save** on this page. Column one is one `FlatPack::Card`. **Header** is the first row. It is a `FlatPack::List::Item` with no icon and no remove, and it opens the header screen. The header is the press kit itself, so it cannot be dragged or removed. A blank description is stored as nothing. 280 characters is the limit. Creating a kit still asks only for the name. + Section stays the only primary button on this page. When there are sections, they follow in that same card as one `FlatPack::List` (`orderable: true`, `divider: true`). Header stays outside that list. Each row is a kit section. The link text is the content type, such as **Text**, and it opens that kit section. The list icon slot is Heroicons `arrows-up-down`. FlatPack's `flat-pack--list-orderable` controller does the drag. This FlatPack pin's `saveOrder` checks `hasOrderablePathValue`, which is never defined, so the fetch does not run. `list:reordered` posts `recording_id` and `before_recording_id` or `after_recording_id`, and that calls `recording_studio_orderable_move!` on kit section ids. Remove is an icon-only trash button. It posts delete and `SectionsController#destroy` trashes the kit section. Column two is one `FlatPack::Card` when there is a short description or at least one kit section. The description comes first, then every kit section through `SectionFrameComponent`. A kit with neither has no preview card. No in-page Preview button. The page nav also carries the kit name. Publishable's menu still has **View** and **Preview**. Types come from `picker_types`. No empty-state tray on edit.
 - Header screen: the page heading is **Header**. Back is **Back to kit** and returns to the kit editor. **Update** (primary) and **Cancel** (default button) sit above the grid. The grid is two columns, the same shape as a section editor. Column one is Title and Short description. Title is required. Short description is optional, with a 280 character count. Column two is a `FlatPack::Card` that shows that title and short description. Saving stays on this screen and uses `revise`. **+ Access** stays off.
-- Section editor: a page heading is the section type, such as **Text**. **Update** (primary) and **Cancel** (default button) sit above the grid. Cancel returns to the kit editor. The default grid is two columns. Column one is the registered editor, full width of that column, or the type label when none is registered. Column two renders that section's saved HTML inside a `FlatPack::Card`, lined up with the field. The card has no header. An editor class can define `preview?` and return false to drop the preview and use one full-width column. Text does that. An editor with no section form can define `section_actions`. Quotes does, so **+ Quote** (Heroicons `plus`, label Quote, primary button) and **Cancel** sit above the grid and the list stays in column one. The Text field is the FlatPack content WYSIWYG with no field label. The kit list trashes a section with the trash icon through `recording_studio_trashable_trash!`. **+ Access** stays off this page.
+- Section editor. The page nav title is the kit section title when one is set, and the content type label otherwise. The on-page heading is the content type, such as **Text**. **Title** and **Subtitle** belong to the kit section. When the content editor shares the form, **Update** and **Cancel** sit above the grid, and column one holds Title, Subtitle, and the content fields. Cancel returns to the kit editor. The default grid is two columns. Column two renders `SectionFrameComponent` inside a `FlatPack::Card` with no card header. An editor class can define `preview?` and return false to drop the preview and use one full-width column. Text does that. An editor that sets `form?` to false gets its own heading form and **Update** button, then `section_actions`. Quotes does that, so **+ Quote** (Heroicons `plus`, label Quote, primary button) and **Cancel** sit under the heading form. The Text field is the FlatPack content editor with no field label. The kit list trashes the kit section with the trash icon through `recording_studio_trashable_trash!`. **+ Access** stays off this page.
 - Owner preview: the same public page, on the default layout, for an authenticated owner. Back returns to the kit editor. A kit that is not live stays hidden from logged-out visitors.
 
 Default-layout chrome is back, close, and page actions. **+ Access** is in the right slot on the kit editor only. Index, the new form, the header screen, the section editor, and owner preview leave that slot empty. Do not put Sign in, Sign out, or Root Switchable there. Core owns back and close.
@@ -284,7 +296,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one published kit titled **Spring launch**, with a short description, and one unpublished kit titled **Autumn recap**. No seeded fake sections. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` stays test-only: it enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. The seeded admin user gets Accessible owner access on the workspace and the admin root.
+Seeds one published kit titled **Spring launch**, with a short description, and one unpublished kit titled **Autumn recap**. No seeded sections. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` stays test-only. Its parent is a kit section. It enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. Its `prepare` hook sets the block title from the create heading, or to Block when that heading is blank. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
 ## Cloud Agent boot
 

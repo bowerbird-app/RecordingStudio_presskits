@@ -24,14 +24,14 @@ module RecordingStudioPresskits
       authorize_recording!(@press_kit_recording, role: :view)
       return if performed?
 
-      @section_recordings = KitQuery.live_children(@press_kit_recording)
+      @section_recordings = KitQuery.sections_for(@press_kit_recording)
     end
 
     def edit
       authorize_recording!(@press_kit_recording, role: :edit)
       return if performed?
 
-      @section_recordings = KitQuery.live_children(@press_kit_recording)
+      @section_recordings = KitQuery.sections_for(@press_kit_recording)
       @picker_types = RecordingStudioPresskits.picker_types
     end
 

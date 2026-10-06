@@ -6,7 +6,7 @@ module RecordingStudioPresskits
 
     recording_studio_recordable label: "Quotes",
                                 root: false,
-                                allowed_parent_types: ["RecordingStudioPresskits::PressKit"]
+                                allowed_parent_types: ["RecordingStudioPresskits::KitSection"]
 
     def self.section_menu_icon
       "chat-bubble-bottom-center-text"
@@ -14,9 +14,5 @@ module RecordingStudioPresskits
 
     include RecordingStudio::Capabilities::Trashable.to
     include RecordingStudio::Capabilities::Orderable.to(allows: ["RecordingStudioPresskits::Quote"])
-
-    def title
-      "Quotes"
-    end
   end
 end

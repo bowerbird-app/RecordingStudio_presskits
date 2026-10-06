@@ -31,7 +31,8 @@ class PressKitMixinsTest < ActiveSupport::TestCase
 
     children = kit.recording_studio_orderable_children
     assert_equal [hero.id, quotes.id], children.map(&:id)
-    assert_kind_of FakeBlock, children.first.recordable
+    assert_kind_of RecordingStudioPresskits::KitSection, children.first.recordable
+    assert_kind_of FakeBlock, children.first.child_recordings.first.recordable
 
     kit.recording_studio_orderable_reorder!(
       ordered_recording_ids: [quotes.id, hero.id],
@@ -98,16 +99,20 @@ class PressKitMixinsTest < ActiveSupport::TestCase
     assert_includes RecordingStudio::Recording.recording_studio_trashable_active, kit
   end
 
-  test "trash a fake block without a section addon" do
+  test "trash a kit section and its content without trashing the press kit" do
     kit = record_press_kit("Spring launch")
     hero = record_fake_block(kit, "Hero")
+    content = hero.child_recordings.first
 
     hero.recording_studio_trashable_trash!(actor: @user)
 
     hero.reload
+    content.reload
     kit.reload
     assert hero.trashed_at.present?
     assert_equal true, hero.trash_root
+    assert content.trashed_at.present?
+    assert_equal false, content.trash_root
     assert_nil kit.trashed_at
     assert_equal 1, hero.events.where(action: "trashed").count
   end
@@ -166,9 +171,12 @@ class PressKitMixinsTest < ActiveSupport::TestCase
 
     copied_children = duplicate.child_recordings.to_a
     assert_equal 1, copied_children.size
-    assert_kind_of FakeBlock, copied_children.first.recordable
+    assert_kind_of RecordingStudioPresskits::KitSection, copied_children.first.recordable
     assert_equal "Hero (Copy)", copied_children.first.recordable.title
     assert_equal duplicate, copied_children.first.parent_recording
+    copied_content = copied_children.first.child_recordings.first
+    assert_kind_of FakeBlock, copied_content.recordable
+    assert_equal "Hero (Copy)", copied_content.recordable.title
   end
 
   test "duplication service copies a press kit under the same workspace" do
@@ -184,7 +192,9 @@ class PressKitMixinsTest < ActiveSupport::TestCase
     assert_predicate result, :success?
     duplicate = result.value
     assert_equal "#{original_title} (Copy)", duplicate.recordable.title
-    assert_equal ["Quotes (Copy)"], duplicate.child_recordings.map { |child| child.recordable.title }
+    copied_section = duplicate.child_recordings.first
+    assert_equal "Quotes (Copy)", copied_section.recordable.title
+    assert_equal ["Quotes (Copy)"], copied_section.child_recordings.map { |child| child.recordable.title }
   end
 
   test "accessible denies duplicate when the actor lacks edit" do
@@ -225,8 +235,11 @@ class PressKitMixinsTest < ActiveSupport::TestCase
   end
 
   def record_fake_block(kit_recording, title)
-    kit_recording.record(FakeBlock, parent_recording: kit_recording) do |fake_block|
-      fake_block.title = title
-    end
+    RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit_recording,
+      content_type: "FakeBlock",
+      title: title,
+      actor: @user
+    )
   end
 end

@@ -14,7 +14,7 @@ module RecordingStudioPresskits
       end
 
       def self.permitted_attributes
-        %i[title body]
+        %i[body]
       end
 
       def self.preview?

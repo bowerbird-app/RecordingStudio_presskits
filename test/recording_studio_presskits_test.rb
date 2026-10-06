@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.16.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.17.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -13,9 +13,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
+      "db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
-      "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb"
+      "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
+      "test/dummy/db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
     end
@@ -187,6 +189,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, '"RecordingStudioPresskits::PressKit"'
+    assert_includes initializer_source, '"RecordingStudioPresskits::KitSection"'
     assert_includes initializer_source, '"RecordingStudioPresskits::Text"'
     assert_includes initializer_source, '"RecordingStudioPresskits::Images"'
     assert_includes initializer_source, '"FakeBlock"'
@@ -194,7 +197,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("dummy/config/initializers/recording_studio_presskits.rb", __dir__)
     )
     assert_includes presskits_initializer, "excluded_picker_types"
-    assert_includes presskits_initializer, 'register_section("FakeBlock"'
+    assert_includes presskits_initializer, "register_section("
     assert_includes presskits_initializer, '"FakeBlock"'
     assert_includes initializer_source, '"AdminRoot"'
     assert_includes initializer_source, '"RecordingStudioPublishable::Publishable"'
@@ -287,7 +290,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     source = File.read(File.expand_path("dummy/app/models/fake_block.rb", __dir__))
     assert_includes source, 'label: "Fake block"'
-    assert_includes source, 'allowed_parent_types: ["RecordingStudioPresskits::PressKit"]'
+    assert_includes source, 'allowed_parent_types: ["RecordingStudioPresskits::KitSection"]'
     assert_includes source, "include RecordingStudio::Capabilities::Trashable.to"
     refute_includes source, "Capabilities::Orderable"
     refute_includes source, "Capabilities::Duplicatable"
@@ -331,11 +334,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     query = File.read(File.expand_path("../lib/recording_studio_presskits/kit_query.rb", __dir__))
     assert_includes query, "recording_studio_trashable_active"
-    assert_includes query, "def live_children"
-    assert_includes query, "def child_ids_with_section_order"
+    assert_includes query, "def sections_for"
+    assert_includes query, "def section_content"
     assert_includes query, "section_types"
     refute_includes query, "RecordingStudioPublishable::Publishable"
-    assert_includes query, "def live_child"
+    assert_includes query, "def section_for"
     assert_includes query, "def published_kits"
     assert_includes query, "PressKit.indexable"
     assert_includes query, "def unpublished_kits"
@@ -422,16 +425,23 @@ class RecordingStudioPresskitsTest < Minitest::Test
     component = File.read(presskits_path("app/components/recording_studio_presskits/images/edit_component.rb"))
     show = File.read(presskits_path("app/components/recording_studio_presskits/images/component.html.erb"))
 
-    assert_includes editor, 'label: "Title"'
-    assert_includes editor, 'label: "Subtitle"'
-    assert_includes editor, 'name: "images[title]"'
-    assert_includes editor, 'name: "images[subtitle]"'
+    frame_path = "press_kits/section_frame_component.html.erb"
+    editor_path = "press_kits/section_editor_component.html.erb"
+    frame = File.read(presskits_path("app/components/recording_studio_presskits/#{frame_path}"))
+    section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
+
+    refute_includes editor, 'name: "images[title]"'
+    refute_includes editor, 'name: "images[subtitle]"'
     refute_includes editor, "images[caption]"
-    assert_operator editor.index('name: "images[title]"'), :<, editor.index('name: "images[subtitle]"')
-    assert_includes component, "%i[title subtitle]"
-    assert_includes show, "FlatPack::SectionTitle::Component"
-    assert_includes show, "anchor_link: true"
-    assert_includes show, "subtitle: subtitle"
+    assert_includes section_editor, 'name: "kit_section[title]"'
+    assert_includes section_editor, 'name: "kit_section[subtitle]"'
+    assert_operator section_editor.index('name: "kit_section[title]"'), :<,
+                    section_editor.index('name: "kit_section[subtitle]"')
+    assert_includes component, "def self.permitted_attributes\n        []"
+    refute_includes show, "FlatPack::SectionTitle::Component"
+    assert_includes frame, "FlatPack::SectionTitle::Component"
+    assert_includes frame, "anchor_link: true"
+    assert_includes frame, "subtitle: subtitle"
     assert_includes component, "def self.preview?\n        true"
     refute_includes component, "preview_card_title"
   end
@@ -447,14 +457,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("../app/components/recording_studio_presskits/text/component.html.erb", __dir__)
     )
 
-    assert_includes editor, 'label: "Title"'
+    editor_path = "press_kits/section_editor_component.html.erb"
+    section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
+
+    refute_includes editor, 'name: "text[title]"'
     assert_includes editor, 'label: "Body"'
-    assert_includes editor, 'name: "text[title]"'
     assert_includes editor, 'name: "text[body]"'
-    assert_operator editor.index('name: "text[title]"'), :<, editor.index('name: "text[body]"')
-    assert_includes component, "%i[title body]"
-    assert_includes show, "FlatPack::SectionTitle::Component"
-    assert_includes show, "anchor_link: true"
+    assert_includes section_editor, 'label: "Title"'
+    assert_includes section_editor, 'name: "kit_section[title]"'
+    assert_includes component, "%i[body]"
+    refute_includes show, "FlatPack::SectionTitle::Component"
     refute_includes show, "gap-4"
   end
 end
