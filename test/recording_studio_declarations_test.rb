@@ -128,6 +128,24 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_includes press_kit.errors[:title], "can't be blank"
   end
 
+  test "press kit description is optional and capped at 280 characters" do
+    press_kit = RecordingStudioPresskits::PressKit.new(title: unique_name("Named kit"))
+
+    assert press_kit.valid?
+    assert_nil press_kit.description
+
+    press_kit.description = "  \n"
+    assert press_kit.valid?
+    assert_nil press_kit.description
+
+    press_kit.description = "a" * RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT
+    assert press_kit.valid?
+
+    press_kit.description = "a" * (RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT + 1)
+    assert_not press_kit.valid?
+    assert press_kit.errors[:description].any?
+  end
+
   test "press kit cannot be created as a root" do
     press_kit = RecordingStudioPresskits::PressKit.create!(
       title: unique_name("Root Rejected Press Kit")
@@ -185,20 +203,26 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "press kit revise creates a new snapshot and log_event! appends history" do
     root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Revise Workspace")))
+    original_title = unique_name("Office hours")
     recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
-      press_kit.title = unique_name("Office hours")
+      press_kit.title = original_title
     end
     original_id = recording.recordable_id
 
     recording.log_event!(action: "noted")
     root_recording.revise(recording) do |press_kit|
       press_kit.title = "Wednesday mornings."
+      press_kit.description = "Doors at noon."
     end
 
     recording.reload
     assert_not_equal original_id, recording.recordable_id
     assert_equal "Wednesday mornings.", recording.recordable.title
+    assert_equal "Doors at noon.", recording.recordable.description
     assert_equal 1, recording.events.where(action: "noted").count
+    original = RecordingStudioPresskits::PressKit.find(original_id)
+    assert_equal original_title, original.title
+    assert_nil original.description
   end
 
   test "text is allowed under a press kit and rejected under the workspace" do

@@ -1,16 +1,26 @@
 # Upgrade notes
 
+## 0.15.0
+
+The kit header is the press kit: required `title`, optional `description`. It is not a child section.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. `recording_studio_press_kits` gains a nullable `description` text column. Existing kits keep their title and start with no description. Creating a kit still asks only for the name.
+
+The kit editor lists Header with the sections. That row opens `GET press_kits/:press_kit_id/header/edit`, a two-column screen: the fields, then a preview. `PATCH press_kits/:press_kit_id/header` revises `title` and `description`. `PATCH press_kits/:id` is no longer a route. A blank description is stored as nothing. 280 characters is the limit. The row is not orderable and not trashable.
+
+A dummy database migrated on 0.14.0 already has `20261006120000` (text section title). This release keeps that migration file, so migrate and rollback can see it. Do not delete it to clear the error.
+
+Bump FlatPack to `>= 0.1.198` (dummy tag `v0.1.198`). Link `stylesheet_link_tag "flat_pack/application"` beside `flat_pack/variables` on host layouts. FlatPack 0.1.198 paints a primary button from that sheet. The public blank layout already links it. Dummy sign-in and the default layout do too.
+
+Bump Accessible to `~> 0.11` (dummy tag `v0.11.1`). Run `bin/rails generate recording_studio_accessible:migrations`, then `bin/rails db:migrate`. Access `role` is a string (`view`, `edit`, `admin`). 0.8.0 adds `depends_on_recording_id`. 0.10.0 adds access invitations. Grant through `bootstrap_owner_access!` / `grant_access`; `RecordingStudio::Access` is readonly.
+
+Bump Publishable to `~> 0.4` (dummy tag `v0.4.2`). Admin dummy tag `v2.0.4`. Attachable `v0.7.1`. Duplicatable `v0.4.3`. Orderable `v0.2.5`. Trashable `v0.4.4`. Root Switchable (dummy) `v0.5.3`. Recording Studio stays `v4.2.2`.
+
 ## 0.14.0
 
 A text section has an optional `title`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. `recording_studio_texts` gains a nullable `title` text column. Existing sections start with no title. A blank title is stored as nothing. The editor labels are Title and Body. The kit row stays the section type. The kit preview and the public page show the title with FlatPack's section title and its anchor when it is present. The title is no longer taken from the first line of the body.
 
 The + Section menu shows a Heroicon beside Text (`document-text`), Images (`photo`), and Quotes (`chat-bubble-bottom-center-text`). A host section can define `self.section_menu_icon`. No migration for the icons.
-
-## Unreleased
-
-Bump Accessible to `~> 0.11` (dummy tag `v0.11.1`). Run `bin/rails generate recording_studio_accessible:migrations`, then `bin/rails db:migrate`. Access `role` is a string (`view`, `edit`, `admin`). 0.8.0 adds `depends_on_recording_id`. 0.10.0 adds access invitations. Grant through `bootstrap_owner_access!` / `grant_access`; `RecordingStudio::Access` is readonly.
-
-Bump Publishable to `~> 0.4` (dummy tag `v0.4.2`). Admin dummy tag `v2.0.4`. Attachable `v0.7.1`. Duplicatable `v0.4.3`. Orderable `v0.2.5`. Trashable `v0.4.4`. Root Switchable (dummy) `v0.5.3`. Recording Studio stays `v4.2.2`. FlatPack stays `v0.1.135`.
 
 ## 0.13.0
 

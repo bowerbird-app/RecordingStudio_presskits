@@ -100,7 +100,7 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_presskits (0.14.0)
+    recording_studio_presskits (0.15.0)
       flat_pack (>= 0.1.198)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
@@ -672,7 +672,7 @@ CHECKSUMS
   recording_studio_attachable (0.7.0)
   recording_studio_duplicatable (0.4.1)
   recording_studio_orderable (0.2.3)
-  recording_studio_presskits (0.14.0)
+  recording_studio_presskits (0.15.0)
   recording_studio_publishable (0.4.0)
   recording_studio_root_switchable (0.5.1)
   recording_studio_trashable (0.4.2)

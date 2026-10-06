@@ -44,6 +44,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.table_exists?(:recording_studio_press_kits)
     assert connection.table_exists?(:admin_roots)
     assert connection.column_exists?(:recording_studio_press_kits, :title)
+    assert connection.column_exists?(:recording_studio_press_kits, :description)
     refute connection.column_exists?(:recording_studio_press_kits, :updated_at)
     assert connection.table_exists?(:recording_studio_texts)
     assert connection.column_exists?(:recording_studio_texts, :body)
@@ -77,6 +78,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     page = Page.find_by!(title: "Getting Started")
     press_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Spring launch")
     unpublished_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Autumn recap")
+    assert_equal "Doors at noon. The one-sheet is inside.", press_kit.description
     admin_root = AdminRoot.find_by!(name: "Admin")
     root_recording = RecordingStudio::Recording.find_by!(recordable: workspace)
     accessible_root_recording = RecordingStudio::Recording.find_by!(recordable: accessible_workspace)
@@ -189,6 +191,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     controller = File.read(Rails.root.join("app/controllers/application_controller.rb"))
 
     assert_includes layout, '<html data-theme="rounded">'
+    assert_includes layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes layout, "page_nav_options[:anchor_href]"
     assert_includes layout, "anchor_tooltip:"
     refute_includes layout, "page_nav_options[:anchor_url]"

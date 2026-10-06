@@ -103,6 +103,42 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "See it live"
   end
 
+  test "public page and owner preview show a short description under the title" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
+    kit.reload
+    record_block(kit, "Hero")
+    publish_kit!(kit, slug: "spring-launch", status: "published")
+
+    get kit.publishable_public_path
+    assert_response :success
+    assert_blank_public_layout
+    assert_select "h1", text: "Spring launch"
+    assert_select "p.mt-2.text-lg", text: "Doors at noon."
+    assert_operator response.body.index("Spring launch"), :<, response.body.index("Doors at noon.")
+    assert_operator response.body.index("Doors at noon."), :<, response.body.index("Hero")
+
+    sign_in @user
+    switch_to_root(@root)
+    get recording_studio_presskits.preview_press_kit_path(kit)
+    assert_response :success
+    assert_rounded_default_layout
+    assert_select "h1", text: "Spring launch"
+    assert_includes response.body, "Doors at noon."
+    assert_includes response.body, "Hero"
+  end
+
+  test "a blank description stays off the public page" do
+    kit = record_kit("Spring launch")
+    publish_kit!(kit, slug: "spring-launch-plain", status: "published")
+
+    get kit.publishable_public_path
+    assert_response :success
+    assert_select "h1", text: "Spring launch"
+    assert_select "p.mt-2.text-lg", count: 0
+    refute_includes response.body, "Doors at noon."
+  end
+
   test "logged-out visitors cannot read an unpublished kit" do
     kit = record_kit("Autumn recap")
     publish_kit!(kit, slug: "autumn-recap", status: "draft")

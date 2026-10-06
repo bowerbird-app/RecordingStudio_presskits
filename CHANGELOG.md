@@ -7,14 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-06
+
+Kit header.
+
+### Added
+- A press kit has an optional short description, 280 characters at most. A blank one is stored as nothing. The kit editor lists Header with the sections. That row opens a screen for the title and short description. The screen is a two-column grid: the fields, then a preview. The row cannot be removed or reordered. The kit preview, the public page, and owner preview show the description under the title when it is present.
+
 ### Changed
+- Renaming a kit moves from `PATCH press_kits/:id` to `PATCH press_kits/:press_kit_id/header`, which also saves the short description.
+- Version `0.15.0`
+- FlatPack is `>= 0.1.198` (dummy tag `v0.1.198`).
 - Point host and dummy Gemfiles at Recording Studio `v4.2.2`
-- Point sibling Recording Studio gems at current tags: Accessible `v0.11.1`, Admin `v2.0.4`, Attachable `v0.7.1`, Duplicatable `v0.4.3`, Orderable `v0.2.5`, Publishable `v0.4.2`, Trashable `v0.4.4`, and dummy Root Switchable `v0.5.3`. Leave FlatPack and this gem's version alone.
+- Point sibling Recording Studio gems at current tags: Accessible `v0.11.1`, Admin `v2.0.4`, Attachable `v0.7.1`, Duplicatable `v0.4.3`, Orderable `v0.2.5`, Publishable `v0.4.2`, Trashable `v0.4.4`, and dummy Root Switchable `v0.5.3`.
 - Gemspec constraints: Accessible `~> 0.11`, Publishable `~> 0.4`
 - Dummy Accessible roles are strings (`view` / `edit` / `admin`). Grants still go through `bootstrap_owner_access!` / `grant_access`. Accessible 0.8–0.11 migrations are in `test/dummy`.
 - Gem tests keep a tiny `Object#stub` helper because Minitest 6 dropped `minitest/mock`.
 
 ### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. `recording_studio_press_kits` gains a nullable `description`. Existing kits keep their title and start with no description. If the dummy database was migrated on 0.14.0, this also restores `20261006120000` (text section title) so migrate and rollback can see that file.
+- Bump FlatPack to at least `0.1.198`. Link `stylesheet_link_tag "flat_pack/application"` beside `flat_pack/variables` on host layouts. That sheet paints primary buttons. The public blank layout already links it.
 - Bump `recording_studio_accessible` to `~> 0.11` and run `bin/rails generate recording_studio_accessible:migrations`. Access `role` becomes a string.
 - Bump `recording_studio_publishable` to `~> 0.4`.
 - Pin Admin, Attachable, Duplicatable, Orderable, Trashable, and Root Switchable to the tags above.
@@ -355,7 +367,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.12.0

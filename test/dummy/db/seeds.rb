@@ -15,7 +15,7 @@ find_or_record_child = lambda do |recordable, root_recording, parent_recording|
   ).recording
 end
 
-find_or_record_named_child = lambda do |type, title, root_recording, parent_recording|
+find_or_record_named_child = lambda do |type, title, root_recording, parent_recording, description: nil|
   existing = RecordingStudio::Recording.recording_studio_trashable_active
                                        .where(root_recording: root_recording, parent_recording: parent_recording,
                                               recordable_type: type.name)
@@ -24,6 +24,7 @@ find_or_record_named_child = lambda do |type, title, root_recording, parent_reco
 
   parent_recording.record(type, parent_recording: parent_recording) do |recordable|
     recordable.title = title
+    recordable.description = description if description.present?
   end
 end
 
@@ -70,7 +71,8 @@ begin
     RecordingStudioPresskits::PressKit,
     "Spring launch",
     root_recording,
-    root_recording
+    root_recording,
+    description: "Doors at noon. The one-sheet is inside."
   )
 
   unpublished_kit_recording = RecordingStudio::Recording.recording_studio_trashable_active
@@ -81,6 +83,7 @@ begin
   if unpublished_kit_recording.nil?
     unpublished_kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
       press_kit.title = "Autumn recap"
+      press_kit.description = "What we shipped, on one page."
     end
   end
 
