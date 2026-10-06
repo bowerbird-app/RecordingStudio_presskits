@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.14.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.15.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_exists
@@ -371,6 +371,23 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
   def presskits_path(relative)
     File.expand_path("../#{relative}", __dir__)
+  end
+
+  def test_images_editor_names_title_and_subtitle
+    editor = File.read(presskits_path("app/components/recording_studio_presskits/images/edit_component.html.erb"))
+    component = File.read(presskits_path("app/components/recording_studio_presskits/images/edit_component.rb"))
+    show = File.read(presskits_path("app/components/recording_studio_presskits/images/component.html.erb"))
+
+    assert_includes editor, 'label: "Title"'
+    assert_includes editor, 'label: "Subtitle"'
+    assert_includes editor, 'name: "images[title]"'
+    assert_includes editor, 'name: "images[subtitle]"'
+    refute_includes editor, "images[caption]"
+    assert_operator editor.index('name: "images[title]"'), :<, editor.index('name: "images[subtitle]"')
+    assert_includes component, "%i[title subtitle]"
+    assert_includes show, "FlatPack::SectionTitle::Component"
+    assert_includes show, "anchor_link: true"
+    assert_includes show, "subtitle: subtitle"
   end
 
   def test_text_editor_names_title_and_body

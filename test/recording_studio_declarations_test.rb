@@ -281,6 +281,30 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_kind_of RecordingStudioPresskits::Images, images_recording.recordable
   end
 
+  test "images title and subtitle are stored and blanks are nothing" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Images Heading")))
+    kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+
+    empty = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording)
+    named = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording) do |images|
+      images.title = "Press photos"
+      images.subtitle = "Doors at noon"
+    end
+    blank = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording) do |images|
+      images.title = "   "
+      images.subtitle = "   "
+    end
+
+    assert_nil empty.recordable.title
+    assert_nil empty.recordable.subtitle
+    assert_equal "Press photos", named.recordable.title
+    assert_equal "Doors at noon", named.recordable.subtitle
+    assert_nil blank.recordable.title
+    assert_nil blank.recordable.subtitle
+  end
+
   test "picker types skip dummy placeholders and types that do not allow press kit" do
     types = RecordingStudioPresskits.picker_types
 

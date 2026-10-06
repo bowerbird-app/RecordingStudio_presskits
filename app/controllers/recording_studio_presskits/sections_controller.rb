@@ -102,9 +102,13 @@ module RecordingStudioPresskits
 
     def assign_section_title(recordable, label)
       return unless recordable.respond_to?(:title=)
-      return if recordable.is_a?(Text) && params[:title].blank?
+      return if optional_section_title?(recordable) && params[:title].blank?
 
       recordable.title = params[:title].presence || label
+    end
+
+    def optional_section_title?(recordable)
+      recordable.is_a?(Text) || recordable.is_a?(Images)
     end
 
     def assign_opening_body(recordable, label)

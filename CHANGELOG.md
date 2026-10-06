@@ -19,6 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `recording_studio_publishable` to `~> 0.4`.
 - Pin Admin, Attachable, Duplicatable, Orderable, Trashable, and Root Switchable to the tags above.
 
+## [0.15.0] - 2026-10-06
+
+Images section heading.
+
+### Changed
+- An images section has an optional title and subtitle instead of a section caption. A blank one is stored as nothing. The editor shows Title and Subtitle, each with its name. The kit row stays Images. The kit preview and the public page show the title with FlatPack's section title and its anchor, and the subtitle under that title, when the title is set. Each photo still has its own caption, credit, and alt text.
+- Version `0.15.0`
+
+### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. `recording_studio_images` drops `caption` and gains nullable `title` and `subtitle`. An existing section caption is copied into `title`. Subtitle starts empty. Photo captions stay on the attachment.
+
 ## [0.14.0] - 2026-10-06
 
 Text section title.
@@ -355,7 +366,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.12.0

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -137,8 +137,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
   end
 
   create_table "recording_studio_images", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.text "caption"
     t.datetime "created_at", null: false
+    t.text "subtitle"
+    t.text "title"
   end
 
   create_table "recording_studio_press_kits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

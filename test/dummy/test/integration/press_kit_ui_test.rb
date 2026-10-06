@@ -610,7 +610,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test "images section saves a caption and shows attached photos" do
+  test "images section saves a title and subtitle and shows attached photos" do
     kit = record_kit("Spring launch")
     sign_in @user
     switch_to_root(@root)
@@ -624,9 +624,15 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     section = images_section(kit)
+    assert_nil section.recordable.title
+    assert_nil section.recordable.subtitle
     assert_select "h1", text: "Images"
-    assert_select "label", text: "Caption"
-    assert_select "input[name='images[caption]']"
+    assert_select "label", text: "Title"
+    assert_select "label", text: "Subtitle"
+    assert_select "input[name='images[title]']"
+    assert_select "input[name='images[subtitle]']"
+    refute_select "input[name='images[caption]']"
+    assert_operator response.body.index('name="images[title]"'), :<, response.body.index('name="images[subtitle]"')
     assert_includes response.body, "No images yet."
     refute_includes response.body, ">Save<"
     assert_select "form[data-controller='recording-studio-attachable--upload']", count: 1
@@ -642,18 +648,24 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-editor-preview", count: 0
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
-      images: { caption: "Press photos", decoy: "nope" }
+      images: { title: "Press photos", subtitle: "Doors at noon", caption: "nope", decoy: "nope" }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     follow_redirect!
-    assert_equal "Press photos", section.reload.recordable.caption
+    section.reload
+    assert_equal "Press photos", section.recordable.title
+    assert_equal "Doors at noon", section.recordable.subtitle
     refute_includes section.recordable.attributes.values, "nope"
+    assert_select "title", text: "Press photos"
+    assert_select "h1", text: "Images"
+    assert_select "input[name='images[title]'][value='Press photos']"
+    assert_select "input[name='images[subtitle]'][value='Doors at noon']"
 
     attachment = attach_image(section, "stage.jpg")
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     assert_select "img[alt='stage']"
-    assert response.body.index("name=\"images[caption]\"") < response.body.index("alt=\"stage\"")
+    assert response.body.index('name="images[title]"') < response.body.index("alt=\"stage\"")
     upload_form = css_select("form[data-controller='recording-studio-attachable--upload']").first.to_html
     refute_includes upload_form, "attachment_collection"
     assert_select "form#attachment-collection-#{section.id}"
@@ -690,15 +702,19 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Images"
     assert_select "#presskits-editor-preview img[alt='stage']"
-    assert_select "#presskits-editor-preview", text: /Press photos/
+    assert_select "#presskits-editor-preview .fp-section-title h2", text: "Press photos"
+    assert_select "#presskits-editor-preview .fp-section-title", text: /Doors at noon/
+    assert_select "#presskits-editor-preview a[href='#press-photos'][aria-label='Copy link to Press photos']"
 
     publish_images_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-images"
     assert_response :success
-    assert_includes response.body, "Press photos"
+    assert_select ".fp-section-title#press-photos h2", text: "Press photos"
+    assert_select ".fp-section-title", text: /Doors at noon/
     assert_select "img[alt='stage']"
-    assert response.body.index("alt=\"stage\"") < response.body.index("Press photos")
+    assert response.body.index("Press photos") < response.body.index("alt=\"stage\"")
 
     delete recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)

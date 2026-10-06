@@ -1,8 +1,15 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::TextInput::Component.new(
-    name: "images[caption]",
-    value: @images.caption,
-    label: "Caption",
+    name: "images[title]",
+    value: @images.title,
+    label: "Title",
+    class: "w-full"
+  ) %>
+
+  <%= render FlatPack::TextInput::Component.new(
+    name: "images[subtitle]",
+    value: @images.subtitle,
+    label: "Subtitle",
     class: "w-full"
   ) %>
 

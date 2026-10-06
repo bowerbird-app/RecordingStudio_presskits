@@ -15,7 +15,7 @@ module RecordingStudioPresskits
       end
 
       def self.permitted_attributes
-        [:caption]
+        %i[title subtitle]
       end
 
       def self.preview?

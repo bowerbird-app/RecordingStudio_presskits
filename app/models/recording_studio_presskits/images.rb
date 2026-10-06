@@ -21,8 +21,13 @@ module RecordingStudioPresskits
       auth_roles: { remove: :edit }
     )
 
-    def title
-      caption.to_s.strip.truncate(80).presence || "Images"
+    before_validation :clear_blank_heading
+
+    private
+
+    def clear_blank_heading
+      self.title = title.to_s.strip.presence
+      self.subtitle = subtitle.to_s.strip.presence
     end
   end
 end
