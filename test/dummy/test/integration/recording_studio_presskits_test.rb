@@ -14,8 +14,9 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     css = Rails.root.join("app/assets/builds/tailwind.css").read
 
     assert_includes css, "max-w-6xl"
-    assert_includes css, "button-ghost-background-color"
+    assert_includes css, "button-focus-ring-color"
     assert_includes css, "surface-subtle-background-color"
+    assert_includes css, "radius-lg"
   end
 
   test "dummy app validates recordable declarations" do

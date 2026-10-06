@@ -153,7 +153,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-editor-actions span", text: "Section"
     assert_select "#presskits-editor-actions [data-flat-pack--icon-name-value='plus']", count: 1
     section_button = css_select("#presskits-section-dropdown button").first
-    assert_includes section_button["class"], "bg-[var(--button-primary-background-color)]"
+    assert_equal "primary", section_button["data-fp-style"]
+    assert_includes section_button["class"], "fp-button"
     refute_select "button#presskits-section-dropdown[disabled]"
     assert_select "a[href*='type=RecordingStudioPresskits%3A%3AText']", text: "Text"
     assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
@@ -194,7 +195,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[name='press_kit[title]']", count: 0
     assert_select "button", text: "Save", count: 0
     assert_includes response.body, "presskits-section-dropdown"
-    assert_includes css_select("#presskits-section-dropdown button").first["class"], "bg-[var(--button-primary-background-color)]"
+    empty_section_button = css_select("#presskits-section-dropdown button").first
+    assert_equal "primary", empty_section_button["data-fp-style"]
+    assert_includes empty_section_button["class"], "fp-button"
     assert_select "#presskits-section-list", count: 0
     assert_select "#presskits-editor-preview", count: 0
     assert_includes response.body, "Preview"
@@ -223,13 +226,16 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal "recording-studio-presskits--section-order", shell["data-controller"]
     assert_includes shell["data-action"], "list:reordered->recording-studio-presskits--section-order#save"
     assert_equal recording_studio_presskits.press_kit_order_path(kit), shell["data-recording-studio-presskits--section-order-url-value"]
-    section_cards = css_select("#presskits-section-list > .rounded-lg")
+    section_cards = css_select("#presskits-section-list > div").select { |node|
+      node["class"].to_s.include?("rounded-[var(--radius-lg)]")
+    }
     assert_equal 1, section_cards.size
     card = section_cards.first
     assert_includes card["class"], "border-[var(--card-border-color)]"
     list = css_select("#presskits-section-list [role='list']").first
     assert_equal "flat-pack--list-orderable", list["data-controller"]
-    assert_includes list["class"], "divide-y"
+    assert_includes list["class"], "flat-pack-list--orderable"
+    assert_includes list["class"], "flat-pack-list-divided"
     items = css_select("#presskits-section-list [role='listitem']")
     assert_equal [hero.id, quotes.id], items.map { |item| item["id"] }
     items.each do |item|
@@ -391,7 +397,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Save", count: 0
     cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node| node.text.include?("Cancel") }
     assert_includes cancel.text, "Cancel"
-    assert_includes cancel["class"], "bg-[var(--button-default-background-color)]"
+    assert_equal "default", cancel["data-fp-style"]
+    assert_includes cancel["class"], "fp-button"
     form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
     assert_operator form_html.index("Update"), :<, form_html.index("name=\"text[title]\"")
     assert_operator form_html.index(">Title<"), :<, form_html.index(">Body<")
