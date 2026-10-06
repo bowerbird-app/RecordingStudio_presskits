@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.16.0
+
+An images section has an optional `title` and `subtitle` instead of a section caption. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. `recording_studio_images` drops `caption` and gains nullable `title` and `subtitle` text columns. An existing section caption is copied into `title`. Subtitle starts empty. A blank title or subtitle is stored as nothing. The editor labels are Title and Subtitle, in column one. Column two is a preview of that section inside a FlatPack card, with no card header. The kit row stays Images. The kit preview and the public page show the title with FlatPack's section title and its anchor, and the subtitle under that title, when the title is present. Each photo still keeps caption, credit, and alt text on the attachment.
+
+A kit section is registered with `RecordingStudioPresskits.register_section`. Declaring the press kit as an allowed parent does not make a recording a section. Text, Images, and Quotes are registered by the gem. Register a host section the same way, and keep `allowed_parent_types` so it can be recorded under the kit. `excluded_picker_types` only hides it from + Section. The editor, preview, and public page show registered sections. Other children stay under the kit. Reordering a section leaves those children in place.
+
 ## 0.15.0
 
 The kit header is the press kit: required `title`, optional `description`. It is not a child section.

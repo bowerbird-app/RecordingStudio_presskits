@@ -2,14 +2,15 @@
 
 module RecordingStudioPresskits
   class Configuration
-    attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_components,
-                  :section_editors, :excluded_picker_types
+    attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
+                  :section_components, :section_editors, :excluded_picker_types
     attr_reader :hooks
 
     def initialize
       @parent_root_type = "Workspace"
       @authentication_method = :authenticate_user!
       @current_actor_method = :current_user
+      @section_types = []
       @section_components = {}
       @section_editors = {}
       @excluded_picker_types = []
@@ -21,6 +22,7 @@ module RecordingStudioPresskits
         parent_root_type: parent_root_type,
         authentication_method: authentication_method,
         current_actor_method: current_actor_method,
+        section_types: Array(section_types).map(&:to_s),
         section_components: section_components.dup,
         section_editors: section_editors.dup,
         excluded_picker_types: Array(excluded_picker_types).map(&:to_s),

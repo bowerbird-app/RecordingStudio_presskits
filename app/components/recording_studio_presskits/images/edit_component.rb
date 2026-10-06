@@ -15,11 +15,11 @@ module RecordingStudioPresskits
       end
 
       def self.permitted_attributes
-        [:caption]
+        %i[title subtitle]
       end
 
       def self.preview?
-        false
+        true
       end
 
       def attachment_collection_options

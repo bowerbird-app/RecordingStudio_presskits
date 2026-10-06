@@ -11,8 +11,12 @@ module RecordingStudioPresskits
         @images = recording.recordable
       end
 
-      def caption
-        @images.caption.to_s.strip.presence
+      def section_title
+        @images.title.to_s.strip.presence
+      end
+
+      def subtitle
+        @images.subtitle.to_s.strip.presence
       end
 
       def image_recordings

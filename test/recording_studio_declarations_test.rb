@@ -305,6 +305,30 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_kind_of RecordingStudioPresskits::Images, images_recording.recordable
   end
 
+  test "images title and subtitle are stored and blanks are nothing" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Images Heading")))
+    kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+
+    empty = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording)
+    named = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording) do |images|
+      images.title = "Press photos"
+      images.subtitle = "Doors at noon"
+    end
+    blank = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording) do |images|
+      images.title = "   "
+      images.subtitle = "   "
+    end
+
+    assert_nil empty.recordable.title
+    assert_nil empty.recordable.subtitle
+    assert_equal "Press photos", named.recordable.title
+    assert_equal "Doors at noon", named.recordable.subtitle
+    assert_nil blank.recordable.title
+    assert_nil blank.recordable.subtitle
+  end
+
   test "picker types skip dummy placeholders and types that do not allow press kit" do
     types = RecordingStudioPresskits.picker_types
 
@@ -319,6 +343,33 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute_includes types, "RecordingStudioPresskits::PressKit"
     refute_includes types, "RecordingStudioPublishable::Publishable"
     refute_includes types, "RecordingStudioAttachable::Attachment"
+    assert_includes RecordingStudioPresskits.section_types, "FakeBlock"
+    assert_includes RecordingStudioPresskits.section_types, "RecordingStudioPresskits::Text"
+    refute RecordingStudioPresskits.section?("RecordingStudioPublishable::Publishable")
+  end
+
+  test "a child under a kit is a section only when its type is registered" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Section Registry")))
+    kit = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+    text = kit.record(RecordingStudioPresskits::Text, parent_recording: kit) do |recordable|
+      recordable.body = "<p>Hello</p>"
+    end
+    aside = kit.record(FakeBlock, parent_recording: kit) { |fake_block| fake_block.title = "Aside" }
+
+    assert_includes RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id), aside.id
+
+    RecordingStudioPresskits.configuration.section_types.delete("FakeBlock")
+    children = RecordingStudioPresskits::KitQuery.live_children(kit)
+    assert_includes children.map(&:id), text.id
+    refute_includes children.map(&:id), aside.id
+    refute RecordingStudioPresskits.section?(aside)
+
+    ordered = RecordingStudioPresskits::KitQuery.child_ids_with_section_order(kit, [text.id])
+    assert_equal [text.id.to_s, aside.id.to_s], ordered
+  ensure
+    RecordingStudioPresskits.register_section("FakeBlock", component: "FakeBlock::Component")
   end
 
   test "shipped sections name a menu icon" do

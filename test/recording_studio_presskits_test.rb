@@ -4,16 +4,18 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.15.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.16.0", ::RecordingStudioPresskits::VERSION
   end
 
-  def test_engine_and_dummy_keep_header_and_text_title_migrations
+  def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
     root = File.expand_path("..", __dir__)
     [
       "db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
+      "db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
-      "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb"
+      "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
+      "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
     end
@@ -97,6 +99,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes source, "def press_kit_type_name"
     assert_includes source, "def picker_types"
+    assert_includes source, "def register_section"
+    assert_includes source, "def section_types"
+    assert_includes source, "def section?"
     assert_includes source, "RecordingStudio.recordable_type_name"
     assert_includes source, "RecordingStudio.declared_allowed_parent_types_for"
     assert_includes source, "excluded_picker_types"
@@ -189,6 +194,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("dummy/config/initializers/recording_studio_presskits.rb", __dir__)
     )
     assert_includes presskits_initializer, "excluded_picker_types"
+    assert_includes presskits_initializer, 'register_section("FakeBlock"'
     assert_includes presskits_initializer, '"FakeBlock"'
     assert_includes initializer_source, '"AdminRoot"'
     assert_includes initializer_source, '"RecordingStudioPublishable::Publishable"'
@@ -326,6 +332,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     query = File.read(File.expand_path("../lib/recording_studio_presskits/kit_query.rb", __dir__))
     assert_includes query, "recording_studio_trashable_active"
     assert_includes query, "def live_children"
+    assert_includes query, "def child_ids_with_section_order"
+    assert_includes query, "section_types"
+    refute_includes query, "RecordingStudioPublishable::Publishable"
     assert_includes query, "def live_child"
     assert_includes query, "def published_kits"
     assert_includes query, "PressKit.indexable"
@@ -406,6 +415,25 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
   def presskits_path(relative)
     File.expand_path("../#{relative}", __dir__)
+  end
+
+  def test_images_editor_names_title_and_subtitle
+    editor = File.read(presskits_path("app/components/recording_studio_presskits/images/edit_component.html.erb"))
+    component = File.read(presskits_path("app/components/recording_studio_presskits/images/edit_component.rb"))
+    show = File.read(presskits_path("app/components/recording_studio_presskits/images/component.html.erb"))
+
+    assert_includes editor, 'label: "Title"'
+    assert_includes editor, 'label: "Subtitle"'
+    assert_includes editor, 'name: "images[title]"'
+    assert_includes editor, 'name: "images[subtitle]"'
+    refute_includes editor, "images[caption]"
+    assert_operator editor.index('name: "images[title]"'), :<, editor.index('name: "images[subtitle]"')
+    assert_includes component, "%i[title subtitle]"
+    assert_includes show, "FlatPack::SectionTitle::Component"
+    assert_includes show, "anchor_link: true"
+    assert_includes show, "subtitle: subtitle"
+    assert_includes component, "def self.preview?\n        true"
+    refute_includes component, "preview_card_title"
   end
 
   def test_text_editor_names_title_and_body

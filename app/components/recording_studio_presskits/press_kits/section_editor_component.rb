@@ -32,6 +32,10 @@ module RecordingStudioPresskits
         show_preview? ? 2 : 1
       end
 
+      def editor_view
+        @editor_view ||= editor_class&.new(recording: @recording, update_path: @update_path)
+      end
+
       def editor_class
         RecordingStudioPresskits.section_editor_for(@recording)
       end

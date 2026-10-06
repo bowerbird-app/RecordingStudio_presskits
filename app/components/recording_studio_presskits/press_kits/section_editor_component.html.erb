@@ -5,9 +5,8 @@
   ) %>
 
   <% editor = editor_class %>
-  <% editor_view = editor&.new(recording: @recording, update_path: @update_path) %>
   <% upload_data = nil %>
-  <% if form? && editor_view.respond_to?(:upload_form_data) %>
+  <% if form? && editor_view&.respond_to?(:upload_form_data) %>
     <% upload_data = editor_view.upload_form_data(helpers) %>
   <% end %>
   <% grid = capture do %>
@@ -23,7 +22,7 @@
       </div>
 
       <% if show_preview? %>
-        <div class="min-w-0">
+        <div class="min-w-0" id="presskits-section-preview">
           <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
             <% component = RecordingStudioPresskits.section_component_for(@recording) %>
             <% if component %>
