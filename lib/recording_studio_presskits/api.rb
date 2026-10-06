@@ -2,20 +2,44 @@
 
 require "recording_studio_presskits/api/quote_payload"
 require "recording_studio_presskits/api/section_payload"
+require "recording_studio_presskits/api/section_action"
+require "recording_studio_presskits/api/create_section"
+require "recording_studio_presskits/api/reorder_sections"
+require "recording_studio_presskits/api/remove_section"
+require "recording_studio_presskits/api/section_action_registration"
 
 module RecordingStudioPresskits
   module Api
+    extend SectionActionRegistration
+
     class << self
       def register!
         return unless defined?(::RecordingStudioApi)
 
+        register_press_kit
         register_kit_section
         register_text
         register_quote
         register_quote_section
+        register_section_actions
       end
 
       private
+
+      def register_press_kit
+        register_type(
+          "RecordingStudioPresskits::PressKit",
+          operations: %i[show],
+          serializer: press_kit_serializer,
+          output_keys: %i[title description],
+          writable_attributes: [],
+          capability_actions: %i[create_section reorder_sections]
+        )
+      end
+
+      def press_kit_serializer
+        ->(recordable, **) { { title: recordable.title, description: recordable.description } }
+      end
 
       def register_kit_section
         register_type(
@@ -23,7 +47,8 @@ module RecordingStudioPresskits
           operations: %i[index show update],
           serializer: kit_section_serializer,
           output_keys: %i[title subtitle content_type content_id],
-          writable_attributes: %i[title subtitle]
+          writable_attributes: %i[title subtitle],
+          capability_actions: %i[remove_section]
         )
       end
 

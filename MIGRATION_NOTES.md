@@ -20,7 +20,7 @@ Create a section with `RecordingStudioPresskits.create_section!`. Stop calling `
 
 Orderable on the press kit allows only kit sections. Reorder those recordings. Do not reorder text, images, or quote sections as children of the press kit. A publishable child under the kit is no longer mixed into that order.
 
-When Recording Studio API is loaded, update `title` and `subtitle` on the kit section. The show payload also has `content_type` and `content_id`. Update a text body on the text recording. There is no kit section create operation and no kit section destroy operation. The editor removes a section by trashing the kit section.
+When Recording Studio API is loaded, a press kit exposes show for `title` and `description`. Update those on the header screen. `create_section` on the press kit takes `content_type`, `title`, and `subtitle` and calls `create_section!`. `reorder_sections` takes `ordered_recording_ids` and calls `recording_studio_orderable_reorder!`. Both actions are registered against Orderable, which the press kit already enables. `remove_section` on the kit section calls `recording_studio_trashable_trash!`. That action is registered against Trashable. Orderable and Trashable do not ship these actions, so this gem registers the wrappers. A kit section still exposes index, show, and update. The show payload has `title`, `subtitle`, `content_type`, and `content_id`. Update a text body on the text recording. There is no generic kit section create and no kit section destroy. The editor removes a section by trashing the kit section, and `remove_section` does the same.
 
 ## 0.16.0
 

@@ -16,12 +16,13 @@ Kit sections.
 - `register_section` registers a content type for the + Section menu, plus its component, editor, and optional `prepare` hook. `section?` is true only for a kit section.
 - The kit editor, the preview, and the public page walk kit sections. `SectionFrameComponent` renders the kit section title and subtitle, then the content component.
 - Reordering or removing a section targets the kit section. Duplicating a kit copies each kit section and the content under it.
+- When Recording Studio API is loaded, `create_section` and `reorder_sections` are press kit actions, and `remove_section` is a kit section action. They call `create_section!`, `recording_studio_orderable_reorder!`, and `recording_studio_trashable_trash!`.
 - Version `0.17.0`
 
 ### Upgrade notes
 - Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. The migration is irreversible. It wraps legacy press-kit children in kit sections, copies their order, and drops the text title column and the images title and subtitle columns. A migrated quote section gets the kit section title Quotes. See `MIGRATION_NOTES.md`.
 - Add `RecordingStudioPresskits::KitSection` to `recordable_types`. Point content `allowed_parent_types` at `RecordingStudioPresskits::KitSection`.
-- Create sections with `RecordingStudioPresskits.create_section!`.
+- Create sections with `RecordingStudioPresskits.create_section!`. API clients use the press kit action `create_section`, reorder with `reorder_sections`, and remove a kit section with `remove_section`. There is still no generic kit section create or destroy.
 
 ## [0.16.0] - 2026-10-06
 

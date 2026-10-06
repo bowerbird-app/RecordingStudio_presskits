@@ -111,6 +111,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes source, "Slot"
   end
 
+  def test_api_registers_section_actions_without_a_bare_create
+    source = File.read(File.expand_path("../lib/recording_studio_presskits/api.rb", __dir__))
+
+    assert_includes source, "capability_actions: %i[create_section reorder_sections]"
+    assert_includes source, "capability_actions: %i[remove_section]"
+    assert_includes source, "operations: %i[show]"
+    assert_includes source, "operations: %i[index show update]"
+    assert_includes source, "register_section_actions"
+    refute_includes source, "operations: %i[create"
+  end
+
   def test_dummy_app_uses_recording_studio_default_layout
     application_controller_path = File.expand_path("dummy/app/controllers/application_controller.rb", __dir__)
     controller_source = File.read(application_controller_path)
