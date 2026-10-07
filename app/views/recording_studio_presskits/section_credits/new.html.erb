@@ -1,45 +1,13 @@
 <% presskits_page_nav(
-  title: "New credit",
+  title: "Add credit",
   back_url: edit_press_kit_section_path(@press_kit_recording, @section_recording),
   back_label: "Back to credits",
   close_url: edit_press_kit_path(@press_kit_recording)
 ) %>
 
-<div class="flex max-w-xl flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "New credit",
-    subtitle: "Saved for this workspace, then added to this kit.",
-    variant: :h1
-  ) %>
-
-  <%= form_with url: press_kit_section_credits_path(@press_kit_recording, @section_recording), method: :post, local: true, class: "flex flex-col gap-4" do %>
-    <%= render FlatPack::Button::Component.new(text: "Create", style: :primary, type: "submit") %>
-
-    <%= render FlatPack::TextInput::Component.new(
-      name: "credit[name]",
-      label: "Name",
-      value: @credit.name,
-      required: true,
-      class: "w-full"
-    ) %>
-    <%= render FlatPack::TextInput::Component.new(
-      name: "credit[usual_role]",
-      label: "Usual role",
-      value: @credit.usual_role,
-      class: "w-full"
-    ) %>
-    <%= render FlatPack::TextInput::Component.new(
-      name: "credit[url]",
-      label: "URL",
-      value: @credit.url,
-      class: "w-full"
-    ) %>
-    <%= render FlatPack::TextInput::Component.new(
-      name: "role",
-      label: "Role",
-      value: params[:role],
-      help_text: "Leave this blank to use their usual role.",
-      class: "w-full"
-    ) %>
-  <% end %>
-</div>
+<%= render RecordingStudioPresskits::CreditsSection::AddComponent.new(
+  credit: @credit,
+  root_recording: current_presskits_root,
+  url: press_kit_section_credits_path(@press_kit_recording, @section_recording),
+  kit_role: params[:role]
+) %>

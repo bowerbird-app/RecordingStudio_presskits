@@ -27,16 +27,8 @@ module RecordingStudioPresskits
         Credits.lines_for(@recording)
       end
 
-      def credit_choices
-        Credits.active_for_root(root_recording).map { |recording| [choice_label(recording), recording.id] }
-      end
-
-      def add_path
-        helpers.press_kit_section_credits_path(kit_recording, kit_section_recording)
-      end
-
-      def new_path
-        helpers.new_press_kit_section_credit_path(kit_recording, kit_section_recording)
+      def section_actions
+        ActionsComponent.new(recording: @recording)
       end
 
       def order_path
@@ -63,15 +55,6 @@ module RecordingStudioPresskits
       end
 
       private
-
-      def choice_label(recording)
-        credit = recording.recordable
-        [credit.name, credit.usual_role].filter_map { |value| value.to_s.strip.presence }.join(", ")
-      end
-
-      def root_recording
-        kit_recording.root_recording
-      end
 
       def kit_section_recording
         @recording.parent_recording

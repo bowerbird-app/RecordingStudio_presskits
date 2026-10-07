@@ -16,6 +16,7 @@ Credits.
 - Credits has its own list, create, edit, and trash screens. Trash and restore use Trashable. Restoring a credit puts it back on kits that already listed it.
 - A Credits section can be added to a press kit. Each line stores the role and the order for that kit, and points at the credit. Removing a line leaves the credit in the workspace.
 - The same credit can be used on more than one kit, with a different role on each line. Changing the usual role does not change lines that already exist.
+- A Credits section keeps Title, Subtitle, and the credit list. **Add credit** opens a screen to choose a workspace credit or create one, and to set **Role on this kit** for that credit.
 - The public page and the kit preview show the role, the name, and a link when the credit has a URL.
 - When Recording Studio API is loaded, a credit exposes index, show, create, and update. A credits section exposes `add_credit` and `reorder_credits`. A credit line exposes index, show, update, and `remove_credit`.
 - Version `0.19.0`

@@ -523,4 +523,26 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, "FlatPack::SectionTitle::Component"
     refute_includes show, "gap-4"
   end
+
+  def test_credits_section_adds_a_credit_on_its_own_screen
+    editor = File.read(presskits_path(
+                         "app/components/recording_studio_presskits/credits_section/edit_component.html.erb"
+                       ))
+    actions = File.read(presskits_path(
+                          "app/components/recording_studio_presskits/credits_section/actions_component.html.erb"
+                        ))
+    add = File.read(presskits_path("app/components/recording_studio_presskits/credits_section/add_component.html.erb"))
+    line = File.read(presskits_path("app/components/recording_studio_presskits/credit_line/edit_component.html.erb"))
+
+    refute_includes editor, "credit_id"
+    refute_includes editor, 'name: "role"'
+    assert_includes actions, 'text: "Add credit"'
+    assert_includes add, 'label: "Role on this kit"'
+    assert_includes add, 'text: "Add to this kit"'
+    assert_includes add, 'text: "Create and add"'
+    assert_includes add, "recording-studio-presskits--add-credit"
+    assert_includes line, 'label: "Role on this kit"'
+    controller = "app/javascript/recording_studio_presskits/controllers/add_credit_controller.js"
+    assert File.exist?(presskits_path(controller))
+  end
 end

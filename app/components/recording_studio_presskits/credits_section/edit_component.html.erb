@@ -1,30 +1,4 @@
 <div class="flex w-full flex-col gap-6">
-  <%= form_with url: add_path, method: :post, local: true, class: "flex w-full flex-col gap-4" do %>
-    <% if credit_choices.any? %>
-      <%= render FlatPack::Select::Component.new(
-        name: "credit_id",
-        label: "Credit",
-        options: credit_choices,
-        placeholder: "Search credits",
-        searchable: true,
-        class: "w-full"
-      ) %>
-      <%= render FlatPack::TextInput::Component.new(
-        name: "role",
-        label: "Role",
-        help_text: "Leave this blank to use their usual role.",
-        class: "w-full"
-      ) %>
-    <% end %>
-
-    <div class="flex flex-wrap items-center gap-3">
-      <% if credit_choices.any? %>
-        <%= render FlatPack::Button::Component.new(text: "Add", style: :primary, type: "submit") %>
-      <% end %>
-      <%= render FlatPack::Button::Component.new(text: "New credit", icon: "plus", style: :secondary, href: new_path) %>
-    </div>
-  <% end %>
-
   <% if lines.any? %>
     <div
       id="presskits-credit-list"

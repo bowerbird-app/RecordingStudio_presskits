@@ -191,6 +191,26 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Credits"
     assert_rounded_default_layout
 
+    empty_kit = record_kit("Empty credits")
+    post recording_studio_presskits.press_kit_sections_path(empty_kit),
+         params: { type: "RecordingStudioPresskits::CreditsSection" }
+    empty_section = RecordingStudioPresskits::KitQuery.sections_for(empty_kit).first
+    follow_redirect!
+    empty_add = recording_studio_presskits.new_press_kit_section_credit_path(empty_kit, empty_section)
+    assert_select "a[href='#{empty_add}']", text: "Add credit"
+    assert_select "input[name='credit_id']", count: 0
+    assert_select "input[name='role']", count: 0
+
+    get empty_add
+    assert_response :success
+    assert_select "h1", text: "Add credit"
+    assert_select "h2", text: "Create a credit"
+    assert_select "h2", text: "Choose a credit", count: 0
+    assert_select "input[name='credit_id']", count: 0
+    assert_select "input[name='credit[name]']"
+    assert_select "label", text: "Role on this kit", count: 1
+    assert_select "button", text: "Create and add"
+
     assert_no_difference -> { RecordingStudioPresskits::Credit.count } do
       post recording_studio_presskits.credits_path, params: { credit: { name: "  ", usual_role: "PR" } }
     end
@@ -217,13 +237,38 @@ class CreditsTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_select "h1", text: "Credits"
+    assert_select "input[name='kit_section[title]']"
+    assert_select "input[name='kit_section[subtitle]']"
+    assert_select "input[name='credit_id']", count: 0
+    assert_select "input[name='role']", count: 0
+    add_credit = recording_studio_presskits.new_press_kit_section_credit_path(kit, section)
+    assert_select "a[href='#{add_credit}']", text: "Add credit"
+
+    get add_credit
+    assert_response :success
+    assert_select "h2", text: "Choose a credit"
+    assert_select "h2", text: "Create a credit"
     assert_select "input[name='credit_id']"
-    assert_select "a[href='#{recording_studio_presskits.new_press_kit_section_credit_path(kit, section)}']", text: "New credit"
+    assert_select "label", text: "Role on this kit", count: 2
+    assert_select "div[hidden][data-recording-studio-presskits--add-credit-target='chosen']"
+    assert_select "button", text: "Add to this kit"
+    assert_select "button", text: "Create and add"
+    payload = JSON.parse(css_select("[data-controller='recording-studio-presskits--add-credit']").first[
+      "data-recording-studio-presskits--add-credit-credits-value"
+    ])
+    assert_equal [{ "id" => tom.id, "name" => "Tom Ross", "usual_role" => "Photographer" }], payload
+
+    post recording_studio_presskits.press_kit_section_credits_path(kit, section), params: {}
+    assert_redirected_to add_credit
+    assert_equal "Pick a credit, or add a new one.", flash[:alert]
 
     post recording_studio_presskits.press_kit_section_credits_path(kit, section), params: { credit_id: tom.id }
     line = RecordingStudioPresskits::Credits.lines_for(credits_content(section)).first
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_credit_path(kit, section, line)
     assert_equal "Photographer", line.recordable.role
+    follow_redirect!
+    assert_select "label", text: "Role on this kit"
+    assert_select "input[name='credit_line[role]'][value='Photographer']"
 
     patch recording_studio_presskits.press_kit_section_credit_path(kit, section, line), params: {
       credit_line: { role: "Photography" }

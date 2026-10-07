@@ -66,7 +66,8 @@ module RecordingStudioPresskits
     end
 
     def missing_choice
-      redirect_to section_edit_path, alert: "Pick a credit, or add a new one."
+      redirect_to new_press_kit_section_credit_path(@press_kit_recording, section_recording),
+                  alert: "Pick a credit, or add a new one."
       nil
     end
 
