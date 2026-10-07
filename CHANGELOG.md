@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-10-07
+
+Section heading save button.
+
+### Changed
+- FlatPack is `>= 0.1.200` (dummy tag `v0.1.200`).
+- The section heading form uses Flatpack unsaved changes. Update renders `style: :default` and is that form's submit target. It stays default while Title, Subtitle, and any other fields in the form match the saved values, and turns primary when they differ. Restoring those values returns it to default.
+- Version `0.19.0`
+
+### Upgrade notes
+- Bump FlatPack to at least `0.1.200`. Importmap hosts that already pin Flatpack controllers load `flat-pack--unsaved-changes` with no new register call. A bundled app that copies the esbuild list in Flatpack's installation doc registers `UnsavedChangesController` as `flat-pack--unsaved-changes`.
+- Reload Flatpack CSS and JavaScript. FlatPack `0.1.199` also changes orderable list drag and makes list rows slightly taller. Call sites stay the same. Rebuild host Tailwind so the new list spacing utilities exist.
+- Hosts that replaced `SectionEditorComponent` add `data: { controller: "flat-pack--unsaved-changes" }` on the heading form and mark Update with `style: :default` and `data: { "flat-pack--unsaved-changes-target": "submit" }`.
+- Header Update and a quote's Save stay primary. They do not use this controller.
+
 ## [0.18.0] - 2026-10-07
 
 Section editor form.
@@ -416,7 +431,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.15.0...v0.16.0
