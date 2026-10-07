@@ -428,9 +428,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Back to kit"
     refute section_editor_cancel?
     form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
+    fieldset_html = css_select("#presskits-section-heading").first.to_html
     assert_operator form_html.index(">Update<"), :<, form_html.index(">Title<")
     assert_operator form_html.index(">Title<"), :<, form_html.index(">Subtitle<")
     assert_operator form_html.index(">Subtitle<"), :<, form_html.index(">Body<")
+    refute_includes fieldset_html, 'name="text[body]"'
+    assert_includes form_html, 'name="text[body]"'
     assert_operator form_html.index("name=\"kit_section[title]\""), :<, form_html.index("name=\"text[body]\"")
     columns = section_editor_columns
     assert_equal 2, columns.size
@@ -1397,6 +1400,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal "default", button["data-fp-style"]
     assert_equal "submit", button["data-flat-pack--unsaved-changes-target"]
     assert_includes button["class"], "fp-button"
+    assert_select "form[data-controller='flat-pack--unsaved-changes'] fieldset#presskits-section-heading" do
+      assert_select "legend", text: "Heading"
+      assert_select "#presskits-section-update button[type=submit]", text: "Update"
+      assert_select "input[name='kit_section[title]']"
+      assert_select "input[name='kit_section[subtitle]']"
+    end
   end
 
   def assert_section_menu_icon(type_name, icon_name)

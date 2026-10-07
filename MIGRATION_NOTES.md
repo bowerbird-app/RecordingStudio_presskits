@@ -39,6 +39,10 @@ When Recording Studio API is loaded, a kit section still returns `title`, `subti
 
 The section editor still has two columns. The preview card is omitted until the section has a title, a subtitle, or content that would show. `SectionFrameComponent#render?` is that check. Text, Images, Quotes, and Video implement `render?` and return false when the body, photos, quotes, or videos are empty. A host content component can do the same. The default is still to render. The kit editor hides its preview card on the same check. A host that replaced `SectionEditorComponent` should wrap the preview card in `show_preview?` rather than always rendering it.
 
+Bump FlatPack to `>= 0.1.202` (dummy tag `v0.1.202`). The heading form wraps Update, Title, and Subtitle in `FlatPack::Fieldset::Component`. The legend is Heading. Body stays in the same form, under that group. Section actions and a `below?` editor stay under the form. Keep `flat-pack--unsaved-changes` on the form, and keep Update as `style: :default` with the submit target.
+
+FlatPack `0.1.202` does not ship Fieldset. This gem defines `FlatPack::Fieldset::Component` when `app/components/flat_pack/fieldset/component.rb` is missing, and uses the gem's class once that file is present. Rebuild host Tailwind so `float-left`, `clear-both`, and `space-y-[var(--stack-gap-md)]` are generated. Dummy scans `lib/recording_studio_presskits/flatpack_fieldset.rb` for those utilities.
+
 ## 0.19.0
 
 Bump FlatPack to `>= 0.1.200` (dummy tag `v0.1.200`). The section heading form, the one with Title and Subtitle, uses Flatpack's unsaved-changes behaviour. Update starts in the default style and turns primary when a field in that form no longer matches the saved value. Typing the saved value back returns the button to default. Saving and coming back to the same screen does too, because the new page captures a new baseline.

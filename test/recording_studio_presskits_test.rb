@@ -41,7 +41,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.200"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.202"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -56,7 +56,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.200"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.202"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -196,6 +196,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes sources_task, '"recording_studio_duplicatable"'
     assert_includes sources_task, '"recording_studio_admin"'
     assert_includes sources_task, '"recording_studio_presskits"'
+    assert_includes sources_task, "lib/recording_studio_presskits/flatpack_fieldset.rb"
+    assert_includes tailwind_source, "lib/recording_studio_presskits/flatpack_fieldset.rb"
     assert_includes sources_task, '"recording_studio_publishable"'
     assert_includes sources_task, '"recording_studio_attachable"'
     refute_includes tailwind_source, "@theme"
@@ -247,8 +249,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.200\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.200"'
+    assert_includes readme, "tag: \"v0.1.202\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.202"'
+    assert_includes readme, "FlatPack::Fieldset::Component"
     assert_includes readme, "unsaved-changes controller"
     assert_includes readme, "PressKit.indexable"
     assert_includes readme, "Press kit"
@@ -485,6 +488,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes section_editor, "upload_form_data"
   end
 
+  def test_section_heading_uses_fieldset_and_skips_the_local_copy_when_flatpack_ships_it
+    engine = File.read(presskits_path("lib/recording_studio_presskits/engine.rb"))
+    fallback = File.read(presskits_path("lib/recording_studio_presskits/flatpack_fieldset.rb"))
+
+    assert_includes engine, "def install_fieldset_fallback"
+    assert_includes engine, 'join("app/components/flat_pack/fieldset/component.rb")'
+    assert_includes engine, 'require "recording_studio_presskits/flatpack_fieldset"'
+    assert_includes fallback, "module Fieldset"
+    assert_includes fallback, 'raise ArgumentError, "title is required"'
+  end
+
   def test_section_editor_puts_update_above_fields_and_custom_ui_below
     editor_path = "press_kits/section_editor_component.html.erb"
     section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
@@ -493,7 +507,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     quotes = File.read(presskits_path("app/components/recording_studio_presskits/quote_section/edit_component.rb"))
     text = File.read(presskits_path("app/components/recording_studio_presskits/text/edit_component.rb"))
 
+    assert_operator section_editor.index("FlatPack::Fieldset::Component"), :<, section_editor.index('text: "Update"')
+    assert_includes section_editor, 'title: "Heading"'
+    assert_includes section_editor, 'id: "presskits-section-heading"'
     assert_operator section_editor.index('text: "Update"'), :<, section_editor.index('name: "kit_section[title]"')
+    heading_close = section_editor.index("<% end %>", section_editor.index('name: "kit_section[subtitle]"'))
+    assert_operator heading_close, :<, section_editor.index("fields_in_form?")
     assert_includes section_editor, 'data: { controller: "flat-pack--unsaved-changes" }'
     assert_includes section_editor, "style: :default"
     assert_includes section_editor, '"flat-pack--unsaved-changes-target": "submit"'

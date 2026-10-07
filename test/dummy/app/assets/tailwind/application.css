@@ -10,6 +10,7 @@
 /* This engine's views and components */
 @source "../../../../../app/views/**/*.erb";
 @source "../../../../../app/components/**/*.{rb,erb}";
+@source "../../../../../lib/recording_studio_presskits/flatpack_fieldset.rb";
 
 /* Fallback scans when Bundler installs into vendor or /usr/local/bundle (CI). */
 @source "../../../vendor/bundle/**/bundler/gems/flatpack-*/app/components/**/*.rb";

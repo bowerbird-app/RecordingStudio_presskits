@@ -20,9 +20,12 @@ Video section.
 
 ### Changed
 - The section editor keeps its preview column. The card is rendered only when `SectionFrameComponent` would show a title, a subtitle, or content. Text, Images, Quotes, and Video return false from `render?` when they have nothing to show. The kit editor uses the same check, so a blank section does not leave an empty preview card.
+- The section heading form wraps Update, Title, and Subtitle in `FlatPack::Fieldset::Component`. The legend is Heading. Body and other extra fields stay in that form, under the group.
+- FlatPack is `>= 0.1.202` (dummy tag `v0.1.202`).
 
 ### Upgrade notes
 - Add `recording_studio_video`, `~> 0.1.0` (tag `v0.1.0`) and `recording_studio_external_embed`, `~> 0.1.1` (tag `v0.1.3`).
+- Bump FlatPack to at least `0.1.202` (tag `v0.1.202`). A host that replaced `SectionEditorComponent` wraps Update, Title, and Subtitle in `FlatPack::Fieldset::Component` with the legend Heading. Keep the unsaved-changes controller on the form. Leave Body in the form, under that group. FlatPack `0.1.202` does not define Fieldset yet. This gem defines it until `app/components/flat_pack/fieldset/component.rb` is in the installed gem. Rebuild host Tailwind so the fieldset utilities are generated.
 - Add `RecordingStudioPresskits::VideoSection` and `RecordingStudioVideo::Video` to `recordable_types`.
 - Run `bin/rails generate recording_studio_video:install`, `bin/rails generate recording_studio_video:migrations`, and `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. External Embed has no table. See `MIGRATION_NOTES.md`.
 

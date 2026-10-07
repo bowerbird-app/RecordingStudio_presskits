@@ -20,6 +20,16 @@ module RecordingStudioPresskits
         register_video_section
       end
 
+      def install_fieldset_fallback
+        fieldset = FlatPack::Engine.root.join("app/components/flat_pack/fieldset/component.rb")
+        return if fieldset.file?
+        return if defined?(FlatPack::Fieldset::Component)
+        # Load the parent before this file subclasses it.
+        return unless FlatPack::BaseComponent
+
+        require "recording_studio_presskits/flatpack_fieldset"
+      end
+
       private
 
       def extensions_for(kind, names)
@@ -199,6 +209,12 @@ module RecordingStudioPresskits
     initializer "recording_studio_presskits.text_section" do
       config.to_prepare do
         RecordingStudioPresskits::Engine.register_builtin_sections
+      end
+    end
+
+    initializer "recording_studio_presskits.fieldset" do
+      config.to_prepare do
+        RecordingStudioPresskits::Engine.install_fieldset_fallback
       end
     end
 

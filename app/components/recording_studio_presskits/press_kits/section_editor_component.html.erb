@@ -9,27 +9,29 @@
       <%= form_with url: @update_path, method: :patch, local: true,
             class: "flex flex-col gap-6",
             data: { controller: "flat-pack--unsaved-changes" } do %>
-        <div id="presskits-section-update" class="flex flex-wrap items-center gap-3">
-          <%= render FlatPack::Button::Component.new(
-            text: "Update",
-            style: :default,
-            type: "submit",
-            data: { "flat-pack--unsaved-changes-target": "submit" }
-          ) %>
-        </div>
+        <%= render FlatPack::Fieldset::Component.new(title: "Heading", id: "presskits-section-heading") do %>
+          <div id="presskits-section-update" class="flex flex-wrap items-center gap-3">
+            <%= render FlatPack::Button::Component.new(
+              text: "Update",
+              style: :default,
+              type: "submit",
+              data: { "flat-pack--unsaved-changes-target": "submit" }
+            ) %>
+          </div>
 
-        <%= render FlatPack::TextInput::Component.new(
-          name: "kit_section[title]",
-          value: section_title,
-          label: "Title",
-          class: "w-full"
-        ) %>
-        <%= render FlatPack::TextInput::Component.new(
-          name: "kit_section[subtitle]",
-          value: section_subtitle,
-          label: "Subtitle",
-          class: "w-full"
-        ) %>
+          <%= render FlatPack::TextInput::Component.new(
+            name: "kit_section[title]",
+            value: section_title,
+            label: "Title",
+            class: "w-full"
+          ) %>
+          <%= render FlatPack::TextInput::Component.new(
+            name: "kit_section[subtitle]",
+            value: section_subtitle,
+            label: "Subtitle",
+            class: "w-full"
+          ) %>
+        <% end %>
 
         <%= render editor_view if fields_in_form? %>
       <% end %>
