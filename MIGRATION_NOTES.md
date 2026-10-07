@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.19.0
+
+Bump FlatPack to `>= 0.1.200` (dummy tag `v0.1.200`). The section heading form, the one with Title and Subtitle, uses Flatpack's unsaved-changes behaviour. Update starts in the default style and turns primary when a field in that form no longer matches the saved value. Typing the saved value back returns the button to default. Saving and coming back to the same screen does too, because the new page captures a new baseline.
+
+Importmap hosts that already pin Flatpack controllers load `flat-pack--unsaved-changes` with no new register call. A bundled app that copies the esbuild list in Flatpack's installation doc registers `UnsavedChangesController` as `flat-pack--unsaved-changes`.
+
+Reload Flatpack CSS and JavaScript. FlatPack `0.1.199` also changes how an orderable list drags and makes those rows slightly taller. The Ruby calls stay the same. Rebuild host Tailwind so the new list spacing utilities are generated.
+
+A host that replaced `SectionEditorComponent` adds the controller on that heading form and marks Update as the submit target with `style: :default`. Header Update and a quote's Save stay primary.
+
 ## 0.18.0
 
 Every section editor draws one heading form. Update sits above Title, Subtitle, and any extra fields. That button is in the same spot for Text, Images, and Quotes.

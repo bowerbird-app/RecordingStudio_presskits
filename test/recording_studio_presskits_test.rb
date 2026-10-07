@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.18.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.19.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -36,7 +36,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.198"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.200"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
@@ -49,7 +49,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.198"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.200"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -238,6 +238,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
+    assert_includes readme, "tag: \"v0.1.200\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.200"'
+    assert_includes readme, "unsaved-changes controller"
     assert_includes readme, "PressKit.indexable"
     assert_includes readme, "Press kit"
     assert_includes readme, "RecordingStudioPresskits::PressKit"
@@ -401,6 +404,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, 'name: "press_kit[description]"'
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, 'text: "Update", style: :primary'
+    refute_includes header, "flat-pack--unsaved-changes"
     assert_includes header, 'text: "Cancel", style: :default'
     assert_includes header, "cols: 2"
     assert_includes header, 'id: "presskits-header-edit-preview"'
@@ -478,6 +482,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     text = File.read(presskits_path("app/components/recording_studio_presskits/text/edit_component.rb"))
 
     assert_operator section_editor.index('text: "Update"'), :<, section_editor.index('name: "kit_section[title]"')
+    assert_includes section_editor, 'data: { controller: "flat-pack--unsaved-changes" }'
+    assert_includes section_editor, "style: :default"
+    assert_includes section_editor, '"flat-pack--unsaved-changes-target": "submit"'
+    refute_includes section_editor, "style: :primary"
     assert_operator section_editor.index('name: "kit_section[title]"'), :<,
                     section_editor.index('name: "kit_section[subtitle]"')
     assert_operator section_editor.index('name: "kit_section[subtitle]"'), :<,

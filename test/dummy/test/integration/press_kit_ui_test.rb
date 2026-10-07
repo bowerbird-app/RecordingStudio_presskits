@@ -421,7 +421,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-preview strong", text: "one-sheet"
     assert_select "#presskits-section-preview li", text: "Photos"
     assert_select "#presskits-section-preview .flat-pack-richtext--view-mode"
-    assert_select "#presskits-section-update button[type=submit]", text: "Update"
+    assert_heading_form_save_button(kit, section)
     assert_select "button", text: "Upload", count: 0
     assert_select "button", text: "Save", count: 0
     assert_includes response.body, "Back to kit"
@@ -687,6 +687,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes cancel["class"], "fp-button"
     form = css_select("form[action='#{recording_studio_presskits.press_kit_header_path(kit)}']").first
     form_html = form.to_html
+    refute_includes form_html, "flat-pack--unsaved-changes"
     assert_operator form_html.index("Update"), :<, form_html.index('name="press_kit[title]"')
     grid_html = css_select("#presskits-header-actions ~ .grid").to_html
     assert_includes grid_html, "grid-cols-1"
@@ -908,6 +909,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
     column = columns.first.to_html
+    assert_heading_form_save_button(kit, section)
     heading = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
     assert_includes heading, ">Update<"
     refute_includes heading, ">Upload<"
@@ -934,6 +936,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Images"
     assert_select "input[name='kit_section[title]'][value='Press photos']"
     assert_select "input[name='kit_section[subtitle]'][value='Doors at noon']"
+    assert_heading_form_save_button(kit, section)
     refute_select "#presskits-section-preview h2", text: "Preview"
     assert_select "#presskits-section-preview .fp-section-title h2", text: "Press photos"
     assert_select "#presskits-section-preview .fp-section-title", text: /Doors at noon/
@@ -952,6 +955,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[name='attachment_collection[rows][][alt_text]']"
     assert_select "label", text: "Credit"
     assert_select "label", text: "Alt text"
+    assert_heading_form_save_button(kit, section)
     assert_select "button", text: "Save"
     assert_select "button", text: "Trash"
     refute_includes response.body, "No images yet."
@@ -1022,7 +1026,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Add quote", count: 0
     assert_select "input[name='kit_section[title]']"
     assert_select "input[name='kit_section[subtitle]']"
-    assert_select "#presskits-section-update button[type=submit]", text: "Update"
+    assert_heading_form_save_button(kit, section)
     assert_select "textarea[name='quote[body]']", count: 0
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
@@ -1060,7 +1064,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[name='quote[role]']"
     assert_select "label", text: "Organisation"
     assert_select "input[name='quote[organisation]']"
-    assert_select "button", text: "Save"
+    save = css_select("#presskits-quote-actions button[type=submit]").first
+    assert_equal "Save", save.text.squish
+    assert_equal "primary", save["data-fp-style"]
+    refute_includes response.body, "flat-pack--unsaved-changes"
     assert_select "a[aria-label='Remove quote']", count: 0
     assert_select "button", text: "Upload"
     assert_select "form[data-controller='recording-studio-attachable--upload']"
@@ -1185,6 +1192,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_heading_form_save_button(kit, section)
+    assert_select "form[data-controller='flat-pack--unsaved-changes']", count: 1
+    form = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").first
+    assert_equal "flat-pack--unsaved-changes", form["data-controller"]
+    button = css_select("#presskits-section-update button[type=submit]").first
+    assert_equal "Update", button.text.squish
+    assert_equal "default", button["data-fp-style"]
+    assert_equal "submit", button["data-flat-pack--unsaved-changes-target"]
+    assert_includes button["class"], "fp-button"
+  end
 
   def assert_section_menu_icon(type_name, icon_name)
     link = css_select("a[href*='type=#{ERB::Util.url_encode(type_name)}']").first
