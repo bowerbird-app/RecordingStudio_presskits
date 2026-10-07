@@ -1,0 +1,16 @@
+<% if videos.any? %>
+  <div class="flex flex-col gap-6">
+    <% videos.each do |video_recording| %>
+      <% video = video_recording.recordable %>
+      <div class="flex flex-col gap-3">
+        <% if video.title.present? %>
+          <p class="text-base font-medium text-(--surface-content-color)"><%= video.title %></p>
+        <% end %>
+        <% if video.description.present? %>
+          <p class="text-base text-(--surface-muted-content-color)"><%= video.description %></p>
+        <% end %>
+        <%= player_for(video_recording) %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

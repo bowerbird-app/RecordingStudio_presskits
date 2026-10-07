@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/api/quote_payload"
+require "recording_studio_presskits/api/video_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/api/section_action"
 require "recording_studio_presskits/api/create_section"
@@ -21,6 +22,7 @@ module RecordingStudioPresskits
         register_text
         register_quote
         register_quote_section
+        register_video_section
         register_section_actions
       end
 
@@ -46,7 +48,7 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
           serializer: kit_section_serializer,
-          output_keys: %i[title subtitle content_type content_id],
+          output_keys: %i[title subtitle content_type content_id videos],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )
@@ -94,6 +96,21 @@ module RecordingStudioPresskits
 
       def register_quote_section
         register_type("RecordingStudioPresskits::QuoteSection", **empty_section_options)
+      end
+
+      def register_video_section
+        register_type(
+          "RecordingStudioPresskits::VideoSection",
+          operations: %i[index show],
+          serializer: video_section_serializer,
+          output_keys: %i[videos]
+        )
+      end
+
+      def video_section_serializer
+        lambda { |_recordable, recording: nil, **|
+          { videos: VideoPayload.for_recording(recording) }
+        }
       end
 
       def register_type(type_name, **)

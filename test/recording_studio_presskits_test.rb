@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.19.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.20.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -14,13 +14,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
       "db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
+      "db/migrate/20261007120000_create_recording_studio_video_sections.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
-      "test/dummy/db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb"
+      "test/dummy/db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
+      "test/dummy/db/migrate/20261007120000_create_recording_studio_video_sections.rb",
+      "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
     end
+
+    refute File.exist?(File.join(root, "db/migrate/20261006143000_create_recording_studio_videos.rb"))
   end
 
   def test_engine_exists
@@ -39,6 +44,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.200"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.1.0"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
   end
 
@@ -55,6 +62,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.4.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -424,12 +433,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     text = File.read(presskits_path("app/models/recording_studio_presskits/text.rb"))
     images = File.read(presskits_path("app/models/recording_studio_presskits/images.rb"))
     quotes = File.read(presskits_path("app/models/recording_studio_presskits/quote_section.rb"))
+    videos = File.read(presskits_path("app/models/recording_studio_presskits/video_section.rb"))
 
     assert_includes dropdown, "icon: item[:icon]"
     assert_includes editor, "section_menu_icon_for"
     assert_includes text, '"document-text"'
     assert_includes images, '"photo"'
     assert_includes quotes, '"chat-bubble-bottom-center-text"'
+    assert_includes videos, '"video-camera"'
   end
 
   def presskits_path(relative)
@@ -530,5 +541,46 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes component, "def self.preview?"
     refute_includes show, "FlatPack::SectionTitle::Component"
     refute_includes show, "gap-4"
+  end
+
+  def test_video_routes_initializer_and_gemfile_pins
+    root = File.expand_path("..", __dir__)
+    routes = File.read(File.join(root, "config/routes.rb"))
+    initializer = File.read(File.join(root, "test/dummy/config/initializers/recording_studio.rb"))
+    gemfile = File.read(File.join(root, "Gemfile"))
+
+    assert_includes routes, "resources :videos"
+    refute_includes routes, "video_order"
+    assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
+    assert_includes initializer, '"RecordingStudioVideo::Video"'
+    assert_includes gemfile, 'gem "recording_studio_video", "~> 0.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
+  end
+
+  def test_video_edit_calls_video_helpers_and_does_not_build_an_iframe
+    root = File.expand_path("..", __dir__)
+    component = File.read(File.join(root, "app/components/recording_studio_presskits/videos/edit_component.rb"))
+    template = File.read(File.join(root, "app/components/recording_studio_presskits/videos/edit_component.html.erb"))
+
+    assert_includes component, "recording_studio_video_fields"
+    assert_includes component, "recording_studio_video_player"
+    [component, template].each do |source|
+      refute_includes source, "<iframe"
+      refute_includes source, "FlatPack::UrlInput"
+      refute_includes source, "FlatPack::TextInput"
+      refute_includes source, "FlatPack::TextArea"
+    end
+  end
+
+  def test_presskits_source_does_not_register_embed_providers
+    root = File.expand_path("..", __dir__)
+    Dir.glob(File.join(root, "{app,lib,config}/**/*.{rb,erb}")).each do |path|
+      source = File.read(path)
+      refute_includes source, "ExternalEmbed.register", path
+      refute_includes source, "ExternalEmbed.resolve", path
+      refute_includes source, "Playback", path
+      refute_includes source, "::YouTube", path
+    end
   end
 end

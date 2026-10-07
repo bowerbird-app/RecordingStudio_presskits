@@ -12,6 +12,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::Images",
     "RecordingStudioPresskits::QuoteSection",
     "RecordingStudioPresskits::Quote",
+    "RecordingStudioPresskits::VideoSection",
+    "RecordingStudioVideo::Video",
     "RecordingStudioPublishable::Publishable",
     "RecordingStudioAttachable::Attachment",
     "FakeBlock"

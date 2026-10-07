@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-10-07
+
+Video section.
+
+### Added
+- A press kit can add a Video section. Press Kits owns the section. Recording Studio Video owns each video recording. External Embed owns provider embeds. YouTube ships with External Embed. Other providers appear when the host registers them. Press Kits does not register Vimeo.
+- `RecordingStudioPresskits::VideoSection` is an empty recordable under the kit section. It includes Trashable and Videos. It does not include Orderable. Videos stay in the order they were added. + Video sits under the heading form and opens a new video. The form uses Video's fields. A saved video shows Video's player.
+- The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A video section also includes `videos`. Each video has `title`, `url`, `description`, `provider`, `canonical_url`, and `content_type`.
+- New table `recording_studio_video_sections`.
+- Version `0.20.0`
+
+### Upgrade notes
+- Add `recording_studio_video`, `~> 0.1.0` (tag `v0.1.0`) and `recording_studio_external_embed`, `~> 0.1.1` (tag `v0.1.3`).
+- Add `RecordingStudioPresskits::VideoSection` and `RecordingStudioVideo::Video` to `recordable_types`.
+- Run `bin/rails generate recording_studio_video:install`, `bin/rails generate recording_studio_video:migrations`, and `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. External Embed has no table. See `MIGRATION_NOTES.md`.
+
 ## [0.19.0] - 2026-10-07
 
 Section heading save button.
@@ -431,7 +447,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.16.0...v0.17.0

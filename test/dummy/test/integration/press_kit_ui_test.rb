@@ -169,6 +169,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
     assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
     assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")
+    assert_section_menu_icon("RecordingStudioPresskits::VideoSection", "video-camera")
     actions_html = css_select("#presskits-editor-actions").to_html
     assert_operator actions_html.index("presskits-section-dropdown"), :<, actions_html.index("publishable_quick_actions_")
     grid_html = css_select("#presskits-editor-grid").to_html
@@ -1191,6 +1192,141 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal ["No byline here"], nameless_lines
   end
 
+  test "a video section links to a new video and plays saved videos" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    assert_difference -> { RecordingStudioPresskits::VideoSection.count }, 1 do
+      assert_no_difference -> { RecordingStudioVideo::Video.count } do
+        post recording_studio_presskits.press_kit_sections_path(kit),
+             params: { type: "RecordingStudioPresskits::VideoSection" }
+      end
+    end
+    follow_redirect!
+    assert_response :success
+    section = video_section(kit)
+    new_video = recording_studio_presskits.new_press_kit_section_video_path(kit, section)
+    assert_select "h1", text: "Video"
+    assert_select "input[name='kit_section[title]']"
+    assert_select "input[name='kit_section[subtitle]']"
+    assert_select "#presskits-section-update button[type=submit]", text: "Update"
+    heading = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
+    assert_operator heading.index(">Update<"), :<, heading.index('name="kit_section[title]"')
+    refute_includes heading, "video[url]"
+    assert_select "#presskits-section-actions a[href='#{new_video}']" do
+      assert_select "span", text: "Video"
+      assert_select "[data-flat-pack--icon-name-value='plus']", count: 1
+    end
+    refute_includes css_select("#presskits-section-actions").to_html, "<form"
+
+    assert_no_difference -> { RecordingStudioVideo::Video.count } do
+      get new_video
+    end
+    assert_response :success
+    assert_video_fields
+    assert_select "h1", text: "Video"
+    assert_select "iframe", count: 0
+
+    post recording_studio_presskits.press_kit_section_videos_path(kit, section), params: {
+      video: {
+        title: "Me at the zoo",
+        url: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+        description: "The first video uploaded to YouTube."
+      }
+    }
+    video = RecordingStudioPresskits::VideoSection.active_videos(section_content(section)).first
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_video_path(kit, section, video)
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "Video added."
+    assert_video_fields
+    assert_includes response.body, "https://www.youtube-nocookie.com/embed/jNQXAC9IVRw"
+    assert_select "h1", text: "Me at the zoo"
+
+    post recording_studio_presskits.press_kit_section_videos_path(kit, section), params: {
+      video: {
+        title: "Second reel",
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        description: "Another clip"
+      }
+    }
+    follow_redirect!
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      kit_section: { title: "Trailer", subtitle: "Two minutes" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    follow_redirect!
+    assert_response :success
+    preview = css_select("#presskits-section-preview").first.to_html
+    zoo = "https://www.youtube-nocookie.com/embed/jNQXAC9IVRw"
+    rick = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
+    assert_operator preview.index("Trailer"), :<, preview.index(zoo)
+    assert_operator preview.index("Two minutes"), :<, preview.index(zoo)
+    assert_operator preview.index("Me at the zoo"), :<, preview.index(zoo)
+    assert_operator preview.index(zoo), :<, preview.index(rick)
+    assert_includes preview, "The first video uploaded to YouTube."
+    assert_includes preview, "Second reel"
+
+    publish_video_kit!(kit)
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-videos"
+    assert_response :success
+    assert_operator response.body.index("Trailer"), :<, response.body.index(zoo)
+    assert_operator response.body.index("Two minutes"), :<, response.body.index(zoo)
+    assert_includes response.body, zoo
+    assert_includes response.body, rick
+  end
+
+  test "a vimeo url stays on the video form and a text section has no video button" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::VideoSection" }
+    follow_redirect!
+    section = video_section(kit)
+    vimeo = "https://vimeo.com/76979871"
+
+    assert_no_difference -> { RecordingStudioVideo::Video.count } do
+      post recording_studio_presskits.press_kit_section_videos_path(kit, section), params: {
+        video: { title: "Nope", url: vimeo, description: "Not this one" }
+      }
+    end
+    assert_response :unprocessable_entity
+    assert_includes response.body, "That URL is not from a supported provider."
+    assert_includes response.body, vimeo
+
+    post recording_studio_presskits.press_kit_section_videos_path(kit, section), params: {
+      video: { title: "Me at the zoo", url: "https://www.youtube.com/watch?v=jNQXAC9IVRw", description: "Kept" }
+    }
+    video = RecordingStudioPresskits::VideoSection.active_videos(section_content(section)).first
+    follow_redirect!
+    assert_no_difference -> { RecordingStudioVideo::Video.count } do
+      patch recording_studio_presskits.press_kit_section_video_path(kit, section, video), params: {
+        video: { title: "Me at the zoo", url: vimeo, description: "Kept" }
+      }
+    end
+    assert_response :unprocessable_entity
+    assert_equal "https://www.youtube.com/watch?v=jNQXAC9IVRw", video.reload.recordable.url
+    assert_includes response.body, "That URL is not from a supported provider."
+
+    get recording_studio_presskits.edit_press_kit_section_video_path(kit, section, SecureRandom.uuid)
+    assert_response :not_found
+
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::Text" }
+    text = content_section(kit, RecordingStudioPresskits::Text)
+    follow_redirect!
+    assert_response :success
+    assert_select "#presskits-section-actions", count: 0
+    assert_select "a", text: "Video", count: 0
+
+    post recording_studio_presskits.press_kit_section_videos_path(kit, text), params: {
+      video: { url: "https://www.youtube.com/watch?v=jNQXAC9IVRw" }
+    }
+    assert_response :not_found
+  end
+
   private
 
   def assert_heading_form_save_button(kit, section)
@@ -1228,6 +1364,28 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
   def quote_section(kit)
     content_section(kit, RecordingStudioPresskits::QuoteSection)
+  end
+
+  def video_section(kit)
+    content_section(kit, RecordingStudioPresskits::VideoSection)
+  end
+
+  def assert_video_fields
+    assert_select "input[name='video[title]']"
+    assert_select "input[name='video[url]']"
+    assert_select "textarea[name='video[description]']"
+    assert_includes response.body, "Paste a link to a supported video, such as YouTube."
+  end
+
+  def publish_video_kit!(kit)
+    result = RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: kit,
+      actor: @user,
+      attributes: { slug: "spring-launch-videos", status: "published", meta_robots: "index,follow" }
+    )
+    raise result.error if result.failure?
+
+    result.value
   end
 
   def live_quotes(section)

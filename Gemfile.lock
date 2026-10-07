@@ -46,6 +46,15 @@ GIT
       recording_studio_accessible (~> 0.11)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_external_embed.git
+  revision: b8dcd6c1e75f815c281d356fe6363504ab246f4a
+  tag: v0.1.3
+  specs:
+    recording_studio_external_embed (0.1.1)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_orderable.git
   revision: 78e7513878a8bacf1c4273333690e9914f828f7a
   tag: v0.2.5
@@ -76,6 +85,17 @@ GIT
       recording_studio (~> 4.2)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_video.git
+  revision: 724258430061c66abf8811eb6e55596477a617d6
+  tag: v0.1.0
+  specs:
+    recording_studio_video (0.1.0)
+      flat_pack (>= 0.1.135)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+      recording_studio_external_embed (~> 0.1.1)
+
+GIT
   remote: https://github.com/bowerbird-app/flatpack.git
   revision: 0cf30bb5c2327c414af1bf269428b2f536057b6c
   tag: v0.1.200
@@ -89,7 +109,7 @@ GIT
 PATH
   remote: .
   specs:
-    recording_studio_presskits (0.19.0)
+    recording_studio_presskits (0.20.0)
       flat_pack (>= 0.1.200)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
@@ -97,9 +117,11 @@ PATH
       recording_studio_admin (~> 2.0)
       recording_studio_attachable (~> 0.7)
       recording_studio_duplicatable (~> 0.4)
+      recording_studio_external_embed (~> 0.1.1)
       recording_studio_orderable (~> 0.2)
       recording_studio_publishable (~> 0.4)
       recording_studio_trashable (~> 0.4)
+      recording_studio_video (~> 0.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -403,10 +425,12 @@ DEPENDENCIES
   recording_studio_admin (~> 2.0)!
   recording_studio_attachable (~> 0.7)!
   recording_studio_duplicatable (~> 0.4)!
+  recording_studio_external_embed (~> 0.1.1)!
   recording_studio_orderable (~> 0.2)!
   recording_studio_presskits!
   recording_studio_publishable (~> 0.4)!
   recording_studio_trashable (~> 0.4)!
+  recording_studio_video (~> 0.1.0)!
   rubocop
   rubocop-rails
   simplecov
@@ -493,10 +517,12 @@ CHECKSUMS
   recording_studio_admin (2.0.2)
   recording_studio_attachable (0.7.0)
   recording_studio_duplicatable (0.4.1)
+  recording_studio_external_embed (0.1.1)
   recording_studio_orderable (0.2.3)
-  recording_studio_presskits (0.19.0)
+  recording_studio_presskits (0.20.0)
   recording_studio_publishable (0.4.0)
   recording_studio_trashable (0.4.2)
+  recording_studio_video (0.1.0)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
   reline (0.7.0) sha256=5b012d8e55dbf9d450f12bde2cf7d15ff546ae80b3f8f3b30e570d431815583d
   responders (3.2.0) sha256=89c2d6ac0ae16f6458a11524cae4a8efdceba1a3baea164d28ee9046bd3df55a
