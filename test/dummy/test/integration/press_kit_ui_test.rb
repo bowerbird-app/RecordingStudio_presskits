@@ -421,19 +421,19 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-preview strong", text: "one-sheet"
     assert_select "#presskits-section-preview li", text: "Photos"
     assert_select "#presskits-section-preview .flat-pack-richtext--view-mode"
-    assert_select "button", text: "Update"
-    assert_select "#presskits-section-actions button", text: "Upload", count: 0
+    assert_select "#presskits-section-update button[type=submit]", text: "Update"
+    assert_select "button", text: "Upload", count: 0
     assert_select "button", text: "Save", count: 0
     assert_includes response.body, "Back to kit"
     refute section_editor_cancel?
     form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
-    assert_operator form_html.index("Update"), :<, form_html.index("name=\"kit_section[title]\"")
+    assert_operator form_html.index(">Update<"), :<, form_html.index(">Title<")
     assert_operator form_html.index(">Title<"), :<, form_html.index(">Subtitle<")
     assert_operator form_html.index(">Subtitle<"), :<, form_html.index(">Body<")
     assert_operator form_html.index("name=\"kit_section[title]\""), :<, form_html.index("name=\"text[body]\"")
     columns = section_editor_columns
     assert_equal 2, columns.size
-    assert_includes columns.first.to_html, 'id="presskits-section-actions"'
+    assert_includes columns.first.to_html, 'id="presskits-section-update"'
     assert_includes columns.first.to_html, 'name="kit_section[title]"'
     assert_includes columns.first.to_html, 'name="text[body]"'
     refute_includes columns.last.to_html, 'name="kit_section[title]"'
@@ -892,7 +892,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     grid = images_editor_grid
     columns = grid.element_children
     assert_equal 2, columns.size
-    assert_includes columns.first.to_html, 'id="presskits-section-actions"'
+    assert_includes columns.first.to_html, 'id="presskits-section-update"'
     assert_includes columns.first.to_html, 'name="kit_section[title]"'
     assert_includes columns.first.to_html, 'name="kit_section[subtitle]"'
     refute_includes columns.last.to_html, 'name="kit_section[title]"'
@@ -901,14 +901,21 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes columns.last.text, "Preview"
     assert_includes response.body, "No images yet."
     refute_includes response.body, ">Save<"
-    assert_select "form[data-controller='recording-studio-attachable--upload']", count: 1
-    assert_select "#presskits-section-actions button[type='button']", text: "Upload"
+    assert_select "[data-controller='recording-studio-attachable--upload']", count: 1
+    refute_select "form[data-controller='recording-studio-attachable--upload']"
+    assert_select "[data-controller='recording-studio-attachable--upload'] button[type='button']", text: "Upload"
     assert_select "input[type=file][accept='image/*'][data-recording-studio-attachable--upload-target='input']"
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
-    actions = css_select("#presskits-section-actions").to_html
-    assert_operator actions.index("Update"), :<, actions.index("Upload")
-    refute_includes actions, "Cancel"
+    column = columns.first.to_html
+    heading = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
+    assert_includes heading, ">Update<"
+    refute_includes heading, ">Upload<"
+    refute_includes heading, 'type="file"'
+    assert_operator heading.index(">Update<"), :<, heading.index('name="kit_section[title]"')
+    assert_operator column.index(">Update<"), :<, column.index('name="kit_section[title]"')
+    assert_operator column.index('name="kit_section[subtitle]"'), :<, column.index(">Upload<")
+    refute_includes column, "Cancel"
     refute section_editor_cancel?
     assert_match(/remove-button-template-value="&lt;button/, response.body)
     refute_includes response.body, ">Remove\">"
@@ -937,7 +944,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "img[alt='stage']"
     images = section_content(section)
     assert response.body.index('name="kit_section[title]"') < response.body.index("alt=\"stage\"")
-    upload_form = css_select("form[data-controller='recording-studio-attachable--upload']").first.to_html
+    upload_form = css_select("[data-controller='recording-studio-attachable--upload']").first.to_html
     refute_includes upload_form, "attachment_collection"
     assert_select "form#attachment-collection-#{images.id}"
     assert_select "input[name='attachment_collection[rows][][caption]'][form='attachment-collection-#{images.id}']"
@@ -1015,7 +1022,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Add quote", count: 0
     assert_select "input[name='kit_section[title]']"
     assert_select "input[name='kit_section[subtitle]']"
-    assert_select "button", text: "Update", count: 1
+    assert_select "#presskits-section-update button[type=submit]", text: "Update"
     assert_select "textarea[name='quote[body]']", count: 0
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
@@ -1024,8 +1031,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     actions = css_select("#presskits-section-actions").to_html
     assert_includes actions, ">Quote<"
     refute_includes actions, "Cancel"
+    refute_includes actions, ">Update<"
+    heading = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
+    assert_operator heading.index(">Update<"), :<, heading.index('name="kit_section[title]"')
+    assert_operator heading.index('name="kit_section[title]"'), :<, heading.index('name="kit_section[subtitle]"')
+    refute_includes heading, ">Quote<"
     columns = section_editor_columns
     assert_equal 2, columns.size
+    assert_operator columns.first.to_html.index(">Update<"), :<, columns.first.to_html.index(">Quote<")
     assert_includes columns.first.to_html, 'name="kit_section[title]"'
     assert_includes columns.first.to_html, 'id="presskits-section-actions"'
     assert_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
@@ -1086,6 +1099,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal 2, columns.size
     assert_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
     refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
+    heading = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
+    refute_includes heading, "Remove quote"
+    assert_operator columns.first.to_html.index(">Update<"), :<, columns.first.to_html.index(">Quote<")
+    assert_operator columns.first.to_html.index(">Quote<"), :<, columns.first.to_html.index("A line worth printing")
     assert_operator columns.first.text.index("A line worth printing"), :<, columns.first.text.index("Ada Lovelace")
     assert_select columns.last, "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
     assert_select columns.last, "figcaption", text: "— Ada Lovelace, Editor, Press"

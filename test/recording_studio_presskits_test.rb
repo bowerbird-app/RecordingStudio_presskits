@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.17.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.18.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -459,8 +459,38 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section_editor, 'id="presskits-section-fields"'
     assert_includes section_editor, 'id="presskits-section-preview"'
     refute_includes section_editor, "preview?"
+    refute_includes section_editor, "if form?"
     refute_includes component, "def self.preview?"
     refute_includes component, "preview_card_title"
+    assert_includes component, "def self.below?"
+    assert_includes editor, 'text: "Upload"'
+    assert_operator editor.index("flex flex-wrap items-center gap-3"), :<, editor.index('text: "Upload"')
+    assert_includes editor, "upload_form_data(helpers)"
+    refute_includes section_editor, "upload_form_data"
+  end
+
+  def test_section_editor_puts_update_above_fields_and_custom_ui_below
+    editor_path = "press_kits/section_editor_component.html.erb"
+    section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
+    component_path = "press_kits/section_editor_component.rb"
+    component = File.read(presskits_path("app/components/recording_studio_presskits/#{component_path}"))
+    quotes = File.read(presskits_path("app/components/recording_studio_presskits/quote_section/edit_component.rb"))
+    text = File.read(presskits_path("app/components/recording_studio_presskits/text/edit_component.rb"))
+
+    assert_operator section_editor.index('text: "Update"'), :<, section_editor.index('name: "kit_section[title]"')
+    assert_operator section_editor.index('name: "kit_section[title]"'), :<,
+                    section_editor.index('name: "kit_section[subtitle]"')
+    assert_operator section_editor.index('name: "kit_section[subtitle]"'), :<,
+                    section_editor.index("fields_in_form?")
+    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index("section_actions")
+    assert_operator section_editor.index("section_actions"), :<, section_editor.index("below_editor?")
+    assert_includes component, "def fields_in_form?"
+    assert_includes component, "def below_editor?"
+    refute_includes component, "def form?"
+    assert_includes quotes, "def below?"
+    refute_includes quotes, "def form?"
+    refute_includes quotes, "def self.form?"
+    refute_includes text, "def self.below?"
   end
 
   def test_text_editor_names_title_and_body
