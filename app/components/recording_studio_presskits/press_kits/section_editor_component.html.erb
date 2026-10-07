@@ -6,9 +6,16 @@
 
   <%= render FlatPack::Grid::Component.new(id: "presskits-section-grid", cols: 2, gap: :lg, align: :start) do %>
     <div id="presskits-section-fields" class="flex w-full min-w-0 flex-col gap-6">
-      <%= form_with url: @update_path, method: :patch, local: true, class: "flex flex-col gap-6" do %>
+      <%= form_with url: @update_path, method: :patch, local: true,
+            class: "flex flex-col gap-6",
+            data: { controller: "flat-pack--unsaved-changes" } do %>
         <div id="presskits-section-update" class="flex flex-wrap items-center gap-3">
-          <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
+          <%= render FlatPack::Button::Component.new(
+            text: "Update",
+            style: :default,
+            type: "submit",
+            data: { "flat-pack--unsaved-changes-target": "submit" }
+          ) %>
         </div>
 
         <%= render FlatPack::TextInput::Component.new(

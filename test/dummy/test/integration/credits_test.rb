@@ -239,6 +239,11 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Credits"
     assert_select "input[name='kit_section[title]']"
     assert_select "input[name='kit_section[subtitle]']"
+    form = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").first
+    assert_equal "flat-pack--unsaved-changes", form["data-controller"]
+    update = css_select("#presskits-section-update button[type=submit]").first
+    assert_equal "Update", update.text.squish
+    assert_equal "default", update["data-fp-style"]
     assert_select "input[name='credit_id']", count: 0
     assert_select "input[name='role']", count: 0
     add_credit = recording_studio_presskits.new_press_kit_section_credit_path(kit, section)

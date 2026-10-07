@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.19.0
+## 0.20.0
 
 Credits belong to the workspace. A line in a press kit only says what that credit did on that kit.
 
@@ -25,6 +25,18 @@ Create credits with `RecordingStudioPresskits::Credits.create!` on the workspace
 The screens are `GET /credits` for the workspace list, and the Credits item in + Section for a kit. **Add credit** on a section opens its own screen. That screen chooses a workspace credit or creates one, and sets the role for this kit. Creating one saves the workspace credit and the line together.
 
 When Recording Studio API is loaded, credits expose index, show, create, and update. There is no credit destroy operation. Trash the recording so existing lines keep their id. `add_credit` and `reorder_credits` are on the credits section. `remove_credit` is on the line. A line's show payload is `role`, `name`, `url`, and `credit_id`. `name` and `url` are read from the credit when it is still active. The kit section payload stays `title`, `subtitle`, `content_type`, and `content_id`.
+
+Bump FlatPack to `>= 0.1.201` (dummy tag `v0.1.201`). Reload kit CSS and JavaScript. `style:` on FlatPack tabs is a button style name. This gem does not pass a CSS string there. Built-in button styles need no host CSS change.
+
+## 0.19.0
+
+Bump FlatPack to `>= 0.1.200` (dummy tag `v0.1.200`). The section heading form, the one with Title and Subtitle, uses Flatpack's unsaved-changes behaviour. Update starts in the default style and turns primary when a field in that form no longer matches the saved value. Typing the saved value back returns the button to default. Saving and coming back to the same screen does too, because the new page captures a new baseline.
+
+Importmap hosts that already pin Flatpack controllers load `flat-pack--unsaved-changes` with no new register call. A bundled app that copies the esbuild list in Flatpack's installation doc registers `UnsavedChangesController` as `flat-pack--unsaved-changes`.
+
+Reload Flatpack CSS and JavaScript. FlatPack `0.1.199` also changes how an orderable list drags and makes those rows slightly taller. The Ruby calls stay the same. Rebuild host Tailwind so the new list spacing utilities are generated.
+
+A host that replaced `SectionEditorComponent` adds the controller on that heading form and marks Update as the submit target with `style: :default`. Header Update and a quote's Save stay primary.
 
 ## 0.18.0
 
