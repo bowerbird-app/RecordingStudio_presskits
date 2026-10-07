@@ -54,7 +54,10 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_equal tom.id, spring_line.recordable.credit_recording_id
     assert_equal tom.id, autumn_line.recordable.credit_recording_id
     assert_equal tom.id, again.recordable.credit_recording_id
-    assert_equal 1, RecordingStudioPresskits::Credit.where(name: "Tom Ross").count
+    workspace_toms = RecordingStudioPresskits::Credits.active_for_root(@root).select do |recording|
+      recording.recordable.name == "Tom Ross"
+    end
+    assert_equal [tom.id], workspace_toms.map(&:id)
 
     RecordingStudioPresskits::Credits.revise!(
       credit_recording: tom,
