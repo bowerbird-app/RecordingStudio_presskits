@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-10-07
+
+Section editor form.
+
+### Changed
+- Every section editor uses one heading form: Title, Subtitle, extra fields, then Update. Update sits in the same place on Text, Images, and Quotes.
+- A content editor renders inside that form unless it defines `self.below?` and returns true. Text leaves that unset, so Body stays in the form. Images and Quotes return true. Their UI sits under the form: Upload and the photo editor for Images, + Quote and the quote list for Quotes.
+- `form?` is gone.
+- Version `0.18.0`
+
+### Upgrade notes
+- Remove `form?` from a content editor. If that editor cannot live inside the heading form, define `self.below?` and return true. The shell still renders `section_actions`, then that editor, under Title, Subtitle, and Update.
+
 ## [0.17.0] - 2026-10-06
 
 Kit sections.
@@ -403,7 +416,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.14.0...v0.15.0

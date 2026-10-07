@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## 0.18.0
+
+Every section editor draws one heading form: Title, Subtitle, extra fields, then Update. Update is in that same spot for Text, Images, and Quotes.
+
+A content editor renders inside the form, before Update, unless the class defines `self.below?` and returns true. Text does not, so Body stays in the form. Images and Quotes return true. Upload and the photo editor sit under the form. + Quote and the quote list sit under the form. `section_actions` still renders between the heading form and a `below?` editor.
+
+Remove `form?`. It no longer changes the page. An editor that returned false from `form?` now needs `self.below?` so its own forms and uploads stay outside the heading form.
+
 ## 0.17.0
 
 A press kit section is a kit section. The content recording sits under it.

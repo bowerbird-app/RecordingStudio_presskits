@@ -25,12 +25,15 @@ module RecordingStudioPresskits
         helpers.edit_press_kit_section_path(@section.parent_recording, @section)
       end
 
-      def form?
-        editor = editor_class
-        return false unless editor
-        return true unless editor.respond_to?(:form?)
+      def fields_in_form?
+        editor_class.present? && !below_editor?
+      end
 
-        editor.form?
+      def below_editor?
+        editor = editor_class
+        return false unless editor.respond_to?(:below?)
+
+        editor.below?
       end
 
       def content_recording

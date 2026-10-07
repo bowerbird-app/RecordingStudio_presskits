@@ -18,8 +18,8 @@ module RecordingStudioPresskits
           []
         end
 
-        def form?
-          false
+        def below?
+          true
         end
       end
 

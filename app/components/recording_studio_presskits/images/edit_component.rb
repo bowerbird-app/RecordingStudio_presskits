@@ -17,6 +17,10 @@ module RecordingStudioPresskits
         []
       end
 
+      def self.below?
+        true
+      end
+
       def attachment_collection_options
         {
           association: :images,
