@@ -477,28 +477,22 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     content = RecordingStudioPresskits::KitQuery.section_content(section)
 
     assert RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioPresskits::VideoSection",
-      parent_recording: section
+      child_type: "RecordingStudioPresskits::VideoSection", parent_recording: section
     )
     refute RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioPresskits::VideoSection",
-      parent_recording: kit
+      child_type: "RecordingStudioPresskits::VideoSection", parent_recording: kit
     )
     refute RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioPresskits::VideoSection",
-      parent_recording: root
+      child_type: "RecordingStudioPresskits::VideoSection", parent_recording: root
     )
     assert RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioVideo::Video",
-      parent_recording: content
+      child_type: "RecordingStudioVideo::Video", parent_recording: content
     )
     refute RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioVideo::Video",
-      parent_recording: section
+      child_type: "RecordingStudioVideo::Video", parent_recording: section
     )
     refute RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioVideo::Video",
-      parent_recording: kit
+      child_type: "RecordingStudioVideo::Video", parent_recording: kit
     )
   end
 

@@ -39,28 +39,10 @@ class VideoPayloadTest < ActiveSupport::TestCase
     refute payload.key?(:caption)
   end
 
-  test "section payload adds videos for a video section and leaves text at four keys" do
-    root, kit = kit_tree
-    user = owner_for(root)
-    text = RecordingStudioPresskits.create_section!(
-      press_kit_recording: kit,
-      content_type: "RecordingStudioPresskits::Text",
-      actor: user,
-      title: "Notes"
-    )
-    section = RecordingStudioPresskits.create_section!(
-      press_kit_recording: kit,
-      content_type: "RecordingStudioPresskits::VideoSection",
-      actor: user,
-      title: "Trailer",
-      subtitle: "Two minutes"
-    )
-    content = RecordingStudioPresskits::KitQuery.section_content(section)
+  test "section payload leaves a text section at four keys" do
+    built = sections_with_videos
+    text = built.fetch(:text)
     text_content = RecordingStudioPresskits::KitQuery.section_content(text)
-    first = record_video(content, actor: user, url: ZOO_URL, title: "Me at the zoo", description: "First")
-    second = record_video(content, actor: user, url: RICK_URL, title: "Second reel", description: "Later")
-    gone = record_video(content, actor: user, url: ZOO_URL, title: "Gone", description: "Hidden")
-    gone.recording_studio_trashable_trash!(actor: user)
 
     assert_equal(
       {
@@ -71,22 +53,35 @@ class VideoPayloadTest < ActiveSupport::TestCase
       },
       RecordingStudioPresskits::Api::SectionPayload.for(text.recordable, text)
     )
+  end
 
+  test "section payload lists active videos in created order" do
+    built = sections_with_videos
+    section = built.fetch(:section)
+    content = built.fetch(:content)
     payload = RecordingStudioPresskits::Api::SectionPayload.for(section.recordable, section)
+    videos = payload.fetch(:videos)
+    titles = videos.map { |entry| entry[:title] }
+    urls = videos.map { |entry| entry[:url] }
+
     assert_equal "Trailer", payload[:title]
     assert_equal "Two minutes", payload[:subtitle]
     assert_equal "RecordingStudioPresskits::VideoSection", payload[:content_type]
     assert_equal content.id, payload[:content_id]
-    assert_equal [ZOO_URL, RICK_URL], payload.fetch(:videos).map { |entry| entry[:url] }
-    assert_equal %i[title url description provider canonical_url content_type], payload.fetch(:videos).first.keys
-    assert_equal [first.recordable.title, second.recordable.title], payload.fetch(:videos).map { |entry| entry[:title] }
-    refute_includes payload.fetch(:videos).map { |entry| entry[:title] }, "Gone"
+    assert_equal [ZOO_URL, RICK_URL], urls
+    assert_equal %i[title url description provider canonical_url content_type], videos.first.keys
+    assert_equal ["Me at the zoo", "Second reel"], titles
+    refute_includes titles, "Gone"
+  end
 
+  test "video section api serializer returns the section videos" do
+    built = sections_with_videos
+    content = built.fetch(:content)
+    payload = RecordingStudioPresskits::Api::SectionPayload.for(built.fetch(:section).recordable, built.fetch(:section))
     registry = fake_api_registry
-    with_recording_studio_api(registry) do
-      RecordingStudioPresskits::Api.register!
-    end
+    with_recording_studio_api(registry) { RecordingStudioPresskits::Api.register! }
     serializer = registry.types.fetch("RecordingStudioPresskits::VideoSection").fetch(:serializer)
+
     assert_equal payload.fetch(:videos), serializer.call(content.recordable, recording: content).fetch(:videos)
   end
 
@@ -112,6 +107,30 @@ class VideoPayloadTest < ActiveSupport::TestCase
     user
   ensure
     Current.actor = previous
+  end
+
+  def sections_with_videos
+    root, kit = kit_tree
+    user = owner_for(root)
+    text = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::Text",
+      actor: user,
+      title: "Notes"
+    )
+    section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::VideoSection",
+      actor: user,
+      title: "Trailer",
+      subtitle: "Two minutes"
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    record_video(content, actor: user, url: ZOO_URL, title: "Me at the zoo", description: "First")
+    record_video(content, actor: user, url: RICK_URL, title: "Second reel", description: "Later")
+    gone = record_video(content, actor: user, url: ZOO_URL, title: "Gone", description: "Hidden")
+    gone.recording_studio_trashable_trash!(actor: user)
+    { text: text, section: section, content: content }
   end
 
   def video_content(kit, user)
