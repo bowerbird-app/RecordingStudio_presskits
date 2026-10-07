@@ -8,7 +8,7 @@
     <div id="presskits-section-fields" class="flex w-full min-w-0 flex-col gap-6">
       <%= render FlatPack::Tabs::Component.new(
         variant: :pills,
-        style: :primary,
+        style: :default,
         default_tab: 0,
         id: "presskits-section-tabs"
       ) do |tabs| %>
@@ -44,9 +44,9 @@
           </div>
         <% end %>
 
-        <% tabs.tab(label: "Section settings", id: "presskits-section-settings") do %>
+        <% tabs.tab(label: "Section title", id: "presskits-section-title") do %>
           <%= form_with url: @update_path, method: :patch, local: true,
-                id: "presskits-section-settings-form",
+                id: "presskits-section-title-form",
                 class: "flex flex-col gap-6",
                 data: { controller: "flat-pack--unsaved-changes" } do %>
             <%= render FlatPack::TextInput::Component.new(

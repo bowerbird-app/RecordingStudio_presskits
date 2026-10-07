@@ -253,7 +253,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, 'gem "flat_pack", ">= 0.1.202"'
     assert_includes readme, "FlatPack::Tabs::Component"
     assert_includes readme, "variant: :pills"
-    assert_includes readme, "Section settings"
+    assert_includes readme, "Section title"
+    refute_includes readme, "Section settings"
     refute_includes readme, "FlatPack::Fieldset::Component"
     assert_includes readme, "unsaved-changes controller"
     assert_includes readme, "PressKit.indexable"
@@ -502,25 +503,27 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes section_editor, "FlatPack::Tabs::Component.new"
     assert_includes section_editor, "variant: :pills"
-    assert_includes section_editor, "style: :primary"
+    assert_operator section_editor.index("variant: :pills"), :<, section_editor.index("style: :default")
+    assert_operator section_editor.index("style: :default"), :<, section_editor.index('label: "Content"')
     assert_includes section_editor, 'id: "presskits-section-tabs"'
     assert_includes section_editor, 'label: "Content"'
     assert_includes section_editor, 'id: "presskits-section-content"'
-    assert_includes section_editor, 'label: "Section settings"'
-    assert_includes section_editor, 'id: "presskits-section-settings"'
+    assert_includes section_editor, 'label: "Section title"'
+    assert_includes section_editor, 'id: "presskits-section-title"'
+    refute_includes section_editor, "Section settings"
     refute_includes section_editor, "Fieldset"
     refute_includes section_editor, 'title: "Heading"'
     refute_includes section_editor, "presskits-section-heading"
     refute_includes engine, "install_fieldset_fallback"
     refute_includes engine, "flatpack_fieldset"
     refute File.file?(presskits_path("lib/recording_studio_presskits/flatpack_fieldset.rb"))
-    assert_operator section_editor.index('label: "Content"'), :<, section_editor.index('label: "Section settings"')
+    assert_operator section_editor.index('label: "Content"'), :<, section_editor.index('label: "Section title"')
     assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index("section_actions")
     assert_operator section_editor.index("section_actions"), :<, section_editor.index("below_editor?")
-    assert_operator section_editor.index("below_editor?"), :<, section_editor.index('label: "Section settings"')
+    assert_operator section_editor.index("below_editor?"), :<, section_editor.index('label: "Section title"')
     assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index('name: "kit_section[title]"')
     assert_includes section_editor, 'id: "presskits-section-content-form"'
-    assert_includes section_editor, 'id: "presskits-section-settings-form"'
+    assert_includes section_editor, 'id: "presskits-section-title-form"'
     assert_includes section_editor, 'data: { controller: "flat-pack--unsaved-changes" }'
     assert_operator section_editor.index('name: "kit_section[title]"'), :<,
                     section_editor.index('name: "kit_section[subtitle]"')

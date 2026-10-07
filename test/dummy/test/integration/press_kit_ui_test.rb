@@ -428,7 +428,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Back to kit"
     refute section_editor_cancel?
     content_form = css_select("#presskits-section-content-form").first
-    settings_form = css_select("#presskits-section-settings-form").first
+    settings_form = css_select("#presskits-section-title-form").first
     assert_equal "flat-pack--unsaved-changes", content_form["data-controller"]
     content_html = content_form.to_html
     settings_html = settings_form.to_html
@@ -439,7 +439,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_operator settings_html.index(">Title<"), :<, settings_html.index(">Subtitle<")
     assert_operator settings_html.index(">Subtitle<"), :<, settings_html.index(">Update<")
     assert_select "#presskits-section-content-panel", text: /Body/
-    assert_select "#presskits-section-settings-panel", text: /Title/
+    assert_select "#presskits-section-title-panel", text: /Title/
     columns = section_editor_columns
     assert_equal 2, columns.size
     assert_includes columns.first.to_html, 'id="presskits-section-update"'
@@ -945,7 +945,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     column = columns.first.to_html
     assert_heading_form_save_button(kit, section)
     assert_select "#presskits-section-content-form", count: 0
-    heading = css_select("#presskits-section-settings-form").first.to_html
+    heading = css_select("#presskits-section-title-form").first.to_html
     assert_includes heading, ">Update<"
     refute_includes heading, ">Upload<"
     refute_includes heading, 'type="file"'
@@ -1072,7 +1072,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes actions, "Cancel"
     refute_includes actions, ">Update<"
     assert_select "#presskits-section-content-form", count: 0
-    heading = css_select("#presskits-section-settings-form").first.to_html
+    heading = css_select("#presskits-section-title-form").first.to_html
     assert_operator heading.index('name="kit_section[title]"'), :<, heading.index(">Update<")
     assert_operator heading.index('name="kit_section[title]"'), :<, heading.index('name="kit_section[subtitle]"')
     refute_includes heading, ">Quote<"
@@ -1142,7 +1142,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal 2, columns.size
     assert_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
     refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
-    heading = css_select("#presskits-section-settings-form").first.to_html
+    heading = css_select("#presskits-section-title-form").first.to_html
     refute_includes heading, "Remove quote"
     assert_operator columns.first.to_html.index(">Quote<"), :<, columns.first.to_html.index(">Update<")
     assert_operator columns.first.to_html.index(">Quote<"), :<, columns.first.to_html.index("A line worth printing")
@@ -1310,7 +1310,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     content_panel = css_select("#presskits-section-content-panel").first.to_html
     assert_includes content_panel, new_video
     refute_includes content_panel, 'name="kit_section[title]"'
-    heading = css_select("#presskits-section-settings-form").first.to_html
+    heading = css_select("#presskits-section-title-form").first.to_html
     assert_operator heading.index('name="kit_section[title]"'), :<, heading.index(">Update<")
     refute_includes heading, "video[url]"
     assert_select "#presskits-section-actions a[href='#{new_video}']" do
@@ -1430,10 +1430,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
   def assert_heading_form_save_button(kit, section)
     assert_section_editor_tabs
-    form = css_select("#presskits-section-settings-form").first
+    form = css_select("#presskits-section-title-form").first
     assert_equal recording_studio_presskits.press_kit_section_path(kit, section), form["action"]
     assert_equal "flat-pack--unsaved-changes", form["data-controller"]
-    button = css_select("#presskits-section-settings-form #presskits-section-update button[type=submit]").first
+    button = css_select("#presskits-section-title-form #presskits-section-update button[type=submit]").first
     assert_equal "Update", button.text.squish
     assert_equal "default", button["data-fp-style"]
     assert_equal "submit", button["data-flat-pack--unsaved-changes-target"]
@@ -1443,7 +1443,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_operator settings.index('name="kit_section[subtitle]"'), :<, settings.index(">Update<")
     refute_includes settings, "<fieldset"
     refute_select "legend", text: "Heading"
-    assert_select "#presskits-section-settings-form" do
+    assert_select "#presskits-section-title-form" do
       assert_select "#presskits-section-update button[type=submit]", text: "Update"
       assert_select "input[name='kit_section[title]']"
       assert_select "input[name='kit_section[subtitle]']"
@@ -1453,14 +1453,15 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   def assert_section_editor_tabs
     assert_select "#presskits-section-tabs[data-controller='flat-pack--tabs']"
     labels = css_select("#presskits-section-tabs [role=tab]").map { |tab| tab.text.squish }
-    assert_equal [ "Content", "Section settings" ], labels
+    assert_equal [ "Content", "Section title" ], labels
     assert_equal "true", css_select("#presskits-section-content-tab").first["aria-selected"]
-    assert_equal "false", css_select("#presskits-section-settings-tab").first["aria-selected"]
+    assert_equal "false", css_select("#presskits-section-title-tab").first["aria-selected"]
     assert_nil css_select("#presskits-section-content-panel").first["hidden"]
-    assert css_select("#presskits-section-settings-panel").first["hidden"]
+    assert css_select("#presskits-section-title-panel").first["hidden"]
     tablist = css_select("#presskits-section-tabs [role=tablist]").first
-    assert_equal "primary", tablist["data-fp-style"]
+    assert_equal "default", tablist["data-fp-style"]
     assert_includes tablist["class"], "fp-pill-style"
+    assert_includes tablist["class"], "fp-pill-button-slots"
   end
 
   def assert_section_menu_icon(type_name, icon_name)

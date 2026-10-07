@@ -20,13 +20,13 @@ Video section.
 
 ### Changed
 - The section editor keeps its preview column. The card is rendered only when `SectionFrameComponent` would show a title, a subtitle, or content. Text, Images, Quotes, and Video return false from `render?` when they have nothing to show. The kit editor uses the same check, so a blank section does not leave an empty preview card.
-- Every section editor uses `FlatPack::Tabs::Component` with `variant: :pills`. The tabs are Content and Section settings. Content is selected first. Section settings is Title, Subtitle, and Update under those fields. There is no Heading group.
-- Text Body saves from Content, with its own Update under the field. Images, Quotes, and Video keep their editors on Content, outside the settings form.
+- Every section editor uses `FlatPack::Tabs::Component` with `variant: :pills` and `style: :default`. The tabs are Content and Section title. Content is selected first. Section title is Title, Subtitle, and Update under those fields. There is no Heading group.
+- Text Body saves from Content, with its own Update under the field. Images, Quotes, and Video keep their editors on Content, outside the title form.
 - FlatPack is `>= 0.1.202` (dummy tag `v0.1.202`).
 
 ### Upgrade notes
 - Add `recording_studio_video`, `~> 0.1.0` (tag `v0.1.0`) and `recording_studio_external_embed`, `~> 0.1.1` (tag `v0.1.3`).
-- Bump FlatPack to at least `0.1.202` (tag `v0.1.202`). A host that replaced `SectionEditorComponent` renders pill tabs (`variant: :pills`, `style: :primary`) labeled Content and Section settings. Put Title, Subtitle, and Update on Section settings, with Update under the fields. Remove any Heading fieldset. Put the content editor on Content. An editor with `self.below?` stays outside the settings form. An editor without it, such as Text, gets its own form and Update on Content. Keep the unsaved-changes controller on each of those forms, and keep Update as `style: :default` with the submit target. `style:` on tabs is a button style name. A CSS string raises `ArgumentError`.
+- Bump FlatPack to at least `0.1.202` (tag `v0.1.202`). A host that replaced `SectionEditorComponent` renders pill tabs (`variant: :pills`, `style: :default`) labeled Content and Section title. Put Title, Subtitle, and Update on Section title, with Update under the fields. Remove any Heading fieldset. Put the content editor on Content. An editor with `self.below?` stays outside the title form. An editor without it, such as Text, gets its own form and Update on Content. Keep the unsaved-changes controller on each of those forms, and keep Update as `style: :default` with the submit target. `style:` on tabs is a button style name. A CSS string raises `ArgumentError`.
 - Add `RecordingStudioPresskits::VideoSection` and `RecordingStudioVideo::Video` to `recordable_types`.
 - Run `bin/rails generate recording_studio_video:install`, `bin/rails generate recording_studio_video:migrations`, and `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. External Embed has no table. See `MIGRATION_NOTES.md`.
 
