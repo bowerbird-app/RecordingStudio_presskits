@@ -153,6 +153,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header button", count: 0
     refute_includes response.body, "0/280 characters"
     header_row = css_select("#presskits-header-row").first
+    assert_includes header_row.to_html, 'data-flat-pack--icon-name-value="bars-3-bottom-left"'
     refute_includes header_row.to_html, "arrows-up-down"
     refute_includes header_row.to_html, "trash"
     refute_includes css_select("#presskits-kit-rows").first["class"].to_s, "divide-y"
@@ -249,6 +250,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes css_select("#presskits-kit-rows").first["class"], "divide-y"
     header_row = css_select("#presskits-header-row").first
     assert_select header_row, "a", text: "Header"
+    assert_includes header_row.to_html, 'data-flat-pack--icon-name-value="bars-3-bottom-left"'
     refute_includes header_row.to_html, "arrows-up-down"
     refute_includes header_row.to_html, "trash"
     assert_select header_row, "button", count: 0
@@ -307,7 +309,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       post recording_studio_presskits.press_kit_sections_path(kit), params: { type: "FakeBlock", title: "Hero" }
     end
 
-    hero = RecordingStudioPresskits::KitQuery.live_children(kit).find { |child| child.recordable.title == "Hero" }
+    hero = RecordingStudioPresskits::KitQuery.sections_for(kit).find { |child| child.recordable.title == "Hero" }
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, hero)
     follow_redirect!
     assert_response :success
@@ -375,8 +377,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, hero)
     follow_redirect!
     assert_response :success
-    assert_equal "Hero, revised", hero.reload.recordable.title
-    refute_includes hero.recordable.attributes.values, "nope"
+    content = section_content(hero)
+    assert_equal "Hero", hero.reload.recordable.title
+    assert_equal "Hero, revised", content.recordable.title
+    refute_includes content.recordable.attributes.values, "nope"
     assert_includes response.body, "Hero, revised"
     refute_includes response.body, "nope"
   ensure
@@ -394,45 +398,47 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
            params: { type: "RecordingStudioPresskits::Text" }
     end
 
-    section = RecordingStudioPresskits::KitQuery.live_children(kit).find { |child|
-      child.recordable.is_a?(RecordingStudioPresskits::Text)
-    }
+    section = content_section(kit, RecordingStudioPresskits::Text)
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     follow_redirect!
     assert_response :success
     assert_includes response.body, "Section added."
     assert_page_nav_without_access
     assert_nil section.recordable.title
-    assert_equal RecordingStudioPresskits::Text.opening_body, section.recordable.body
+    assert_nil section.recordable.subtitle
+    assert_equal RecordingStudioPresskits::Text.opening_body, section_content(section).recordable.body
     assert_select "label", text: "Title"
+    assert_select "label", text: "Subtitle"
     assert_select "label", text: "Body"
-    assert_select "input[name='text[title]']"
-    assert_nil css_select("input[name='text[title]']").first["value"]
+    assert_select "input[name='kit_section[title]']"
+    assert_nil css_select("input[name='kit_section[title]']").first["value"]
     assert_select "input[type=hidden][name='text[body]'][value=?]", RecordingStudioPresskits::Text.opening_body
     assert_includes response.body, "&quot;preset&quot;:&quot;content&quot;"
     assert_includes response.body, "&quot;toolbar&quot;:&quot;standard&quot;"
     assert_select "h1", text: "Text"
     assert_select "label", text: "Text", count: 0
-    assert_select "h2", text: "Launch notes", count: 0
-    assert_select "strong", text: "one-sheet", count: 0
-    assert_select "li", text: "Photos", count: 0
-    assert_select ".flat-pack-richtext--view-mode", count: 0
+    assert_select "#presskits-section-preview h2", text: "Launch notes"
+    assert_select "#presskits-section-preview strong", text: "one-sheet"
+    assert_select "#presskits-section-preview li", text: "Photos"
+    assert_select "#presskits-section-preview .flat-pack-richtext--view-mode"
     assert_select "button", text: "Update"
     assert_select "#presskits-section-actions button", text: "Upload", count: 0
     assert_select "button", text: "Save", count: 0
-    cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node| node.text.include?("Cancel") }
-    assert_includes cancel.text, "Cancel"
-    assert_equal "default", cancel["data-fp-style"]
-    assert_includes cancel["class"], "fp-button"
+    assert_includes response.body, "Back to kit"
+    refute section_editor_cancel?
     form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
-    assert_operator form_html.index("Update"), :<, form_html.index("name=\"text[title]\"")
-    assert_operator form_html.index(">Title<"), :<, form_html.index(">Body<")
-    assert_operator form_html.index("name=\"text[title]\""), :<, form_html.index("name=\"text[body]\"")
-    grid_html = css_select("#presskits-section-actions ~ .grid").to_html
-    assert_includes grid_html, "grid-cols-1"
-    refute_includes grid_html, "md:grid-cols-2"
-    refute_includes grid_html, ">Update<"
-    refute_includes grid_html, ">Cancel<"
+    assert_operator form_html.index("Update"), :<, form_html.index("name=\"kit_section[title]\"")
+    assert_operator form_html.index(">Title<"), :<, form_html.index(">Subtitle<")
+    assert_operator form_html.index(">Subtitle<"), :<, form_html.index(">Body<")
+    assert_operator form_html.index("name=\"kit_section[title]\""), :<, form_html.index("name=\"text[body]\"")
+    columns = section_editor_columns
+    assert_equal 2, columns.size
+    assert_includes columns.first.to_html, 'id="presskits-section-actions"'
+    assert_includes columns.first.to_html, 'name="kit_section[title]"'
+    assert_includes columns.first.to_html, 'name="text[body]"'
+    refute_includes columns.last.to_html, 'name="kit_section[title]"'
+    refute_includes columns.last.to_html, ">Update<"
+    assert_includes columns.last["id"], "presskits-section-preview"
     assert_select "button", text: "Remove", count: 0
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
@@ -440,12 +446,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     }
     assert_response :unprocessable_entity
     assert_includes response.body, "Could not save that section."
-    assert_equal RecordingStudioPresskits::Text.opening_body, section.reload.recordable.body
+    assert_equal RecordingStudioPresskits::Text.opening_body, section_content(section).reload.recordable.body
 
-    original_id = section.recordable_id
+    original_section_id = section.recordable_id
+    original_text_id = section_content(section).recordable_id
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      kit_section: { title: "Launch notes", subtitle: "Doors at noon", decoy: "nope" },
       text: {
-        title: "Launch notes",
         body: "<h2>Set list</h2><p>Line two</p><script>alert(1)</script>",
         decoy: "nope"
       }
@@ -454,23 +461,28 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     section.reload
-    refute_equal original_id, section.recordable_id
+    content = section_content(section)
+    refute_equal original_section_id, section.recordable_id
+    refute_equal original_text_id, content.recordable_id
     assert_equal "Launch notes", section.recordable.title
-    assert_nil RecordingStudioPresskits::Text.find(original_id).title
-    assert_includes section.recordable.body, "<h2>Set list</h2>"
-    assert_includes section.recordable.body, "<p>Line two</p>"
-    refute_match(/<script/i, section.recordable.body)
-    refute_includes section.recordable.body, "alert(1)"
+    assert_equal "Doors at noon", section.recordable.subtitle
+    assert_nil RecordingStudioPresskits::KitSection.find(original_section_id).title
+    assert_includes content.recordable.body, "<h2>Set list</h2>"
+    assert_includes content.recordable.body, "<p>Line two</p>"
+    refute_match(/<script/i, content.recordable.body)
+    refute_includes content.recordable.body, "alert(1)"
     refute_includes section.recordable.attributes.values, "nope"
+    refute_includes content.recordable.attributes.values, "nope"
     assert_select "title", text: "Launch notes"
     assert_select "h1", text: "Text"
-    assert_select "input[name='text[title]'][value=?]", "Launch notes"
+    assert_select "input[name='kit_section[title]'][value=?]", "Launch notes"
+    assert_select "input[name='kit_section[subtitle]'][value=?]", "Doors at noon"
     assert_select "label", text: "Title"
     assert_select "label", text: "Body"
-    assert_select "h2", text: "Launch notes", count: 0
-    assert_select "h2", text: "Set list", count: 0
-    assert_select "p", text: "Line two", count: 0
-    assert_select ".flat-pack-richtext--view-mode", count: 0
+    assert_select "#presskits-section-preview .fp-section-title h2", text: "Launch notes"
+    assert_select "#presskits-section-preview h2", text: "Set list"
+    assert_select "#presskits-section-preview p", text: "Line two"
+    assert_select "#presskits-section-preview .flat-pack-richtext--view-mode"
     refute_includes response.body, "nope"
 
     get recording_studio_presskits.edit_press_kit_path(kit)
@@ -486,10 +498,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "p", text: "Line two"
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
-      text: { title: "   ", body: section.recordable.body }
+      kit_section: { title: "   ", subtitle: "   " },
+      text: { body: section_content(section).recordable.body }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_nil section.reload.recordable.title
+    assert_nil section.recordable.subtitle
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
@@ -522,14 +536,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button[aria-label='Remove'] [data-flat-pack--icon-name-value='trash']", count: 1
     assert_select "button", text: "Remove", count: 0
 
+    content = section_content(hero)
     delete recording_studio_presskits.press_kit_section_path(kit, hero)
     follow_redirect!
 
     assert_response :success
     refute_includes response.body, "Hero"
-    refute_includes RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id), hero.id
+    refute_includes RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id), hero.id
     assert hero.reload.trashed_at.present?
     assert_equal true, hero.trash_root
+    assert content.reload.trashed_at.present?
+    assert_equal false, content.trash_root
     assert_nil kit.reload.trashed_at
     assert_equal 1, hero.events.where(action: "trashed").count
   end
@@ -551,7 +568,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, "Order saved."
-    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id)
+    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
     assert hidden.reload.trashed_at.present?
   end
 
@@ -571,7 +588,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal [quotes.id, hero.id], kit.recording_studio_orderable_children.map(&:id)
   end
 
-  test "dragging a section leaves a non-section child where it sits" do
+  test "reordering sections leaves the publishable child alone" do
     kit = record_kit("Spring launch")
     first = record_block(kit, "Hero")
     result = RecordingStudioPublishable::Services::Publishables::Update.call(
@@ -582,7 +599,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     raise result.error if result.failure?
 
     second = record_block(kit, "Notes")
-    publishable = kit.recording_studio_orderable_children.find do |child|
+    publishable = kit.child_recordings.find do |child|
       child.recordable_type == "RecordingStudioPublishable::Publishable"
     end
     sign_in @user
@@ -595,9 +612,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     assert_response :success
-    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id)
-    assert_equal [second.id, publishable.id, first.id], kit.recording_studio_orderable_children.map(&:id)
-    refute_includes RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id), publishable.id
+    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
+    assert_equal [second.id, first.id], kit.recording_studio_orderable_children.map(&:id)
+    refute_includes kit.recording_studio_orderable_children.map(&:id), publishable.id
+    assert_equal kit.id, publishable.reload.parent_recording_id
   end
 
   test "dragging a section before another uses orderable and leaves a trashed sibling" do
@@ -617,7 +635,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, "Order saved."
-    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id)
+    assert_equal [second.id, first.id], RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
     assert_equal [second.id, first.id, hidden.id], kit.recording_studio_orderable_children.map(&:id)
     assert hidden.reload.trashed_at.present?
     assert_select "button", text: "Move up", count: 0
@@ -866,17 +884,19 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Images"
     assert_select "label", text: "Title"
     assert_select "label", text: "Subtitle"
-    assert_select "input[name='images[title]']"
-    assert_select "input[name='images[subtitle]']"
+    assert_select "input[name='kit_section[title]']"
+    assert_select "input[name='kit_section[subtitle]']"
+    refute_select "input[name='images[title]']"
     refute_select "input[name='images[caption]']"
-    assert_operator response.body.index('name="images[title]"'), :<, response.body.index('name="images[subtitle]"')
-    assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
+    assert_operator response.body.index('name="kit_section[title]"'), :<, response.body.index('name="kit_section[subtitle]"')
     grid = images_editor_grid
     columns = grid.element_children
     assert_equal 2, columns.size
-    assert_includes columns.first.to_html, 'name="images[title]"'
-    assert_includes columns.first.to_html, 'name="images[subtitle]"'
-    refute_includes columns.last.to_html, 'name="images[title]"'
+    assert_includes columns.first.to_html, 'id="presskits-section-actions"'
+    assert_includes columns.first.to_html, 'name="kit_section[title]"'
+    assert_includes columns.first.to_html, 'name="kit_section[subtitle]"'
+    refute_includes columns.last.to_html, 'name="kit_section[title]"'
+    refute_includes columns.last.to_html, ">Update<"
     refute_select "#presskits-section-preview h2", text: "Preview"
     refute_includes columns.last.text, "Preview"
     assert_includes response.body, "No images yet."
@@ -887,14 +907,15 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
     actions = css_select("#presskits-section-actions").to_html
-    assert_operator actions.index("Update"), :<, actions.index("Cancel")
-    assert_operator actions.index("Cancel"), :<, actions.index("Upload")
+    assert_operator actions.index("Update"), :<, actions.index("Upload")
+    refute_includes actions, "Cancel"
+    refute section_editor_cancel?
     assert_match(/remove-button-template-value="&lt;button/, response.body)
     refute_includes response.body, ">Remove\">"
     assert_select "#presskits-editor-preview", count: 0
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
-      images: { title: "Press photos", subtitle: "Doors at noon", caption: "nope", decoy: "nope" }
+      kit_section: { title: "Press photos", subtitle: "Doors at noon", decoy: "nope" }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     follow_redirect!
@@ -904,8 +925,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes section.recordable.attributes.values, "nope"
     assert_select "title", text: "Press photos"
     assert_select "h1", text: "Images"
-    assert_select "input[name='images[title]'][value='Press photos']"
-    assert_select "input[name='images[subtitle]'][value='Doors at noon']"
+    assert_select "input[name='kit_section[title]'][value='Press photos']"
+    assert_select "input[name='kit_section[subtitle]'][value='Doors at noon']"
     refute_select "#presskits-section-preview h2", text: "Preview"
     assert_select "#presskits-section-preview .fp-section-title h2", text: "Press photos"
     assert_select "#presskits-section-preview .fp-section-title", text: /Doors at noon/
@@ -914,11 +935,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     assert_select "img[alt='stage']"
-    assert response.body.index('name="images[title]"') < response.body.index("alt=\"stage\"")
+    images = section_content(section)
+    assert response.body.index('name="kit_section[title]"') < response.body.index("alt=\"stage\"")
     upload_form = css_select("form[data-controller='recording-studio-attachable--upload']").first.to_html
     refute_includes upload_form, "attachment_collection"
-    assert_select "form#attachment-collection-#{section.id}"
-    assert_select "input[name='attachment_collection[rows][][caption]'][form='attachment-collection-#{section.id}']"
+    assert_select "form#attachment-collection-#{images.id}"
+    assert_select "input[name='attachment_collection[rows][][caption]'][form='attachment-collection-#{images.id}']"
     assert_select "input[name='attachment_collection[rows][][credit]']"
     assert_select "input[name='attachment_collection[rows][][alt_text]']"
     assert_select "label", text: "Credit"
@@ -929,7 +951,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     signed = css_select("input[name='attachment_collection[signed_editor]']").first["value"]
     return_to = recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    patch recording_studio_attachable.recording_attachment_collection_path(section), params: {
+    patch recording_studio_attachable.recording_attachment_collection_path(images), params: {
       redirect_mode: "return_to",
       return_to: return_to,
       attachment_collection: {
@@ -991,22 +1013,24 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       assert_select "[data-flat-pack--icon-name-value='plus']", count: 1
     end
     assert_select "button", text: "Add quote", count: 0
-    assert_select "button", text: "Update", count: 0
+    assert_select "input[name='kit_section[title]']"
+    assert_select "input[name='kit_section[subtitle]']"
+    assert_select "button", text: "Update", count: 1
     assert_select "textarea[name='quote[body]']", count: 0
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
-    cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node|
-      node.text.include?("Cancel")
-    }
-    assert_includes cancel.text, "Cancel"
+    assert_includes response.body, "Back to kit"
+    refute section_editor_cancel?
     actions = css_select("#presskits-section-actions").to_html
-    assert_operator actions.index(">Quote<"), :<, actions.index("Cancel")
-    grid = quotes_editor_grid
-    assert grid
-    assert_equal 2, grid.element_children.size
-    refute_includes grid.to_html, 'data-flat-pack--icon-name-value="plus"'
-    refute_includes grid.text, "Cancel"
-    assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
+    assert_includes actions, ">Quote<"
+    refute_includes actions, "Cancel"
+    columns = section_editor_columns
+    assert_equal 2, columns.size
+    assert_includes columns.first.to_html, 'name="kit_section[title]"'
+    assert_includes columns.first.to_html, 'id="presskits-section-actions"'
+    assert_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
+    refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
+    refute_includes columns.last.text, "Cancel"
 
     assert_difference -> { RecordingStudioPresskits::Quote.count }, 1 do
       post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
@@ -1060,7 +1084,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     grid = quotes_editor_grid
     columns = grid.element_children
     assert_equal 2, columns.size
-    refute_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
+    assert_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
     refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
     assert_operator columns.first.text.index("A line worth printing"), :<, columns.first.text.index("Ada Lovelace")
     assert_select columns.last, "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
@@ -1108,7 +1132,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Quote", count: 0
 
     post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
-    blank = section.child_recordings.where(
+    blank = section_content(section).child_recordings.where(
       recordable_type: "RecordingStudioPresskits::Quote",
       trashed_at: nil
     ).order(:created_at).last
@@ -1130,7 +1154,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes columns.last.text, "A line worth printing"
 
     post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
-    nameless = section.child_recordings.where(
+    nameless = section_content(section).child_recordings.where(
       recordable_type: "RecordingStudioPresskits::Quote",
       trashed_at: nil
     ).order(:created_at).last
@@ -1152,23 +1176,27 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   def quotes_editor_grid
-    css_select(".grid").find { |node| node["class"].to_s.include?("md:grid-cols-2") }
+    css_select("#presskits-section-grid").first
   end
 
   def images_editor_grid
-    css_select(".grid").find do |node|
-      node["id"] != "presskits-editor-grid" && node["class"].to_s.include?("md:grid-cols-2")
-    end
+    quotes_editor_grid
+  end
+
+  def section_editor_columns
+    quotes_editor_grid.element_children
+  end
+
+  def section_editor_cancel?
+    css_select("#presskits-section-fields a, #presskits-section-fields button").any? { |node| node.text.include?("Cancel") }
   end
 
   def quote_section(kit)
-    RecordingStudioPresskits::KitQuery.live_children(kit).find do |child|
-      child.recordable.is_a?(RecordingStudioPresskits::QuoteSection)
-    end
+    content_section(kit, RecordingStudioPresskits::QuoteSection)
   end
 
   def live_quotes(section)
-    section.recording_studio_orderable_children.reject { |child| child.trashed_at.present? }
+    section_content(section).recording_studio_orderable_children.reject { |child| child.trashed_at.present? }
   end
 
   def publish_quote_kit!(kit)
@@ -1183,9 +1211,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   def images_section(kit)
-    RecordingStudioPresskits::KitQuery.live_children(kit).find do |child|
-      child.recordable.is_a?(RecordingStudioPresskits::Images)
+    content_section(kit, RecordingStudioPresskits::Images)
+  end
+
+  def content_section(kit, klass)
+    RecordingStudioPresskits::KitQuery.sections_for(kit).find do |section|
+      section_content(section)&.recordable.is_a?(klass)
     end
+  end
+
+  def section_content(section)
+    RecordingStudioPresskits::KitQuery.section_content(section)
   end
 
   def attach_image(section, filename)
@@ -1194,7 +1230,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       filename: filename,
       content_type: "image/jpeg"
     )
-    section.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user)
+    section_content(section).record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user)
   end
 
   def publish_images_kit!(kit)
@@ -1232,6 +1268,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   def record_block(kit, title)
-    kit.record(FakeBlock, parent_recording: kit) { |fake_block| fake_block.title = title }
+    RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "FakeBlock",
+      title: title,
+      actor: @user
+    )
   end
 end

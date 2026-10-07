@@ -30,11 +30,18 @@ module RecordingStudioPresskits
     end
 
     def presskits_title_for(recording)
-      recording.recordable&.try(:title).presence || recording.name.presence || recording.type_label
+      recordable = recording.recordable
+      return kit_section_title(recording) if recordable.is_a?(KitSection)
+
+      recordable&.try(:title).presence || recording.name.presence || recording.type_label
     end
 
-    # Optional cover for index cards. A recordable supplies one with `cover_image_url`.
-    # Blank and unsafe values fall through to the muted placeholder.
+    def kit_section_title(recording)
+      recording.recordable.title.presence ||
+        KitQuery.section_content(recording)&.type_label ||
+        recording.type_label
+    end
+
     def presskits_cover_url_for(recording)
       recordable = recording&.recordable
       return unless recordable.respond_to?(:cover_image_url)

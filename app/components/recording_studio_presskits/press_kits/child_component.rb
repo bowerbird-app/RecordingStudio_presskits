@@ -11,7 +11,7 @@ module RecordingStudioPresskits
       end
 
       def row_label
-        @recording.type_label
+        KitQuery.section_content(@recording)&.type_label || @recording.type_label
       end
 
       def can_remove?

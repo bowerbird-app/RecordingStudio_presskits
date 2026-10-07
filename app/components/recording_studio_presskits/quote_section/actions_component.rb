@@ -9,17 +9,17 @@ module RecordingStudioPresskits
       end
 
       def add_path
-        helpers.press_kit_section_quotes_path(kit_recording, @recording)
-      end
-
-      def cancel_path
-        helpers.edit_press_kit_path(kit_recording)
+        helpers.press_kit_section_quotes_path(kit_recording, kit_section_recording)
       end
 
       private
 
-      def kit_recording
+      def kit_section_recording
         @recording.parent_recording
+      end
+
+      def kit_recording
+        kit_section_recording.parent_recording
       end
     end
   end

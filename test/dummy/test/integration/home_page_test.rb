@@ -26,9 +26,12 @@ class HomePageTest < ActionDispatch::IntegrationTest
     kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
       press_kit.title = "Spring launch"
     end
-    kit_recording.record(FakeBlock, parent_recording: kit_recording) do |fake_block|
-      fake_block.title = "Hero"
-    end
+    RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit_recording,
+      content_type: "FakeBlock",
+      title: "Hero",
+      actor: user
+    )
 
     sign_in user
 

@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-10-06
+
+Kit sections.
+
+### Changed
+- A press kit's ordered children are kit sections. Each kit section has an optional title and subtitle, and one content recording under it. Text keeps its body. Images keep their attachments. A quote section stays the parent of its quotes, and the quote section sits under the kit section.
+- `register_section` registers a content type for the + Section menu, plus its component, editor, and optional `prepare` hook. `section?` is true only for a kit section.
+- The kit editor, the preview, and the public page walk kit sections. `SectionFrameComponent` renders the kit section title and subtitle, then the content component.
+- Reordering or removing a section targets the kit section. Duplicating a kit copies each kit section and the content under it.
+- When Recording Studio API is loaded, `create_section` and `reorder_sections` are press kit actions, and `remove_section` is a kit section action. They call `create_section!`, `recording_studio_orderable_reorder!`, and `recording_studio_trashable_trash!`.
+- The kit editor Header row uses Heroicon `bars-3-bottom-left`. Section rows keep `arrows-up-down`. Header still cannot be reordered or removed.
+- Every section editor uses one two-column template. Column one holds Title, Subtitle, the section buttons, and that section's editor. Column two is the preview. Text shows that preview too. `preview?` on a content editor no longer changes the page.
+- Section editors no longer show Cancel. Back still returns to the kit. The quote edit screen and the header screen still have Cancel.
+- Version `0.17.0`
+
+### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. The migration is irreversible. It wraps legacy press-kit children in kit sections, copies their order, and drops the text title column and the images title and subtitle columns. A migrated quote section gets the kit section title Quotes. See `MIGRATION_NOTES.md`.
+- Add `RecordingStudioPresskits::KitSection` to `recordable_types`. Point content `allowed_parent_types` at `RecordingStudioPresskits::KitSection`.
+- Create sections with `RecordingStudioPresskits.create_section!`. API clients use the press kit action `create_section`, reorder with `reorder_sections`, and remove a kit section with `remove_section`. There is still no generic kit section create or destroy.
+- The Header row icon is `bars-3-bottom-left`. Hosts do not configure it.
+- Section editors are always two columns. Remove `preview?` from a content editor. It no longer hides the preview.
+- Section editors no longer show Cancel. Back still returns to the kit.
+
 ## [0.16.0] - 2026-10-06
 
 Images section heading.
@@ -380,7 +403,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.13.0...v0.14.0

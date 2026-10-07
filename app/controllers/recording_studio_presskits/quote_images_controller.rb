@@ -16,7 +16,7 @@ module RecordingStudioPresskits
 
     private
 
-    attr_reader :section_recording
+    attr_reader :section_recording, :quote_section_recording
 
     def remove_attachment
       RecordingStudioAttachable::Services::RemoveAttachment.call(
@@ -46,7 +46,7 @@ module RecordingStudioPresskits
     end
 
     def find_quote
-      section_recording.child_recordings.where(
+      quote_section_recording.child_recordings.where(
         trashed_at: nil,
         recordable_type: "RecordingStudioPresskits::Quote"
       ).find_by(id: params[:quote_id])
@@ -69,8 +69,9 @@ module RecordingStudioPresskits
     def set_section
       return if performed?
 
-      @section_recording = KitQuery.live_child(@press_kit_recording, params[:section_id])
-      return if @section_recording&.recordable.is_a?(QuoteSection)
+      @section_recording = KitQuery.section_for(@press_kit_recording, params[:section_id])
+      @quote_section_recording = KitQuery.section_content(@section_recording)
+      return if @quote_section_recording&.recordable.is_a?(QuoteSection)
 
       head :not_found
     end

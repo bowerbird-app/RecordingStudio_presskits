@@ -25,13 +25,8 @@ module RecordingStudioPresskits
         options
       end
 
-      def section_title(recording)
-        recordable = recording&.recordable
-        recordable&.try(:title).presence || recording&.try(:name).presence || recording&.type_label
-      end
-
       def section_recordings
-        @section_recordings || KitQuery.live_children(@press_kit_recording)
+        @section_recordings || KitQuery.sections_for(@press_kit_recording)
       end
 
       def preview?
@@ -40,10 +35,6 @@ module RecordingStudioPresskits
 
       def live?
         @press_kit_recording.respond_to?(:currently_published?) && @press_kit_recording.currently_published?
-      end
-
-      def section_component_for(recording)
-        RecordingStudioPresskits.section_component_for(recording)
       end
     end
   end

@@ -24,9 +24,11 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "AdminRoot", "Workspace" ].sort, RecordingStudio.root_recordable_types.sort
     assert_equal [ "Workspace", "Folder" ], RecordingStudio.allowed_parent_types_for("Page")
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
-    assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("FakeBlock")
-    assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
-    assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Images")
+    assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::KitSection")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("FakeBlock")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Images")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::QuoteSection")
     assert_equal "Text", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Text)
     assert_equal "Images", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Images)
     assert_equal "Press kit", RecordingStudio.recordable_type_label(RecordingStudioPresskits::PressKit)
@@ -48,11 +50,15 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute connection.column_exists?(:recording_studio_press_kits, :updated_at)
     assert connection.table_exists?(:recording_studio_texts)
     assert connection.column_exists?(:recording_studio_texts, :body)
-    assert connection.column_exists?(:recording_studio_texts, :title)
+    refute connection.column_exists?(:recording_studio_texts, :title)
     assert connection.table_exists?(:recording_studio_images)
-    assert connection.column_exists?(:recording_studio_images, :title)
-    assert connection.column_exists?(:recording_studio_images, :subtitle)
+    refute connection.column_exists?(:recording_studio_images, :title)
+    refute connection.column_exists?(:recording_studio_images, :subtitle)
     refute connection.column_exists?(:recording_studio_images, :caption)
+    assert connection.table_exists?(:recording_studio_kit_sections)
+    assert connection.column_exists?(:recording_studio_kit_sections, :title)
+    assert connection.column_exists?(:recording_studio_kit_sections, :subtitle)
+    refute connection.column_exists?(:recording_studio_kit_sections, :updated_at)
     refute connection.column_exists?(:recording_studio_images, :updated_at)
     assert connection.table_exists?(:active_storage_blobs)
     refute connection.column_exists?(:recording_studio_texts, :updated_at)
@@ -108,8 +114,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal root_recording, press_kit_recording.parent_recording
     assert_equal root_recording, press_kit_recording.root_recording
     assert_equal unpublished_kit_recording.root_recording, root_recording
-    assert_empty RecordingStudioPresskits::KitQuery.live_children(press_kit_recording)
-    assert_empty RecordingStudioPresskits::KitQuery.live_children(unpublished_kit_recording)
+    assert_empty RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
+    assert_empty RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
     assert press_kit.published?
     assert press_kit.indexable?
     assert press_kit_recording.currently_published?

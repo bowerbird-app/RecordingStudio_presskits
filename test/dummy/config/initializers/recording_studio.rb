@@ -7,6 +7,7 @@ RecordingStudio.configure do |config|
     "Page",
     "AdminRoot",
     "RecordingStudioPresskits::PressKit",
+    "RecordingStudioPresskits::KitSection",
     "RecordingStudioPresskits::Text",
     "RecordingStudioPresskits::Images",
     "RecordingStudioPresskits::QuoteSection",

@@ -98,8 +98,10 @@ begin
     existing.recording_studio_trashable_trash!(actor: user)
   end
 
-  %w[Hero Quotes].each { |title| trash_named_child.call(press_kit_recording, FakeBlock, title) }
-  trash_named_child.call(unpublished_kit_recording, FakeBlock, "Notes")
+  %w[Hero Quotes].each do |title|
+    trash_named_child.call(press_kit_recording, RecordingStudioPresskits::KitSection, title)
+  end
+  trash_named_child.call(unpublished_kit_recording, RecordingStudioPresskits::KitSection, "Notes")
 
   publish_kit = lambda do |kit_recording, slug:, status:|
     result = RecordingStudioPublishable::Services::Publishables::Update.call(

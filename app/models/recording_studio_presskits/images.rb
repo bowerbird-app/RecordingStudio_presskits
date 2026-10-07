@@ -6,7 +6,7 @@ module RecordingStudioPresskits
 
     recording_studio_recordable label: "Images",
                                 root: false,
-                                allowed_parent_types: ["RecordingStudioPresskits::PressKit"]
+                                allowed_parent_types: ["RecordingStudioPresskits::KitSection"]
 
     def self.section_menu_icon
       "photo"
@@ -20,14 +20,5 @@ module RecordingStudioPresskits
       max_file_count: 20,
       auth_roles: { remove: :edit }
     )
-
-    before_validation :clear_blank_heading
-
-    private
-
-    def clear_blank_heading
-      self.title = title.to_s.strip.presence
-      self.subtitle = subtitle.to_s.strip.presence
-    end
   end
 end

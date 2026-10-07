@@ -18,10 +18,6 @@ module RecordingStudioPresskits
           []
         end
 
-        def preview?
-          true
-        end
-
         def form?
           false
         end
@@ -36,15 +32,15 @@ module RecordingStudioPresskits
       end
 
       def order_path
-        helpers.press_kit_section_quote_order_path(kit_recording, @recording)
+        helpers.press_kit_section_quote_order_path(kit_recording, kit_section_recording)
       end
 
       def edit_path(quote_recording)
-        helpers.edit_press_kit_section_quote_path(kit_recording, @recording, quote_recording)
+        helpers.edit_press_kit_section_quote_path(kit_recording, kit_section_recording, quote_recording)
       end
 
       def remove_path(quote_recording)
-        helpers.press_kit_section_quote_path(kit_recording, @recording, quote_recording)
+        helpers.press_kit_section_quote_path(kit_recording, kit_section_recording, quote_recording)
       end
 
       def quote_snippet(quote_recording)
@@ -61,8 +57,12 @@ module RecordingStudioPresskits
         child.trashed_at.present? || !child.recordable.is_a?(Quote)
       end
 
-      def kit_recording
+      def kit_section_recording
         @recording.parent_recording
+      end
+
+      def kit_recording
+        kit_section_recording.parent_recording
       end
     end
   end

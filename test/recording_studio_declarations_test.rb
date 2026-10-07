@@ -13,7 +13,12 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for("Folder")
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for(Page)
     assert_equal ["Workspace"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
-    assert_equal ["RecordingStudioPresskits::PressKit"], RecordingStudio.allowed_parent_types_for("FakeBlock")
+    assert_equal ["RecordingStudioPresskits::PressKit"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::KitSection")
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("FakeBlock")
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Images")
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::QuoteSection")
+    refute RecordingStudio.root_allowed?("RecordingStudioPresskits::KitSection")
     assert_equal "Press kit", RecordingStudio.recordable_type_label("RecordingStudioPresskits::PressKit")
     assert_equal "RecordingStudioPresskits::PressKit", RecordingStudioPresskits.press_kit_type_name
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::PressKit")
@@ -178,27 +183,31 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "RecordingStudioPresskits::PressKit cannot be recorded under Folder", error.message
   end
 
-  test "fake block is allowed under a press kit and rejected under the workspace" do
+  test "fake block is allowed under a kit section and rejected under the press kit" do
     root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Block Workspace")))
     kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
       press_kit.title = unique_name("Spring launch")
     end
+    section = kit_recording.record(RecordingStudioPresskits::KitSection, parent_recording: kit_recording)
 
-    assert RecordingStudio.parent_allowed?(child_type: "FakeBlock", parent_recording: kit_recording)
+    assert RecordingStudio.parent_allowed?(child_type: "FakeBlock", parent_recording: section)
+    refute RecordingStudio.parent_allowed?(child_type: "FakeBlock", parent_recording: kit_recording)
     refute RecordingStudio.parent_allowed?(child_type: "FakeBlock", parent_recording: root_recording)
 
-    block_recording = kit_recording.record(FakeBlock, parent_recording: kit_recording) do |fake_block|
+    block_recording = section.record(FakeBlock, parent_recording: section) do |fake_block|
       fake_block.title = "Hero"
     end
 
-    assert_equal kit_recording, block_recording.parent_recording
+    assert_equal section, block_recording.parent_recording
     assert_equal root_recording, block_recording.root_recording
     assert_kind_of FakeBlock, block_recording.recordable
 
     error = assert_raises(RecordingStudio::InvalidParent) do
-      root_recording.record(FakeBlock) { |fake_block| fake_block.title = "Wrong parent" }
+      kit_recording.record(FakeBlock, parent_recording: kit_recording) do |fake_block|
+        fake_block.title = "Wrong parent"
+      end
     end
-    assert_equal "FakeBlock cannot be recorded under Workspace", error.message
+    assert_equal "FakeBlock cannot be recorded under RecordingStudioPresskits::PressKit", error.message
   end
 
   test "press kit revise creates a new snapshot and log_event! appends history" do
@@ -225,68 +234,61 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_nil original.description
   end
 
-  test "text is allowed under a press kit and rejected under the workspace" do
-    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Text Workspace")))
-    kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
-      press_kit.title = unique_name("Spring launch")
-    end
+  test "text is allowed under a kit section and stores only a body" do
+    _root, kit = spring_kit
+    section = record_section(kit, title: "Bio")
+    text_type = "RecordingStudioPresskits::Text"
 
-    assert RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioPresskits::Text",
-      parent_recording: kit_recording
-    )
-    refute RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioPresskits::Text",
-      parent_recording: root_recording
-    )
+    assert RecordingStudio.parent_allowed?(child_type: text_type, parent_recording: section)
+    refute RecordingStudio.parent_allowed?(child_type: text_type, parent_recording: kit)
 
-    text_recording = kit_recording.record(RecordingStudioPresskits::Text, parent_recording: kit_recording) do |text|
+    text_recording = section.record(RecordingStudioPresskits::Text, parent_recording: section) do |text|
       text.body = "Opening line\nMore"
     end
 
-    assert_equal kit_recording, text_recording.parent_recording
+    assert_equal section, text_recording.parent_recording
     assert_kind_of RecordingStudioPresskits::Text, text_recording.recordable
-    assert_nil text_recording.recordable.title
+    refute text_recording.recordable.respond_to?(:title)
+    assert_equal "Bio", section.recordable.title
+    assert_equal "Opening line\nMore", text_recording.recordable.body
 
     error = assert_raises(RecordingStudio::InvalidParent) do
-      root_recording.record(RecordingStudioPresskits::Text) { |text| text.body = "Wrong parent" }
+      kit.record(RecordingStudioPresskits::Text, parent_recording: kit) { |text| text.body = "Wrong parent" }
     end
-    assert_equal "RecordingStudioPresskits::Text cannot be recorded under Workspace", error.message
+    assert_equal "#{text_type} cannot be recorded under RecordingStudioPresskits::PressKit", error.message
   end
 
-  test "text title is stored and a blank title is nothing" do
-    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Text Title Workspace")))
+  test "kit section stores a title and subtitle and blanks are nothing" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Section Heading")))
     kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
       press_kit.title = unique_name("Spring launch")
     end
 
-    named = kit_recording.record(RecordingStudioPresskits::Text, parent_recording: kit_recording) do |text|
-      text.title = "Bio"
-      text.body = "Opening line\nMore"
+    named = kit_recording.record(RecordingStudioPresskits::KitSection, parent_recording: kit_recording) do |section|
+      section.title = "Bio"
+      section.subtitle = "Doors at noon"
     end
-    blank = kit_recording.record(RecordingStudioPresskits::Text, parent_recording: kit_recording) do |text|
-      text.title = "   "
-      text.body = "Still here"
+    blank = kit_recording.record(RecordingStudioPresskits::KitSection, parent_recording: kit_recording) do |section|
+      section.title = "   "
+      section.subtitle = "   "
     end
 
     assert_equal "Bio", named.recordable.title
-    refute_equal "Opening line", named.recordable.title
+    assert_equal "Doors at noon", named.recordable.subtitle
     assert_nil blank.recordable.title
+    assert_nil blank.recordable.subtitle
   end
 
-  test "images is allowed under a press kit and uses attachable" do
-    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Images Workspace")))
-    kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
-      press_kit.title = unique_name("Spring launch")
-    end
-
+  test "images is allowed under a kit section and uses attachable" do
+    _root, kit_recording = spring_kit
+    section = record_section(kit_recording)
     assert RecordingStudio.parent_allowed?(
       child_type: "RecordingStudioPresskits::Images",
-      parent_recording: kit_recording
+      parent_recording: section
     )
     refute RecordingStudio.parent_allowed?(
       child_type: "RecordingStudioPresskits::Images",
-      parent_recording: root_recording
+      parent_recording: kit_recording
     )
     assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PressKit")
@@ -300,33 +302,10 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal [:image], options[:enabled_attachment_kinds]
     assert_equal :edit, options[:auth_roles][:remove]
 
-    images_recording = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording)
-    assert_equal kit_recording, images_recording.parent_recording
+    images_recording = section.record(RecordingStudioPresskits::Images, parent_recording: section)
+    assert_equal section, images_recording.parent_recording
     assert_kind_of RecordingStudioPresskits::Images, images_recording.recordable
-  end
-
-  test "images title and subtitle are stored and blanks are nothing" do
-    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Images Heading")))
-    kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
-      press_kit.title = unique_name("Spring launch")
-    end
-
-    empty = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording)
-    named = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording) do |images|
-      images.title = "Press photos"
-      images.subtitle = "Doors at noon"
-    end
-    blank = kit_recording.record(RecordingStudioPresskits::Images, parent_recording: kit_recording) do |images|
-      images.title = "   "
-      images.subtitle = "   "
-    end
-
-    assert_nil empty.recordable.title
-    assert_nil empty.recordable.subtitle
-    assert_equal "Press photos", named.recordable.title
-    assert_equal "Doors at noon", named.recordable.subtitle
-    assert_nil blank.recordable.title
-    assert_nil blank.recordable.subtitle
+    refute images_recording.recordable.respond_to?(:title=)
   end
 
   test "picker types skip dummy placeholders and types that do not allow press kit" do
@@ -341,33 +320,41 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute_includes types, "Folder"
     refute_includes types, "Page"
     refute_includes types, "RecordingStudioPresskits::PressKit"
+    refute_includes types, "RecordingStudioPresskits::KitSection"
     refute_includes types, "RecordingStudioPublishable::Publishable"
     refute_includes types, "RecordingStudioAttachable::Attachment"
     assert_includes RecordingStudioPresskits.section_types, "FakeBlock"
     assert_includes RecordingStudioPresskits.section_types, "RecordingStudioPresskits::Text"
     refute RecordingStudioPresskits.section?("RecordingStudioPublishable::Publishable")
+    refute RecordingStudioPresskits.section?("RecordingStudioPresskits::Text")
+    assert RecordingStudioPresskits.section?("RecordingStudioPresskits::KitSection")
   end
 
-  test "a child under a kit is a section only when its type is registered" do
+  test "a kit section stays a section when its content type leaves the registry" do
     root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Section Registry")))
     kit = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
       press_kit.title = unique_name("Spring launch")
     end
-    text = kit.record(RecordingStudioPresskits::Text, parent_recording: kit) do |recordable|
-      recordable.body = "<p>Hello</p>"
-    end
-    aside = kit.record(FakeBlock, parent_recording: kit) { |fake_block| fake_block.title = "Aside" }
+    text = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::Text",
+      title: "Hello"
+    )
+    aside = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "FakeBlock",
+      title: "Aside"
+    )
+    publishable = publish_kit(kit, root_recording)
 
-    assert_includes RecordingStudioPresskits::KitQuery.live_children(kit).map(&:id), aside.id
+    assert_equal [text.id, aside.id], RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
+    assert RecordingStudioPresskits.section?(text)
+    refute RecordingStudioPresskits.section?(RecordingStudioPresskits::KitQuery.section_content(aside))
+    refute_includes RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id), publishable.id
 
     RecordingStudioPresskits.configuration.section_types.delete("FakeBlock")
-    children = RecordingStudioPresskits::KitQuery.live_children(kit)
-    assert_includes children.map(&:id), text.id
-    refute_includes children.map(&:id), aside.id
-    refute RecordingStudioPresskits.section?(aside)
-
-    ordered = RecordingStudioPresskits::KitQuery.child_ids_with_section_order(kit, [text.id])
-    assert_equal [text.id.to_s, aside.id.to_s], ordered
+    assert_includes RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id), aside.id
+    assert RecordingStudioPresskits.section?(aside)
   ensure
     RecordingStudioPresskits.register_section("FakeBlock", component: "FakeBlock::Component")
   end
@@ -392,6 +379,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PressKit")
     assert RecordingStudio.capability_enabled?(:orderable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:orderable, for: "FakeBlock")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::KitSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Quote")
@@ -400,7 +388,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
 
     press_kit_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::PressKit").to_h
-    refute press_kit_options.key?(:allows)
+    assert_equal ["RecordingStudioPresskits::KitSection"], Array(press_kit_options[:allows]).map(&:to_s)
 
     quote_section_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::QuoteSection").to_h
     assert_equal ["RecordingStudioPresskits::Quote"], Array(quote_section_options[:allows]).map(&:to_s)
@@ -411,6 +399,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "trashable is enabled on press kit and dummy fake block" do
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::PressKit")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::KitSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "FakeBlock")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Text")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Images")
@@ -424,6 +413,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
   test "publishable is enabled on press kit only" do
     assert RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::PressKit")
     refute RecordingStudio.capability_enabled?(:publishable, for: "FakeBlock")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::KitSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::QuoteSection")
@@ -441,6 +431,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
   test "duplicatable is enabled on press kit only" do
     assert RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::PressKit")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "FakeBlock")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::KitSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::QuoteSection")
@@ -454,16 +445,24 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal [], options[:exclude_children]
   end
 
-  test "quote section parent is press kit and quote parent is the section" do
+  test "quote section sits under a kit section and quotes sit under the quote section" do
     root, kit, section = quote_tree
+    kit_section = section.parent_recording
 
-    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::QuoteSection", parent_recording: kit)
+    assert_kind_of RecordingStudioPresskits::KitSection, kit_section.recordable
+    assert_equal kit, kit_section.parent_recording
+    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::KitSection", parent_recording: kit)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::QuoteSection", parent_recording: kit)
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::QuoteSection",
+      parent_recording: kit_section
+    )
     refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::QuoteSection", parent_recording: root)
-    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Quote", parent_recording: kit)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Quote", parent_recording: kit_section)
     assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Quote", parent_recording: section)
-    assert_equal "Quotes", section.recordable.title
     refute section.recordable.respond_to?(:title=)
     refute section.recordable.respond_to?(:body=)
+    assert_nil kit_section.recordable.title
   end
 
   test "quote attachable allows one image" do
@@ -536,6 +535,32 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     ).recording
   end
 
+  def spring_kit
+    root = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Workspace")))
+    kit = root.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Spring launch")
+    end
+    [root, kit]
+  end
+
+  def record_section(kit, title: nil)
+    kit.record(RecordingStudioPresskits::KitSection, parent_recording: kit) do |section|
+      section.title = title
+    end
+  end
+
+  def publish_kit(kit, root)
+    RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: kit,
+      actor: quote_owner(root),
+      attributes: {
+        slug: "registry-#{SecureRandom.hex(4)}",
+        status: "published",
+        meta_robots: "index,follow"
+      }
+    ).value
+  end
+
   def unique_name(prefix)
     "#{prefix} #{SecureRandom.hex(4)}"
   end
@@ -545,8 +570,11 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     kit = root.record(RecordingStudioPresskits::PressKit) do |press_kit|
       press_kit.title = unique_name("Spring launch")
     end
-    section = kit.record(RecordingStudioPresskits::QuoteSection, parent_recording: kit)
-    [root, kit, section]
+    kit_section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::QuoteSection"
+    )
+    [root, kit, RecordingStudioPresskits::KitQuery.section_content(kit_section)]
   end
 
   def quote_owner(root_recording)

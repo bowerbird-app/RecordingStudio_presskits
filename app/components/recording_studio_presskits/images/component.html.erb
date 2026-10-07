@@ -1,26 +1,12 @@
-<% if section_title.present? || subtitle.present? || image_recordings.any? %>
-  <div>
-    <% if section_title.present? %>
-      <%= render FlatPack::SectionTitle::Component.new(
-        title: section_title,
-        subtitle: subtitle,
-        anchor_link: true
-      ) %>
-    <% elsif subtitle.present? %>
-      <p class="text-base text-[var(--surface-muted-content-color)]"><%= subtitle %></p>
-    <% end %>
+<% if image_recordings.any? %>
+  <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
+    <% image_recordings.each do |image_recording| %>
+      <% url = image_url_for(image_recording) %>
+      <% next if url.blank? %>
 
-    <% if image_recordings.any? %>
-      <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
-        <% image_recordings.each do |image_recording| %>
-          <% url = image_url_for(image_recording) %>
-          <% next if url.blank? %>
-
-          <%= image_tag url,
-                alt: image_recording.recordable.name,
-                class: "aspect-video w-full rounded-lg object-cover" %>
-        <% end %>
-      <% end %>
+      <%= image_tag url,
+            alt: image_recording.recordable.name,
+            class: "aspect-video w-full rounded-lg object-cover" %>
     <% end %>
-  </div>
+  <% end %>
 <% end %>

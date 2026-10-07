@@ -196,7 +196,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     engine_routes = RecordingStudioPublishable::Engine.routes.routes.map { |route| route.path.spec.to_s }
     assert(engine_routes.any? { |path| path.include?("/published/:uuid/:slug") })
 
-    children = RecordingStudioPresskits::KitQuery.live_children(kit)
+    children = RecordingStudioPresskits::KitQuery.sections_for(kit)
     assert_equal ["Hero"], children.map { |child| child.recordable.title }
     refute_includes children.map(&:recordable_type), "RecordingStudioPublishable::Publishable"
   end
@@ -227,7 +227,12 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
   end
 
   def record_block(kit, title)
-    kit.record(FakeBlock, parent_recording: kit) { |fake_block| fake_block.title = title }
+    RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "FakeBlock",
+      title: title,
+      actor: @user
+    )
   end
 
   def publish_kit!(kit, slug:, status:)

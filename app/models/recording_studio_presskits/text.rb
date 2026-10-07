@@ -12,7 +12,7 @@ module RecordingStudioPresskits
 
     recording_studio_recordable label: "Text",
                                 root: false,
-                                allowed_parent_types: ["RecordingStudioPresskits::PressKit"]
+                                allowed_parent_types: ["RecordingStudioPresskits::KitSection"]
 
     def self.section_menu_icon
       "document-text"
@@ -22,7 +22,6 @@ module RecordingStudioPresskits
 
     validates :body, presence: true
 
-    before_validation :clear_blank_title
     before_validation :sanitize_body
 
     def self.opening_body
@@ -30,10 +29,6 @@ module RecordingStudioPresskits
     end
 
     private
-
-    def clear_blank_title
-      self.title = title.to_s.strip.presence
-    end
 
     def sanitize_body
       cleaned = body.to_s.gsub(%r{<(script|style)\b[^>]*>.*?</\1>}mi, "")

@@ -8,15 +8,6 @@ module RecordingStudioPresskits
       def initialize(recording:)
         super()
         @recording = recording
-        @images = recording.recordable
-      end
-
-      def section_title
-        @images.title.to_s.strip.presence
-      end
-
-      def subtitle
-        @images.subtitle.to_s.strip.presence
       end
 
       def image_recordings
