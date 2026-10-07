@@ -427,10 +427,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Back to kit"
     refute section_editor_cancel?
     form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
+    assert_operator form_html.index(">Update<"), :<, form_html.index(">Title<")
     assert_operator form_html.index(">Title<"), :<, form_html.index(">Subtitle<")
     assert_operator form_html.index(">Subtitle<"), :<, form_html.index(">Body<")
     assert_operator form_html.index("name=\"kit_section[title]\""), :<, form_html.index("name=\"text[body]\"")
-    assert_operator form_html.index("name=\"text[body]\""), :<, form_html.index(">Update<")
     columns = section_editor_columns
     assert_equal 2, columns.size
     assert_includes columns.first.to_html, 'id="presskits-section-update"'
@@ -912,7 +912,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes heading, ">Update<"
     refute_includes heading, ">Upload<"
     refute_includes heading, 'type="file"'
-    assert_operator column.index(">Update<"), :<, column.index(">Upload<")
+    assert_operator heading.index(">Update<"), :<, heading.index('name="kit_section[title]"')
+    assert_operator column.index(">Update<"), :<, column.index('name="kit_section[title]"')
+    assert_operator column.index('name="kit_section[subtitle]"'), :<, column.index(">Upload<")
     refute_includes column, "Cancel"
     refute section_editor_cancel?
     assert_match(/remove-button-template-value="&lt;button/, response.body)
@@ -1031,8 +1033,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes actions, "Cancel"
     refute_includes actions, ">Update<"
     heading = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
+    assert_operator heading.index(">Update<"), :<, heading.index('name="kit_section[title]"')
     assert_operator heading.index('name="kit_section[title]"'), :<, heading.index('name="kit_section[subtitle]"')
-    assert_operator heading.index('name="kit_section[subtitle]"'), :<, heading.index(">Update<")
     refute_includes heading, ">Quote<"
     columns = section_editor_columns
     assert_equal 2, columns.size

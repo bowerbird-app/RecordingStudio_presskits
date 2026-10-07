@@ -12,13 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Section editor form.
 
 ### Changed
-- Every section editor uses one heading form: Title, Subtitle, extra fields, then Update. Update sits in the same place on Text, Images, and Quotes.
-- A content editor renders inside that form unless it defines `self.below?` and returns true. Text leaves that unset, so Body stays in the form. Images and Quotes return true. Their UI sits under the form: Upload and the photo editor for Images, + Quote and the quote list for Quotes.
+- Every section editor uses one heading form. Update sits above Title, Subtitle, and any extra fields, in the same place on Text, Images, and Quotes.
+- A content editor renders inside that form, under Update, unless it defines `self.below?` and returns true. Text leaves that unset, so Body stays in the form. Images and Quotes return true. Their UI sits under the form: Upload and the photo editor for Images, + Quote and the quote list for Quotes.
 - `form?` is gone.
 - Version `0.18.0`
 
 ### Upgrade notes
-- Remove `form?` from a content editor. If that editor cannot live inside the heading form, define `self.below?` and return true. The shell still renders `section_actions`, then that editor, under Title, Subtitle, and Update.
+- Remove `form?` from a content editor. If that editor cannot live inside the heading form, define `self.below?` and return true. The shell still renders `section_actions`, then that editor, under Update, Title, and Subtitle.
 
 ## [0.17.0] - 2026-10-06
 

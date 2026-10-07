@@ -7,6 +7,10 @@
   <%= render FlatPack::Grid::Component.new(id: "presskits-section-grid", cols: 2, gap: :lg, align: :start) do %>
     <div id="presskits-section-fields" class="flex w-full min-w-0 flex-col gap-6">
       <%= form_with url: @update_path, method: :patch, local: true, class: "flex flex-col gap-6" do %>
+        <div id="presskits-section-update" class="flex flex-wrap items-center gap-3">
+          <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
+        </div>
+
         <%= render FlatPack::TextInput::Component.new(
           name: "kit_section[title]",
           value: section_title,
@@ -21,10 +25,6 @@
         ) %>
 
         <%= render editor_view if fields_in_form? %>
-
-        <div id="presskits-section-update" class="flex flex-wrap items-center gap-3">
-          <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
-        </div>
       <% end %>
 
       <% if editor_view&.respond_to?(:section_actions) %>

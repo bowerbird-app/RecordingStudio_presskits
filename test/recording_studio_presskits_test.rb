@@ -469,7 +469,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes section_editor, "upload_form_data"
   end
 
-  def test_section_editor_puts_fields_before_update_and_custom_ui_below
+  def test_section_editor_puts_update_above_fields_and_custom_ui_below
     editor_path = "press_kits/section_editor_component.html.erb"
     section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
     component_path = "press_kits/section_editor_component.rb"
@@ -477,12 +477,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     quotes = File.read(presskits_path("app/components/recording_studio_presskits/quote_section/edit_component.rb"))
     text = File.read(presskits_path("app/components/recording_studio_presskits/text/edit_component.rb"))
 
+    assert_operator section_editor.index('text: "Update"'), :<, section_editor.index('name: "kit_section[title]"')
     assert_operator section_editor.index('name: "kit_section[title]"'), :<,
                     section_editor.index('name: "kit_section[subtitle]"')
     assert_operator section_editor.index('name: "kit_section[subtitle]"'), :<,
                     section_editor.index("fields_in_form?")
-    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index('text: "Update"')
-    assert_operator section_editor.index('text: "Update"'), :<, section_editor.index("section_actions")
+    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index("section_actions")
     assert_operator section_editor.index("section_actions"), :<, section_editor.index("below_editor?")
     assert_includes component, "def fields_in_form?"
     assert_includes component, "def below_editor?"
