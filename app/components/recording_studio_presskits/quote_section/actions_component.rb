@@ -12,10 +12,6 @@ module RecordingStudioPresskits
         helpers.press_kit_section_quotes_path(kit_recording, kit_section_recording)
       end
 
-      def cancel_path
-        helpers.edit_press_kit_path(kit_recording)
-      end
-
       private
 
       def kit_section_recording

@@ -21,10 +21,6 @@ module RecordingStudioPresskits
         @section.recordable.subtitle
       end
 
-      def cancel_path
-        helpers.edit_press_kit_path(@section.parent_recording)
-      end
-
       def attachment_return_path
         helpers.edit_press_kit_section_path(@section.parent_recording, @section)
       end

@@ -424,10 +424,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Update"
     assert_select "#presskits-section-actions button", text: "Upload", count: 0
     assert_select "button", text: "Save", count: 0
-    cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node| node.text.include?("Cancel") }
-    assert_includes cancel.text, "Cancel"
-    assert_equal "default", cancel["data-fp-style"]
-    assert_includes cancel["class"], "fp-button"
+    assert_includes response.body, "Back to kit"
+    refute section_editor_cancel?
     form_html = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").to_html
     assert_operator form_html.index("Update"), :<, form_html.index("name=\"kit_section[title]\"")
     assert_operator form_html.index(">Title<"), :<, form_html.index(">Subtitle<")
@@ -909,8 +907,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
     actions = css_select("#presskits-section-actions").to_html
-    assert_operator actions.index("Update"), :<, actions.index("Cancel")
-    assert_operator actions.index("Cancel"), :<, actions.index("Upload")
+    assert_operator actions.index("Update"), :<, actions.index("Upload")
+    refute_includes actions, "Cancel"
+    refute section_editor_cancel?
     assert_match(/remove-button-template-value="&lt;button/, response.body)
     refute_includes response.body, ">Remove\">"
     assert_select "#presskits-editor-preview", count: 0
@@ -1020,12 +1019,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "textarea[name='quote[body]']", count: 0
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
-    cancel = css_select("a[href='#{recording_studio_presskits.edit_press_kit_path(kit)}']").find { |node|
-      node.text.include?("Cancel")
-    }
-    assert_includes cancel.text, "Cancel"
+    assert_includes response.body, "Back to kit"
+    refute section_editor_cancel?
     actions = css_select("#presskits-section-actions").to_html
-    assert_operator actions.index(">Quote<"), :<, actions.index("Cancel")
+    assert_includes actions, ">Quote<"
+    refute_includes actions, "Cancel"
     columns = section_editor_columns
     assert_equal 2, columns.size
     assert_includes columns.first.to_html, 'name="kit_section[title]"'
@@ -1187,6 +1185,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
   def section_editor_columns
     quotes_editor_grid.element_children
+  end
+
+  def section_editor_cancel?
+    css_select("#presskits-section-fields a, #presskits-section-fields button").any? { |node| node.text.include?("Cancel") }
   end
 
   def quote_section(kit)

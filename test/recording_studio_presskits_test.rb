@@ -483,6 +483,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section_editor, 'label: "Title"'
     assert_includes section_editor, 'name: "kit_section[title]"'
     assert_includes section_editor, "cols: 2"
+    refute_includes section_editor, 'text: "Cancel"'
+    actions = File.read(presskits_path(
+                          "app/components/recording_studio_presskits/quote_section/actions_component.html.erb"
+                        ))
+    refute_includes actions, 'text: "Cancel"'
     assert_includes component, "%i[body]"
     refute_includes component, "def self.preview?"
     refute_includes show, "FlatPack::SectionTitle::Component"
