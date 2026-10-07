@@ -192,7 +192,6 @@ module RecordingStudioPresskits
         next unless defined?(RecordingStudioVideo)
         next if RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
 
-        # defined? does not load the model. Naming the constant does.
         RecordingStudioVideo::Video.include RecordingStudio::Capabilities::Trashable.to
       end
     end

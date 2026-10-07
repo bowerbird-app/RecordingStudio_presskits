@@ -12,7 +12,6 @@ module RecordingStudioPresskits
       "video-camera"
     end
 
-    # recording.videos keeps trashed children. Lists use the active scope.
     def self.active_videos(recording)
       return RecordingStudio::Recording.none if recording.blank?
 
