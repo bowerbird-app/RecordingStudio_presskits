@@ -121,6 +121,66 @@ begin
   publish_kit.call(press_kit_recording, slug: "spring-launch", status: "published")
   publish_kit.call(unpublished_kit_recording, slug: "autumn-recap", status: "draft")
 
+  find_or_record_credit = lambda do |root_recording, name, usual_role, url|
+    existing = RecordingStudioPresskits::Credits.active_for_root(root_recording).find do |recording|
+      recording.recordable.name == name
+    end
+    return existing if existing
+
+    RecordingStudioPresskits::Credits.create!(
+      root_recording: root_recording,
+      name: name,
+      url: url,
+      usual_role: usual_role,
+      actor: user
+    )
+  end
+
+  ensure_credits_section = lambda do |kit_recording, title, lines|
+    existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
+      section.recordable.title == title
+    end
+    section = existing || RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit_recording,
+      content_type: "RecordingStudioPresskits::CreditsSection",
+      actor: user,
+      title: title
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    lines.each do |credit_recording, role|
+      already = RecordingStudioPresskits::Credits.lines_for(content).any? do |line|
+        line.recordable.credit_recording_id == credit_recording.id && line.recordable.role == role
+      end
+      next if already
+
+      RecordingStudioPresskits::Credits.add!(
+        credits_section_recording: content,
+        credit_recording: credit_recording,
+        role: role,
+        actor: user
+      )
+    end
+  end
+
+  studio_bright = find_or_record_credit.call(root_recording, "Studio Bright", "Architecture", "https://studiobright.com.au")
+  flack = find_or_record_credit.call(root_recording, "Flack Studio", "Interior Design", "https://flackstudio.com.au")
+  tom = find_or_record_credit.call(root_recording, "Tom Ross", "Photography", nil)
+  marsha = find_or_record_credit.call(root_recording, "Marsha Golemac", "Styling", nil)
+  vitra = find_or_record_credit.call(root_recording, "Vitra", "Furniture", "https://www.vitra.com")
+
+  ensure_credits_section.call(
+    press_kit_recording,
+    "Project credits",
+    [
+      [studio_bright, "Architecture"],
+      [flack, "Interior Design"],
+      [tom, "Photography"],
+      [marsha, "Styling"],
+      [vitra, "Furniture"]
+    ]
+  )
+  ensure_credits_section.call(unpublished_kit_recording, "Credits", [[tom, "Creative Direction"]])
+
   [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
     bootstrap_owner_access.call(recording, user)
   end

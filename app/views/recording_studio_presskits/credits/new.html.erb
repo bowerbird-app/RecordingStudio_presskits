@@ -1,0 +1,13 @@
+<% presskits_page_nav(
+  title: "New credit",
+  back_url: credits_path,
+  back_label: "Credits",
+  close_url: credits_path
+) %>
+
+<%= render RecordingStudioPresskits::Credits::FormComponent.new(
+  credit: @credit,
+  url: credits_path,
+  method: :post,
+  heading: "New credit"
+) %>

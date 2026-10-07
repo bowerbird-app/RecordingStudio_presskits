@@ -1,16 +1,23 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/api/quote_payload"
+require "recording_studio_presskits/api/credit_payload"
+require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/api/section_action"
 require "recording_studio_presskits/api/create_section"
 require "recording_studio_presskits/api/reorder_sections"
 require "recording_studio_presskits/api/remove_section"
+require "recording_studio_presskits/api/add_credit"
+require "recording_studio_presskits/api/reorder_credits"
+require "recording_studio_presskits/api/remove_credit"
 require "recording_studio_presskits/api/section_action_registration"
+require "recording_studio_presskits/api/credit_registration"
 
 module RecordingStudioPresskits
   module Api
     extend SectionActionRegistration
+    extend CreditRegistration
 
     class << self
       def register!
@@ -21,6 +28,7 @@ module RecordingStudioPresskits
         register_text
         register_quote
         register_quote_section
+        register_credits!
         register_section_actions
       end
 

@@ -2,9 +2,10 @@
 
 module RecordingStudioPresskits
   class QuoteOrder
-    def initialize(section_recording, params)
+    def initialize(section_recording, params, recordable_type: "RecordingStudioPresskits::Quote")
       @section_recording = section_recording
       @params = params
+      @recordable_type = recordable_type
     end
 
     def apply(actor)
@@ -48,7 +49,7 @@ module RecordingStudioPresskits
     end
 
     def quote_scope
-      { trashed_at: nil, recordable_type: "RecordingStudioPresskits::Quote" }
+      { trashed_at: nil, recordable_type: recordable_type }
     end
 
     def insertion_index(child)
@@ -79,6 +80,6 @@ module RecordingStudioPresskits
       Integer(value, exception: false) || 0
     end
 
-    attr_reader :section_recording, :params
+    attr_reader :section_recording, :params, :recordable_type
   end
 end

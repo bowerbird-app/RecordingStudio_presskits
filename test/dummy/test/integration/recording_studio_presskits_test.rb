@@ -29,6 +29,9 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Images")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::QuoteSection")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::CreditsSection")
+    assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Credit")
+    assert_equal [ "RecordingStudioPresskits::CreditsSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::CreditLine")
     assert_equal "Text", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Text)
     assert_equal "Images", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Images)
     assert_equal "Press kit", RecordingStudio.recordable_type_label(RecordingStudioPresskits::PressKit)
@@ -56,6 +59,15 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute connection.column_exists?(:recording_studio_images, :subtitle)
     refute connection.column_exists?(:recording_studio_images, :caption)
     assert connection.table_exists?(:recording_studio_kit_sections)
+    assert connection.table_exists?(:recording_studio_credits)
+    assert connection.column_exists?(:recording_studio_credits, :name)
+    assert connection.column_exists?(:recording_studio_credits, :url)
+    assert connection.column_exists?(:recording_studio_credits, :usual_role)
+    refute connection.column_exists?(:recording_studio_credits, :updated_at)
+    assert connection.table_exists?(:recording_studio_credits_sections)
+    assert connection.table_exists?(:recording_studio_credit_lines)
+    assert connection.column_exists?(:recording_studio_credit_lines, :role)
+    assert connection.column_exists?(:recording_studio_credit_lines, :credit_recording_id)
     assert connection.column_exists?(:recording_studio_kit_sections, :title)
     assert connection.column_exists?(:recording_studio_kit_sections, :subtitle)
     refute connection.column_exists?(:recording_studio_kit_sections, :updated_at)
@@ -114,8 +126,25 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal root_recording, press_kit_recording.parent_recording
     assert_equal root_recording, press_kit_recording.root_recording
     assert_equal unpublished_kit_recording.root_recording, root_recording
-    assert_empty RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
-    assert_empty RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
+    spring_sections = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
+    autumn_sections = RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
+    assert_equal ["Project credits"], spring_sections.map { |section| section.recordable.title }
+    assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
+    spring_lines = RecordingStudioPresskits::Credits.visible_lines(
+      RecordingStudioPresskits::KitQuery.section_content(spring_sections.first)
+    )
+    autumn_lines = RecordingStudioPresskits::Credits.visible_lines(
+      RecordingStudioPresskits::KitQuery.section_content(autumn_sections.first)
+    )
+    assert_equal(
+      ["Architecture", "Interior Design", "Photography", "Styling", "Furniture"],
+      spring_lines.map { |line| line.recordable.role }
+    )
+    assert_equal ["Creative Direction"], autumn_lines.map { |line| line.recordable.role }
+    assert_equal(
+      spring_lines[2].recordable.credit_recording_id,
+      autumn_lines.first.recordable.credit_recording_id
+    )
     assert press_kit.published?
     assert press_kit.indexable?
     assert press_kit_recording.currently_published?

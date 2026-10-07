@@ -1,0 +1,70 @@
+<div class="flex w-full flex-col gap-6">
+  <%= form_with url: add_path, method: :post, local: true, class: "flex w-full flex-col gap-4" do %>
+    <% if credit_choices.any? %>
+      <%= render FlatPack::Select::Component.new(
+        name: "credit_id",
+        label: "Credit",
+        options: credit_choices,
+        placeholder: "Search credits",
+        searchable: true,
+        class: "w-full"
+      ) %>
+      <%= render FlatPack::TextInput::Component.new(
+        name: "role",
+        label: "Role",
+        help_text: "Leave this blank to use their usual role.",
+        class: "w-full"
+      ) %>
+    <% end %>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <% if credit_choices.any? %>
+        <%= render FlatPack::Button::Component.new(text: "Add", style: :primary, type: "submit") %>
+      <% end %>
+      <%= render FlatPack::Button::Component.new(text: "New credit", icon: "plus", style: :secondary, href: new_path) %>
+    </div>
+  <% end %>
+
+  <% if lines.any? %>
+    <div
+      id="presskits-credit-list"
+      data-controller="recording-studio-presskits--section-order"
+      data-action="list:reordered->recording-studio-presskits--section-order#save"
+      data-recording-studio-presskits--section-order-url-value="<%= order_path %>"
+    >
+      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+        <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
+          <% lines.each do |line_recording| %>
+            <%= render FlatPack::List::Item.new(id: line_recording.id, icon: "arrows-up-down", hover: true) do %>
+              <div class="flex w-full items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <%= link_to edit_path(line_recording), draggable: "false", class: "block min-w-0" do %>
+                    <span class="block truncate text-sm font-medium text-(--surface-content-color)">
+                      <%= line_role(line_recording) %>
+                    </span>
+                    <% if (name = line_name(line_recording)) %>
+                      <span class="block truncate text-sm text-(--surface-muted-content-color)">
+                        <%= name %>
+                      </span>
+                    <% end %>
+                  <% end %>
+                </div>
+                <%= form_with url: remove_path(line_recording), method: :delete, local: true, html: { draggable: "false" } do %>
+                  <%= render FlatPack::Button::Component.new(
+                    icon: "trash",
+                    icon_only: true,
+                    style: :ghost,
+                    size: :sm,
+                    type: "submit",
+                    draggable: "false",
+                    aria: { label: "Remove from this kit" }
+                  ) %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
