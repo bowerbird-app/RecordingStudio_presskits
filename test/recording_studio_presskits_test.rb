@@ -473,7 +473,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section_editor, "cols: 2"
     assert_includes section_editor, 'id="presskits-section-fields"'
     assert_includes section_editor, 'id="presskits-section-preview"'
-    refute_includes section_editor, "preview?"
+    assert_includes section_editor, "show_preview?"
+    refute_includes section_editor, "def self.preview?"
     refute_includes section_editor, "if form?"
     refute_includes component, "def self.preview?"
     refute_includes component, "preview_card_title"

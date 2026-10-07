@@ -8,6 +8,10 @@ module RecordingStudioPresskits
         @recording = recording
       end
 
+      def render?
+        videos.any?
+      end
+
       def videos
         VideoSection.active_videos(@recording)
       end

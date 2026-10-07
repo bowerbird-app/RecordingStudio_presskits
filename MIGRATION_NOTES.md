@@ -37,6 +37,8 @@ bin/rails db:migrate
 
 When Recording Studio API is loaded, a kit section still returns `title`, `subtitle`, `content_type`, and `content_id`. `:videos` is declared on that output. The array is included only when the content type is `RecordingStudioPresskits::VideoSection`. A video entry always has `title`, `url`, `description`, `provider`, `canonical_url`, and `content_type`. The video section type returns `{ videos: ... }`. Do not register `RecordingStudioVideo::Video` again from the host or from Press Kits. Video already registers that type, including the derived provider fields.
 
+The section editor still has two columns. The preview card is omitted until the section has a title, a subtitle, or content that would show. `SectionFrameComponent#render?` is that check. Text, Images, Quotes, and Video implement `render?` and return false when the body, photos, quotes, or videos are empty. A host content component can do the same. The default is still to render. The kit editor hides its preview card on the same check. A host that replaced `SectionEditorComponent` should wrap the preview card in `show_preview?` rather than always rendering it.
+
 ## 0.19.0
 
 Bump FlatPack to `>= 0.1.200` (dummy tag `v0.1.200`). The section heading form, the one with Title and Subtitle, uses Flatpack's unsaved-changes behaviour. Update starts in the default style and turns primary when a field in that form no longer matches the saved value. Typing the saved value back returns the button to default. Saving and coming back to the same screen does too, because the new page captures a new baseline.

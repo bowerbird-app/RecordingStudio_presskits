@@ -10,6 +10,10 @@ module RecordingStudioPresskits
         @recording = recording
       end
 
+      def render?
+        image_recordings.any?
+      end
+
       def image_recordings
         gallery_images_for(@recording)
       end

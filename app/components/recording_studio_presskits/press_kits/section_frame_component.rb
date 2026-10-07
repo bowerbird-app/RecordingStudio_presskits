@@ -24,7 +24,14 @@ module RecordingStudioPresskits
       end
 
       def render?
-        title.present? || subtitle.present? || content_component.present?
+        title.present? || subtitle.present? || content_visible?
+      end
+
+      def content_visible?
+        component = content_component
+        return false if component.blank?
+
+        component.new(recording: @content_recording).render?
       end
     end
   end

@@ -49,6 +49,10 @@ module RecordingStudioPresskits
 
         RecordingStudioPresskits.section_editor_for(content_recording)
       end
+
+      def show_preview?
+        SectionFrameComponent.new(section_recording: @section).render?
+      end
     end
   end
 end

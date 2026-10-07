@@ -25,7 +25,7 @@ module RecordingStudioPresskits
       end
 
       def show_preview?
-        @section_recordings.any? || show_header_preview?
+        show_header_preview? || @section_recordings.any? { |recording| section_visible?(recording) }
       end
 
       def header_rule_class
@@ -48,6 +48,10 @@ module RecordingStudioPresskits
 
       def section_menu_icon_for(type_name)
         type_name.to_s.safe_constantize.try(:section_menu_icon).presence
+      end
+
+      def section_visible?(recording)
+        SectionFrameComponent.new(section_recording: recording).render?
       end
     end
   end

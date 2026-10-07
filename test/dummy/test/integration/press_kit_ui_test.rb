@@ -1192,6 +1192,65 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal ["No byline here"], nameless_lines
   end
 
+  test "the preview card stays hidden until a section has something to show" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::Images" }
+    follow_redirect!
+    assert_response :success
+    refute_section_preview_card
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-editor-preview", count: 0
+
+    images = images_section(kit)
+    patch recording_studio_presskits.press_kit_section_path(kit, images), params: {
+      kit_section: { title: "Stills" }
+    }
+    follow_redirect!
+    assert_section_preview_card
+    assert_select "#presskits-section-preview .fp-section-title h2", text: "Stills"
+    assert_select "#presskits-section-preview img", count: 0
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_select "#presskits-editor-preview .fp-section-title h2", text: "Stills"
+    assert_select "#presskits-editor-preview img", count: 0
+
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::QuoteSection" }
+    follow_redirect!
+    refute_section_preview_card
+
+    quotes = quote_section(kit)
+    patch recording_studio_presskits.press_kit_section_path(kit, quotes), params: {
+      kit_section: { subtitle: "One line" }
+    }
+    follow_redirect!
+    assert_section_preview_card
+    assert_select "#presskits-section-preview p", text: "One line"
+
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::VideoSection" }
+    follow_redirect!
+    refute_section_preview_card
+
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::Text" }
+    follow_redirect!
+    assert_section_preview_card
+    assert_select "#presskits-section-preview", text: /Launch notes/
+
+    text = content_section(kit, RecordingStudioPresskits::Text)
+    RecordingStudioPresskits::Text.where(id: section_content(text).recordable.id).update_all(body: "<p><br></p>")
+    get recording_studio_presskits.edit_press_kit_section_path(kit, text)
+    assert_response :success
+    refute_section_preview_card
+  end
+
   test "a video section links to a new video and plays saved videos" do
     kit = record_kit("Spring launch")
     sign_in @user
@@ -1356,6 +1415,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
   def section_editor_columns
     quotes_editor_grid.element_children
+  end
+
+  def refute_section_preview_card
+    column = css_select("#presskits-section-preview").first
+    assert column
+    assert_nil column.at_css("[class*='card-border-color']")
+  end
+
+  def assert_section_preview_card
+    column = css_select("#presskits-section-preview").first
+    assert column&.at_css("[class*='card-border-color']")
   end
 
   def section_editor_cancel?

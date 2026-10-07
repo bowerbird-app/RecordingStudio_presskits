@@ -18,6 +18,9 @@ Video section.
 - New table `recording_studio_video_sections`.
 - Version `0.20.0`
 
+### Changed
+- The section editor keeps its preview column. The card is rendered only when `SectionFrameComponent` would show a title, a subtitle, or content. Text, Images, Quotes, and Video return false from `render?` when they have nothing to show. The kit editor uses the same check, so a blank section does not leave an empty preview card.
+
 ### Upgrade notes
 - Add `recording_studio_video`, `~> 0.1.0` (tag `v0.1.0`) and `recording_studio_external_embed`, `~> 0.1.1` (tag `v0.1.3`).
 - Add `RecordingStudioPresskits::VideoSection` and `RecordingStudioVideo::Video` to `recordable_types`.

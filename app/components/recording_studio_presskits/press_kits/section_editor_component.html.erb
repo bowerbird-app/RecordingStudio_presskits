@@ -52,8 +52,10 @@
     </div>
 
     <div class="min-w-0" id="presskits-section-preview">
-      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
-        <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: @section) %>
+      <% if show_preview? %>
+        <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+          <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: @section) %>
+        <% end %>
       <% end %>
     </div>
   <% end %>
