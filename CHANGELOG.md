@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-10-07
+
+Credits.
+
+### Added
+- A credit is reusable information for a person or studio in the current workspace. It stores a name, an optional URL, and an optional usual role.
+- Credits has its own list, create, edit, and trash screens. Trash and restore use Trashable. Restoring a credit puts it back on kits that already listed it.
+- A Credits section can be added to a press kit. Each line stores the role and the order for that kit, and points at the credit. Removing a line leaves the credit in the workspace.
+- The same credit can be used on more than one kit, with a different role on each line. Changing the usual role does not change lines that already exist.
+- The public page and the kit preview show the role, the name, and a link when the credit has a URL.
+- When Recording Studio API is loaded, a credit exposes index, show, create, and update. A credits section exposes `add_credit` and `reorder_credits`. A credit line exposes index, show, update, and `remove_credit`.
+- Version `0.19.0`
+
+### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. That adds `recording_studio_credits`, `recording_studio_credits_sections`, and `recording_studio_credit_lines`.
+- Add `RecordingStudioPresskits::Credit`, `RecordingStudioPresskits::CreditsSection`, and `RecordingStudioPresskits::CreditLine` to `recordable_types`.
+- Add a credit with `RecordingStudioPresskits::Credits.create!`. Add one to a section with `RecordingStudioPresskits::Credits.add!`. Do not copy the name or URL onto the line.
+
 ## [0.18.0] - 2026-10-07
 
 Section editor form.
@@ -416,7 +434,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.15.0...v0.16.0
