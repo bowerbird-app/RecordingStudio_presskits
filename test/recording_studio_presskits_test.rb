@@ -196,8 +196,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes sources_task, '"recording_studio_duplicatable"'
     assert_includes sources_task, '"recording_studio_admin"'
     assert_includes sources_task, '"recording_studio_presskits"'
-    assert_includes sources_task, "lib/recording_studio_presskits/flatpack_fieldset.rb"
-    assert_includes tailwind_source, "lib/recording_studio_presskits/flatpack_fieldset.rb"
+    refute_includes sources_task, "flatpack_fieldset"
+    refute_includes tailwind_source, "flatpack_fieldset"
     assert_includes sources_task, '"recording_studio_publishable"'
     assert_includes sources_task, '"recording_studio_attachable"'
     refute_includes tailwind_source, "@theme"
@@ -251,7 +251,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.4.2\""
     assert_includes readme, "tag: \"v0.1.202\""
     assert_includes readme, 'gem "flat_pack", ">= 0.1.202"'
-    assert_includes readme, "FlatPack::Fieldset::Component"
+    assert_includes readme, "FlatPack::Tabs::Component"
+    assert_includes readme, "variant: :pills"
+    assert_includes readme, "Section settings"
+    refute_includes readme, "FlatPack::Fieldset::Component"
     assert_includes readme, "unsaved-changes controller"
     assert_includes readme, "PressKit.indexable"
     assert_includes readme, "Press kit"
@@ -488,41 +491,47 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes section_editor, "upload_form_data"
   end
 
-  def test_section_heading_uses_fieldset_and_skips_the_local_copy_when_flatpack_ships_it
-    engine = File.read(presskits_path("lib/recording_studio_presskits/engine.rb"))
-    fallback = File.read(presskits_path("lib/recording_studio_presskits/flatpack_fieldset.rb"))
-
-    assert_includes engine, "def install_fieldset_fallback"
-    assert_includes engine, 'join("app/components/flat_pack/fieldset/component.rb")'
-    assert_includes engine, 'require "recording_studio_presskits/flatpack_fieldset"'
-    assert_includes fallback, "module Fieldset"
-    assert_includes fallback, 'raise ArgumentError, "title is required"'
-  end
-
-  def test_section_editor_puts_update_above_fields_and_custom_ui_below
+  def test_section_editor_uses_pill_tabs_and_puts_update_under_the_settings_fields
     editor_path = "press_kits/section_editor_component.html.erb"
     section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
     component_path = "press_kits/section_editor_component.rb"
     component = File.read(presskits_path("app/components/recording_studio_presskits/#{component_path}"))
+    engine = File.read(presskits_path("lib/recording_studio_presskits/engine.rb"))
     quotes = File.read(presskits_path("app/components/recording_studio_presskits/quote_section/edit_component.rb"))
     text = File.read(presskits_path("app/components/recording_studio_presskits/text/edit_component.rb"))
 
-    assert_operator section_editor.index("FlatPack::Fieldset::Component"), :<, section_editor.index('text: "Update"')
-    assert_includes section_editor, 'title: "Heading"'
-    assert_includes section_editor, 'id: "presskits-section-heading"'
-    assert_operator section_editor.index('text: "Update"'), :<, section_editor.index('name: "kit_section[title]"')
-    heading_close = section_editor.index("<% end %>", section_editor.index('name: "kit_section[subtitle]"'))
-    assert_operator heading_close, :<, section_editor.index("fields_in_form?")
+    assert_includes section_editor, "FlatPack::Tabs::Component.new"
+    assert_includes section_editor, "variant: :pills"
+    assert_includes section_editor, "style: :primary"
+    assert_includes section_editor, 'id: "presskits-section-tabs"'
+    assert_includes section_editor, 'label: "Content"'
+    assert_includes section_editor, 'id: "presskits-section-content"'
+    assert_includes section_editor, 'label: "Section settings"'
+    assert_includes section_editor, 'id: "presskits-section-settings"'
+    refute_includes section_editor, "Fieldset"
+    refute_includes section_editor, 'title: "Heading"'
+    refute_includes section_editor, "presskits-section-heading"
+    refute_includes engine, "install_fieldset_fallback"
+    refute_includes engine, "flatpack_fieldset"
+    refute File.file?(presskits_path("lib/recording_studio_presskits/flatpack_fieldset.rb"))
+    assert_operator section_editor.index('label: "Content"'), :<, section_editor.index('label: "Section settings"')
+    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index("section_actions")
+    assert_operator section_editor.index("section_actions"), :<, section_editor.index("below_editor?")
+    assert_operator section_editor.index("below_editor?"), :<, section_editor.index('label: "Section settings"')
+    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index('name: "kit_section[title]"')
+    assert_includes section_editor, 'id: "presskits-section-content-form"'
+    assert_includes section_editor, 'id: "presskits-section-settings-form"'
     assert_includes section_editor, 'data: { controller: "flat-pack--unsaved-changes" }'
-    assert_includes section_editor, "style: :default"
-    assert_includes section_editor, '"flat-pack--unsaved-changes-target": "submit"'
-    refute_includes section_editor, "style: :primary"
     assert_operator section_editor.index('name: "kit_section[title]"'), :<,
                     section_editor.index('name: "kit_section[subtitle]"')
     assert_operator section_editor.index('name: "kit_section[subtitle]"'), :<,
-                    section_editor.index("fields_in_form?")
-    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index("section_actions")
-    assert_operator section_editor.index("section_actions"), :<, section_editor.index("below_editor?")
+                    section_editor.index('id="presskits-section-update"')
+    assert_includes section_editor, 'id="presskits-section-content-update"'
+    assert_includes component, "def update_button"
+    assert_includes component, "style: :default"
+    assert_includes component, '"flat-pack--unsaved-changes-target": "submit"'
+    assert_includes component, 'text: "Update"'
+    refute_includes component, "style: :primary"
     assert_includes component, "def fields_in_form?"
     assert_includes component, "def below_editor?"
     refute_includes component, "def form?"

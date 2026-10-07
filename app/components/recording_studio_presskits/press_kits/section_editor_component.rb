@@ -53,6 +53,15 @@ module RecordingStudioPresskits
       def show_preview?
         SectionFrameComponent.new(section_recording: @section).render?
       end
+
+      def update_button
+        FlatPack::Button::Component.new(
+          text: "Update",
+          style: :default,
+          type: "submit",
+          data: { "flat-pack--unsaved-changes-target": "submit" }
+        )
+      end
     end
   end
 end

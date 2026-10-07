@@ -16,7 +16,6 @@ namespace :tailwind do
       "recording_studio_presskits" => %w[
         app/views/**/*.erb
         app/components/**/*.{rb,erb}
-        lib/recording_studio_presskits/flatpack_fieldset.rb
       ]
     }
 
