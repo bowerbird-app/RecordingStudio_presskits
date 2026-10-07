@@ -24,64 +24,55 @@
   <% if form? && editor_view&.respond_to?(:upload_form_data) %>
     <% upload_data = editor_view.upload_form_data(helpers) %>
   <% end %>
-  <% grid = capture do %>
-    <%= render FlatPack::Grid::Component.new(cols: grid_cols, gap: :lg, align: :start) do %>
-      <div class="flex w-full min-w-0 flex-col gap-6">
-        <% if form? %>
+
+  <%= render FlatPack::Grid::Component.new(id: "presskits-section-grid", cols: 2, gap: :lg, align: :start) do %>
+    <div id="presskits-section-fields" class="flex w-full min-w-0 flex-col gap-6">
+      <% if editor && form? %>
+        <%= form_with url: @update_path, method: :patch, local: true,
+              class: "flex flex-col gap-6", **(upload_data ? { data: upload_data } : {}) do %>
+          <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
+            <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
+            <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
+            <% if upload_data %>
+              <%= render FlatPack::Button::Component.new(
+                text: "Upload",
+                icon: "upload",
+                style: :default,
+                type: "button",
+                data: { action: "recording-studio-attachable--upload#browse" }
+              ) %>
+            <% end %>
+          </div>
+
           <%= headings %>
-        <% end %>
-        <% if editor %>
           <%= render editor_view %>
         <% end %>
-      </div>
-
-      <% if show_preview? %>
-        <div class="min-w-0" id="presskits-section-preview">
-          <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
-            <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: @section) %>
-          <% end %>
-        </div>
-      <% end %>
-    <% end %>
-  <% end %>
-
-  <% if editor && form? %>
-    <%= form_with url: @update_path, method: :patch, local: true,
-          class: "flex flex-col gap-6", **(upload_data ? { data: upload_data } : {}) do %>
-      <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
-        <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
-        <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
-        <% if upload_data %>
-          <%= render FlatPack::Button::Component.new(
-            text: "Upload",
-            icon: "upload",
-            style: :default,
-            type: "button",
-            data: { action: "recording-studio-attachable--upload#browse" }
-          ) %>
+      <% else %>
+        <%= form_with url: @update_path, method: :patch, local: true, class: "flex flex-col gap-6" do %>
+          <%= headings %>
+          <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
         <% end %>
-      </div>
+        <% if editor_view&.respond_to?(:section_actions) %>
+          <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
+            <%= render editor_view.section_actions %>
+          </div>
+        <% end %>
+        <%= render editor_view if editor %>
+      <% end %>
 
-      <%= grid %>
-    <% end %>
-  <% else %>
-    <%= form_with url: @update_path, method: :patch, local: true, class: "flex flex-col gap-6" do %>
-      <%= headings %>
-      <%= render FlatPack::Button::Component.new(text: "Update", style: :primary, type: "submit") %>
-    <% end %>
-    <% if editor_view&.respond_to?(:section_actions) %>
-      <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
-        <%= render editor_view.section_actions %>
-      </div>
-    <% end %>
-    <%= grid %>
-  <% end %>
+      <% if editor_view&.respond_to?(:attachment_collection_options) && content_recording %>
+        <%= helpers.attachment_collection_editor(
+              content_recording,
+              **editor_view.attachment_collection_options,
+              return_to: attachment_return_path
+            ) %>
+      <% end %>
+    </div>
 
-  <% if editor_view&.respond_to?(:attachment_collection_options) && content_recording %>
-    <%= helpers.attachment_collection_editor(
-          content_recording,
-          **editor_view.attachment_collection_options,
-          return_to: attachment_return_path
-        ) %>
+    <div class="min-w-0" id="presskits-section-preview">
+      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+        <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: @section) %>
+      <% end %>
+    </div>
   <% end %>
 </div>

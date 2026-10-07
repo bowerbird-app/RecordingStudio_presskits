@@ -417,10 +417,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "&quot;toolbar&quot;:&quot;standard&quot;"
     assert_select "h1", text: "Text"
     assert_select "label", text: "Text", count: 0
-    assert_select "h2", text: "Launch notes", count: 0
-    assert_select "strong", text: "one-sheet", count: 0
-    assert_select "li", text: "Photos", count: 0
-    assert_select ".flat-pack-richtext--view-mode", count: 0
+    assert_select "#presskits-section-preview h2", text: "Launch notes"
+    assert_select "#presskits-section-preview strong", text: "one-sheet"
+    assert_select "#presskits-section-preview li", text: "Photos"
+    assert_select "#presskits-section-preview .flat-pack-richtext--view-mode"
     assert_select "button", text: "Update"
     assert_select "#presskits-section-actions button", text: "Upload", count: 0
     assert_select "button", text: "Save", count: 0
@@ -433,11 +433,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_operator form_html.index(">Title<"), :<, form_html.index(">Subtitle<")
     assert_operator form_html.index(">Subtitle<"), :<, form_html.index(">Body<")
     assert_operator form_html.index("name=\"kit_section[title]\""), :<, form_html.index("name=\"text[body]\"")
-    grid_html = css_select("#presskits-section-actions ~ .grid").to_html
-    assert_includes grid_html, "grid-cols-1"
-    refute_includes grid_html, "md:grid-cols-2"
-    refute_includes grid_html, ">Update<"
-    refute_includes grid_html, ">Cancel<"
+    columns = section_editor_columns
+    assert_equal 2, columns.size
+    assert_includes columns.first.to_html, 'id="presskits-section-actions"'
+    assert_includes columns.first.to_html, 'name="kit_section[title]"'
+    assert_includes columns.first.to_html, 'name="text[body]"'
+    refute_includes columns.last.to_html, 'name="kit_section[title]"'
+    refute_includes columns.last.to_html, ">Update<"
+    assert_includes columns.last["id"], "presskits-section-preview"
     assert_select "button", text: "Remove", count: 0
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
@@ -478,10 +481,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[name='kit_section[subtitle]'][value=?]", "Doors at noon"
     assert_select "label", text: "Title"
     assert_select "label", text: "Body"
-    assert_select "h2", text: "Launch notes", count: 0
-    assert_select "h2", text: "Set list", count: 0
-    assert_select "p", text: "Line two", count: 0
-    assert_select ".flat-pack-richtext--view-mode", count: 0
+    assert_select "#presskits-section-preview .fp-section-title h2", text: "Launch notes"
+    assert_select "#presskits-section-preview h2", text: "Set list"
+    assert_select "#presskits-section-preview p", text: "Line two"
+    assert_select "#presskits-section-preview .flat-pack-richtext--view-mode"
     refute_includes response.body, "nope"
 
     get recording_studio_presskits.edit_press_kit_path(kit)
@@ -888,13 +891,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_select "input[name='images[title]']"
     refute_select "input[name='images[caption]']"
     assert_operator response.body.index('name="kit_section[title]"'), :<, response.body.index('name="kit_section[subtitle]"')
-    assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
     grid = images_editor_grid
     columns = grid.element_children
     assert_equal 2, columns.size
+    assert_includes columns.first.to_html, 'id="presskits-section-actions"'
     assert_includes columns.first.to_html, 'name="kit_section[title]"'
     assert_includes columns.first.to_html, 'name="kit_section[subtitle]"'
     refute_includes columns.last.to_html, 'name="kit_section[title]"'
+    refute_includes columns.last.to_html, ">Update<"
     refute_select "#presskits-section-preview h2", text: "Preview"
     refute_includes columns.last.text, "Preview"
     assert_includes response.body, "No images yet."
@@ -1022,12 +1026,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes cancel.text, "Cancel"
     actions = css_select("#presskits-section-actions").to_html
     assert_operator actions.index(">Quote<"), :<, actions.index("Cancel")
-    grid = quotes_editor_grid
-    assert grid
-    assert_equal 2, grid.element_children.size
-    refute_includes grid.to_html, 'data-flat-pack--icon-name-value="plus"'
-    refute_includes grid.text, "Cancel"
-    assert_operator response.body.index('id="presskits-section-actions"'), :<, response.body.index("md:grid-cols-2")
+    columns = section_editor_columns
+    assert_equal 2, columns.size
+    assert_includes columns.first.to_html, 'name="kit_section[title]"'
+    assert_includes columns.first.to_html, 'id="presskits-section-actions"'
+    assert_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
+    refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
+    refute_includes columns.last.text, "Cancel"
 
     assert_difference -> { RecordingStudioPresskits::Quote.count }, 1 do
       post recording_studio_presskits.press_kit_section_quotes_path(kit, section)
@@ -1081,7 +1086,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     grid = quotes_editor_grid
     columns = grid.element_children
     assert_equal 2, columns.size
-    refute_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
+    assert_includes columns.first.to_html, 'data-flat-pack--icon-name-value="plus"'
     refute_includes columns.last.to_html, 'data-flat-pack--icon-name-value="plus"'
     assert_operator columns.first.text.index("A line worth printing"), :<, columns.first.text.index("Ada Lovelace")
     assert_select columns.last, "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
@@ -1173,13 +1178,15 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   def quotes_editor_grid
-    css_select(".grid").find { |node| node["class"].to_s.include?("md:grid-cols-2") }
+    css_select("#presskits-section-grid").first
   end
 
   def images_editor_grid
-    css_select(".grid").find do |node|
-      node["id"] != "presskits-editor-grid" && node["class"].to_s.include?("md:grid-cols-2")
-    end
+    quotes_editor_grid
+  end
+
+  def section_editor_columns
+    quotes_editor_grid.element_children
   end
 
   def quote_section(kit)

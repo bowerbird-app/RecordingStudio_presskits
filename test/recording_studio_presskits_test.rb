@@ -454,7 +454,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes frame, "FlatPack::SectionTitle::Component"
     assert_includes frame, "anchor_link: true"
     assert_includes frame, "subtitle: subtitle"
-    assert_includes component, "def self.preview?\n        true"
+    assert_includes section_editor, 'id: "presskits-section-grid"'
+    assert_includes section_editor, "cols: 2"
+    assert_includes section_editor, 'id="presskits-section-fields"'
+    assert_includes section_editor, 'id="presskits-section-preview"'
+    refute_includes section_editor, "preview?"
+    refute_includes component, "def self.preview?"
     refute_includes component, "preview_card_title"
   end
 
@@ -477,7 +482,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, 'name: "text[body]"'
     assert_includes section_editor, 'label: "Title"'
     assert_includes section_editor, 'name: "kit_section[title]"'
+    assert_includes section_editor, "cols: 2"
     assert_includes component, "%i[body]"
+    refute_includes component, "def self.preview?"
     refute_includes show, "FlatPack::SectionTitle::Component"
     refute_includes show, "gap-4"
   end

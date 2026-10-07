@@ -29,23 +29,12 @@ module RecordingStudioPresskits
         helpers.edit_press_kit_section_path(@section.parent_recording, @section)
       end
 
-      def show_preview?
-        editor = editor_class
-        return true unless editor.respond_to?(:preview?)
-
-        editor.preview?
-      end
-
       def form?
         editor = editor_class
         return false unless editor
         return true unless editor.respond_to?(:form?)
 
         editor.form?
-      end
-
-      def grid_cols
-        show_preview? ? 2 : 1
       end
 
       def content_recording

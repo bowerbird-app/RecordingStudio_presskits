@@ -18,10 +18,6 @@ module RecordingStudioPresskits
           []
         end
 
-        def preview?
-          true
-        end
-
         def form?
           false
         end

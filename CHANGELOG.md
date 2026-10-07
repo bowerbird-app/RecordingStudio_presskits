@@ -18,6 +18,7 @@ Kit sections.
 - Reordering or removing a section targets the kit section. Duplicating a kit copies each kit section and the content under it.
 - When Recording Studio API is loaded, `create_section` and `reorder_sections` are press kit actions, and `remove_section` is a kit section action. They call `create_section!`, `recording_studio_orderable_reorder!`, and `recording_studio_trashable_trash!`.
 - The kit editor Header row uses Heroicon `bars-3-bottom-left`. Section rows keep `arrows-up-down`. Header still cannot be reordered or removed.
+- Every section editor uses one two-column template. Column one holds Title, Subtitle, the section buttons, and that section's editor. Column two is the preview. Text shows that preview too. `preview?` on a content editor no longer changes the page.
 - Version `0.17.0`
 
 ### Upgrade notes
@@ -25,6 +26,7 @@ Kit sections.
 - Add `RecordingStudioPresskits::KitSection` to `recordable_types`. Point content `allowed_parent_types` at `RecordingStudioPresskits::KitSection`.
 - Create sections with `RecordingStudioPresskits.create_section!`. API clients use the press kit action `create_section`, reorder with `reorder_sections`, and remove a kit section with `remove_section`. There is still no generic kit section create or destroy.
 - The Header row icon is `bars-3-bottom-left`. Hosts do not configure it.
+- Section editors are always two columns. Remove `preview?` from a content editor. It no longer hides the preview.
 
 ## [0.16.0] - 2026-10-06
 
