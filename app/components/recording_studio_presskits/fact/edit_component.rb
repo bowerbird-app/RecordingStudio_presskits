@@ -10,9 +10,7 @@ module RecordingStudioPresskits
         @fact_recording = fact_recording
       end
 
-      def fact
-        @fact
-      end
+      attr_reader :fact
 
       def heading
         fact.label.to_s.strip.presence || "Fact"

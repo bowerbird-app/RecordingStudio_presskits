@@ -28,11 +28,19 @@ module RecordingStudioPresskits
     private
 
     def clear_blank_details
-      self.label = label.to_s.strip
-      self.value = value.to_s.strip
-      self.unit = unit.to_s.strip.presence
-      self.description = description.to_s.strip.presence
-      self.source_url = source_url.to_s.strip.presence
+      self.label = stripped(label)
+      self.value = stripped(value)
+      self.unit = blank_to_nil(unit)
+      self.description = blank_to_nil(description)
+      self.source_url = blank_to_nil(source_url)
+    end
+
+    def stripped(value)
+      value.to_s.strip
+    end
+
+    def blank_to_nil(value)
+      stripped(value).presence
     end
   end
 end

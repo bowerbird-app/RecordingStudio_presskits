@@ -2,6 +2,7 @@
 
 # User slice for press kits. Hosts mount this engine, then people work from
 # the index and kit editor. Admin screens register separately.
+# rubocop:disable Metrics/BlockLength
 RecordingStudioPresskits::Engine.routes.draw do
   resources :credits, only: %i[index new create edit update destroy] do
     collection do
@@ -32,3 +33,4 @@ RecordingStudioPresskits::Engine.routes.draw do
 
   root to: "press_kits#index"
 end
+# rubocop:enable Metrics/BlockLength

@@ -9,6 +9,8 @@ module RecordingStudioPresskits
         @update_path = update_path
       end
 
+      attr_reader :update_path
+
       class << self
         def param_key
           :facts_section
@@ -57,18 +59,14 @@ module RecordingStudioPresskits
 
       def display_style_options
         [
-          ["List", "list"],
-          ["Cards", "cards"],
-          ["Table", "table"]
+          %w[List list],
+          %w[Cards cards],
+          %w[Table table]
         ]
       end
 
       def column_options
         FactsSection::COLUMN_COUNTS.map { |count| [count.to_s, count] }
-      end
-
-      def update_path
-        @update_path
       end
 
       private
