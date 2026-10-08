@@ -245,8 +245,10 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_includes layout, '<html data-theme="rounded">'
     assert_includes layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes layout, "page_nav_options[:anchor_href]"
+    assert_includes layout, "page_nav_options[:secondary_anchor_href]"
     assert_includes layout, "anchor_tooltip:"
     refute_includes layout, "page_nav_options[:anchor_url]"
+    refute_includes layout, "page_nav_options[:back_url]"
     assert_includes controller, "include RecordingStudio::UsesDefaultLayout"
     assert_includes controller, '"recording_studio/default_layout"'
     refute File.exist?(Rails.root.join("app/views/home/index.html.erb"))

@@ -63,8 +63,8 @@
       } %>
       <% back_url = content_for(:page_nav_back_url).presence %>
       <% anchor_url = content_for(:page_nav_anchor_url).presence %>
-      <% page_nav_options[:back_url] = back_url if back_url.present? %>
-      <%# Flatpack 0.1.133 PageNav renders the close X from anchor_href, not core's anchor_url slot. %>
+      <%# Flatpack 0.1.207 PageNav: back_url -> secondary_anchor_href; close stays on anchor_href. %>
+      <% page_nav_options[:secondary_anchor_href] = back_url if back_url.present? %>
       <% page_nav_options[:anchor_href] = anchor_url if anchor_url.present? %>
 
       <div class="mt-4 mb-8">
@@ -88,7 +88,7 @@
                     icon_only: true,
                     style: page_nav_options[:back_style],
                     size: page_nav_options[:back_size],
-                    url: back_url,
+                    href: back_url,
                     aria: { label: page_nav_options[:back_label] }
                   ) %>
                 <% else %>
