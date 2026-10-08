@@ -157,7 +157,27 @@ export default class extends Controller {
   }
 
   previewLines() {
-    return document.querySelector("#presskits-section-preview [data-credit-lines]")
+    const preview = document.querySelector("#presskits-section-preview")
+    if (!preview) return null
+
+    const existing = preview.querySelector("[data-credit-lines]")
+    if (existing) return existing
+
+    const lines = document.createElement("div")
+    lines.className = "flex flex-col gap-5"
+    lines.setAttribute("data-credit-lines", "")
+
+    const card = preview.firstElementChild
+    if (card) {
+      card.append(lines)
+      return lines
+    }
+
+    const shell = document.createElement("div")
+    shell.className = "w-full rounded-[var(--radius-lg)] bg-[var(--card-background-color)] border border-[var(--card-border-color)] text-[var(--surface-content-color)] p-6"
+    shell.append(lines)
+    preview.append(shell)
+    return lines
   }
 
   listElement(event) {

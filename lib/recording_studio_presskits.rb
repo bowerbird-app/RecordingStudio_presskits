@@ -6,6 +6,7 @@ require "recording_studio_orderable"
 require "recording_studio_publishable"
 require "recording_studio_trashable"
 require "recording_studio_duplicatable"
+require "recording_studio_video"
 require "recording_studio_admin"
 require "flat_pack"
 require "recording_studio_presskits/version"
@@ -73,6 +74,14 @@ module RecordingStudioPresskits
         title: title,
         subtitle: subtitle
       )
+    end
+
+    def section_heading(section_recording)
+      section_recording.recordable.title.to_s.strip.presence || default_section_heading(section_recording)
+    end
+
+    def default_section_heading(section_recording)
+      KitQuery.section_content(section_recording)&.type_label.presence || section_recording.type_label
     end
 
     def register_section(type_name, component: nil, editor: nil, prepare: nil)

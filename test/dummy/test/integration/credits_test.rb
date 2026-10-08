@@ -215,7 +215,7 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_equal "flat-pack--unsaved-changes", heading["data-controller"]
     refute_includes heading.inner_html, "credit_lines"
     assert_select "#presskits-credit-lines[data-controller='flat-pack--unsaved-changes']", count: 0
-    assert_select "#presskits-section-preview [data-credit-lines]"
+    assert_select "#presskits-section-preview [data-credit-lines]", count: 0
     assert_select "#presskits-credit-lines[data-action*='collection-editor:selected->recording-studio-presskits--credit-preview#choose']"
     assert_select "#presskits-credit-lines[data-action*='input->recording-studio-presskits--credit-preview#role']"
     assert_select "#presskits-credit-lines[data-action*='click->recording-studio-presskits--credit-preview#drop']"

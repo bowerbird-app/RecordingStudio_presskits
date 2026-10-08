@@ -14,13 +14,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
       "db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
+      "db/migrate/20261007120000_create_recording_studio_video_sections.rb",
+      "db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
-      "test/dummy/db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb"
+      "test/dummy/db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
+      "test/dummy/db/migrate/20261007120000_create_recording_studio_video_sections.rb",
+      "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
+      "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
     end
+
+    refute File.exist?(File.join(root, "db/migrate/20261006143000_create_recording_studio_videos.rb"))
   end
 
   def test_engine_exists
@@ -39,6 +46,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.204"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.1.0"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
   end
 
@@ -55,6 +64,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.4.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -187,6 +198,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes sources_task, '"recording_studio_duplicatable"'
     assert_includes sources_task, '"recording_studio_admin"'
     assert_includes sources_task, '"recording_studio_presskits"'
+    refute_includes sources_task, "flatpack_fieldset"
+    refute_includes tailwind_source, "flatpack_fieldset"
     assert_includes sources_task, '"recording_studio_publishable"'
     assert_includes sources_task, '"recording_studio_attachable"'
     refute_includes tailwind_source, "@theme"
@@ -240,6 +253,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.4.2\""
     assert_includes readme, "tag: \"v0.1.204\""
     assert_includes readme, 'gem "flat_pack", ">= 0.1.204"'
+    assert_includes readme, "FlatPack::Tabs::Component"
+    assert_includes readme, "variant: :pills"
+    assert_includes readme, "Section title"
+    refute_includes readme, "Section settings"
+    refute_includes readme, "FlatPack::Fieldset::Component"
     assert_includes readme, "unsaved-changes controller"
     assert_includes readme, "PressKit.indexable"
     assert_includes readme, "Press kit"
@@ -397,6 +415,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'text: "Save"'
     assert_includes row, 'id: "presskits-header-row"'
     assert_includes row, 'icon: "bars-3-bottom-left"'
+    assert_includes row, 'class: "!items-center"'
     assert_includes row, 'link_to "Header"'
     refute_includes row, "arrows-up-down"
     refute_includes row, "trash"
@@ -424,12 +443,28 @@ class RecordingStudioPresskitsTest < Minitest::Test
     text = File.read(presskits_path("app/models/recording_studio_presskits/text.rb"))
     images = File.read(presskits_path("app/models/recording_studio_presskits/images.rb"))
     quotes = File.read(presskits_path("app/models/recording_studio_presskits/quote_section.rb"))
+    videos = File.read(presskits_path("app/models/recording_studio_presskits/video_section.rb"))
 
     assert_includes dropdown, "icon: item[:icon]"
     assert_includes editor, "section_menu_icon_for"
     assert_includes text, '"document-text"'
     assert_includes images, '"photo"'
     assert_includes quotes, '"chat-bubble-bottom-center-text"'
+    assert_includes videos, '"video-camera"'
+    child_path = "app/components/recording_studio_presskits/press_kits/child_component.html.erb"
+    child_ruby = "app/components/recording_studio_presskits/press_kits/child_component.rb"
+    child = File.read(presskits_path(child_path))
+    child_component = File.read(presskits_path(child_ruby))
+    assert_includes child, "icon: row_icon"
+    assert_includes child, 'class: "!items-center"'
+    assert_includes child, "truncate"
+    assert_includes child, "title: link_title"
+    refute_includes child, "arrows-up-down"
+    assert_includes child_component, "def row_icon"
+    assert_includes child_component, "def row_label"
+    assert_includes child_component, "saved_text_title"
+    assert_includes child_component, "RecordingStudioPresskits::Text"
+    assert_includes child_component, "section_menu_icon"
   end
 
   def presskits_path(relative)
@@ -462,7 +497,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section_editor, "cols: 2"
     assert_includes section_editor, 'id="presskits-section-fields"'
     assert_includes section_editor, 'id="presskits-section-preview"'
-    refute_includes section_editor, "preview?"
+    assert_includes section_editor, "show_preview?"
+    refute_includes section_editor, "def self.preview?"
     refute_includes section_editor, "if form?"
     refute_includes component, "def self.preview?"
     refute_includes component, "preview_card_title"
@@ -473,25 +509,49 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes section_editor, "upload_form_data"
   end
 
-  def test_section_editor_puts_update_above_fields_and_custom_ui_below
+  def test_section_editor_uses_pill_tabs_and_puts_update_under_the_settings_fields
     editor_path = "press_kits/section_editor_component.html.erb"
     section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
     component_path = "press_kits/section_editor_component.rb"
     component = File.read(presskits_path("app/components/recording_studio_presskits/#{component_path}"))
+    engine = File.read(presskits_path("lib/recording_studio_presskits/engine.rb"))
     quotes = File.read(presskits_path("app/components/recording_studio_presskits/quote_section/edit_component.rb"))
     text = File.read(presskits_path("app/components/recording_studio_presskits/text/edit_component.rb"))
 
-    assert_operator section_editor.index('text: "Update"'), :<, section_editor.index('name: "kit_section[title]"')
+    assert_includes section_editor, "FlatPack::Tabs::Component.new"
+    assert_includes section_editor, "variant: :pills"
+    assert_operator section_editor.index("variant: :pills"), :<, section_editor.index("style: :default")
+    assert_operator section_editor.index("style: :default"), :<, section_editor.index('label: "Content"')
+    assert_includes section_editor, 'id: "presskits-section-tabs"'
+    assert_includes section_editor, 'label: "Content"'
+    assert_includes section_editor, 'id: "presskits-section-content"'
+    assert_includes section_editor, 'label: "Section title"'
+    assert_includes section_editor, 'id: "presskits-section-title"'
+    refute_includes section_editor, "Section settings"
+    refute_includes section_editor, "Fieldset"
+    refute_includes section_editor, 'title: "Heading"'
+    refute_includes section_editor, "presskits-section-heading"
+    refute_includes engine, "install_fieldset_fallback"
+    refute_includes engine, "flatpack_fieldset"
+    refute File.file?(presskits_path("lib/recording_studio_presskits/flatpack_fieldset.rb"))
+    assert_operator section_editor.index('label: "Content"'), :<, section_editor.index('label: "Section title"')
+    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index("section_actions")
+    assert_operator section_editor.index("section_actions"), :<, section_editor.index("below_editor?")
+    assert_operator section_editor.index("below_editor?"), :<, section_editor.index('label: "Section title"')
+    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index('name: "kit_section[title]"')
+    assert_includes section_editor, 'id: "presskits-section-content-form"'
+    assert_includes section_editor, 'id: "presskits-section-title-form"'
     assert_includes section_editor, 'data: { controller: "flat-pack--unsaved-changes" }'
-    assert_includes section_editor, "style: :default"
-    assert_includes section_editor, '"flat-pack--unsaved-changes-target": "submit"'
-    refute_includes section_editor, "style: :primary"
     assert_operator section_editor.index('name: "kit_section[title]"'), :<,
                     section_editor.index('name: "kit_section[subtitle]"')
     assert_operator section_editor.index('name: "kit_section[subtitle]"'), :<,
-                    section_editor.index("fields_in_form?")
-    assert_operator section_editor.index("fields_in_form?"), :<, section_editor.index("section_actions")
-    assert_operator section_editor.index("section_actions"), :<, section_editor.index("below_editor?")
+                    section_editor.index('id="presskits-section-update"')
+    assert_includes section_editor, 'id="presskits-section-content-update"'
+    assert_includes component, "def update_button"
+    assert_includes component, "style: :default"
+    assert_includes component, '"flat-pack--unsaved-changes-target": "submit"'
+    assert_includes component, 'text: "Update"'
+    refute_includes component, "style: :primary"
     assert_includes component, "def fields_in_form?"
     assert_includes component, "def below_editor?"
     refute_includes component, "def form?"
@@ -499,6 +559,29 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes quotes, "def form?"
     refute_includes quotes, "def self.form?"
     refute_includes text, "def self.below?"
+  end
+
+  def test_section_heading_falls_back_to_the_content_type
+    source = File.read(presskits_path("lib/recording_studio_presskits.rb"))
+    frame_path = "app/components/recording_studio_presskits/press_kits/section_frame_component.rb"
+    editor_path = "app/components/recording_studio_presskits/press_kits/section_editor_component.html.erb"
+    component_path = "app/components/recording_studio_presskits/press_kits/section_editor_component.rb"
+    helper_path = "app/helpers/recording_studio_presskits/application_helper.rb"
+    frame = File.read(presskits_path(frame_path))
+    editor = File.read(presskits_path(editor_path))
+    component = File.read(presskits_path(component_path))
+    helper = File.read(presskits_path(helper_path))
+
+    assert_includes source, "def section_heading"
+    assert_includes source, "def default_section_heading"
+    assert_operator source.index("def section_heading"), :<, source.index("default_section_heading")
+    assert_includes frame, "RecordingStudioPresskits.section_heading"
+    assert_includes frame, "def saved_title"
+    assert_includes frame, "saved_title.present? || subtitle.present? || content_visible?"
+    assert_includes editor, "placeholder: section_title_fallback"
+    assert_includes component, "def section_title_fallback"
+    assert_includes component, "RecordingStudioPresskits.default_section_heading"
+    assert_includes helper, "RecordingStudioPresskits.section_heading"
   end
 
   def test_text_editor_names_title_and_body
@@ -596,5 +679,51 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes preview, "role(event)"
     assert_includes preview, "drop(event)"
     assert_includes preview, "orderableUnsaved"
+    show_component = File.read(presskits_path(
+                                 "app/components/recording_studio_presskits/credits_section/component.rb"
+                               ))
+    assert_includes show_component, "def render?"
+    assert_includes show_component, "lines.any?"
+  end
+
+  def test_video_routes_initializer_and_gemfile_pins
+    root = File.expand_path("..", __dir__)
+    routes = File.read(File.join(root, "config/routes.rb"))
+    initializer = File.read(File.join(root, "test/dummy/config/initializers/recording_studio.rb"))
+    gemfile = File.read(File.join(root, "Gemfile"))
+
+    assert_includes routes, "resources :videos"
+    refute_includes routes, "video_order"
+    assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
+    assert_includes initializer, '"RecordingStudioVideo::Video"'
+    assert_includes gemfile, 'gem "recording_studio_video", "~> 0.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
+  end
+
+  def test_video_edit_calls_video_helpers_and_does_not_build_an_iframe
+    root = File.expand_path("..", __dir__)
+    component = File.read(File.join(root, "app/components/recording_studio_presskits/videos/edit_component.rb"))
+    template = File.read(File.join(root, "app/components/recording_studio_presskits/videos/edit_component.html.erb"))
+
+    assert_includes component, "recording_studio_video_fields"
+    assert_includes component, "recording_studio_video_player"
+    [component, template].each do |source|
+      refute_includes source, "<iframe"
+      refute_includes source, "FlatPack::UrlInput"
+      refute_includes source, "FlatPack::TextInput"
+      refute_includes source, "FlatPack::TextArea"
+    end
+  end
+
+  def test_presskits_source_does_not_register_embed_providers
+    root = File.expand_path("..", __dir__)
+    Dir.glob(File.join(root, "{app,lib,config}/**/*.{rb,erb}")).each do |path|
+      source = File.read(path)
+      refute_includes source, "ExternalEmbed.register", path
+      refute_includes source, "ExternalEmbed.resolve", path
+      refute_includes source, "Playback", path
+      refute_includes source, "::YouTube", path
+    end
   end
 end

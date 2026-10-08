@@ -16,7 +16,7 @@ Credits.
 - Credits has its own list, create, edit, and trash screens. Trash and restore use Trashable. Restoring a credit puts it back on kits that already listed it.
 - A Credits section can be added to a press kit. Each line stores the role and the order for that kit, and points at the credit. Removing a line leaves the credit in the workspace.
 - The same credit can be used on more than one kit, with a different role on each line. Changing the usual role does not change lines that already exist.
-- A Credits section keeps Title and Subtitle on the heading form. Under that form, a collection editor searches workspace credits, creates one from a modal, and sets **Role on this kit** on each line. **Save** stores those lines. The preview column follows a chosen credit, a role edit, a removed row, and a saved reorder before the page reloads.
+- A Credits section keeps Title and Subtitle on the Section title tab. On Content, a collection editor searches workspace credits, creates one from a modal, and sets **Role on this kit** on each line. **Save** stores those lines. The preview column follows a chosen credit, a role edit, a removed row, and a saved reorder before the page reloads. An empty credits section does not show a preview card.
 - The public page and the kit preview show the role, the name, and a link when the credit has a URL.
 - When Recording Studio API is loaded, a credit exposes index, show, create, and update. A credits section exposes `add_credit` and `reorder_credits`. A credit line exposes index, show, update, and `remove_credit`.
 - Version `0.21.0`
@@ -29,6 +29,32 @@ Credits.
 - Add `RecordingStudioPresskits::Credit`, `RecordingStudioPresskits::CreditsSection`, and `RecordingStudioPresskits::CreditLine` to `recordable_types`.
 - Add a credit with `RecordingStudioPresskits::Credits.create!`. Add one to a section with `RecordingStudioPresskits::Credits.add!`. Do not copy the name or URL onto the line.
 - Bump FlatPack to at least `0.1.204`. Reload its CSS and JavaScript. `style:` on FlatPack tabs is a button style name. Press kits do not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. The credits section uses `FlatPack::CollectionEditor::Component`. Importmap hosts that already pin Flatpack controllers load `flat-pack--collection-editor` and `flat-pack--list-orderable` with no new register call. Reload the press kits JavaScript too. The credits preview follows a chosen credit, a role edit, and a removed row without waiting for Save.
+
+## [0.20.0] - 2026-10-07
+
+Video section.
+
+### Added
+- A press kit can add a Video section. Press Kits owns the section. Recording Studio Video owns each video recording. External Embed owns provider embeds. YouTube ships with External Embed. Other providers appear when the host registers them. Press Kits does not register Vimeo.
+- `RecordingStudioPresskits::VideoSection` is an empty recordable under the kit section. It includes Trashable and Videos. It does not include Orderable. Videos stay in the order they were added. + Video sits on the Content tab and opens a new video. The form uses Video's fields. A saved video shows Video's player.
+- The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A video section also includes `videos`. Each video has `title`, `url`, `description`, `provider`, `canonical_url`, and `content_type`.
+- New table `recording_studio_video_sections`.
+- Version `0.20.0`
+
+### Changed
+- The section editor keeps its preview column. The card is rendered only when `SectionFrameComponent` would show a title, a subtitle, or content. Text, Images, Quotes, and Video return false from `render?` when they have nothing to show. The kit editor uses the same check, so a blank section does not leave an empty preview card.
+- Every section editor uses `FlatPack::Tabs::Component` with `variant: :pills` and `style: :default`. The tabs are Content and Section title. Content is selected first. Section title is Title, Subtitle, and Update under those fields. There is no Heading group.
+- A blank kit section title falls back to the content type label on the preview, the public page, and the page nav. The saved title stays blank. The Title field shows that label as its placeholder. A saved title replaces the fallback. The fallback does not show the preview card by itself.
+- Kit section rows use the section menu icon in the list icon slot. Header and section rows use `class: "!items-center"`. Drag to reorder still uses the orderable list.
+- A text section with a saved title shows that title in the kit list. A blank text title stays Text. The label truncates to the column. Images, Quotes, Video, and host types stay on the content type label.
+- Text Body saves from Content, with its own Update under the field. Images, Quotes, and Video keep their editors on Content, outside the title form.
+- FlatPack is `>= 0.1.202` (dummy tag `v0.1.202`).
+
+### Upgrade notes
+- Add `recording_studio_video`, `~> 0.1.0` (tag `v0.1.0`) and `recording_studio_external_embed`, `~> 0.1.1` (tag `v0.1.3`).
+- Bump FlatPack to at least `0.1.202` (tag `v0.1.202`). A host that replaced the kit section row should pass the section menu icon and `class: "!items-center"` on `FlatPack::List::Item`. Do not put `arrows-up-down` in that slot. Show a text section's saved title as that row's label, truncate the label, and leave other types on the content type label. A host that replaced `SectionFrameComponent` renders `RecordingStudioPresskits.section_heading` for the visible title. Keep the preview card off until there is a saved title, a subtitle, or content. `default_section_heading` is the Title placeholder. A host that replaced `SectionEditorComponent` renders pill tabs (`variant: :pills`, `style: :default`) labeled Content and Section title. Put Title, Subtitle, and Update on Section title, with Update under the fields. Remove any Heading fieldset. Put the content editor on Content. An editor with `self.below?` stays outside the title form. An editor without it, such as Text, gets its own form and Update on Content. Keep the unsaved-changes controller on each of those forms, and keep Update as `style: :default` with the submit target. `style:` on tabs is a button style name. A CSS string raises `ArgumentError`.
+- Add `RecordingStudioPresskits::VideoSection` and `RecordingStudioVideo::Video` to `recordable_types`.
+- Run `bin/rails generate recording_studio_video:install`, `bin/rails generate recording_studio_video:migrations`, and `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. External Embed has no table. See `MIGRATION_NOTES.md`.
 
 ## [0.19.0] - 2026-10-07
 

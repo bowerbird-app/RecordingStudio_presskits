@@ -8,6 +8,10 @@ module RecordingStudioPresskits
         @recording = recording
       end
 
+      def render?
+        quotes.any?
+      end
+
       def quotes
         ordered_quotes.select { |child| child.recordable.body.to_s.strip.present? }
       end

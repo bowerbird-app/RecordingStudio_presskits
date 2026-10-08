@@ -18,6 +18,7 @@ module RecordingStudioPresskits
         register_images_section
         register_quote_section
         register_credits_section
+        register_video_section
       end
 
       private
@@ -89,6 +90,14 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::CreditsSection",
           component: "RecordingStudioPresskits::CreditsSection::Component",
           editor: "RecordingStudioPresskits::CreditsSection::EditComponent"
+        )
+      end
+
+      def register_video_section
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::VideoSection",
+          component: "RecordingStudioPresskits::VideoSection::Component",
+          editor: "RecordingStudioPresskits::VideoSection::EditComponent"
         )
       end
     end
@@ -184,6 +193,15 @@ module RecordingStudioPresskits
         next if RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
 
         RecordingStudioAttachable::Attachment.include RecordingStudio::Capabilities::Trashable.to
+      end
+    end
+
+    initializer "recording_studio_presskits.video_trash" do
+      config.to_prepare do
+        next unless defined?(RecordingStudioVideo)
+        next if RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
+
+        RecordingStudioVideo::Video.include RecordingStudio::Capabilities::Trashable.to
       end
     end
 

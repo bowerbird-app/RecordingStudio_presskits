@@ -22,11 +22,58 @@ Trash a credit with `recording_studio_trashable_trash!`. Restore it with `record
 
 Create credits with `RecordingStudioPresskits::Credits.create!` on the workspace root. Add one to a section with `Credits.add!`. Revise the reusable fields with `Credits.revise!`. Revise one kit's role with `Credits.revise_role!`. List the workspace credits with `Credits.active_for_root`. A credit from another root is refused.
 
-The screens are `GET /credits` for the workspace list, and the Credits item in + Section for a kit. The section editor keeps Title and Subtitle on the heading form. Under it, a collection editor adds each line. The first column searches `GET /credits/search` and creates with `POST /credits` when the response is JSON. The second column is the role on this kit. **Save** patches the lines. A blank role on a new line still copies `usual_role`. The preview column follows a chosen credit, a role edit, and a removed row before Save. A blank role on a new row shows that usual role. Dragging a saved row patches `moving_recording_id` and a 1-based `target_position`. The response is `{ ok: true }`. The preview follows that order too. `recording_id` with `before_recording_id` or `after_recording_id` still reorders a line. Reload the press kits JavaScript with this version.
+The screens are `GET /credits` for the workspace list, and the Credits item in + Section for a kit. Title and Subtitle stay on the Section title tab. On Content, a collection editor adds each line. The first column searches `GET /credits/search` and creates with `POST /credits` when the response is JSON. The second column is the role on this kit. **Save** patches the lines. A blank role on a new line still copies `usual_role`. The preview column follows a chosen credit, a role edit, and a removed row before Save. A blank role on a new row shows that usual role. Dragging a saved row patches `moving_recording_id` and a 1-based `target_position`. The response is `{ ok: true }`. The preview follows that order too. `recording_id` with `before_recording_id` or `after_recording_id` still reorders a line. Reload the press kits JavaScript with this version.
 
-When Recording Studio API is loaded, credits expose index, show, create, and update. There is no credit destroy operation. Trash the recording so existing lines keep their id. `add_credit` and `reorder_credits` are on the credits section. `remove_credit` is on the line. A line's show payload is `role`, `name`, `url`, and `credit_id`. `name` and `url` are read from the credit when it is still active. The kit section payload stays `title`, `subtitle`, `content_type`, and `content_id`.
+When Recording Studio API is loaded, credits expose index, show, create, and update. There is no credit destroy operation. Trash the recording so existing lines keep their id. `add_credit` and `reorder_credits` are on the credits section. `remove_credit` is on the line. A line's show payload is `role`, `name`, `url`, and `credit_id`. `name` and `url` are read from the credit when it is still active. The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A video section also includes `videos`.
 
-Bump FlatPack to `>= 0.1.204` (dummy tag `v0.1.204`). Reload kit CSS and JavaScript. `style:` on FlatPack tabs is a button style name. This gem does not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. The credits section uses the collection editor. Importmap hosts that already pin Flatpack controllers load it with no new register call.
+Bump FlatPack to `>= 0.1.204` (dummy tag `v0.1.204`). Reload kit CSS and JavaScript. `style:` on FlatPack tabs is a button style name. This gem does not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. The credits section uses the collection editor. Importmap hosts that already pin Flatpack controllers load it with no new register call. `CreditsSection::Component#render?` is false when no visible line remains, so an empty credits section does not show a preview card.
+
+## 0.20.0
+
+A press kit can hold a video section. Press Kits owns the section. Recording Studio Video owns the recording. External Embed owns provider embeds.
+
+YouTube ships with External Embed. Other providers appear when the host registers them, before External Embed freezes its catalog. Press Kits does not register Vimeo, and it does not call `RecordingStudio::ExternalEmbed.register`.
+
+Add both gems:
+
+```ruby
+gem "recording_studio_external_embed", "~> 0.1.1", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"
+gem "recording_studio_video", "~> 0.1.0", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"
+```
+
+The `v0.1.3` tag still reports External Embed `VERSION` as `0.1.1`. The gemspec constraint follows that constant. The Gemfile pins the tag.
+
+Add both recordable types:
+
+```ruby
+"RecordingStudioPresskits::VideoSection",
+"RecordingStudioVideo::Video"
+```
+
+Run the Video generators, then the Press Kits migrations generator, then migrate:
+
+```bash
+bin/rails generate recording_studio_video:install
+bin/rails generate recording_studio_video:migrations
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+`recording_studio_video_sections` is a new empty table: a UUID primary key and `created_at`. `recording_studio_videos` belongs to Video (`title`, `url`, `description`, `created_at`). External Embed has no table and no migrations generator.
+
+`VideoSection` includes Trashable and `RecordingStudio::Capabilities::Videos.to`. It does not include Orderable. Kit sections stay the only ordered children of a press kit. Videos follow `created_at`. The editor sets `below?` to true, so + Video and the video list sit on the Content tab. + Video links to a new video. A blank video cannot be recorded. Title, URL, and description use Video's field helper. A saved video shows Video's player. Removing one video trashes that recording and leaves the section. Removing the section trashes the kit section, the video section, and its videos. `trash_root` is set on the kit section. Rows stay in the database.
+
+When Recording Studio API is loaded, a kit section still returns `title`, `subtitle`, `content_type`, and `content_id`. `:videos` is declared on that output. The array is included only when the content type is `RecordingStudioPresskits::VideoSection`. A video entry always has `title`, `url`, `description`, `provider`, `canonical_url`, and `content_type`. The video section type returns `{ videos: ... }`. Do not register `RecordingStudioVideo::Video` again from the host or from Press Kits. Video already registers that type, including the derived provider fields.
+
+Kit section rows on the kit editor use the section menu icon instead of `arrows-up-down`. Header and section rows pass `class: "!items-center"` on `FlatPack::List::Item`. That is the class this Flatpack pin uses to center a row. Drag to reorder is unchanged. A text section with a saved title uses that title as the row label. A blank text title stays Text. The label truncates to the column, and the saved title is the link title. Images, Quotes, Video, and host types stay on the content type label. A host that replaced `ChildComponent` should do the same.
+
+A blank kit section title stays blank. The preview, the public page, and the page nav use `RecordingStudioPresskits.section_heading`, which falls back to `default_section_heading`: the content type label. The Title field placeholder is that label. A saved title replaces it. The fallback does not show the preview card by itself. A host that replaced `SectionFrameComponent` should use `section_heading` for the visible title and keep the card behind the saved-title check.
+
+The section editor still has two columns. The preview card is omitted until the section has a saved title, a subtitle, or content that would show. `SectionFrameComponent#render?` is that check. Text, Images, Quotes, and Video implement `render?` and return false when the body, photos, quotes, or videos are empty. A host content component can do the same. The default is still to render. The kit editor hides its preview card on the same check. A host that replaced `SectionEditorComponent` should wrap the preview card in `show_preview?` rather than always rendering it.
+
+Bump FlatPack to `>= 0.1.202` (dummy tag `v0.1.202`). Every section editor uses `FlatPack::Tabs::Component` with `variant: :pills` and `style: :default`. The pills are Content and Section title. Content is selected first. Section title is Title, Subtitle, and Update under those fields. There is no Heading group. Keep `flat-pack--unsaved-changes` on that form, and keep Update as `style: :default` with the submit target. `style:` on the tabs is a button style name. Do not pass a CSS string.
+
+Content holds the section editor. `section_actions` and a `below?` editor stay on Content, outside the title form. An editor that does not set `below?` renders on Content in its own form, with Update under its fields. Text does that, so Body saves without Title and Subtitle, and Title saves without the body. A host that replaced `SectionEditorComponent` follows this split. Saving either form still posts to the kit section update. Sending only `kit_section` leaves the body alone. Sending only the content key leaves the title and subtitle alone.
 
 ## 0.19.0
 

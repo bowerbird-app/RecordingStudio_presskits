@@ -37,9 +37,7 @@ module RecordingStudioPresskits
     end
 
     def kit_section_title(recording)
-      recording.recordable.title.presence ||
-        KitQuery.section_content(recording)&.type_label ||
-        recording.type_label
+      RecordingStudioPresskits.section_heading(recording)
     end
 
     def presskits_cover_url_for(recording)

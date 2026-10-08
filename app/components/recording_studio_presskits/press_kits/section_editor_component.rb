@@ -17,6 +17,10 @@ module RecordingStudioPresskits
         @section.recordable.title
       end
 
+      def section_title_fallback
+        RecordingStudioPresskits.default_section_heading(@section)
+      end
+
       def section_subtitle
         @section.recordable.subtitle
       end
@@ -48,6 +52,19 @@ module RecordingStudioPresskits
         return if content_recording.blank?
 
         RecordingStudioPresskits.section_editor_for(content_recording)
+      end
+
+      def show_preview?
+        SectionFrameComponent.new(section_recording: @section).render?
+      end
+
+      def update_button
+        FlatPack::Button::Component.new(
+          text: "Update",
+          style: :default,
+          type: "submit",
+          data: { "flat-pack--unsaved-changes-target": "submit" }
+        )
       end
     end
   end

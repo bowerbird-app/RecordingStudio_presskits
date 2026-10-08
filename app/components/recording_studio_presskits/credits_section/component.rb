@@ -8,6 +8,10 @@ module RecordingStudioPresskits
         @recording = recording
       end
 
+      def render?
+        lines.any?
+      end
+
       def lines
         Credits.visible_lines(@recording)
       end

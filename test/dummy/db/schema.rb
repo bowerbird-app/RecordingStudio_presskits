@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -259,6 +259,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
     t.uuid "recording_id", null: false
     t.datetime "updated_at", null: false
     t.index ["recording_id"], name: "idx_rs_trashable_retention_on_recording", unique: true
+  end
+
+  create_table "recording_studio_video_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+  end
+
+  create_table "recording_studio_videos", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "title"
+    t.text "url", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

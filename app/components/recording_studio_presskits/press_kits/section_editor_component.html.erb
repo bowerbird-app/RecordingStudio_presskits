@@ -6,54 +6,75 @@
 
   <%= render FlatPack::Grid::Component.new(id: "presskits-section-grid", cols: 2, gap: :lg, align: :start) do %>
     <div id="presskits-section-fields" class="flex w-full min-w-0 flex-col gap-6">
-      <%= form_with url: @update_path, method: :patch, local: true,
-            class: "flex flex-col gap-6",
-            data: { controller: "flat-pack--unsaved-changes" } do %>
-        <div id="presskits-section-update" class="flex flex-wrap items-center gap-3">
-          <%= render FlatPack::Button::Component.new(
-            text: "Update",
-            style: :default,
-            type: "submit",
-            data: { "flat-pack--unsaved-changes-target": "submit" }
-          ) %>
-        </div>
+      <%= render FlatPack::Tabs::Component.new(
+        variant: :pills,
+        style: :default,
+        default_tab: 0,
+        id: "presskits-section-tabs"
+      ) do |tabs| %>
+        <% tabs.tab(label: "Content", id: "presskits-section-content") do %>
+          <div class="flex w-full min-w-0 flex-col gap-6">
+            <% if fields_in_form? %>
+              <%= form_with url: @update_path, method: :patch, local: true,
+                    id: "presskits-section-content-form",
+                    class: "flex flex-col gap-6",
+                    data: { controller: "flat-pack--unsaved-changes" } do %>
+                <%= render editor_view %>
+                <div id="presskits-section-content-update" class="flex flex-wrap items-center gap-3">
+                  <%= render update_button %>
+                </div>
+              <% end %>
+            <% end %>
 
-        <%= render FlatPack::TextInput::Component.new(
-          name: "kit_section[title]",
-          value: section_title,
-          label: "Title",
-          class: "w-full"
-        ) %>
-        <%= render FlatPack::TextInput::Component.new(
-          name: "kit_section[subtitle]",
-          value: section_subtitle,
-          label: "Subtitle",
-          class: "w-full"
-        ) %>
+            <% if editor_view&.respond_to?(:section_actions) %>
+              <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
+                <%= render editor_view.section_actions %>
+              </div>
+            <% end %>
 
-        <%= render editor_view if fields_in_form? %>
-      <% end %>
+            <%= render editor_view if below_editor? %>
 
-      <% if editor_view&.respond_to?(:section_actions) %>
-        <div id="presskits-section-actions" class="flex flex-wrap items-center gap-3">
-          <%= render editor_view.section_actions %>
-        </div>
-      <% end %>
+            <% if editor_view&.respond_to?(:attachment_collection_options) && content_recording %>
+              <%= helpers.attachment_collection_editor(
+                    content_recording,
+                    **editor_view.attachment_collection_options,
+                    return_to: attachment_return_path
+                  ) %>
+            <% end %>
+          </div>
+        <% end %>
 
-      <%= render editor_view if below_editor? %>
-
-      <% if editor_view&.respond_to?(:attachment_collection_options) && content_recording %>
-        <%= helpers.attachment_collection_editor(
-              content_recording,
-              **editor_view.attachment_collection_options,
-              return_to: attachment_return_path
+        <% tabs.tab(label: "Section title", id: "presskits-section-title") do %>
+          <%= form_with url: @update_path, method: :patch, local: true,
+                id: "presskits-section-title-form",
+                class: "flex flex-col gap-6",
+                data: { controller: "flat-pack--unsaved-changes" } do %>
+            <%= render FlatPack::TextInput::Component.new(
+              name: "kit_section[title]",
+              value: section_title,
+              label: "Title",
+              placeholder: section_title_fallback,
+              class: "w-full"
             ) %>
+            <%= render FlatPack::TextInput::Component.new(
+              name: "kit_section[subtitle]",
+              value: section_subtitle,
+              label: "Subtitle",
+              class: "w-full"
+            ) %>
+            <div id="presskits-section-update" class="flex flex-wrap items-center gap-3">
+              <%= render update_button %>
+            </div>
+          <% end %>
+        <% end %>
       <% end %>
     </div>
 
     <div class="min-w-0" id="presskits-section-preview">
-      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
-        <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: @section) %>
+      <% if show_preview? %>
+        <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+          <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: @section) %>
+        <% end %>
       <% end %>
     </div>
   <% end %>

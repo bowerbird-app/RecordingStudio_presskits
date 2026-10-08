@@ -1,25 +1,23 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  class Images
+  class VideoSection
     class Component < ViewComponent::Base
-      include Gallery
-
       def initialize(recording:)
         super()
         @recording = recording
       end
 
       def render?
-        image_recordings.any?
+        videos.any?
       end
 
-      def image_recordings
-        gallery_images_for(@recording)
+      def videos
+        VideoSection.active_videos(@recording)
       end
 
-      def image_url_for(attachment_recording)
-        gallery_image_url(attachment_recording)
+      def player_for(video_recording)
+        helpers.recording_studio_video_player(video_recording)
       end
     end
   end
