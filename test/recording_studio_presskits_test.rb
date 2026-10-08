@@ -56,9 +56,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.2.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.6"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.204"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.207"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -154,8 +154,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes default_layout, '<html data-theme="rounded">'
     assert_includes default_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
+    assert_includes default_layout, "page_nav_options[:secondary_anchor_href]"
     assert_includes default_layout, "anchor_tooltip:"
     refute_includes default_layout, "page_nav_options[:anchor_url]"
+    refute_includes default_layout, "page_nav_options[:back_url]"
     refute_includes controller_source, "flat_pack_sidebar"
     refute File.exist?(File.expand_path("dummy/app/views/layouts/flat_pack_sidebar.html.erb", __dir__))
     refute File.exist?(File.expand_path("dummy/app/views/layouts/flat_pack/_sidebar.html.erb", __dir__))
@@ -247,11 +249,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.2.2"
     assert_includes readme, "v0.11.1"
-    assert_includes readme, "tag: \"v2.0.4\""
+    assert_includes readme, "tag: \"v2.0.6\""
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.204\""
+    assert_includes readme, "tag: \"v0.1.207\""
     assert_includes readme, 'gem "flat_pack", ">= 0.1.204"'
     assert_includes readme, "FlatPack::Tabs::Component"
     assert_includes readme, "variant: :pills"

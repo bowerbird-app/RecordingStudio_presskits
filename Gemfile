@@ -6,10 +6,10 @@ source "https://rubygems.org"
 gemspec
 
 # These gems are not published to RubyGems; resolve the gemspec pins from GitHub.
-gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.204"
+gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.207"
 gem "recording_studio", "~> 4.2", github: "bowerbird-app/RecordingStudio", tag: "v4.2.2"
 gem "recording_studio_accessible", "~> 0.11", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"
-gem "recording_studio_admin", "~> 2.0", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"
+gem "recording_studio_admin", "~> 2.0", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.6"
 gem "recording_studio_attachable", "~> 0.7", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"
 gem "recording_studio_duplicatable", "~> 0.4", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"
 gem "recording_studio_external_embed", "~> 0.1.1", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"
