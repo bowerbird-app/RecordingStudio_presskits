@@ -14,6 +14,7 @@ RecordingStudioPresskits::Engine.routes.draw do
         resource :image, only: :destroy, controller: "quote_images"
       end
       resource :quote_order, only: :update, controller: "quote_orders"
+      resources :videos, only: %i[new create edit update destroy]
     end
     resource :order, only: :update, controller: "orders"
   end

@@ -102,6 +102,31 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     assert_empty RecordingStudioPresskits::KitQuery.sections_for(kit)
   end
 
+  test "video section api registers videos without replacing the video type" do
+    registry = fake_api_registry
+    registry.register_recordable_type_api(
+      "RecordingStudioVideo::Video",
+      marker: :video_gem,
+      output_keys: %i[title url description provider canonical_url content_type]
+    )
+
+    with_recording_studio_api(registry) do
+      RecordingStudioPresskits::Api.register!
+    end
+
+    video = registry.types.fetch("RecordingStudioVideo::Video")
+    assert_equal :video_gem, video[:marker]
+    assert_equal %i[title url description provider canonical_url content_type], video[:output_keys]
+
+    registered = registry.types.fetch("RecordingStudioPresskits::VideoSection")
+    assert_equal %i[index show], registered[:operations]
+    assert_equal %i[videos], registered[:output_keys]
+
+    kit_section = registry.types.fetch("RecordingStudioPresskits::KitSection")
+    assert_includes kit_section[:output_keys], :title
+    assert_includes kit_section[:output_keys], :videos
+  end
+
   test "section actions register once against orderable and trashable" do
     registry = fake_api_registry
     with_recording_studio_api(registry) do

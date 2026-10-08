@@ -1,0 +1,36 @@
+<div class="flex w-full flex-col gap-6">
+  <% if videos.any? %>
+    <div id="presskits-video-list">
+      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+        <%= render FlatPack::List::Component.new(divider: true, class: "w-full") do %>
+          <% videos.each do |video_recording| %>
+            <%= render FlatPack::List::Item.new(id: video_recording.id, hover: true) do %>
+              <div class="flex w-full items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <%= link_to edit_path(video_recording), class: "block min-w-0" do %>
+                    <span class="block truncate text-sm font-medium text-(--surface-content-color)">
+                      <%= video_title(video_recording) %>
+                    </span>
+                    <span class="block truncate text-sm text-(--surface-muted-content-color)">
+                      <%= video_url(video_recording) %>
+                    </span>
+                  <% end %>
+                </div>
+                <%= form_with url: remove_path(video_recording), method: :delete, local: true do %>
+                  <%= render FlatPack::Button::Component.new(
+                    icon: "trash",
+                    icon_only: true,
+                    style: :ghost,
+                    size: :sm,
+                    type: "submit",
+                    aria: { label: "Remove video" }
+                  ) %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

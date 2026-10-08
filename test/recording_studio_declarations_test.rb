@@ -18,6 +18,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Images")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::QuoteSection")
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::KitSection")
     assert_equal "Press kit", RecordingStudio.recordable_type_label("RecordingStudioPresskits::PressKit")
     assert_equal "RecordingStudioPresskits::PressKit", RecordingStudioPresskits.press_kit_type_name
@@ -294,6 +295,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PressKit")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::QuoteSection")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::VideoSection")
     assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Quote")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
 
@@ -315,7 +317,9 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_includes types, "RecordingStudioPresskits::Text"
     assert_includes types, "RecordingStudioPresskits::Images"
     assert_includes types, "RecordingStudioPresskits::QuoteSection"
+    assert_includes types, "RecordingStudioPresskits::VideoSection"
     refute_includes types, "RecordingStudioPresskits::Quote"
+    refute_includes types, "RecordingStudioVideo::Video"
     refute_includes types, "Workspace"
     refute_includes types, "Folder"
     refute_includes types, "Page"
@@ -363,6 +367,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "document-text", RecordingStudioPresskits::Text.section_menu_icon
     assert_equal "photo", RecordingStudioPresskits::Images.section_menu_icon
     assert_equal "chat-bubble-bottom-center-text", RecordingStudioPresskits::QuoteSection.section_menu_icon
+    assert_equal "video-camera", RecordingStudioPresskits::VideoSection.section_menu_icon
     assert_nil FakeBlock.try(:section_menu_icon)
   end
 
@@ -384,6 +389,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Quote")
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::QuoteSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::VideoSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
 
@@ -405,6 +411,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Images")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::QuoteSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Quote")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::VideoSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Page")
@@ -418,6 +426,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Quote")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::VideoSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Page")
@@ -436,6 +445,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Quote")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::VideoSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Page")
@@ -443,6 +453,47 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     options = RecordingStudio.capability_options(:duplicatable, for: "RecordingStudioPresskits::PressKit").to_h
     assert_equal " (Copy)", options[:suffix]
     assert_equal [], options[:exclude_children]
+  end
+
+  test "videos capability is enabled on the video section only" do
+    assert RecordingStudio.capability_enabled?(:videos, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:videos, for: "RecordingStudioPresskits::KitSection")
+    refute RecordingStudio.capability_enabled?(:videos, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.capability_enabled?(:videos, for: "RecordingStudioPresskits::Text")
+    refute RecordingStudio.capability_enabled?(:videos, for: "RecordingStudioPresskits::Images")
+    refute RecordingStudio.capability_enabled?(:videos, for: "RecordingStudioPresskits::QuoteSection")
+    refute RecordingStudio.capability_enabled?(:videos, for: "RecordingStudioPresskits::Quote")
+
+    assert_equal "Video", RecordingStudio.recordable_type_label("RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.root_allowed?("RecordingStudioPresskits::VideoSection")
+  end
+
+  test "video section sits under a kit section and videos sit under the video section" do
+    root, kit = spring_kit
+    section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::VideoSection"
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::VideoSection", parent_recording: section
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::VideoSection", parent_recording: kit
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::VideoSection", parent_recording: root
+    )
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioVideo::Video", parent_recording: content
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioVideo::Video", parent_recording: section
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioVideo::Video", parent_recording: kit
+    )
   end
 
   test "quote section sits under a kit section and quotes sit under the quote section" do
