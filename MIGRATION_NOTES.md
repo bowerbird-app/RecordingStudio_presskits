@@ -4,6 +4,8 @@
 
 Bump FlatPack to `>= 0.1.209` (dummy tag `v0.1.209`). Reload kit CSS. The credits collection editor call sites stay the same. Below 40rem FlatPack stacks each row: handle, name, and remove on one line, **Role on this kit** underneath as a normal bordered field. Wide screens keep the table. Chip edit (`update_url`) from `0.1.208` is unused; the chip name stays plain text.
 
+Hosts that copied dummy's PageNav mapping from 0.21.1 should stop passing `page_nav_back_url` as `secondary_anchor_href`. PageNav already paints history back. Close stays on `anchor_href`. Keep `page_nav_back_url` for the fallback nav only.
+
 ## 0.21.1
 
 Pin Admin `v2.0.6` and FlatPack `v0.1.207`. Reload kit CSS. Dummy PageNav maps back to `secondary_anchor_href`.

@@ -164,7 +164,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes default_layout, '<html data-theme="rounded">'
     assert_includes default_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
-    assert_includes default_layout, "page_nav_options[:secondary_anchor_href]"
+    refute_includes default_layout, "page_nav_options[:secondary_anchor_href]"
     assert_includes default_layout, "anchor_tooltip:"
     refute_includes default_layout, "page_nav_options[:anchor_url]"
     refute_includes default_layout, "page_nav_options[:back_url]"

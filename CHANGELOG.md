@@ -15,8 +15,12 @@ FlatPack 0.1.209.
 - FlatPack is `>= 0.1.209` (dummy tag `v0.1.209`).
 - Version `0.21.2`
 
+### Fixed
+- Dummy default layout no longer maps `page_nav_back_url` to Flatpack `secondary_anchor_href`. PageNav already paints history back, so that mapping showed two chevrons next to close. Close stays on `anchor_href`. Kit, header, and section editors now show one back arrow.
+
 ### Upgrade notes
 - Bump FlatPack to at least `0.1.209` and reload its CSS. The credits collection editor keeps the table on a wide screen. Below 40rem each row drops the table lines: handle, name, and remove sit on one line, **Role on this kit** sits underneath as a normal bordered field, and the chip's own remove control hides. Call sites stay the same. Omit `update_url` on the credit chip so the name stays plain text. `0.1.208`'s chip edit is optional and unused here.
+- Hosts that copied dummy's PageNav mapping from 0.21.1 should stop passing `page_nav_back_url` as `secondary_anchor_href`. Keep `anchor_href` for close. Flatpack already paints the back control.
 
 ## [0.21.1] - 2026-10-08
 

@@ -196,6 +196,9 @@ class CreditsTest < ActionDispatch::IntegrationTest
          params: { type: "RecordingStudioPresskits::CreditsSection" }
     empty_section = RecordingStudioPresskits::KitQuery.sections_for(empty_kit).first
     follow_redirect!
+    assert_rounded_default_layout
+    assert_page_nav_one_back
+    assert_page_nav_close(href: recording_studio_presskits.edit_press_kit_path(empty_kit))
     assert_select "#presskits-credit-lines"
     assert_select ".flat-pack-collection-editor-empty", text: "No credits yet"
     assert_select "button[data-flat-pack--collection-editor-target='addButton']", text: "Credit"
