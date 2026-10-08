@@ -26,7 +26,7 @@ The screens are `GET /credits` for the workspace list, and the Credits item in +
 
 When Recording Studio API is loaded, credits expose index, show, create, and update. There is no credit destroy operation. Trash the recording so existing lines keep their id. `add_credit` and `reorder_credits` are on the credits section. `remove_credit` is on the line. A line's show payload is `role`, `name`, `url`, and `credit_id`. `name` and `url` are read from the credit when it is still active. The kit section payload stays `title`, `subtitle`, `content_type`, and `content_id`.
 
-Bump FlatPack to `>= 0.1.201` (dummy tag `v0.1.201`). Reload kit CSS and JavaScript. `style:` on FlatPack tabs is a button style name. This gem does not pass a CSS string there. Built-in button styles need no host CSS change.
+Bump FlatPack to `>= 0.1.204` (dummy tag `v0.1.204`). Reload kit CSS and JavaScript. `style:` on FlatPack tabs is a button style name. This gem does not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. These screens do not use the collection editor.
 
 ## 0.19.0
 

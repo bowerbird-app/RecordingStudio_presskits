@@ -22,13 +22,13 @@ Credits.
 - Version `0.20.0`
 
 ### Changed
-- FlatPack is `>= 0.1.201` (dummy tag `v0.1.201`).
+- FlatPack is `>= 0.1.204` (dummy tag `v0.1.204`).
 
 ### Upgrade notes
 - Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. That adds `recording_studio_credits`, `recording_studio_credits_sections`, and `recording_studio_credit_lines`.
 - Add `RecordingStudioPresskits::Credit`, `RecordingStudioPresskits::CreditsSection`, and `RecordingStudioPresskits::CreditLine` to `recordable_types`.
 - Add a credit with `RecordingStudioPresskits::Credits.create!`. Add one to a section with `RecordingStudioPresskits::Credits.add!`. Do not copy the name or URL onto the line.
-- Bump FlatPack to at least `0.1.201`. Reload its CSS and JavaScript. `style:` on FlatPack tabs is a button style name. Press kits do not pass a CSS string there. Built-in button styles need no host CSS change.
+- Bump FlatPack to at least `0.1.204`. Reload its CSS and JavaScript. `style:` on FlatPack tabs is a button style name. Press kits do not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. These screens do not use the collection editor.
 
 ## [0.19.0] - 2026-10-07
 

@@ -36,7 +36,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.201"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.204"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
@@ -49,7 +49,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.201"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.204"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -238,8 +238,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.201\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.201"'
+    assert_includes readme, "tag: \"v0.1.204\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.204"'
     assert_includes readme, "unsaved-changes controller"
     assert_includes readme, "PressKit.indexable"
     assert_includes readme, "Press kit"
