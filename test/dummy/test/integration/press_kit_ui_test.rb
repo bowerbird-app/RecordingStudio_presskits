@@ -154,6 +154,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "0/280 characters"
     header_row = css_select("#presskits-header-row").first
     assert_includes header_row.to_html, 'data-flat-pack--icon-name-value="bars-3-bottom-left"'
+    assert_includes header_row["class"], "!items-center"
     refute_includes header_row.to_html, "arrows-up-down"
     refute_includes header_row.to_html, "trash"
     refute_includes css_select("#presskits-kit-rows").first["class"].to_s, "divide-y"
@@ -252,6 +253,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     header_row = css_select("#presskits-header-row").first
     assert_select header_row, "a", text: "Header"
     assert_includes header_row.to_html, 'data-flat-pack--icon-name-value="bars-3-bottom-left"'
+    assert_includes header_row["class"], "!items-center"
     refute_includes header_row.to_html, "arrows-up-down"
     refute_includes header_row.to_html, "trash"
     assert_select header_row, "button", count: 0
@@ -263,7 +265,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     items = css_select("#presskits-section-list [role='listitem']")
     assert_equal [hero.id, quotes.id], items.map { |item| item["id"] }
     items.each do |item|
-      assert_includes item.to_html, 'data-flat-pack--icon-name-value="arrows-up-down"'
+      refute_includes item.to_html, "arrows-up-down"
+      assert_includes item["class"], "!items-center"
       assert_includes item.to_html, 'data-flat-pack--icon-name-value="trash"'
       assert_select item, "button[aria-label='Remove']", count: 1
       assert_select item, "input[name='_method'][value='delete']", count: 1
@@ -523,6 +526,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text"
+    text_row = css_select("#presskits-section-list [role='listitem']").find { |item| item["id"] == section.id }
+    assert_includes text_row.to_html, 'data-flat-pack--icon-name-value="document-text"'
+    refute_includes text_row.to_html, "arrows-up-down"
+    assert_includes text_row["class"], "!items-center"
     assert_select ".fp-section-title#launch-notes h2", text: "Launch notes"
     assert_select ".fp-section-title#launch-notes" do |titles|
       refute_includes titles.first.parent["class"].to_s, "gap-4"
@@ -1021,6 +1028,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Images"
+    images_row = css_select("#presskits-section-list [role='listitem']").find { |item| item["id"] == section.id }
+    assert_includes images_row.to_html, 'data-flat-pack--icon-name-value="photo"'
+    refute_includes images_row.to_html, "arrows-up-down"
+    assert_includes images_row["class"], "!items-center"
     assert_select "#presskits-editor-preview img[alt='stage']"
     assert_select "#presskits-editor-preview .fp-section-title h2", text: "Press photos"
     assert_select "#presskits-editor-preview .fp-section-title", text: /Doors at noon/

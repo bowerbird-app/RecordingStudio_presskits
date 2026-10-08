@@ -413,6 +413,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'text: "Save"'
     assert_includes row, 'id: "presskits-header-row"'
     assert_includes row, 'icon: "bars-3-bottom-left"'
+    assert_includes row, 'class: "!items-center"'
     assert_includes row, 'link_to "Header"'
     refute_includes row, "arrows-up-down"
     refute_includes row, "trash"
@@ -448,6 +449,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes images, '"photo"'
     assert_includes quotes, '"chat-bubble-bottom-center-text"'
     assert_includes videos, '"video-camera"'
+    child_path = "app/components/recording_studio_presskits/press_kits/child_component.html.erb"
+    child_ruby = "app/components/recording_studio_presskits/press_kits/child_component.rb"
+    child = File.read(presskits_path(child_path))
+    child_component = File.read(presskits_path(child_ruby))
+    assert_includes child, "icon: row_icon"
+    assert_includes child, 'class: "!items-center"'
+    refute_includes child, "arrows-up-down"
+    assert_includes child_component, "def row_icon"
+    assert_includes child_component, "section_menu_icon"
   end
 
   def presskits_path(relative)
