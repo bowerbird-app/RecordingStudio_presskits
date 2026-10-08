@@ -651,6 +651,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes fields, 'label: "Credit"'
     assert_includes fields, 'search_placeholder: "Search credits"'
     assert_includes fields, 'data: { create_field: "name", fill_from_query: "true" }'
+    assert_includes fields, 'label: "Default role"'
+    refute_includes fields, 'label: "Usual role"'
     assert_includes fields, 'create_field: "usual_role"'
     assert_includes fields, 'form: "collection-editor-unattached"'
     assert_includes order, "moving_recording_id"

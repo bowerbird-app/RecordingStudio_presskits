@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Credits.
 
 ### Added
-- A credit is reusable information for a person or studio in the current workspace. It stores a name, an optional URL, and an optional usual role.
+- A credit is reusable information for a person or studio in the current workspace. It stores a name, an optional URL, and an optional usual role. The new credit modal labels that field **Default role**. The stored name stays `usual_role`.
 - Credits has its own list, create, edit, and trash screens. Trash and restore use Trashable. Restoring a credit puts it back on kits that already listed it.
 - A Credits section can be added to a press kit. Each line stores the role and the order for that kit, and points at the credit. Removing a line leaves the credit in the workspace.
 - The same credit can be used on more than one kit, with a different role on each line. Changing the usual role does not change lines that already exist.

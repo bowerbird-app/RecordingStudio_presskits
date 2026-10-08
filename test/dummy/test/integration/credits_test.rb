@@ -203,6 +203,8 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_select "input[name='credit_id']", count: 0
     assert_select "template input[data-create-field='name'][data-fill-from-query]"
     assert_select "template input[data-create-field='usual_role']"
+    assert_select "template label", text: "Default role"
+    assert_select "template label", text: "Usual role", count: 0
     assert_select "template input[data-create-field='url'][form='collection-editor-unattached']"
     search_url = recording_studio_presskits.search_credits_path
     assert_select "[data-search-url='#{search_url}']"

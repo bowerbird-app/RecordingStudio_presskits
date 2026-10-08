@@ -6,7 +6,7 @@ Credits belong to the workspace. A line in a press kit only says what that credi
 
 Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds three tables and does not change existing kit rows.
 
-`recording_studio_credits` stores `name`, optional `url`, and optional `usual_role`. The column is `usual_role` because Active Record already uses `default_role` for the database connection. `recording_studio_credits_sections` is the section content under a kit section, the same shape as a quote section. `recording_studio_credit_lines` stores `role` and `credit_recording_id`. The name and URL stay on the credit. `Credits.add!` copies `usual_role` onto a new line when that line has no role yet. Later edits to `usual_role` do not revise existing lines.
+`recording_studio_credits` stores `name`, optional `url`, and optional `usual_role`. The column is `usual_role` because Active Record already uses `default_role` for the database connection. The new credit modal labels that field Default role. `recording_studio_credits_sections` is the section content under a kit section, the same shape as a quote section. `recording_studio_credit_lines` stores `role` and `credit_recording_id`. The name and URL stay on the credit. `Credits.add!` copies `usual_role` onto a new line when that line has no role yet. Later edits to `usual_role` do not revise existing lines.
 
 Add these to `config.recordable_types`:
 
