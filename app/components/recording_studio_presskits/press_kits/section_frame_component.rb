@@ -10,11 +10,15 @@ module RecordingStudioPresskits
       end
 
       def title
-        @section_recording.recordable.title.to_s.strip.presence
+        RecordingStudioPresskits.section_heading(@section_recording)
       end
 
       def subtitle
         @section_recording.recordable.subtitle.to_s.strip.presence
+      end
+
+      def saved_title
+        @section_recording.recordable.title.to_s.strip.presence
       end
 
       def content_component
@@ -24,7 +28,7 @@ module RecordingStudioPresskits
       end
 
       def render?
-        title.present? || subtitle.present? || content_visible?
+        saved_title.present? || subtitle.present? || content_visible?
       end
 
       def content_visible?

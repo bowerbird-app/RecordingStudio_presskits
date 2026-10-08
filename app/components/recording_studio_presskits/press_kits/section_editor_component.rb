@@ -17,6 +17,10 @@ module RecordingStudioPresskits
         @section.recordable.title
       end
 
+      def section_title_fallback
+        RecordingStudioPresskits.default_section_heading(@section)
+      end
+
       def section_subtitle
         @section.recordable.subtitle
       end

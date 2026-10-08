@@ -411,13 +411,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "label", text: "Title"
     assert_select "label", text: "Subtitle"
     assert_select "label", text: "Body"
-    assert_select "input[name='kit_section[title]']"
+    assert_select "input[name='kit_section[title]'][placeholder=?]", "Text"
     assert_nil css_select("input[name='kit_section[title]']").first["value"]
     assert_select "input[type=hidden][name='text[body]'][value=?]", RecordingStudioPresskits::Text.opening_body
     assert_includes response.body, "&quot;preset&quot;:&quot;content&quot;"
     assert_includes response.body, "&quot;toolbar&quot;:&quot;standard&quot;"
     assert_select "h1", text: "Text"
     assert_select "label", text: "Text", count: 0
+    assert_select "#presskits-section-preview .fp-section-title h2", text: "Text"
     assert_select "#presskits-section-preview h2", text: "Launch notes"
     assert_select "#presskits-section-preview strong", text: "one-sheet"
     assert_select "#presskits-section-preview li", text: "Photos"
@@ -541,7 +542,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select ".fp-section-title", count: 0
+    assert_select ".fp-section-title h2", text: "Text"
     assert_select "h2", text: "Set list"
   end
 
@@ -919,7 +920,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Images"
     assert_select "label", text: "Title"
     assert_select "label", text: "Subtitle"
-    assert_select "input[name='kit_section[title]']"
+    assert_select "input[name='kit_section[title]'][placeholder=?]", "Images"
     assert_select "input[name='kit_section[subtitle]']"
     refute_select "input[name='images[title]']"
     refute_select "input[name='images[caption]']"
@@ -1059,7 +1060,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       assert_select "[data-flat-pack--icon-name-value='plus']", count: 1
     end
     assert_select "button", text: "Add quote", count: 0
-    assert_select "input[name='kit_section[title]']"
+    assert_select "input[name='kit_section[title]'][placeholder=?]", "Quotes"
     assert_select "input[name='kit_section[subtitle]']"
     assert_heading_form_save_button(kit, section)
     assert_select "textarea[name='quote[body]']", count: 0
@@ -1154,6 +1155,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     publish_quote_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-quotes"
     assert_response :success
+    assert_select ".fp-section-title h2", text: "Quotes"
     assert_select "figure.fp-quote blockquote.text-xl", text: "A line worth printing"
     assert_select "figcaption", text: "— Ada Lovelace, Editor, Press"
     assert_includes css_select("figure.fp-quote").first["class"], "[&>blockquote]:border-l-[length:var(--quote-border-width)]"
@@ -1266,7 +1268,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     }
     follow_redirect!
     assert_section_preview_card
-    assert_select "#presskits-section-preview p", text: "One line"
+    assert_select "#presskits-section-preview .fp-section-title h2", text: "Quotes"
+    assert_select "#presskits-section-preview .fp-section-title", text: /One line/
 
     post recording_studio_presskits.press_kit_sections_path(kit),
          params: { type: "RecordingStudioPresskits::VideoSection" }
@@ -1351,6 +1354,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       }
     }
     follow_redirect!
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    assert_nil section.recordable.title
+    assert_select "#presskits-section-preview .fp-section-title h2", text: "Video"
+    assert_select "input[name='kit_section[title]'][placeholder=?]", "Video"
+
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
       kit_section: { title: "Trailer", subtitle: "Two minutes" }
     }

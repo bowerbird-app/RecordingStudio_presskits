@@ -72,6 +72,14 @@ module RecordingStudioPresskits
       )
     end
 
+    def section_heading(section_recording)
+      section_recording.recordable.title.to_s.strip.presence || default_section_heading(section_recording)
+    end
+
+    def default_section_heading(section_recording)
+      KitQuery.section_content(section_recording)&.type_label.presence || section_recording.type_label
+    end
+
     def register_section(type_name, component: nil, editor: nil, prepare: nil)
       name = RecordingStudio.recordable_type_name(type_name).to_s
       configuration.section_types = (section_types + [name]).uniq

@@ -544,6 +544,29 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes text, "def self.below?"
   end
 
+  def test_section_heading_falls_back_to_the_content_type
+    source = File.read(presskits_path("lib/recording_studio_presskits.rb"))
+    frame_path = "app/components/recording_studio_presskits/press_kits/section_frame_component.rb"
+    editor_path = "app/components/recording_studio_presskits/press_kits/section_editor_component.html.erb"
+    component_path = "app/components/recording_studio_presskits/press_kits/section_editor_component.rb"
+    helper_path = "app/helpers/recording_studio_presskits/application_helper.rb"
+    frame = File.read(presskits_path(frame_path))
+    editor = File.read(presskits_path(editor_path))
+    component = File.read(presskits_path(component_path))
+    helper = File.read(presskits_path(helper_path))
+
+    assert_includes source, "def section_heading"
+    assert_includes source, "def default_section_heading"
+    assert_operator source.index("def section_heading"), :<, source.index("default_section_heading")
+    assert_includes frame, "RecordingStudioPresskits.section_heading"
+    assert_includes frame, "def saved_title"
+    assert_includes frame, "saved_title.present? || subtitle.present? || content_visible?"
+    assert_includes editor, "placeholder: section_title_fallback"
+    assert_includes component, "def section_title_fallback"
+    assert_includes component, "RecordingStudioPresskits.default_section_heading"
+    assert_includes helper, "RecordingStudioPresskits.section_heading"
+  end
+
   def test_text_editor_names_title_and_body
     editor = File.read(
       File.expand_path("../app/components/recording_studio_presskits/text/edit_component.html.erb", __dir__)
