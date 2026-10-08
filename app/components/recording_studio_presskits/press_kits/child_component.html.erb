@@ -1,7 +1,7 @@
 <%= render FlatPack::List::Item.new(id: @recording.id, icon: row_icon, hover: true, class: "!items-center") do %>
   <div class="flex w-full flex-wrap items-center justify-between gap-3">
     <div class="min-w-0 flex-1">
-      <%= link_to row_label, @edit_path, draggable: "false", class: "text-sm font-medium text-(--surface-content-color)" %>
+      <%= link_to row_label, @edit_path, draggable: "false", title: link_title, class: "block min-w-0 truncate text-sm font-medium text-(--surface-content-color)" %>
     </div>
 
     <% if can_remove? %>

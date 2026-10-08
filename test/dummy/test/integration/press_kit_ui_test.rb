@@ -237,6 +237,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}']", text: "Fake block"
     assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}']", text: "Fake block"
+    assert_nil css_select("a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}']").first["title"]
     refute_includes response.body, "Fake block: Hero"
     refute_includes response.body, "Fake block: Quotes"
     assert_select "button", text: "Move up", count: 0
@@ -525,7 +526,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Text"
+    section_link = "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']"
+    assert_select section_link, text: "Launch notes"
+    launch_link = css_select(section_link).first
+    assert_equal "Launch notes", launch_link["title"]
+    assert_includes launch_link["class"], "truncate"
     text_row = css_select("#presskits-section-list [role='listitem']").find { |item| item["id"] == section.id }
     assert_includes text_row.to_html, 'data-flat-pack--icon-name-value="document-text"'
     refute_includes text_row.to_html, "arrows-up-down"
@@ -539,6 +544,20 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: "Set list"
     assert_select "p", text: "Line two"
 
+    long_title = "Night set at the riverside hall with the full band and one more encore"
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      kit_section: { title: long_title, subtitle: "Doors at noon" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    long_link = css_select(section_link).first
+    assert_equal long_title, long_link.text
+    assert_equal long_title, long_link["title"]
+    assert_includes long_link["class"], "block"
+    assert_includes long_link["class"], "truncate"
+
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
       kit_section: { title: "   ", subtitle: "   " },
       text: { body: section_content(section).recordable.body }
@@ -549,6 +568,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
+    blank_link = css_select(section_link).first
+    assert_equal "Text", blank_link.text
+    assert_nil blank_link["title"]
     assert_select ".fp-section-title h2", text: "Text"
     assert_select "h2", text: "Set list"
   end
@@ -1027,7 +1049,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']", text: "Images"
+    images_link = "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, section)}']"
+    assert_select images_link, text: "Images"
+    assert_nil css_select(images_link).first["title"]
     images_row = css_select("#presskits-section-list [role='listitem']").find { |item| item["id"] == section.id }
     assert_includes images_row.to_html, 'data-flat-pack--icon-name-value="photo"'
     refute_includes images_row.to_html, "arrows-up-down"

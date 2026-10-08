@@ -455,8 +455,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     child_component = File.read(presskits_path(child_ruby))
     assert_includes child, "icon: row_icon"
     assert_includes child, 'class: "!items-center"'
+    assert_includes child, "truncate"
+    assert_includes child, "title: link_title"
     refute_includes child, "arrows-up-down"
     assert_includes child_component, "def row_icon"
+    assert_includes child_component, "def row_label"
+    assert_includes child_component, "saved_text_title"
+    assert_includes child_component, "RecordingStudioPresskits::Text"
     assert_includes child_component, "section_menu_icon"
   end
 

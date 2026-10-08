@@ -11,7 +11,11 @@ module RecordingStudioPresskits
       end
 
       def row_label
-        content_recording&.type_label || @recording.type_label
+        saved_text_title || content_type_label
+      end
+
+      def link_title
+        saved_text_title
       end
 
       def row_icon
@@ -26,6 +30,16 @@ module RecordingStudioPresskits
 
       def content_recording
         @content_recording ||= KitQuery.section_content(@recording)
+      end
+
+      def content_type_label
+        content_recording&.type_label || @recording.type_label
+      end
+
+      def saved_text_title
+        return unless content_recording&.recordable_type == "RecordingStudioPresskits::Text"
+
+        @recording.recordable.title.to_s.strip.presence
       end
     end
   end
