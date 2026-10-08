@@ -1,0 +1,34 @@
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(title: @heading, variant: :h1) %>
+
+  <%= form_with url: @url, method: @method, local: true, class: "flex max-w-xl flex-col gap-4" do %>
+    <%= render FlatPack::Button::Component.new(text: button_text, style: :primary, type: "submit") %>
+
+    <%= render FlatPack::TextInput::Component.new(
+      name: "credit[name]",
+      label: "Name",
+      value: credit.name,
+      required: true,
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "credit[usual_role]",
+      label: "Usual role",
+      value: credit.usual_role,
+      help_text: "Kits that already use this credit keep their own role.",
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "credit[url]",
+      label: "URL",
+      value: credit.url,
+      class: "w-full"
+    ) %>
+  <% end %>
+
+  <% if @trash_path %>
+    <%= form_with url: @trash_path, method: :delete, local: true, class: "inline-flex" do %>
+      <%= render FlatPack::Button::Component.new(text: "Trash", icon: "trash", style: :ghost, type: "submit") %>
+    <% end %>
+  <% end %>
+</div>

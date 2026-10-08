@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-10-08
+
+Credits.
+
+### Added
+- A credit is reusable information for a person or studio in the current workspace. It stores a name, an optional URL, and an optional usual role. The new credit modal labels that field **Default role**. The stored name stays `usual_role`.
+- Credits has its own list, create, edit, and trash screens. Trash and restore use Trashable. Restoring a credit puts it back on kits that already listed it.
+- A Credits section can be added to a press kit. Each line stores the role and the order for that kit, and points at the credit. Removing a line leaves the credit in the workspace.
+- The same credit can be used on more than one kit, with a different role on each line. Changing the usual role does not change lines that already exist.
+- A Credits section keeps Title and Subtitle on the Section title tab. On Content, a collection editor searches workspace credits, creates one from a modal, and sets **Role on this kit** on each line. **Save** sits under that table. It starts in the default style and turns primary when the rows no longer match the saved lines. The preview column follows a chosen credit, a role edit, a removed row, and a saved reorder before the page reloads. An empty credits section does not show a preview card.
+- The public page and the kit preview show the role, the name, and a link when the credit has a URL.
+- When Recording Studio API is loaded, a credit exposes index, show, create, and update. A credits section exposes `add_credit` and `reorder_credits`. A credit line exposes index, show, update, and `remove_credit`.
+- Version `0.21.0`
+
+### Changed
+- FlatPack is `>= 0.1.204` (dummy tag `v0.1.204`).
+
+### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. That adds `recording_studio_credits`, `recording_studio_credits_sections`, and `recording_studio_credit_lines`.
+- Add `RecordingStudioPresskits::Credit`, `RecordingStudioPresskits::CreditsSection`, and `RecordingStudioPresskits::CreditLine` to `recordable_types`.
+- Add a credit with `RecordingStudioPresskits::Credits.create!`. Add one to a section with `RecordingStudioPresskits::Credits.add!`. Do not copy the name or URL onto the line.
+- Bump FlatPack to at least `0.1.204`. Reload its CSS and JavaScript. `style:` on FlatPack tabs is a button style name. Press kits do not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. The credits section uses `FlatPack::CollectionEditor::Component`. Importmap hosts that already pin Flatpack controllers load `flat-pack--collection-editor` and `flat-pack--list-orderable` with no new register call. Reload the press kits JavaScript too. The credits preview follows a chosen credit, a role edit, and a removed row without waiting for Save. **Save** on that form is under the table, `style: :default`, and the `flat-pack--unsaved-changes` submit target. It turns primary when the rows change.
+
 ## [0.20.0] - 2026-10-07
 
 Video section.
@@ -457,7 +480,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.17.0...v0.18.0

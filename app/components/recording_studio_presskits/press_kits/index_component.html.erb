@@ -13,6 +13,13 @@
       href: @new_path
     ) %>
 
+    <%= render FlatPack::Button::Component.new(
+      text: "Credits",
+      icon: "user-group",
+      style: :secondary,
+      href: @credits_path
+    ) %>
+
     <%= render FlatPack::ButtonGroup::Component.new do |group| %>
       <% group.button(FlatPack::Button::Component.new(
         icon: "squares-2x2",

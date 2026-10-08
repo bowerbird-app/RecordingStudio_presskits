@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.20.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.21.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -15,11 +15,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
       "db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
       "db/migrate/20261007120000_create_recording_studio_video_sections.rb",
+      "db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
       "test/dummy/db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
       "test/dummy/db/migrate/20261007120000_create_recording_studio_video_sections.rb",
+      "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
@@ -41,7 +43,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.202"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.204"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -56,7 +58,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.202"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.204"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -249,8 +251,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.202\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.202"'
+    assert_includes readme, "tag: \"v0.1.204\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.204"'
     assert_includes readme, "FlatPack::Tabs::Component"
     assert_includes readme, "variant: :pills"
     assert_includes readme, "Section title"
@@ -611,6 +613,86 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes component, "def self.preview?"
     refute_includes show, "FlatPack::SectionTitle::Component"
     refute_includes show, "gap-4"
+  end
+
+  def test_credits_section_edits_lines_in_a_collection_editor
+    editor = File.read(presskits_path(
+                         "app/components/recording_studio_presskits/credits_section/edit_component.html.erb"
+                       ))
+    fields = File.read(presskits_path(
+                         "app/views/recording_studio_presskits/credits_section/_line_fields.html.erb"
+                       ))
+    component = File.read(presskits_path(
+                            "app/components/recording_studio_presskits/credits_section/edit_component.rb"
+                          ))
+    order = File.read(presskits_path("lib/recording_studio_presskits/quote_order.rb"))
+    routes = File.read(presskits_path("config/routes.rb"))
+
+    assert_includes editor, "FlatPack::CollectionEditor::Component"
+    assert_includes editor, 'add_label: "Credit"'
+    assert_includes editor, 'empty_text: "No credits yet"'
+    assert_includes editor, 'text: "Save"'
+    assert_includes editor, "style: :default"
+    refute_includes editor, "style: :primary"
+    assert_includes editor, "flat-pack--unsaved-changes"
+    assert_includes editor, '"flat-pack--unsaved-changes-target": "submit"'
+    assert_includes editor, 'id="presskits-credit-lines-save"'
+    assert_operator editor.index("FlatPack::CollectionEditor::Component"), :<, editor.index('text: "Save"')
+    assert_includes editor, "moving_recording_id"
+    assert_includes editor, "target_position"
+    assert_includes editor, 'child_index: "NEW_RECORD"'
+    refute_includes editor, "Add credit"
+    refute_includes component, "def section_actions"
+    refute File.exist?(presskits_path(
+                         "app/components/recording_studio_presskits/credits_section/actions_component.rb"
+                       ))
+    assert_includes fields, 'label: "Role on this kit"'
+    assert_includes fields, "chrome: :cell"
+    assert_includes fields, 'label: "Credit"'
+    assert_includes fields, 'search_placeholder: "Search credits"'
+    assert_includes fields, 'data: { create_field: "name", fill_from_query: "true" }'
+    assert_includes fields, 'label: "Default role"'
+    refute_includes fields, 'label: "Usual role"'
+    assert_includes fields, 'create_field: "usual_role"'
+    assert_includes fields, 'form: "collection-editor-unattached"'
+    assert_includes order, "moving_recording_id"
+    assert_includes order, "target_position"
+    assert_includes routes, "get :search"
+    assert_includes routes, "resource :credit_lines, only: :update"
+    assert_includes editor, "recording-studio-presskits--credit-preview"
+    assert_includes editor, "preview_actions"
+    assert_includes editor, "data-credit-catalog"
+    assert_includes component, "def preview_actions"
+    assert_includes component, "collection-editor:selected->recording-studio-presskits--credit-preview#choose"
+    assert_includes component, "input->recording-studio-presskits--credit-preview#role"
+    assert_includes component, "click->recording-studio-presskits--credit-preview#drop"
+    assert_includes component, "click->recording-studio-presskits--credit-preview#note"
+    assert_includes component, "list:reordered->recording-studio-presskits--credit-preview#sync"
+    assert_includes component, "def credit_catalog"
+    show = File.read(presskits_path(
+                       "app/components/recording_studio_presskits/credits_section/component.html.erb"
+                     ))
+    assert_includes show, "data-credit-lines"
+    assert_includes show, "data-credit-line-id"
+    assert_includes show, "data-credit-role"
+    assert_includes show, "data-credit-name"
+    refute_includes show, "if lines.any?"
+    preview = File.read(presskits_path(
+                          "app/javascript/recording_studio_presskits/controllers/credit_preview_controller.js"
+                        ))
+    assert_includes preview, "presskits-section-preview"
+    assert_includes preview, "data-credit-line-id"
+    assert_includes preview, "choose(event)"
+    assert_includes preview, "role(event)"
+    assert_includes preview, "drop(event)"
+    assert_includes preview, "note(event)"
+    assert_includes preview, "markFormChanged"
+    assert_includes preview, "orderableUnsaved"
+    show_component = File.read(presskits_path(
+                                 "app/components/recording_studio_presskits/credits_section/component.rb"
+                               ))
+    assert_includes show_component, "def render?"
+    assert_includes show_component, "lines.any?"
   end
 
   def test_video_routes_initializer_and_gemfile_pins

@@ -317,8 +317,11 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_includes types, "RecordingStudioPresskits::Text"
     assert_includes types, "RecordingStudioPresskits::Images"
     assert_includes types, "RecordingStudioPresskits::QuoteSection"
+    assert_includes types, "RecordingStudioPresskits::CreditsSection"
     assert_includes types, "RecordingStudioPresskits::VideoSection"
     refute_includes types, "RecordingStudioPresskits::Quote"
+    refute_includes types, "RecordingStudioPresskits::Credit"
+    refute_includes types, "RecordingStudioPresskits::CreditLine"
     refute_includes types, "RecordingStudioVideo::Video"
     refute_includes types, "Workspace"
     refute_includes types, "Folder"
@@ -367,6 +370,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "document-text", RecordingStudioPresskits::Text.section_menu_icon
     assert_equal "photo", RecordingStudioPresskits::Images.section_menu_icon
     assert_equal "chat-bubble-bottom-center-text", RecordingStudioPresskits::QuoteSection.section_menu_icon
+    assert_equal "user-group", RecordingStudioPresskits::CreditsSection.section_menu_icon
     assert_equal "video-camera", RecordingStudioPresskits::VideoSection.section_menu_icon
     assert_nil FakeBlock.try(:section_menu_icon)
   end
@@ -575,7 +579,57 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_nil second.reload.trashed_at
   end
 
+  test "a credit lives on the workspace and a line lives under the credits section" do
+    root, kit = spring_kit
+    credit = RecordingStudioPresskits::Credits.create!(
+      root_recording: root,
+      name: "Tom Ross",
+      usual_role: "Photography",
+      url: "https://example.com/tom"
+    )
+    section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::CreditsSection",
+      title: "Project credits"
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+
+    assert_equal root, credit.parent_recording
+    assert_equal "Credits", content.type_label
+    assert_credit_placement(root, kit, section, content)
+    assert_credit_capabilities
+  end
+
   private
+
+  def assert_credit_placement(root, kit, section, content)
+    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Credit", parent_recording: root)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Credit", parent_recording: kit)
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::CreditsSection",
+      parent_recording: section
+    )
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::CreditLine",
+      parent_recording: content
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::CreditLine",
+      parent_recording: section
+    )
+  end
+
+  def assert_credit_capabilities
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Credit")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::CreditLine")
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::CreditsSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Credit")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Credit")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::CreditLine")
+
+    options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::CreditsSection").to_h
+    assert_equal ["RecordingStudioPresskits::CreditLine"], Array(options[:allows]).map(&:to_s)
+  end
 
   def record_child(recordable, root_recording, parent_recording)
     RecordingStudio.record!(

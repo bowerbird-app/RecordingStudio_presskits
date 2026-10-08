@@ -1,17 +1,24 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/api/quote_payload"
+require "recording_studio_presskits/api/credit_payload"
+require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/api/section_action"
 require "recording_studio_presskits/api/create_section"
 require "recording_studio_presskits/api/reorder_sections"
 require "recording_studio_presskits/api/remove_section"
+require "recording_studio_presskits/api/add_credit"
+require "recording_studio_presskits/api/reorder_credits"
+require "recording_studio_presskits/api/remove_credit"
 require "recording_studio_presskits/api/section_action_registration"
+require "recording_studio_presskits/api/credit_registration"
 
 module RecordingStudioPresskits
   module Api
     extend SectionActionRegistration
+    extend CreditRegistration
 
     class << self
       def register!
@@ -22,6 +29,7 @@ module RecordingStudioPresskits
         register_text
         register_quote
         register_quote_section
+        register_credits!
         register_video_section
         register_section_actions
       end
@@ -102,15 +110,11 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::VideoSection",
           operations: %i[index show],
-          serializer: video_section_serializer,
+          serializer: lambda { |_recordable, recording: nil, **|
+            { videos: VideoPayload.for_recording(recording) }
+          },
           output_keys: %i[videos]
         )
-      end
-
-      def video_section_serializer
-        lambda { |_recordable, recording: nil, **|
-          { videos: VideoPayload.for_recording(recording) }
-        }
       end
 
       def register_type(type_name, **)

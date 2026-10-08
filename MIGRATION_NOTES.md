@@ -1,5 +1,33 @@
 # Upgrade notes
 
+## 0.21.0
+
+Credits belong to the workspace. A line in a press kit only says what that credit did on that kit.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds three tables and does not change existing kit rows.
+
+`recording_studio_credits` stores `name`, optional `url`, and optional `usual_role`. The column is `usual_role` because Active Record already uses `default_role` for the database connection. The new credit modal labels that field Default role. `recording_studio_credits_sections` is the section content under a kit section, the same shape as a quote section. `recording_studio_credit_lines` stores `role` and `credit_recording_id`. The name and URL stay on the credit. `Credits.add!` copies `usual_role` onto a new line when that line has no role yet. Later edits to `usual_role` do not revise existing lines.
+
+Add these to `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::Credit",
+"RecordingStudioPresskits::CreditsSection",
+"RecordingStudioPresskits::CreditLine"
+```
+
+`Credit` allows the same parent as a press kit, `RecordingStudioPresskits.parent_root_type`. `CreditsSection` allows a kit section. `CreditLine` allows a credits section. Orderable on the credits section allows credit lines. Trashable is on all three. Publishable and Duplicatable stay off them. Duplicating a kit copies the lines and keeps each `credit_recording_id`, so the copy still points at the workspace credits.
+
+Trash a credit with `recording_studio_trashable_trash!`. Restore it with `recording_studio_trashable_restore!`. The line stays. The public page skips a line whose credit is trashed or missing. Restoring the credit shows that line again. Removing a line trashes the line only.
+
+Create credits with `RecordingStudioPresskits::Credits.create!` on the workspace root. Add one to a section with `Credits.add!`. Revise the reusable fields with `Credits.revise!`. Revise one kit's role with `Credits.revise_role!`. List the workspace credits with `Credits.active_for_root`. A credit from another root is refused.
+
+The screens are `GET /credits` for the workspace list, and the Credits item in + Section for a kit. Title and Subtitle stay on the Section title tab. On Content, a collection editor adds each line. The first column searches `GET /credits/search` and creates with `POST /credits` when the response is JSON. The second column is the role on this kit. **Save** sits under the table and patches the lines. It starts in the default style and turns primary when the rows no longer match the saved lines. A blank role on a new line still copies `usual_role`. The preview column follows a chosen credit, a role edit, and a removed row before Save. A blank role on a new row shows that usual role. Dragging a saved row patches `moving_recording_id` and a 1-based `target_position`. The response is `{ ok: true }`. The preview follows that order too. `recording_id` with `before_recording_id` or `after_recording_id` still reorders a line. Reload the press kits JavaScript with this version.
+
+When Recording Studio API is loaded, credits expose index, show, create, and update. There is no credit destroy operation. Trash the recording so existing lines keep their id. `add_credit` and `reorder_credits` are on the credits section. `remove_credit` is on the line. A line's show payload is `role`, `name`, `url`, and `credit_id`. `name` and `url` are read from the credit when it is still active. The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A video section also includes `videos`.
+
+Bump FlatPack to `>= 0.1.204` (dummy tag `v0.1.204`). Reload kit CSS and JavaScript. `style:` on FlatPack tabs is a button style name. This gem does not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. The credits section uses the collection editor. Importmap hosts that already pin Flatpack controllers load it with no new register call. `CreditsSection::Component#render?` is false when no visible line remains, so an empty credits section does not show a preview card.
+
 ## 0.20.0
 
 A press kit can hold a video section. Press Kits owns the section. Recording Studio Video owns the recording. External Embed owns provider embeds.

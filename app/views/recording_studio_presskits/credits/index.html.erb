@@ -1,0 +1,12 @@
+<% presskits_page_nav(
+  title: "Credits",
+  back_url: press_kits_path,
+  back_label: "Press kits",
+  close_url: press_kits_path
+) %>
+
+<%= render RecordingStudioPresskits::Credits::IndexComponent.new(
+  credit_recordings: @credit_recordings,
+  new_path: new_credit_path,
+  edit_path: ->(recording) { edit_credit_path(recording) }
+) %>

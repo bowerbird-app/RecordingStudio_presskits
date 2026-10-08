@@ -19,6 +19,10 @@ require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/admin"
 require "recording_studio_presskits/api"
 require "recording_studio_presskits/quote_order"
+require "recording_studio_presskits/credits"
+require "recording_studio_presskits/credits/picker"
+require "recording_studio_presskits/credit_line_batch"
+require "recording_studio_presskits/credit_line_batch/sync"
 
 module RecordingStudioPresskits
   class << self

@@ -17,6 +17,7 @@ module RecordingStudioPresskits
         register_text_section
         register_images_section
         register_quote_section
+        register_credits_section
         register_video_section
       end
 
@@ -81,6 +82,14 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::QuoteSection",
           component: "RecordingStudioPresskits::QuoteSection::Component",
           editor: "RecordingStudioPresskits::QuoteSection::EditComponent"
+        )
+      end
+
+      def register_credits_section
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::CreditsSection",
+          component: "RecordingStudioPresskits::CreditsSection::Component",
+          editor: "RecordingStudioPresskits::CreditsSection::EditComponent"
         )
       end
 
