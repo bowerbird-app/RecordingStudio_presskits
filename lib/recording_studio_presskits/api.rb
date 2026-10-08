@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/api/quote_payload"
+require "recording_studio_presskits/api/fact_payload"
 require "recording_studio_presskits/api/credit_payload"
 require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
@@ -29,6 +30,8 @@ module RecordingStudioPresskits
         register_text
         register_quote
         register_quote_section
+        register_fact
+        register_facts_section
         register_credits!
         register_video_section
         register_section_actions
@@ -56,7 +59,7 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
           serializer: kit_section_serializer,
-          output_keys: %i[title subtitle content_type content_id videos],
+          output_keys: %i[title subtitle content_type content_id videos display facts],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )
@@ -104,6 +107,42 @@ module RecordingStudioPresskits
 
       def register_quote_section
         register_type("RecordingStudioPresskits::QuoteSection", **empty_section_options)
+      end
+
+      def register_fact
+        ::RecordingStudioApi.register_recordable_type_api(
+          "RecordingStudioPresskits::Fact",
+          **fact_registration
+        )
+      end
+
+      def fact_registration
+        {
+          operations: %i[index show create update destroy],
+          serializer: fact_serializer,
+          output_keys: fact_keys,
+          writable_attributes: fact_keys
+        }
+      end
+
+      def fact_keys
+        %i[label value unit description source_url as_of_date]
+      end
+
+      def fact_serializer
+        ->(recordable, **) { FactPayload.for(recordable) }
+      end
+
+      def register_facts_section
+        register_type(
+          "RecordingStudioPresskits::FactsSection",
+          operations: %i[index show update],
+          serializer: lambda { |recordable, recording: nil, **|
+            FactPayload.for_recording(recording || RecordingStudio::Recording.find_by(recordable: recordable))
+          },
+          output_keys: %i[display facts],
+          writable_attributes: %i[display_style columns]
+        )
       end
 
       def register_video_section

@@ -20,6 +20,8 @@ RecordingStudioPresskits::Engine.routes.draw do
         resource :image, only: :destroy, controller: "quote_images"
       end
       resource :quote_order, only: :update, controller: "quote_orders"
+      resources :facts, only: %i[new create edit update destroy]
+      resource :fact_order, only: :update, controller: "fact_orders"
       resources :credits, only: %i[new create edit update destroy], controller: "section_credits"
       resource :credit_lines, only: :update, controller: "section_credit_lines"
       resource :credit_order, only: :update, controller: "credit_orders"

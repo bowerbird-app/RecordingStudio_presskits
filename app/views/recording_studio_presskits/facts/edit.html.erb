@@ -1,0 +1,13 @@
+<% fact = @fact || @fact_recording.recordable %>
+<% presskits_page_nav(
+  title: fact.title.presence || "Fact",
+  back_url: edit_press_kit_section_path(@press_kit_recording, @section_recording),
+  back_label: "Back to facts",
+  close_url: edit_press_kit_path(@press_kit_recording)
+) %>
+
+<%= render RecordingStudioPresskits::Fact::EditComponent.new(
+  fact: fact,
+  section_recording: @section_recording,
+  fact_recording: @fact_recording
+) %>

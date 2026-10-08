@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/api/video_payload"
+require "recording_studio_presskits/api/fact_payload"
 
 module RecordingStudioPresskits
   module Api
@@ -9,10 +10,19 @@ module RecordingStudioPresskits
         recording ||= RecordingStudio::Recording.find_by(recordable: recordable)
         content = recording && KitQuery.section_content(recording)
         payload = headings(recordable, content)
-        return payload unless content&.recordable_type == VideoSection.name
-
-        payload.merge(videos: VideoPayload.for_recording(content))
+        extras = extras_for(content)
+        extras ? payload.merge(extras) : payload
       end
+
+      def self.extras_for(content)
+        case content&.recordable_type
+        when VideoSection.name
+          { videos: VideoPayload.for_recording(content) }
+        when FactsSection.name
+          FactPayload.for_recording(content)
+        end
+      end
+      private_class_method :extras_for
 
       def self.headings(recordable, content)
         {

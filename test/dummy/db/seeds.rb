@@ -181,6 +181,60 @@ begin
   )
   ensure_credits_section.call(unpublished_kit_recording, "Credits", [[tom, "Creative Direction"]])
 
+  ensure_facts_section = lambda do |kit_recording, title, display_style, columns, facts|
+    existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
+      section.recordable.title == title
+    end
+    section = existing || RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit_recording,
+      content_type: "RecordingStudioPresskits::FactsSection",
+      actor: user,
+      title: title
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    if content.recordable.display_style != display_style || content.recordable.columns != columns
+      root_recording.revise(content, actor: user) do |recordable|
+        recordable.display_style = display_style
+        recordable.columns = columns
+      end
+    end
+    facts.each do |label, value, unit|
+      already = RecordingStudioPresskits::FactsSection.active_facts(content).any? do |child|
+        child.recordable.label == label && child.recordable.value == value
+      end
+      next if already
+
+      content.record(RecordingStudioPresskits::Fact, parent_recording: content, actor: user) do |fact|
+        fact.label = label
+        fact.value = value
+        fact.unit = unit
+      end
+    end
+  end
+
+  ensure_facts_section.call(
+    press_kit_recording,
+    "Company statistics",
+    "cards",
+    3,
+    [
+      ["Projects", "120", nil],
+      ["Countries", "15", nil],
+      ["Employees", "85", nil]
+    ]
+  )
+  ensure_facts_section.call(
+    press_kit_recording,
+    "Project specifications",
+    "list",
+    3,
+    [
+      ["Floor area", "420", "m²"],
+      ["Completion", "2025", nil],
+      ["Project cost", "2.4 million", "AUD"]
+    ]
+  )
+
   [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
     bootstrap_owner_access.call(recording, user)
   end
