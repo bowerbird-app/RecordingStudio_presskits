@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## 0.21.2
+
+Bump FlatPack to `>= 0.1.209` (dummy tag `v0.1.209`). Reload kit CSS. The credits collection editor call sites stay the same. Below 40rem FlatPack stacks each row: handle, name, and remove on one line, **Role on this kit** underneath as a normal bordered field. Wide screens keep the table. Chip edit (`update_url`) from `0.1.208` is unused; the chip name stays plain text.
+
+## 0.21.1
+
+Pin Admin `v2.0.6` and FlatPack `v0.1.207`. Reload kit CSS. Dummy PageNav maps back to `secondary_anchor_href`.
+
 ## 0.21.0
 
 Credits belong to the workspace. A line in a press kit only says what that credit did on that kit.

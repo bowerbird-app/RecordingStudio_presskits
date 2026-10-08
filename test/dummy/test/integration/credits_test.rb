@@ -209,6 +209,7 @@ class CreditsTest < ActionDispatch::IntegrationTest
     search_url = recording_studio_presskits.search_credits_path
     assert_select "[data-search-url='#{search_url}']"
     assert_select "[data-create-url='#{recording_studio_presskits.credits_path}']"
+    assert_select "#presskits-credit-lines [data-update-url]", count: 0
     empty_order = recording_studio_presskits.press_kit_section_credit_order_path(empty_kit, empty_section)
     assert_select "[data-flat-pack--list-orderable-orderable-url-value='#{empty_order}']"
     assert_select "[data-flat-pack--list-orderable-param-uuid-name-value='moving_recording_id']"

@@ -19,6 +19,15 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_includes css, "radius-lg"
   end
 
+  test "dummy FlatPack 0.1.209 stacks collection editor rows below 40rem" do
+    assert_equal "0.1.209", FlatPack::VERSION
+    css = FlatPack::Engine.root.join("app/assets/stylesheets/flat_pack/application.css").read
+
+    assert_includes css, "@media (min-width: 40rem)"
+    assert_includes css, ".flat-pack-collection-editor-row"
+    assert_includes css, ".flat-pack-collection-editor-fields"
+  end
+
   test "dummy app validates recordable declarations" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_equal [ "AdminRoot", "Workspace" ].sort, RecordingStudio.root_recordable_types.sort

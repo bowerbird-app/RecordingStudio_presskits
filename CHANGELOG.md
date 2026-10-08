@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.2] - 2026-10-08
+
+FlatPack 0.1.209.
+
+### Changed
+- FlatPack is `>= 0.1.209` (dummy tag `v0.1.209`).
+- Version `0.21.2`
+
+### Upgrade notes
+- Bump FlatPack to at least `0.1.209` and reload its CSS. The credits collection editor keeps the table on a wide screen. Below 40rem each row drops the table lines: handle, name, and remove sit on one line, **Role on this kit** sits underneath as a normal bordered field, and the chip's own remove control hides. Call sites stay the same. Omit `update_url` on the credit chip so the name stays plain text. `0.1.208`'s chip edit is optional and unused here.
+
+## [0.21.1] - 2026-10-08
+
+Admin 2.0.6 and FlatPack 0.1.207.
+
+### Changed
+- Dummy and Gemfile pin `recording_studio_admin` `v2.0.6` and FlatPack `v0.1.207`.
+
+### Upgrade notes
+- Pin Admin `v2.0.6` and FlatPack `v0.1.207`. Reload kit CSS. Dummy PageNav maps back to `secondary_anchor_href`.
+
 ## [0.21.0] - 2026-10-08
 
 Credits.
@@ -480,7 +501,9 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.2...HEAD
+[0.21.2]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.1...v0.21.2
+[0.21.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...v0.19.0
