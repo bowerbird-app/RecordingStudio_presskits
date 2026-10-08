@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-08
+
+Image list and slides.
+
+### Changed
+- The images section edits photos with Attachable's list and slides. List opens first. Slides shows one photo at a time, with its own caption, credit, alt text, and Save. Saving a slide stays on that slide. Saving the list reloads the page. A refresh returns to List. An empty section still shows Upload and "No images yet."
+- Attachable is `~> 0.8` (tag `v0.8.0`). FlatPack is `>= 0.1.205` (dummy tag `v0.1.205`).
+- Version `0.22.0`
+
+### Upgrade notes
+- Bump `recording_studio_attachable` to `~> 0.8` (tag `v0.8.0`) and FlatPack to at least `0.1.205` (tag `v0.1.205`). Reload FlatPack CSS and JavaScript, and reload Attachable controllers. `collection_display_controller` lives with the other Attachable controllers.
+- No migration.
+- A host that replaced `Images::EditComponent#attachment_collection_options`, or that calls `attachment_collection_editor` on its own, passes `displays: %i[list carousel]` and `default_display: :list`. Quote images stay a single upload.
+
 ## [0.21.0] - 2026-10-08
 
 Credits.
@@ -480,7 +494,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...v0.19.0
