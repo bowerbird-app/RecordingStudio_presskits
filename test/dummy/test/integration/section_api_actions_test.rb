@@ -125,6 +125,13 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     kit_section = registry.types.fetch("RecordingStudioPresskits::KitSection")
     assert_includes kit_section[:output_keys], :title
     assert_includes kit_section[:output_keys], :videos
+    assert_includes kit_section[:output_keys], :location
+
+    location = registry.types.fetch("RecordingStudio::Location::Location")
+    assert_equal %i[show update], location[:operations]
+    assert_includes location[:output_keys], :name
+    assert_includes location[:output_keys], :locality
+    assert_includes location[:output_keys], :latitude
   end
 
   test "section actions register once against orderable and trashable" do

@@ -14,6 +14,7 @@ module RecordingStudioPresskits
     helper ::RecordingStudio::LayoutHelper if defined?(::RecordingStudio::LayoutHelper)
     helper ::RecordingStudioAccessible::AvatarsHelper if defined?(::RecordingStudioAccessible::AvatarsHelper)
     helper ::RecordingStudioPublishable::Engine.helpers if defined?(::RecordingStudioPublishable::Engine)
+    helper ::RecordingStudioLocation::Engine.helpers if defined?(::RecordingStudioLocation::Engine)
 
     before_action :authenticate_presskits_actor!
     before_action :set_presskits_current_actor

@@ -7,5 +7,6 @@
 
 <%= render RecordingStudioPresskits::PressKits::SectionEditorComponent.new(
   recording: @section_recording,
-  update_path: press_kit_section_path(@press_kit_recording, @section_recording)
+  update_path: press_kit_section_path(@press_kit_recording, @section_recording),
+  unsaved_recordable: @unsaved_recordable
 ) %>

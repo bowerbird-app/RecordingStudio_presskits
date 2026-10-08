@@ -33,7 +33,9 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Credit")
     assert_equal [ "RecordingStudioPresskits::CreditsSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::CreditLine")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location")
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::VideoSection"
+    assert_includes RecordingStudioPresskits.picker_types, "RecordingStudio::Location::Location"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioVideo::Video"
     assert_equal "Text", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Text)
     assert_equal "Images", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Images)
@@ -86,6 +88,12 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.column_exists?(:recording_studio_kit_sections, :title)
     assert connection.column_exists?(:recording_studio_kit_sections, :subtitle)
     refute connection.column_exists?(:recording_studio_kit_sections, :updated_at)
+    assert connection.table_exists?(:recording_studio_locations)
+    assert connection.column_exists?(:recording_studio_locations, :name)
+    assert connection.column_exists?(:recording_studio_locations, :locality)
+    assert connection.column_exists?(:recording_studio_locations, :country_code)
+    assert connection.column_exists?(:recording_studio_locations, :latitude)
+    assert connection.column_exists?(:recording_studio_locations, :longitude)
     refute connection.column_exists?(:recording_studio_images, :updated_at)
     assert connection.table_exists?(:active_storage_blobs)
     refute connection.column_exists?(:recording_studio_texts, :updated_at)
@@ -143,8 +151,14 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal unpublished_kit_recording.root_recording, root_recording
     spring_sections = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
     autumn_sections = RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
-    assert_equal ["Project credits"], spring_sections.map { |section| section.recordable.title }
+    assert_equal ["Project credits", "Project location"], spring_sections.map { |section| section.recordable.title }
     assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
+    location_section = spring_sections.find { |section| section.recordable.title == "Project location" }
+    location = RecordingStudioPresskits::KitQuery.section_content(location_section).recordable
+    assert_kind_of RecordingStudio::Location::Location, location
+    assert_equal "The Pavilion", location.name
+    assert_equal "Melbourne", location.locality
+    assert_equal "AU", location.country_code
     spring_lines = RecordingStudioPresskits::Credits.visible_lines(
       RecordingStudioPresskits::KitQuery.section_content(spring_sections.first)
     )

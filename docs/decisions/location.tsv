@@ -1,0 +1,7 @@
+ts	phase	decision	why	evidence	result
+2026-10-08T08:50:00Z	tree	Location is a content child of KitSection, not a LocationSection wrapper	The brief forbids a second model. Text is the same shape: one content recordable under the kit section.	app/models/recording_studio_presskits/kit_section.rb	open
+2026-10-08T08:50:00Z	capability	KitSection enables RecordingStudio::Capabilities::Location.to	Location does not list host parents. The capability is how a place becomes a legal child.	app/models/recording_studio_presskits/kit_section.rb	open
+2026-10-08T08:50:00Z	picker	picker_types uses allowed_parent_types_for	Location has no declared allowed_parent_types. Declared-only would hide it from + Section.	lib/recording_studio_presskits.rb	open
+2026-10-08T08:50:00Z	ui	Reuse recording_studio_location_fields and recording_studio_location_display	Location owns fields, validation, and formatting. Press Kits only wraps them as a section.	app/components/recording_studio_presskits/location	open
+2026-10-08T08:50:00Z	api	Nest location on the kit section payload, matching videos	Agents need structured place fields on the complete kit walk. No second Location API.	lib/recording_studio_presskits/api/section_payload.rb	open
+2026-10-08T08:50:00Z	maps	Optional OpenStreetMap link, no embed and no geocode on save	The brief asked for a simple external link and forbade auto geocoding.	lib/recording_studio_presskits/location_content.rb	open

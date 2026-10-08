@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-08
+
+Location section.
+
+### Added
+- A press kit can add a Location section. Press Kits owns the section. Recording Studio Location owns the place. There is no LocationSection model and no copy of the locations table.
+- `RecordingStudio::Location::Location` sits under a kit section. KitSection enables `RecordingStudio::Capabilities::Location.to`. Zero, one, or many location sections can sit on one kit. Order them with Orderable on the kit.
+- The + Section menu label is Location and the icon is `map-pin`. The Content tab renders `recording_studio_location_fields(form)`. Title and subtitle stay on Section title. The preview, owner preview, and public page render `recording_studio_location_display(location)` inside `SectionFrameComponent`. A filled place can also show **Open map**, an external OpenStreetMap link. Saving never geocodes.
+- When Recording Studio API is loaded, a location section nests a `location` object on the kit section payload: `name`, `address_line_1`, `address_line_2`, `locality`, `region`, `postal_code`, `country_code`, `latitude`, and `longitude`. Location also exposes show and update for those keys. MCP uses the same payload.
+- Version `0.22.0`
+
+### Changed
+- `picker_types` and `create_section!` accept a content type whose parent is a kit section through a capability, not only through `allowed_parent_types` on that class. Location needs that. Text, Images, Quotes, Credits, and Video still declare the kit section themselves.
+
+### Upgrade notes
+- Add `recording_studio_location`, `~> 0.2` (tag `v0.2.0`).
+- Add `RecordingStudio::Location::Location` to `recordable_types`.
+- Run `bin/rails generate recording_studio_location:install`, `bin/rails generate recording_studio_location:migrations`, then `bin/rails db:migrate`. The host owns `recording_studio_locations`. Press Kits does not copy that table. See `MIGRATION_NOTES.md`.
+
 ## [0.21.0] - 2026-10-08
 
 Credits.

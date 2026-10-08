@@ -1,5 +1,37 @@
 # Upgrade notes
 
+## 0.22.0
+
+A press kit can hold a location section. Press Kits owns the section. Recording Studio Location owns the place.
+
+Add the gem:
+
+```ruby
+gem "recording_studio_location", "~> 0.2", github: "bowerbird-app/RecordingStudio_location", tag: "v0.2.0"
+```
+
+Add the recordable type:
+
+```ruby
+"RecordingStudio::Location::Location"
+```
+
+Run Location's generators, then migrate:
+
+```bash
+bin/rails generate recording_studio_location:install
+bin/rails generate recording_studio_location:migrations
+bin/rails db:migrate
+```
+
+Do not copy `recording_studio_locations` into Press Kits. Location's migration is the one that creates that table. KitSection already enables `RecordingStudio::Capabilities::Location.to`. Do not enable Location on PressKit. A location is a content child of a kit section.
+
+`create_section!` with `content_type: "RecordingStudio::Location::Location"` writes the kit section and the location in one transaction. The Content tab uses `recording_studio_location_fields(form)`. Display uses `recording_studio_location_display(location)`. Saving does not geocode. Leave Location credentials on the host.
+
+When Recording Studio API is loaded, a kit section still returns `title`, `subtitle`, `content_type`, and `content_id`. `:location` is declared on that output. The object is included only when the content type is `RecordingStudio::Location::Location`. Each field is present. Blank optional values are `null`. Location also exposes show and update. Do not register a second Location API from the host.
+
+`picker_types` now uses `RecordingStudio.allowed_parent_types_for`. A registered content type whose parent is a kit section through a capability can appear on + Section. Types that already declare that parent are unchanged.
+
 ## 0.21.0
 
 Credits belong to the workspace. A line in a press kit only says what that credit did on that kit.

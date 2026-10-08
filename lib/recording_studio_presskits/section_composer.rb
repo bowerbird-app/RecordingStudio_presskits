@@ -38,7 +38,7 @@ module RecordingStudioPresskits
       end
 
       def declared_under_section?(type_name)
-        RecordingStudio.declared_allowed_parent_types_for(type_name).include?(KitSection.name)
+        RecordingStudio.allowed_parent_types_for(type_name).include?(KitSection.name)
       end
 
       def assert_section!(section_recording)

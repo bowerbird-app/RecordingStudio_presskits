@@ -19,6 +19,7 @@ module RecordingStudioPresskits
         register_quote_section
         register_credits_section
         register_video_section
+        register_location_section
       end
 
       private
@@ -98,6 +99,14 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::VideoSection",
           component: "RecordingStudioPresskits::VideoSection::Component",
           editor: "RecordingStudioPresskits::VideoSection::EditComponent"
+        )
+      end
+
+      def register_location_section
+        RecordingStudioPresskits.register_section(
+          LocationContent::TYPE_NAME,
+          component: "RecordingStudioPresskits::Location::Component",
+          editor: "RecordingStudioPresskits::Location::EditComponent"
         )
       end
     end
@@ -202,6 +211,18 @@ module RecordingStudioPresskits
         next if RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
 
         RecordingStudioVideo::Video.include RecordingStudio::Capabilities::Trashable.to
+      end
+    end
+
+    initializer "recording_studio_presskits.location_support" do
+      config.to_prepare do
+        next unless defined?(RecordingStudio::Location::Location)
+
+        klass = RecordingStudio::Location::Location
+        klass.extend(LocationContent::MenuIcon) unless klass.respond_to?(:section_menu_icon)
+        next if RecordingStudio.capability_enabled?(:trashable, for: klass)
+
+        klass.include RecordingStudio::Capabilities::Trashable.to
       end
     end
 

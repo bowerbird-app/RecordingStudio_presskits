@@ -9,6 +9,7 @@ module RecordingStudioPresskits
                                 allowed_parent_types: ["RecordingStudioPresskits::PressKit"]
 
     include RecordingStudio::Capabilities::Trashable.to
+    include RecordingStudio::Capabilities::Location.to
 
     before_validation :clear_blank_headings
 

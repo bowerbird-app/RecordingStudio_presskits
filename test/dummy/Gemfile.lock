@@ -55,6 +55,16 @@ GIT
       recording_studio (~> 4.2)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_location.git
+  revision: 4ac598f435971e8946151e53bd5a7fde6ef3ac12
+  tag: v0.2.0
+  specs:
+    recording_studio_location (0.2.0)
+      flat_pack (>= 0.1.74)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_orderable.git
   revision: 78e7513878a8bacf1c4273333690e9914f828f7a
   tag: v0.2.5
@@ -120,7 +130,7 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_presskits (0.21.0)
+    recording_studio_presskits (0.22.0)
       flat_pack (>= 0.1.204)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
@@ -129,6 +139,7 @@ PATH
       recording_studio_attachable (~> 0.7)
       recording_studio_duplicatable (~> 0.4)
       recording_studio_external_embed (~> 0.1.1)
+      recording_studio_location (~> 0.2)
       recording_studio_orderable (~> 0.2)
       recording_studio_publishable (~> 0.4)
       recording_studio_trashable (~> 0.4)
@@ -560,6 +571,7 @@ DEPENDENCIES
   recording_studio_attachable!
   recording_studio_duplicatable!
   recording_studio_external_embed!
+  recording_studio_location!
   recording_studio_orderable!
   recording_studio_presskits!
   recording_studio_publishable!
@@ -696,8 +708,9 @@ CHECKSUMS
   recording_studio_attachable (0.7.0)
   recording_studio_duplicatable (0.4.1)
   recording_studio_external_embed (0.1.1)
+  recording_studio_location (0.2.0)
   recording_studio_orderable (0.2.3)
-  recording_studio_presskits (0.21.0)
+  recording_studio_presskits (0.22.0)
   recording_studio_publishable (0.4.0)
   recording_studio_root_switchable (0.5.1)
   recording_studio_trashable (0.4.2)

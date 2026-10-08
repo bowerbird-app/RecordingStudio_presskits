@@ -7,9 +7,11 @@ require "recording_studio_publishable"
 require "recording_studio_trashable"
 require "recording_studio_duplicatable"
 require "recording_studio_video"
+require "recording_studio_location"
 require "recording_studio_admin"
 require "flat_pack"
 require "recording_studio_presskits/version"
+require "recording_studio_presskits/location_content"
 require "recording_studio_presskits/engine"
 require "recording_studio_presskits/configuration"
 require "recording_studio_presskits/kit_query"
@@ -54,7 +56,7 @@ module RecordingStudioPresskits
         next false if excluded.include?(type_name)
         next false unless registered.include?(type_name)
 
-        RecordingStudio.declared_allowed_parent_types_for(type_name).include?(parent_type)
+        RecordingStudio.allowed_parent_types_for(type_name).include?(parent_type)
       end
     end
 

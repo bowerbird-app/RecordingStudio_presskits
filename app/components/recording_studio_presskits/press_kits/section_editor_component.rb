@@ -3,10 +3,11 @@
 module RecordingStudioPresskits
   module PressKits
     class SectionEditorComponent < ViewComponent::Base
-      def initialize(recording:, update_path:)
+      def initialize(recording:, update_path:, unsaved_recordable: nil)
         super()
         @section = recording
         @update_path = update_path
+        apply_unsaved_recordable(unsaved_recordable)
       end
 
       def page_title
@@ -65,6 +66,22 @@ module RecordingStudioPresskits
           type: "submit",
           data: { "flat-pack--unsaved-changes-target": "submit" }
         )
+      end
+
+      private
+
+      def apply_unsaved_recordable(recordable)
+        return if recordable.blank?
+
+        if recordable.is_a?(KitSection)
+          @section.association(:recordable).target = recordable
+          return
+        end
+
+        recording = content_recording
+        return unless recording && recordable.class.name == recording.recordable_type
+
+        recording.association(:recordable).target = recordable
       end
     end
   end

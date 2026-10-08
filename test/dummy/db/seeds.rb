@@ -181,6 +181,47 @@ begin
   )
   ensure_credits_section.call(unpublished_kit_recording, "Credits", [[tom, "Creative Direction"]])
 
+  ensure_location_section = lambda do |kit_recording, title, attributes|
+    existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
+      section.recordable.title == title &&
+        RecordingStudioPresskits::LocationContent.type?(
+          RecordingStudioPresskits::KitQuery.section_content(section)
+        )
+    end
+    section = existing || RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit_recording,
+      content_type: RecordingStudioPresskits::LocationContent::TYPE_NAME,
+      actor: user,
+      title: title
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    location = content.recordable
+    already = attributes.all? do |key, value|
+      current = location.public_send(key)
+      next current.to_f == value.to_f if %i[latitude longitude].include?(key)
+
+      current == value
+    end
+    next if already
+
+    root_recording.revise(content, actor: user) do |recordable|
+      attributes.each { |key, value| recordable.public_send(:"#{key}=", value) }
+    end
+  end
+
+  ensure_location_section.call(
+    press_kit_recording,
+    "Project location",
+    {
+      name: "The Pavilion",
+      locality: "Melbourne",
+      region: "Victoria",
+      country_code: "AU",
+      latitude: -37.81,
+      longitude: 144.96
+    }
+  )
+
   [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
     bootstrap_owner_access.call(recording, user)
   end
