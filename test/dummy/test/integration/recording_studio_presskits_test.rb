@@ -242,7 +242,9 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     layout = File.read(Rails.root.join("app/views/layouts/recording_studio/default_layout.html.erb"))
     controller = File.read(Rails.root.join("app/controllers/application_controller.rb"))
 
-    assert_includes layout, '<html data-theme="rounded">'
+    assert_includes layout, '<html data-theme="rounded"'
+    assert_includes layout, "flat_pack_copy_data"
+    assert_includes layout, 'lang="<%= I18n.locale %>"'
     assert_includes layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes layout, "page_nav_options[:anchor_href]"
     assert_includes layout, "anchor_tooltip:"

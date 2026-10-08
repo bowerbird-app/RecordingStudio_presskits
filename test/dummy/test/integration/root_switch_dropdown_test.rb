@@ -12,7 +12,8 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "admin@admin.com"
     assert_includes response.body, "Password"
-    assert_includes response.body, 'data-theme="rounded"'
+    assert_select "html[data-theme='rounded'][lang='#{I18n.locale}'][data-fp-copy]", count: 1
+    assert_includes response.body, '"flat_pack/copy"'
     refute_includes response.body, "data-recording-studio-default-layout"
     refute_includes response.body, "mt-28"
     refute_includes response.body, "fixed inset-0"

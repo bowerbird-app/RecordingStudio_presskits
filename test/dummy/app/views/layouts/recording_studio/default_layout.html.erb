@@ -1,6 +1,6 @@
 <%# Dummy host override of Recording Studio 4.2 default layout. Core puts data-theme on body; Flatpack's built-in rounded theme must be on html. Keep UsesDefaultLayout. %>
 <!DOCTYPE html>
-<html data-theme="rounded">
+<html data-theme="rounded" lang="<%= I18n.locale %>" <%= tag.attributes(data: flat_pack_copy_data) %>>
   <head>
     <% rs_config = RecordingStudio.configuration %>
     <% app_name = (rs_config.respond_to?(:app_name) ? rs_config.app_name : nil) || "CHANGE_APP_NAME_IN_DEFAULT_LAYOUT" %>

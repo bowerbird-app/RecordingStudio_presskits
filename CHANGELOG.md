@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-08
+
+FlatPack 0.1.207.
+
+### Changed
+- FlatPack is `>= 0.1.207` (dummy tag `v0.1.207`).
+- Version `0.22.0`
+
+### Upgrade notes
+- Bump FlatPack to at least `0.1.207`. Reload its CSS and JavaScript.
+- On each host `<html>` tag, set `lang` to the current locale and `<%= tag.attributes(data: flat_pack_copy_data) %>`. Kit JavaScript reads that copy. English fallbacks still work when the attribute is missing.
+- FlatPack's engine importmap pins `flat_pack/copy`. A host importmap that lists FlatPack pins by hand adds `pin "flat_pack/copy", to: "flat_pack/copy.js", preload: false`.
+- Component token names are unchanged. A named brand theme that sets `--color-primary` can leave `--color-primary-hover` unset unless hover should diverge.
+
 ## [0.21.0] - 2026-10-08
 
 Credits.
@@ -480,7 +494,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...v0.19.0

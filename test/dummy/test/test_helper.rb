@@ -7,7 +7,7 @@ require "rails/test_help"
 
 module RoundedDefaultLayoutAssertions
   def assert_rounded_default_layout
-    assert_select "html[data-theme='rounded']", count: 1
+    assert_select "html[data-theme='rounded'][lang='#{I18n.locale}'][data-fp-copy]", count: 1
     assert_select "body[data-recording-studio-default-layout='true']", count: 1
     assert_select "body[data-theme='rounded']", count: 1
     assert_includes response.body, "/assets/tailwind"
@@ -40,7 +40,7 @@ module RoundedDefaultLayoutAssertions
   end
 
   def assert_blank_public_layout
-    assert_select "html[data-theme='rounded']", count: 1
+    assert_select "html[data-theme='rounded'][lang='#{I18n.locale}'][data-fp-copy]", count: 1
     assert_select "body[data-presskits-blank-layout='true']", count: 1
     assert_select "body[data-theme='rounded']", count: 1
     assert_select "body[data-recording-studio-default-layout='true']", count: 0
