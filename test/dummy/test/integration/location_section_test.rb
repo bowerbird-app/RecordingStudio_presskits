@@ -289,7 +289,7 @@ class LocationSectionTest < ActionDispatch::IntegrationTest
     end
     copied_content = section_content(copied)
     assert_equal "Studio (Copy)", copied.recordable.title
-    assert_equal "The Pavilion", copied_content.recordable.name
+    assert_equal "The Pavilion (Copy)", copied_content.recordable.name
     refute_equal section.id, copied.id
     refute_equal content.id, copied_content.id
 
