@@ -18,6 +18,8 @@ export default class extends Controller {
   }
 
   choose(event) {
+    this.markFormChanged()
+
     const row = event.target?.closest?.("[data-collection-editor-row]")
     const name = event.detail?.title?.trim() || ""
     const creditId = String(event.detail?.id || "")
@@ -56,6 +58,21 @@ export default class extends Controller {
 
     const id = button.closest("[data-collection-editor-row]")?.dataset.id
     this.previewLine(id)?.remove()
+    this.markFormChanged()
+  }
+
+  // Adding a row writes fields without an input event. Flatpack's unsaved-changes
+  // controller only compares the form after input or change.
+  note(event) {
+    const target = event.target
+    if (!(target instanceof Element)) return
+    if (!target.closest("[data-flat-pack--collection-editor-target='addButton']")) return
+
+    this.markFormChanged()
+  }
+
+  markFormChanged() {
+    this.element.dispatchEvent(new Event("change", { bubbles: true }))
   }
 
   readCatalog() {

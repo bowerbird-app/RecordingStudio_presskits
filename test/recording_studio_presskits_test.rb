@@ -632,11 +632,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, 'add_label: "Credit"'
     assert_includes editor, 'empty_text: "No credits yet"'
     assert_includes editor, 'text: "Save"'
-    assert_includes editor, "style: :primary"
+    assert_includes editor, "style: :default"
+    refute_includes editor, "style: :primary"
+    assert_includes editor, "flat-pack--unsaved-changes"
+    assert_includes editor, '"flat-pack--unsaved-changes-target": "submit"'
+    assert_includes editor, 'id="presskits-credit-lines-save"'
+    assert_operator editor.index("FlatPack::CollectionEditor::Component"), :<, editor.index('text: "Save"')
     assert_includes editor, "moving_recording_id"
     assert_includes editor, "target_position"
     assert_includes editor, 'child_index: "NEW_RECORD"'
-    refute_includes editor, "flat-pack--unsaved-changes"
     refute_includes editor, "Add credit"
     refute_includes component, "def section_actions"
     refute File.exist?(presskits_path(
@@ -660,6 +664,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes component, "collection-editor:selected->recording-studio-presskits--credit-preview#choose"
     assert_includes component, "input->recording-studio-presskits--credit-preview#role"
     assert_includes component, "click->recording-studio-presskits--credit-preview#drop"
+    assert_includes component, "click->recording-studio-presskits--credit-preview#note"
     assert_includes component, "list:reordered->recording-studio-presskits--credit-preview#sync"
     assert_includes component, "def credit_catalog"
     show = File.read(presskits_path(
@@ -678,6 +683,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes preview, "choose(event)"
     assert_includes preview, "role(event)"
     assert_includes preview, "drop(event)"
+    assert_includes preview, "note(event)"
+    assert_includes preview, "markFormChanged"
     assert_includes preview, "orderableUnsaved"
     show_component = File.read(presskits_path(
                                  "app/components/recording_studio_presskits/credits_section/component.rb"

@@ -54,6 +54,7 @@ module RecordingStudioPresskits
           collection-editor:selected->recording-studio-presskits--credit-preview#choose
           input->recording-studio-presskits--credit-preview#role
           click->recording-studio-presskits--credit-preview#drop
+          click->recording-studio-presskits--credit-preview#note
         ].join(" ")
       end
 

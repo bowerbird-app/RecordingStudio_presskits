@@ -214,7 +214,15 @@ class CreditsTest < ActionDispatch::IntegrationTest
     heading = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(empty_kit, empty_section)}']").first
     assert_equal "flat-pack--unsaved-changes", heading["data-controller"]
     refute_includes heading.inner_html, "credit_lines"
-    assert_select "#presskits-credit-lines[data-controller='flat-pack--unsaved-changes']", count: 0
+    lines_form = css_select("#presskits-credit-lines").first
+    assert_includes lines_form["data-controller"], "flat-pack--unsaved-changes"
+    assert_includes lines_form["data-controller"], "recording-studio-presskits--credit-preview"
+    empty_save = css_select("#presskits-credit-lines-save button[type=submit]").first
+    assert_equal "Save", empty_save.text.squish
+    assert_equal "default", empty_save["data-fp-style"]
+    assert_equal "submit", empty_save["data-flat-pack--unsaved-changes-target"]
+    assert_operator lines_form.inner_html.index("flat-pack-collection-editor"), :<,
+                    lines_form.inner_html.index('id="presskits-credit-lines-save"')
     assert_select "#presskits-section-preview [data-credit-lines]", count: 0
     assert_select "#presskits-credit-lines[data-action*='collection-editor:selected->recording-studio-presskits--credit-preview#choose']"
     assert_select "#presskits-credit-lines[data-action*='input->recording-studio-presskits--credit-preview#role']"
@@ -256,7 +264,13 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_equal "default", update["data-fp-style"]
     assert_select "input[name='credit_id']", count: 0
     assert_select "a", text: "Add credit", count: 0
-    assert_select "#presskits-credit-lines button[type=submit]", text: "Save"
+    save = css_select("#presskits-credit-lines-save button[type=submit]").first
+    assert_equal "Save", save.text.squish
+    assert_equal "default", save["data-fp-style"]
+    assert_equal "submit", save["data-flat-pack--unsaved-changes-target"]
+    spring_lines = css_select("#presskits-credit-lines").first
+    assert_operator spring_lines.inner_html.index("flat-pack-collection-editor"), :<,
+                    spring_lines.inner_html.index('id="presskits-credit-lines-save"')
 
     get recording_studio_presskits.search_credits_path, params: { q: "tom" }, as: :json
     assert_response :success
@@ -284,7 +298,7 @@ class CreditsTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "[data-collection-editor-title]", text: "Tom Ross"
     assert_select "input[name='credit_lines[credit_lines_attributes][0][role]'][value='Photographer']"
-    assert_select "#presskits-credit-lines[data-controller='recording-studio-presskits--credit-preview']"
+    assert_select "#presskits-credit-lines[data-controller*='recording-studio-presskits--credit-preview'][data-controller*='flat-pack--unsaved-changes']"
     assert_select "#presskits-section-preview [data-credit-line-id='#{line.id}']"
     assert_select "#presskits-section-preview [data-credit-role]", text: "Photographer"
     assert_select "#presskits-section-preview [data-credit-name]", text: "Tom Ross"
