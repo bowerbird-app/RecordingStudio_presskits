@@ -32,3 +32,7 @@ the gem.
 Repo-specific test guidance also lives in
 [`.github/skills/minitest-workflow`](../.github/skills/minitest-workflow/SKILL.md).
 That path is a GitHub skill. It is not part of the Cursor pack.
+
+The kit editor instruction lives in
+[`.github/skills/recording-studio-presskit-editor`](../.github/skills/recording-studio-presskit-editor/SKILL.md).
+That path is a GitHub skill. `.cursor/fetch-skills.sh` does not download it.
