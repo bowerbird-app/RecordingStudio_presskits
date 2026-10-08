@@ -16,7 +16,7 @@ Credits.
 - Credits has its own list, create, edit, and trash screens. Trash and restore use Trashable. Restoring a credit puts it back on kits that already listed it.
 - A Credits section can be added to a press kit. Each line stores the role and the order for that kit, and points at the credit. Removing a line leaves the credit in the workspace.
 - The same credit can be used on more than one kit, with a different role on each line. Changing the usual role does not change lines that already exist.
-- A Credits section keeps Title, Subtitle, and the credit list. **Add credit** opens a screen to choose a workspace credit or create one, and to set **Role on this kit** for that credit.
+- A Credits section keeps Title and Subtitle on the heading form. Under that form, a collection editor searches workspace credits, creates one from a modal, and sets **Role on this kit** on each line. **Save** stores those lines.
 - The public page and the kit preview show the role, the name, and a link when the credit has a URL.
 - When Recording Studio API is loaded, a credit exposes index, show, create, and update. A credits section exposes `add_credit` and `reorder_credits`. A credit line exposes index, show, update, and `remove_credit`.
 - Version `0.20.0`
@@ -28,7 +28,7 @@ Credits.
 - Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. That adds `recording_studio_credits`, `recording_studio_credits_sections`, and `recording_studio_credit_lines`.
 - Add `RecordingStudioPresskits::Credit`, `RecordingStudioPresskits::CreditsSection`, and `RecordingStudioPresskits::CreditLine` to `recordable_types`.
 - Add a credit with `RecordingStudioPresskits::Credits.create!`. Add one to a section with `RecordingStudioPresskits::Credits.add!`. Do not copy the name or URL onto the line.
-- Bump FlatPack to at least `0.1.204`. Reload its CSS and JavaScript. `style:` on FlatPack tabs is a button style name. Press kits do not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. These screens do not use the collection editor.
+- Bump FlatPack to at least `0.1.204`. Reload its CSS and JavaScript. `style:` on FlatPack tabs is a button style name. Press kits do not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. The credits section uses `FlatPack::CollectionEditor::Component`. Importmap hosts that already pin Flatpack controllers load `flat-pack--collection-editor` and `flat-pack--list-orderable` with no new register call.
 
 ## [0.19.0] - 2026-10-07
 

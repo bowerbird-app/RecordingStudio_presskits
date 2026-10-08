@@ -12,6 +12,13 @@ module RecordingStudioPresskits
       @credit_recordings = Credits.active_for_root(current_presskits_root)
     end
 
+    def search
+      authorize_recording!(current_presskits_root, role: :view)
+      return if performed?
+
+      render json: Credits::Picker.search(current_presskits_root, params[:q])
+    end
+
     def new
       authorize_recording!(current_presskits_root, role: :edit)
       return if performed?
@@ -24,6 +31,8 @@ module RecordingStudioPresskits
       return if performed?
 
       recording = create_credit
+      return render json: Credits::Picker.created(recording) if request.format.json?
+
       redirect_to edit_credit_path(recording), notice: "Credit is ready."
     rescue ActiveRecord::RecordInvalid
       render_invalid_credit
@@ -71,7 +80,7 @@ module RecordingStudioPresskits
     end
 
     def credit_fields
-      values = credit_params
+      values = request.format.json? ? params.permit(:name, :url, :usual_role) : credit_params
       { name: values[:name], url: values[:url], usual_role: values[:usual_role] }
     end
 
@@ -80,6 +89,8 @@ module RecordingStudioPresskits
     end
 
     def render_invalid_credit
+      return render json: Credits::Picker.rejected, status: :unprocessable_entity if request.format.json?
+
       @credit = Credit.new(credit_params)
       flash.now[:alert] = "Give them a name."
       render :new, status: :unprocessable_entity

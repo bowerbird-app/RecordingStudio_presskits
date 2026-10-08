@@ -532,25 +532,43 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, "gap-4"
   end
 
-  def test_credits_section_adds_a_credit_on_its_own_screen
+  def test_credits_section_edits_lines_in_a_collection_editor
     editor = File.read(presskits_path(
                          "app/components/recording_studio_presskits/credits_section/edit_component.html.erb"
                        ))
-    actions = File.read(presskits_path(
-                          "app/components/recording_studio_presskits/credits_section/actions_component.html.erb"
-                        ))
-    add = File.read(presskits_path("app/components/recording_studio_presskits/credits_section/add_component.html.erb"))
-    line = File.read(presskits_path("app/components/recording_studio_presskits/credit_line/edit_component.html.erb"))
+    fields = File.read(presskits_path(
+                         "app/views/recording_studio_presskits/credits_section/_line_fields.html.erb"
+                       ))
+    component = File.read(presskits_path(
+                            "app/components/recording_studio_presskits/credits_section/edit_component.rb"
+                          ))
+    order = File.read(presskits_path("lib/recording_studio_presskits/quote_order.rb"))
+    routes = File.read(presskits_path("config/routes.rb"))
 
-    refute_includes editor, "credit_id"
-    refute_includes editor, 'name: "role"'
-    assert_includes actions, 'text: "Add credit"'
-    assert_includes add, 'label: "Role on this kit"'
-    assert_includes add, 'text: "Add to this kit"'
-    assert_includes add, 'text: "Create and add"'
-    assert_includes add, "recording-studio-presskits--add-credit"
-    assert_includes line, 'label: "Role on this kit"'
-    controller = "app/javascript/recording_studio_presskits/controllers/add_credit_controller.js"
-    assert File.exist?(presskits_path(controller))
+    assert_includes editor, "FlatPack::CollectionEditor::Component"
+    assert_includes editor, 'add_label: "Credit"'
+    assert_includes editor, 'empty_text: "No credits yet"'
+    assert_includes editor, 'text: "Save"'
+    assert_includes editor, "style: :primary"
+    assert_includes editor, "moving_recording_id"
+    assert_includes editor, "target_position"
+    assert_includes editor, 'child_index: "NEW_RECORD"'
+    refute_includes editor, "flat-pack--unsaved-changes"
+    refute_includes editor, "Add credit"
+    refute_includes component, "def section_actions"
+    refute File.exist?(presskits_path(
+                         "app/components/recording_studio_presskits/credits_section/actions_component.rb"
+                       ))
+    assert_includes fields, 'label: "Role on this kit"'
+    assert_includes fields, "chrome: :cell"
+    assert_includes fields, 'label: "Credit"'
+    assert_includes fields, 'search_placeholder: "Search credits"'
+    assert_includes fields, 'data: { create_field: "name", fill_from_query: "true" }'
+    assert_includes fields, 'create_field: "usual_role"'
+    assert_includes fields, 'form: "collection-editor-unattached"'
+    assert_includes order, "moving_recording_id"
+    assert_includes order, "target_position"
+    assert_includes routes, "get :search"
+    assert_includes routes, "resource :credit_lines, only: :update"
   end
 end

@@ -18,11 +18,10 @@ module RecordingStudioPresskits
     attr_reader :section_recording, :credits_section_recording
 
     def apply_reorder
-      if reorder
-        redirect_to section_edit_path, notice: "Order saved."
-      else
-        redirect_to section_edit_path, alert: "Nothing to reorder."
-      end
+      saved = reorder.present?
+      return render json: { ok: saved }, status: (saved ? :ok : :unprocessable_entity) if request.format.json?
+
+      redirect_to section_edit_path, **(saved ? { notice: "Order saved." } : { alert: "Nothing to reorder." })
     end
 
     def reorder

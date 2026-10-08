@@ -1,44 +1,40 @@
-<div class="flex w-full flex-col gap-6">
-  <% if lines.any? %>
-    <div
-      id="presskits-credit-list"
-      data-controller="recording-studio-presskits--section-order"
-      data-action="list:reordered->recording-studio-presskits--section-order#save"
-      data-recording-studio-presskits--section-order-url-value="<%= order_path %>"
-    >
-      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
-        <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
-          <% lines.each do |line_recording| %>
-            <%= render FlatPack::List::Item.new(id: line_recording.id, icon: "arrows-up-down", hover: true) do %>
-              <div class="flex w-full items-center justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <%= link_to edit_path(line_recording), draggable: "false", class: "block min-w-0" do %>
-                    <span class="block truncate text-sm font-medium text-(--surface-content-color)">
-                      <%= line_role(line_recording) %>
-                    </span>
-                    <% if (name = line_name(line_recording)) %>
-                      <span class="block truncate text-sm text-(--surface-muted-content-color)">
-                        <%= name %>
-                      </span>
-                    <% end %>
-                  <% end %>
-                </div>
-                <%= form_with url: remove_path(line_recording), method: :delete, local: true, html: { draggable: "false" } do %>
-                  <%= render FlatPack::Button::Component.new(
-                    icon: "trash",
-                    icon_only: true,
-                    style: :ghost,
-                    size: :sm,
-                    type: "submit",
-                    draggable: "false",
-                    aria: { label: "Remove from this kit" }
-                  ) %>
-                <% end %>
-              </div>
-            <% end %>
-          <% end %>
+<%= form_with model: batch, url: lines_path, method: :patch, local: true,
+      html: { id: "presskits-credit-lines" }, class: "flex flex-col gap-6" do |form| %>
+  <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
+
+  <%= render FlatPack::CollectionEditor::Component.new(
+    empty_text: "No credits yet",
+    add_label: "Credit",
+    headers: ["Credit", "Role on this kit"],
+    orderable: true,
+    orderable_url: order_path,
+    param_uuid_name: "moving_recording_id",
+    param_target_position_name: "target_position"
+  ) do |editor| %>
+    <% batch.credit_lines.each_with_index do |draft, index| %>
+      <% form.fields_for :credit_lines, draft, child_index: index do |row_form| %>
+        <% editor.with_row(form: row_form, record_id: draft.id) do |row| %>
+          <%= render "recording_studio_presskits/credits_section/line_fields",
+                row: row,
+                row_form: row_form,
+                title: draft.title,
+                search_path: search_path,
+                credits_path: credits_path %>
         <% end %>
       <% end %>
-    </div>
+    <% end %>
+
+    <% editor.with_template do %>
+      <% form.fields_for :credit_lines, blank_line, child_index: "NEW_RECORD" do |row_form| %>
+        <%= render FlatPack::CollectionEditor::Row::Component.new(form: row_form, index_token: "NEW_RECORD") do |row| %>
+          <%= render "recording_studio_presskits/credits_section/line_fields",
+                row: row,
+                row_form: row_form,
+                title: nil,
+                search_path: search_path,
+                credits_path: credits_path %>
+        <% end %>
+      <% end %>
+    <% end %>
   <% end %>
-</div>
+<% end %>

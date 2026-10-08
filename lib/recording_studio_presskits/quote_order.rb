@@ -38,7 +38,7 @@ module RecordingStudioPresskits
     end
 
     def move_child
-      child_id = params[:recording_id].presence || params[:id].presence
+      child_id = params[:recording_id].presence || params[:moving_recording_id].presence || params[:id].presence
       return if child_id.blank?
 
       find_quote(child_id)
@@ -53,11 +53,31 @@ module RecordingStudioPresskits
     end
 
     def insertion_index(child)
-      sibling_ids = sibling_ids_without(child)
-      return index_after(sibling_ids, params[:after_recording_id]) if params[:after_recording_id].present?
-      return index_before(sibling_ids, params[:before_recording_id]) if params[:before_recording_id].present?
+      index_for(sibling_ids_without(child))
+    end
+
+    def index_for(sibling_ids)
+      return neighbor_index(sibling_ids) if neighbor_move?
+      return target_position_index if params[:target_position].present?
 
       move_index
+    end
+
+    def neighbor_move?
+      params[:after_recording_id].present? || params[:before_recording_id].present?
+    end
+
+    def neighbor_index(sibling_ids)
+      return index_after(sibling_ids, params[:after_recording_id]) if params[:after_recording_id].present?
+
+      index_before(sibling_ids, params[:before_recording_id])
+    end
+
+    def target_position_index
+      position = Integer(params[:target_position], exception: false)
+      return 0 if position.nil?
+
+      [position - 1, 0].max
     end
 
     def sibling_ids_without(child)

@@ -23,35 +23,28 @@ module RecordingStudioPresskits
         end
       end
 
-      def lines
-        Credits.lines_for(@recording)
+      def batch
+        @batch ||= CreditLineBatch.for_section(@recording)
       end
 
-      def section_actions
-        ActionsComponent.new(recording: @recording)
+      def blank_line
+        CreditLineBatch.blank_draft
+      end
+
+      def lines_path
+        helpers.press_kit_section_credit_lines_path(kit_recording, kit_section_recording)
       end
 
       def order_path
         helpers.press_kit_section_credit_order_path(kit_recording, kit_section_recording)
       end
 
-      def edit_path(line_recording)
-        helpers.edit_press_kit_section_credit_path(kit_recording, kit_section_recording, line_recording)
+      def search_path
+        helpers.search_credits_path
       end
 
-      def remove_path(line_recording)
-        helpers.press_kit_section_credit_path(kit_recording, kit_section_recording, line_recording)
-      end
-
-      def line_role(line_recording)
-        line_recording.recordable.role.to_s.strip.presence || "Credit"
-      end
-
-      def line_name(line_recording)
-        credit = Credits.credit_for(line_recording)
-        return "In the trash" unless Credits.shown_credit?(credit)
-
-        credit.recordable.name.to_s.strip.presence
+      def credits_path
+        helpers.credits_path
       end
 
       private

@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
-// FlatPack list-orderable owns the drag. This pin's saveOrder checks
-// hasOrderablePathValue, and that value is not defined, so the fetch never runs.
-// list:reordered still fires. This posts the new neighbor to Orderable.
+// FlatPack list-orderable owns the drag. These lists do not set an orderable
+// URL, so saveOrder returns without a request. list:reordered still fires.
+// This posts the new neighbor to Orderable.
 export default class extends Controller {
   static values = { url: String }
 

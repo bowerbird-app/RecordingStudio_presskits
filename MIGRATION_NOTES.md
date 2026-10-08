@@ -22,11 +22,11 @@ Trash a credit with `recording_studio_trashable_trash!`. Restore it with `record
 
 Create credits with `RecordingStudioPresskits::Credits.create!` on the workspace root. Add one to a section with `Credits.add!`. Revise the reusable fields with `Credits.revise!`. Revise one kit's role with `Credits.revise_role!`. List the workspace credits with `Credits.active_for_root`. A credit from another root is refused.
 
-The screens are `GET /credits` for the workspace list, and the Credits item in + Section for a kit. **Add credit** on a section opens its own screen. That screen chooses a workspace credit or creates one, and sets the role for this kit. Creating one saves the workspace credit and the line together.
+The screens are `GET /credits` for the workspace list, and the Credits item in + Section for a kit. The section editor keeps Title and Subtitle on the heading form. Under it, a collection editor adds each line. The first column searches `GET /credits/search` and creates with `POST /credits` when the response is JSON. The second column is the role on this kit. **Save** patches the lines. A blank role on a new line still copies `usual_role`. Dragging a saved row patches `moving_recording_id` and a 1-based `target_position`. The response is `{ ok: true }`. `recording_id` with `before_recording_id` or `after_recording_id` still reorders a line.
 
 When Recording Studio API is loaded, credits expose index, show, create, and update. There is no credit destroy operation. Trash the recording so existing lines keep their id. `add_credit` and `reorder_credits` are on the credits section. `remove_credit` is on the line. A line's show payload is `role`, `name`, `url`, and `credit_id`. `name` and `url` are read from the credit when it is still active. The kit section payload stays `title`, `subtitle`, `content_type`, and `content_id`.
 
-Bump FlatPack to `>= 0.1.204` (dummy tag `v0.1.204`). Reload kit CSS and JavaScript. `style:` on FlatPack tabs is a button style name. This gem does not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. These screens do not use the collection editor.
+Bump FlatPack to `>= 0.1.204` (dummy tag `v0.1.204`). Reload kit CSS and JavaScript. `style:` on FlatPack tabs is a button style name. This gem does not pass a CSS string there. Select wrappers also include `flat-pack-input-wrapper`. The credits section uses the collection editor. Importmap hosts that already pin Flatpack controllers load it with no new register call.
 
 ## 0.19.0
 
