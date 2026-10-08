@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-08
+
+Facts & Figures.
+
+### Added
+- A Facts & Figures section can be added to a press kit. `RecordingStudioPresskits::FactsSection` sits under the kit section and stores `display_style` (`list`, `cards`, or `table`) and `columns` (`2`, `3`, or `4`, for cards). Each `RecordingStudioPresskits::Fact` is a child recording with a required label and value, plus optional unit, description, source URL, and as-of date.
+- The section editor keeps Title and Subtitle on the Section title tab. Content holds Show as, Columns when Cards is selected, **+ Fact**, and the fact list. A blank section shows an empty state. Facts are added, edited, reordered, and trashed like quotes.
+- List, cards, and table layouts render on the preview and the public page. Cards use the saved column count on larger screens and collapse on smaller ones. A blank section does not leave an empty preview card. A blank kit section title falls back to Facts & Figures.
+- When Recording Studio API is loaded, a facts section includes `display` and ordered `facts`. Trashed facts stay out of that payload. MCP uses the same structured data.
+
+### Changed
+- Version `0.22.0`
+
+### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. That adds `recording_studio_facts_sections` and `recording_studio_facts`.
+- Add `RecordingStudioPresskits::FactsSection` and `RecordingStudioPresskits::Fact` to `recordable_types`.
+- Create the section with `RecordingStudioPresskits.create_section!` and `content_type: "RecordingStudioPresskits::FactsSection"`. Record facts under the facts section. Save display settings with `revise` on that section. Reorder facts through Orderable on the facts section.
+
 ## [0.21.0] - 2026-10-08
 
 Credits.
@@ -480,7 +498,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.18.0...v0.19.0

@@ -170,6 +170,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
     assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
     assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")
+    assert_section_menu_icon("RecordingStudioPresskits::FactsSection", "calculator")
     assert_section_menu_icon("RecordingStudioPresskits::VideoSection", "video-camera")
     actions_html = css_select("#presskits-editor-actions").to_html
     assert_operator actions_html.index("presskits-section-dropdown"), :<, actions_html.index("publishable_quick_actions_")

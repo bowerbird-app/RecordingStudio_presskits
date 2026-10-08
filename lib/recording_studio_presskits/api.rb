@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/api/quote_payload"
+require "recording_studio_presskits/api/fact_payload"
 require "recording_studio_presskits/api/credit_payload"
 require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
@@ -14,11 +15,13 @@ require "recording_studio_presskits/api/reorder_credits"
 require "recording_studio_presskits/api/remove_credit"
 require "recording_studio_presskits/api/section_action_registration"
 require "recording_studio_presskits/api/credit_registration"
+require "recording_studio_presskits/api/fact_registration"
 
 module RecordingStudioPresskits
   module Api
     extend SectionActionRegistration
     extend CreditRegistration
+    extend FactRegistration
 
     class << self
       def register!
@@ -29,6 +32,7 @@ module RecordingStudioPresskits
         register_text
         register_quote
         register_quote_section
+        register_facts!
         register_credits!
         register_video_section
         register_section_actions
@@ -40,32 +44,22 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::PressKit",
           operations: %i[show],
-          serializer: press_kit_serializer,
+          serializer: ->(recordable, **) { { title: recordable.title, description: recordable.description } },
           output_keys: %i[title description],
           writable_attributes: [],
           capability_actions: %i[create_section reorder_sections]
         )
       end
 
-      def press_kit_serializer
-        ->(recordable, **) { { title: recordable.title, description: recordable.description } }
-      end
-
       def register_kit_section
         register_type(
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
-          serializer: kit_section_serializer,
-          output_keys: %i[title subtitle content_type content_id videos],
+          serializer: ->(recordable, recording: nil, **) { SectionPayload.for(recordable, recording) },
+          output_keys: %i[title subtitle content_type content_id videos display facts],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )
-      end
-
-      def kit_section_serializer
-        lambda { |recordable, recording: nil, **|
-          SectionPayload.for(recordable, recording)
-        }
       end
 
       def register_text

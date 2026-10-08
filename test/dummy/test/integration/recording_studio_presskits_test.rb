@@ -29,11 +29,15 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Images")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::QuoteSection")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::FactsSection")
+    assert_equal [ "RecordingStudioPresskits::FactsSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Fact")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::CreditsSection")
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Credit")
     assert_equal [ "RecordingStudioPresskits::CreditsSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::CreditLine")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::VideoSection"
+    assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::FactsSection"
+    refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Fact"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioVideo::Video"
     assert_equal "Text", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Text)
     assert_equal "Images", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Images)
@@ -81,6 +85,18 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute connection.column_exists?(:recording_studio_credits, :updated_at)
     assert connection.table_exists?(:recording_studio_credits_sections)
     assert connection.table_exists?(:recording_studio_credit_lines)
+    assert connection.table_exists?(:recording_studio_facts_sections)
+    assert connection.column_exists?(:recording_studio_facts_sections, :display_style)
+    assert connection.column_exists?(:recording_studio_facts_sections, :columns)
+    refute connection.column_exists?(:recording_studio_facts_sections, :updated_at)
+    assert connection.table_exists?(:recording_studio_facts)
+    assert connection.column_exists?(:recording_studio_facts, :label)
+    assert connection.column_exists?(:recording_studio_facts, :value)
+    assert connection.column_exists?(:recording_studio_facts, :unit)
+    assert connection.column_exists?(:recording_studio_facts, :description)
+    assert connection.column_exists?(:recording_studio_facts, :source_url)
+    assert connection.column_exists?(:recording_studio_facts, :as_of_date)
+    refute connection.column_exists?(:recording_studio_facts, :updated_at)
     assert connection.column_exists?(:recording_studio_credit_lines, :role)
     assert connection.column_exists?(:recording_studio_credit_lines, :credit_recording_id)
     assert connection.column_exists?(:recording_studio_kit_sections, :title)
@@ -143,7 +159,10 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal unpublished_kit_recording.root_recording, root_recording
     spring_sections = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
     autumn_sections = RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
-    assert_equal ["Project credits"], spring_sections.map { |section| section.recordable.title }
+    assert_equal(
+      ["Project credits", "Company statistics", "Project specifications"],
+      spring_sections.map { |section| section.recordable.title }
+    )
     assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
     spring_lines = RecordingStudioPresskits::Credits.visible_lines(
       RecordingStudioPresskits::KitQuery.section_content(spring_sections.first)
@@ -159,6 +178,21 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal(
       spring_lines[2].recordable.credit_recording_id,
       autumn_lines.first.recordable.credit_recording_id
+    )
+    statistics = spring_sections.find { |section| section.recordable.title == "Company statistics" }
+    specifications = spring_sections.find { |section| section.recordable.title == "Project specifications" }
+    statistics_content = RecordingStudioPresskits::KitQuery.section_content(statistics)
+    specifications_content = RecordingStudioPresskits::KitQuery.section_content(specifications)
+    assert_equal "cards", statistics_content.recordable.display_style
+    assert_equal 3, statistics_content.recordable.columns
+    assert_equal(
+      ["Projects", "Countries", "Employees"],
+      RecordingStudioPresskits::FactsSection.active_facts(statistics_content).map { |child| child.recordable.label }
+    )
+    assert_equal "list", specifications_content.recordable.display_style
+    assert_equal(
+      ["Floor area", "Completion", "Project cost"],
+      RecordingStudioPresskits::FactsSection.active_facts(specifications_content).map { |child| child.recordable.label }
     )
     assert press_kit.published?
     assert press_kit.indexable?

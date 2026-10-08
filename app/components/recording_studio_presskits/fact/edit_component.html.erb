@@ -1,0 +1,57 @@
+<div class="flex flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(title: heading, variant: :h1) %>
+
+  <%= form_with url: form_path, method: form_method, local: true, class: "flex flex-col gap-6" do %>
+    <div id="presskits-fact-actions" class="flex flex-wrap items-center gap-3">
+      <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
+      <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
+    </div>
+
+    <%= render FlatPack::TextInput::Component.new(
+      name: "fact[label]",
+      value: fact.label,
+      label: "Label",
+      required: true,
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "fact[value]",
+      value: fact.value,
+      label: "Value",
+      required: true,
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "fact[unit]",
+      value: fact.unit,
+      label: "Unit",
+      class: "w-full"
+    ) %>
+
+    <details class="flex flex-col gap-4">
+      <summary class="cursor-pointer text-sm font-medium text-(--surface-content-color)">
+        More detail
+      </summary>
+      <%= render FlatPack::TextArea::Component.new(
+        name: "fact[description]",
+        value: fact.description,
+        label: "Description",
+        class: "w-full"
+      ) %>
+      <%= render FlatPack::TextInput::Component.new(
+        name: "fact[source_url]",
+        value: fact.source_url,
+        label: "Source",
+        placeholder: "https://",
+        class: "w-full"
+      ) %>
+      <%= render FlatPack::TextInput::Component.new(
+        name: "fact[as_of_date]",
+        value: fact.as_of_date,
+        label: "As of",
+        type: "date",
+        class: "w-full"
+      ) %>
+    </details>
+  <% end %>
+</div>

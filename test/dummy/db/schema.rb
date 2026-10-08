@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -152,6 +152,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_120000) do
     t.index ["recording_id", "idempotency_key"], name: "index_recording_studio_events_on_recording_and_idempotency_key", unique: true, where: "(idempotency_key IS NOT NULL)"
     t.index ["recording_id", "occurred_at", "created_at"], name: "index_rs_events_on_recording_and_timeline", order: { occurred_at: :desc, created_at: :desc }
     t.index ["recording_id"], name: "index_recording_studio_events_on_recording_id"
+  end
+
+  create_table "recording_studio_facts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "label", default: "", null: false
+    t.text "value", default: "", null: false
+    t.string "unit"
+    t.text "description"
+    t.string "source_url"
+    t.date "as_of_date"
+    t.datetime "created_at", null: false
+  end
+
+  create_table "recording_studio_facts_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "display_style", default: "list", null: false
+    t.integer "columns", default: 3, null: false
+    t.datetime "created_at", null: false
   end
 
   create_table "recording_studio_images", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

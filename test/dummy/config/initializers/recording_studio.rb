@@ -12,6 +12,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::Images",
     "RecordingStudioPresskits::QuoteSection",
     "RecordingStudioPresskits::Quote",
+    "RecordingStudioPresskits::FactsSection",
+    "RecordingStudioPresskits::Fact",
     "RecordingStudioPresskits::CreditsSection",
     "RecordingStudioPresskits::Credit",
     "RecordingStudioPresskits::CreditLine",

@@ -1,0 +1,36 @@
+<% if facts.any? %>
+  <% if table? %>
+    <%= render FlatPack::Table::Component.new(data: facts) do |table| %>
+      <% table.column(title: "Fact", html: ->(recording) { recording.recordable.label }) %>
+      <% table.column(title: "Value", html: ->(recording) { formatted_value(recording.recordable) }) %>
+    <% end %>
+  <% elsif cards? %>
+    <%= render FlatPack::Grid::Component.new(cols: columns, gap: :lg, class: grid_class) do %>
+      <% facts.each do |fact_recording| %>
+        <% fact = fact_recording.recordable %>
+        <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+          <p class="text-2xl font-medium text-(--surface-content-color)"><%= formatted_value(fact) %></p>
+          <p class="mt-1 text-sm text-(--surface-muted-content-color)"><%= fact.label %></p>
+          <% supporting_text(fact).each do |line| %>
+            <p class="mt-2 text-sm text-(--surface-muted-content-color)"><%= line %></p>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <dl class="flex flex-col gap-4">
+      <% facts.each do |fact_recording| %>
+        <% fact = fact_recording.recordable %>
+        <div class="flex flex-col gap-1">
+          <div class="flex flex-wrap items-baseline justify-between gap-3">
+            <dt class="text-sm text-(--surface-muted-content-color)"><%= fact.label %></dt>
+            <dd class="text-base font-medium text-(--surface-content-color)"><%= formatted_value(fact) %></dd>
+          </div>
+          <% supporting_text(fact).each do |line| %>
+            <p class="text-sm text-(--surface-muted-content-color)"><%= line %></p>
+          <% end %>
+        </div>
+      <% end %>
+    </dl>
+  <% end %>
+<% end %>

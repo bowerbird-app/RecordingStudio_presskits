@@ -1,5 +1,26 @@
 # Upgrade notes
 
+## 0.22.0
+
+Facts & Figures is a press kit section. The facts section stores how the facts look. Each fact is its own recording.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds two tables and does not change existing kit rows.
+
+`recording_studio_facts_sections` stores `display_style` (`list`, `cards`, or `table`, default `list`) and `columns` (`2`, `3`, or `4`, default `3`). Columns apply when the style is cards. `recording_studio_facts` stores `label`, `value`, optional `unit`, `description`, `source_url`, and `as_of_date`. There is no foreign key between the tables. The recording tree is the parent.
+
+Add these to `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::FactsSection",
+"RecordingStudioPresskits::Fact"
+```
+
+`FactsSection` allows a kit section. `Fact` allows a facts section. Orderable on the facts section allows facts. Trashable is on both. Publishable and Duplicatable stay off them. Duplicating a kit copies the facts section, its display settings, and the facts in order.
+
+Create the section with `RecordingStudioPresskits.create_section!`. Record a fact under the facts section. Revise display settings on the facts section. Reorder with `recording_studio_orderable_reorder!` or `recording_studio_orderable_move!` on the facts section. Trash a fact with `recording_studio_trashable_trash!`.
+
+The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A facts section also includes `display` and `facts`. MCP uses that same payload. List, cards, and table are the only layouts.
+
 ## 0.21.0
 
 Credits belong to the workspace. A line in a press kit only says what that credit did on that kit.
