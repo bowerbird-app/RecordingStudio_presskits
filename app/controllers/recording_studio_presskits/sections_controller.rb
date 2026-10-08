@@ -63,8 +63,8 @@ module RecordingStudioPresskits
 
       save_section(headings, attributes)
       redirect_to section_edit_path, notice: "Saved."
-    rescue ActiveRecord::RecordInvalid => error
-      @unsaved_recordable = error.record
+    rescue ActiveRecord::RecordInvalid => e
+      @unsaved_recordable = e.record
       raise
     end
 

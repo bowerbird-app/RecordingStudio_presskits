@@ -10,7 +10,9 @@ module RecordingStudioPresskits
         recording ||= RecordingStudio::Recording.find_by(recordable: recordable)
         content = recording && KitQuery.section_content(recording)
         payload = headings(recordable, content)
-        return payload.merge(videos: VideoPayload.for_recording(content)) if content&.recordable_type == VideoSection.name
+        if content&.recordable_type == VideoSection.name
+          return payload.merge(videos: VideoPayload.for_recording(content))
+        end
         return payload.merge(location: LocationPayload.for(content.recordable)) if LocationContent.type?(content)
 
         payload

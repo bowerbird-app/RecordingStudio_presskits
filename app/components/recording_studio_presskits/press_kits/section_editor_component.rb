@@ -79,7 +79,7 @@ module RecordingStudioPresskits
         end
 
         recording = content_recording
-        return unless recording && recordable.class.name == recording.recordable_type
+        return unless recording && recordable.instance_of?(recording.recordable.class)
 
         recording.association(:recordable).target = recordable
       end

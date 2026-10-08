@@ -15,11 +15,15 @@ require "recording_studio_presskits/api/reorder_credits"
 require "recording_studio_presskits/api/remove_credit"
 require "recording_studio_presskits/api/section_action_registration"
 require "recording_studio_presskits/api/credit_registration"
+require "recording_studio_presskits/api/location_registration"
+require "recording_studio_presskits/api/video_registration"
 
 module RecordingStudioPresskits
   module Api
     extend SectionActionRegistration
     extend CreditRegistration
+    extend LocationRegistration
+    extend VideoRegistration
 
     class << self
       def register!
@@ -106,27 +110,6 @@ module RecordingStudioPresskits
 
       def register_quote_section
         register_type("RecordingStudioPresskits::QuoteSection", **empty_section_options)
-      end
-
-      def register_video_section
-        register_type(
-          "RecordingStudioPresskits::VideoSection",
-          operations: %i[index show],
-          serializer: lambda { |_recordable, recording: nil, **|
-            { videos: VideoPayload.for_recording(recording) }
-          },
-          output_keys: %i[videos]
-        )
-      end
-
-      def register_location
-        register_type(
-          LocationContent::TYPE_NAME,
-          operations: %i[show update],
-          serializer: ->(recordable, **) { LocationPayload.for(recordable) },
-          output_keys: LocationPayload::KEYS,
-          writable_attributes: LocationPayload::KEYS
-        )
       end
 
       def register_type(type_name, **)

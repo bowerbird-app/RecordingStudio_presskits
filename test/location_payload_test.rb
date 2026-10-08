@@ -9,32 +9,16 @@ require "rails/test_help"
 class LocationPayloadTest < ActiveSupport::TestCase
   test "a saved location payload keeps every public field" do
     _root, kit = kit_tree
-    section = add_location(
-      kit,
-      title: "Project location",
-      name: "The Pavilion",
-      locality: "Melbourne",
-      region: "Victoria",
-      country_code: "AU",
-      latitude: -37.81,
-      longitude: 144.96
+    content = RecordingStudioPresskits::KitQuery.section_content(
+      add_location(kit, title: "Project location", name: "The Pavilion", locality: "Melbourne",
+                        region: "Victoria", country_code: "AU", latitude: -37.81, longitude: 144.96)
     )
-    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    expected = {
+      name: "The Pavilion", address_line_1: nil, address_line_2: nil, locality: "Melbourne",
+      region: "Victoria", postal_code: nil, country_code: "AU", latitude: -37.81, longitude: 144.96
+    }
 
-    assert_equal(
-      {
-        name: "The Pavilion",
-        address_line_1: nil,
-        address_line_2: nil,
-        locality: "Melbourne",
-        region: "Victoria",
-        postal_code: nil,
-        country_code: "AU",
-        latitude: -37.81,
-        longitude: 144.96
-      },
-      RecordingStudioPresskits::Api::LocationPayload.for(content.recordable)
-    )
+    assert_equal expected, RecordingStudioPresskits::Api::LocationPayload.for(content.recordable)
   end
 
   test "section payload leaves a text section at four keys" do
@@ -88,10 +72,7 @@ class LocationPayloadTest < ActiveSupport::TestCase
     section = add_location(kit)
     payload = RecordingStudioPresskits::Api::SectionPayload.for(section.recordable, section)
 
-    RecordingStudioPresskits::Api::LocationPayload::KEYS.each do |key|
-      assert payload[:location].key?(key), key
-      assert_nil payload[:location][key], key
-    end
+    assert_nil_location_fields(payload[:location])
   end
 
   test "location section api serializer returns the nested location" do
@@ -127,6 +108,13 @@ class LocationPayloadTest < ActiveSupport::TestCase
   end
 
   private
+
+  def assert_nil_location_fields(location)
+    RecordingStudioPresskits::Api::LocationPayload::KEYS.each do |key|
+      assert location.key?(key), key
+      assert_nil location[key], key
+    end
+  end
 
   def kit_tree
     root = RecordingStudio.root_recording_for(Workspace.create!(name: "Location payload #{SecureRandom.hex(4)}"))

@@ -9,6 +9,8 @@ module RecordingStudioPresskits
   module LocationContent
     TYPE_NAME = "RecordingStudio::Location::Location"
     MENU_ICON = "map-pin"
+    # Names match RecordingStudio::Location::Location columns.
+    # rubocop:disable Naming/VariableNumber
     ATTRIBUTES = %i[
       name
       address_line_1
@@ -20,6 +22,7 @@ module RecordingStudioPresskits
       latitude
       longitude
     ].freeze
+    # rubocop:enable Naming/VariableNumber
 
     module MenuIcon
       def section_menu_icon
