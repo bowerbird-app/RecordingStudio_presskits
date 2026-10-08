@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.22.0
+
+FlatPack is `>= 0.1.207` (dummy tag `v0.1.207`).
+
+Reload kit CSS and JavaScript. Component token names are unchanged. A named brand theme that sets `--color-primary` can leave `--color-primary-hover` unset unless hover should diverge.
+
+On each host `<html>` tag, set `lang` to the current locale and `<%= tag.attributes(data: flat_pack_copy_data) %>`. The public blank layout does this. Dummy sign-in and the default layout do too. Kit JavaScript reads that copy. English fallbacks still work when the attribute is missing.
+
+FlatPack's engine importmap pins `flat_pack/copy`. A host importmap that lists FlatPack pins by hand adds `pin "flat_pack/copy", to: "flat_pack/copy.js", preload: false`.
+
 ## 0.21.0
 
 Credits belong to the workspace. A line in a press kit only says what that credit did on that kit.

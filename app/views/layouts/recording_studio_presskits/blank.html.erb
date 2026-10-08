@@ -1,6 +1,6 @@
 <%# Public kit page for now: a document and the kit, with no page nav and no TopNav. %>
 <!DOCTYPE html>
-<html data-theme="rounded">
+<html data-theme="rounded" lang="<%= I18n.locale %>" <%= tag.attributes(data: flat_pack_copy_data) %>>
   <head>
     <title><%= content_for(:title).presence || "Press kit" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">

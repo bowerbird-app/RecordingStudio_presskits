@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.21.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.22.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -43,7 +43,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.204"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.207"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -58,7 +58,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.204"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.207"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -151,7 +151,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes default_layout, "Sign out"
     refute_includes default_layout, "Sign in"
     refute_includes default_layout, "root_switch"
-    assert_includes default_layout, '<html data-theme="rounded">'
+    assert_includes default_layout, '<html data-theme="rounded"'
+    assert_includes default_layout, "flat_pack_copy_data"
+    assert_includes default_layout, 'lang="<%= I18n.locale %>"'
     assert_includes default_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
     assert_includes default_layout, "anchor_tooltip:"
@@ -175,10 +177,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
   def test_dummy_login_layout_keeps_flatpack_assets_without_tight_main_offset
     application_layout = File.read(File.expand_path("dummy/app/views/layouts/application.html.erb", __dir__))
 
-    assert_includes application_layout, '<html data-theme="rounded">'
+    assert_includes application_layout, '<html data-theme="rounded"'
+    assert_includes application_layout, "flat_pack_copy_data"
+    assert_includes application_layout, 'lang="<%= I18n.locale %>"'
     assert_includes application_layout, 'stylesheet_link_tag "flat_pack/variables"'
     assert_includes application_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes application_layout, "javascript_importmap_tags"
+    importmap = File.read(File.expand_path("dummy/config/importmap.rb", __dir__))
+    assert_includes importmap, 'pin "flat_pack/copy", to: "flat_pack/copy.js", preload: false'
     assert_includes application_layout, "min-h-screen"
     refute_includes application_layout, "mt-28"
     refute_includes application_layout, "flat_pack_sidebar"
@@ -237,6 +243,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme_source, "This Rails app exists to prove Recording Studio Press Kits"
     assert_includes readme_source, "/recording_studio"
     assert_includes readme_source, "redirects to the press kit index"
+    assert_includes readme_source, "flat_pack_copy_data"
     refute_includes readme_source, "flat_pack_sidebar"
     refute_includes readme_source, "/docs/"
   end
@@ -251,8 +258,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.204\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.204"'
+    assert_includes readme, "tag: \"v0.1.207\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.207"'
     assert_includes readme, "FlatPack::Tabs::Component"
     assert_includes readme, "variant: :pills"
     assert_includes readme, "Section title"
@@ -308,6 +315,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
       File.expand_path("../app/views/layouts/recording_studio_presskits/blank.html.erb", __dir__)
     )
     assert_includes blank_layout, 'stylesheet_link_tag "flat_pack/application"'
+    assert_includes blank_layout, "flat_pack_copy_data"
+    assert_includes blank_layout, 'lang="<%= I18n.locale %>"'
 
     helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/application_helper.rb", __dir__))
     assert_includes helper, "recording_studio_accessible_avatars"

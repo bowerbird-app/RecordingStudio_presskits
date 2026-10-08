@@ -20,7 +20,7 @@ gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publi
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"
-gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.204"
+gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.207"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
 
@@ -36,7 +36,7 @@ gem "recording_studio_publishable", "~> 0.4"
 gem "recording_studio_attachable", "~> 0.7"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
-gem "flat_pack", ">= 0.1.204"
+gem "flat_pack", ">= 0.1.207"
 ```
 
 Then:
@@ -295,7 +295,7 @@ Dummy kit pins:
 | Accessible | `v0.11.1` |
 | Admin | `v2.0.4` |
 | Root Switchable | `v0.5.3` |
-| FlatPack | `v0.1.204` |
+| FlatPack | `v0.1.207` |
 | Attachable | `v0.7.1` |
 | Orderable | `v0.2.5` |
 | Trashable | `v0.4.4` |
@@ -304,7 +304,7 @@ Dummy kit pins:
 | External Embed | `v0.1.3` |
 | Video | `v0.1.0` |
 
-Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, and this gem so that layout is not an unstyled box.
+Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.2 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That tag also sets `lang` and `flat_pack_copy_data`, so kit JavaScript reads the current copy. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet and set the same html attributes. The same override passes Flatpack `anchor_href` (core still stores the close path in `page_nav_anchor_url`) so the close X shows next to back. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, and this gem so that layout is not an unstyled box.
 
 The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav. Core owns back and close on the default layout. **+ Access** is in the slot on the kit editor only. Cards, table, the kit editor, the header screen, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-header-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` (logged-out Spring launch), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 
