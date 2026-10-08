@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## 0.22.1
+
+Bump FlatPack to `>= 0.1.210` (dummy tag `v0.1.210`). Reload kit CSS and JavaScript. SectionTitle calls stay the same. `size:`, `spacing:`, and `level:` are optional. A blank subtitle no longer renders an empty paragraph.
+
+The credits collection editor call sites stay the same. Below 40rem FlatPack stacks each row: handle, name, and remove on one line, **Role on this kit** underneath as a normal bordered field. Wide screens keep the table. Chip edit (`update_url`) from `0.1.208` is unused; the chip name stays plain text.
+
+Hosts that copied dummy's PageNav mapping from 0.21.1 / 0.22.0 should stop passing `page_nav_back_url` as `secondary_anchor_href`. PageNav already paints history back. Close stays on `anchor_href`. Keep `page_nav_back_url` for the fallback nav only.
+
 ## 0.22.0
 
 Facts & Figures is a press kit section. The facts section stores how the facts look. Each fact is its own recording.

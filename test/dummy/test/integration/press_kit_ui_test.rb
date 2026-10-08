@@ -143,6 +143,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_rounded_default_layout
+    assert_page_nav_one_back
     assert_select "title", text: "Spring launch"
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-editor-grid h1", count: 0
@@ -292,6 +293,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_section_path(kit, hero)
     assert_response :success
+    assert_page_nav_one_back
     assert_select "title", text: "Hero"
     assert_select "h1", text: "Fake block"
     assert_includes response.body, "Hero"
@@ -734,6 +736,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_header_path(kit)
     assert_response :success
     assert_rounded_default_layout
+    assert_page_nav_one_back
     assert_select "title", text: "Header"
     assert_select "h1", text: "Header"
     assert_includes response.body, "Back to kit"

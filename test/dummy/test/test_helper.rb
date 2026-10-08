@@ -16,9 +16,14 @@ module RoundedDefaultLayoutAssertions
   end
 
   def assert_page_nav_close(href: "/recording_studio_presskits/press_kits")
+    assert_page_nav_one_back
     assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='x-mark']", count: 1
     assert_select "a[href='#{href}'][aria-label='Close']", count: 1
     refute_includes response.body, "Dummy host"
+  end
+
+  def assert_page_nav_one_back
+    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='chevron-left']", count: 1
   end
 
   def assert_page_nav_without_access

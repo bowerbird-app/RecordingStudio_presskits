@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.1] - 2026-10-08
+
+FlatPack 0.1.210.
+
+### Changed
+- FlatPack is `>= 0.1.210` (dummy tag `v0.1.210`).
+- Version `0.22.1`. Open PR #39 (Location) already claims `0.23.0`, so this pin uses the next free patch.
+
+### Fixed
+- Dummy default layout no longer maps `page_nav_back_url` to Flatpack `secondary_anchor_href`. PageNav already paints history back, so that mapping showed two chevrons next to close. Close stays on `anchor_href`. Kit, header, and section editors now show one back arrow.
+
+### Upgrade notes
+- Bump FlatPack to at least `0.1.210` and reload its CSS and JavaScript. SectionTitle calls stay the same; `size:`, `spacing:`, and `level:` are optional and unused here. A blank subtitle no longer renders an empty paragraph.
+- The credits collection editor keeps the table on a wide screen. Below 40rem each row drops the table lines: handle, name, and remove sit on one line, **Role on this kit** sits underneath as a normal bordered field, and the chip's own remove control hides. Call sites stay the same. Omit `update_url` on the credit chip so the name stays plain text. `0.1.208`'s chip edit is optional and unused here.
+- Hosts that copied dummy's PageNav mapping from 0.21.1 / 0.22.0 should stop passing `page_nav_back_url` as `secondary_anchor_href`. Keep `anchor_href` for close. Flatpack already paints the back control.
+
 ## [0.22.0] - 2026-10-08
 
 Facts & Figures.
@@ -498,7 +514,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...HEAD
+[0.22.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...v0.20.0
