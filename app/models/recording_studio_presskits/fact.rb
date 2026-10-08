@@ -4,7 +4,7 @@ module RecordingStudioPresskits
   class Fact < ApplicationRecord
     self.table_name = "recording_studio_facts"
 
-    HTTP_URL = /\Ahttps?:\/\/[^\s]+\z/i
+    HTTP_URL = %r{\Ahttps?://[^\s]+\z}i
 
     recording_studio_recordable label: "Fact",
                                 root: false,
@@ -20,10 +20,6 @@ module RecordingStudioPresskits
     }, allow_blank: true
 
     before_validation :clear_blank_details
-
-    def title
-      label.to_s.strip.presence || "Fact"
-    end
 
     def formatted_value
       [value, unit].filter_map { |part| part.to_s.strip.presence }.join(" ")

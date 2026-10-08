@@ -178,6 +178,7 @@ class FactPayloadTest < ActiveSupport::TestCase
       recordable.display_style = "cards"
       recordable.columns = 3
     end
+    content.reload
     record_fact(content, label: "Floor area", value: "420", unit: "m²")
     record_fact(content, label: "Completed", value: "2025")
     gone = record_fact(content, label: "Gone", value: "0")

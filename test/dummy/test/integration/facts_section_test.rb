@@ -254,7 +254,7 @@ class FactsSectionTest < ActionDispatch::IntegrationTest
     copied_content = section_content(copied_section)
     copied_facts = RecordingStudioPresskits::FactsSection.active_facts(copied_content)
 
-    assert_equal "Company statistics", copied_section.recordable.title
+    assert_equal "Company statistics (Copy)", copied_section.recordable.title
     assert_equal "cards", copied_content.recordable.display_style
     assert_equal 4, copied_content.recordable.columns
     assert_equal ["Countries", "Projects"], copied_facts.map { |child| child.recordable.label }

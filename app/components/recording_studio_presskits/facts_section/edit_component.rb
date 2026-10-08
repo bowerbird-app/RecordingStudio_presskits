@@ -47,10 +47,6 @@ module RecordingStudioPresskits
         helpers.press_kit_section_fact_path(kit_recording, kit_section_recording, fact_recording)
       end
 
-      def add_path
-        helpers.new_press_kit_section_fact_path(kit_recording, kit_section_recording)
-      end
-
       def fact_label(fact_recording)
         fact_recording.recordable.label.to_s.strip.presence || "Fact"
       end

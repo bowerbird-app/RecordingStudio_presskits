@@ -3,8 +3,6 @@
 module RecordingStudioPresskits
   module Api
     class FactPayload
-      KEYS = %i[label value unit description source_url as_of_date].freeze
-
       def self.for(recordable)
         {
           label: recordable.label,
@@ -19,7 +17,7 @@ module RecordingStudioPresskits
       def self.for_recording(recording)
         {
           display: display_for(recording&.recordable),
-          facts: FactsSection.active_facts(recording).map { |child| for(child.recordable) }
+          facts: FactsSection.active_facts(recording).map { |child| FactPayload.for(child.recordable) }
         }
       end
 

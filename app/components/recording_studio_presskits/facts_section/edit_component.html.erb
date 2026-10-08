@@ -84,10 +84,6 @@
       title: "No figures yet",
       description: "Add a number, a date, or a short line.",
       icon: :inbox
-    ) do |empty| %>
-      <% empty.with_actions do %>
-        <%= render FlatPack::Button::Component.new(text: "Fact", icon: "plus", style: :primary, href: add_path) %>
-      <% end %>
-    <% end %>
+    ) %>
   <% end %>
 </div>

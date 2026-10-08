@@ -15,7 +15,7 @@ module RecordingStudioPresskits
       end
 
       def heading
-        fact.title.presence || "Fact"
+        fact.label.to_s.strip.presence || "Fact"
       end
 
       def form_path
