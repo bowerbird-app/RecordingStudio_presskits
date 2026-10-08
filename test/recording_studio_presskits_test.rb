@@ -570,5 +570,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes order, "target_position"
     assert_includes routes, "get :search"
     assert_includes routes, "resource :credit_lines, only: :update"
+    assert_includes editor, "recording-studio-presskits--credit-preview"
+    assert_includes editor, "list:saved->recording-studio-presskits--credit-preview#sync"
+    show = File.read(presskits_path(
+                       "app/components/recording_studio_presskits/credits_section/component.html.erb"
+                     ))
+    assert_includes show, "data-credit-lines"
+    assert_includes show, "data-credit-line-id"
+    preview = File.read(presskits_path(
+                          "app/javascript/recording_studio_presskits/controllers/credit_preview_controller.js"
+                        ))
+    assert_includes preview, "presskits-section-preview"
+    assert_includes preview, "data-credit-line-id"
   end
 end

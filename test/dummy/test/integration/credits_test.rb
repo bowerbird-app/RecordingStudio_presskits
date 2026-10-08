@@ -279,6 +279,8 @@ class CreditsTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "[data-collection-editor-title]", text: "Tom Ross"
     assert_select "input[name='credit_lines[credit_lines_attributes][0][role]'][value='Photographer']"
+    assert_select "#presskits-credit-lines[data-controller='recording-studio-presskits--credit-preview']"
+    assert_select "#presskits-section-preview [data-credit-line-id='#{line.id}']"
 
     save_lines(kit, section, {
       "0" => { id: line.id, credit_recording_id: tom.id, role: "Photography", _destroy: "0" }
