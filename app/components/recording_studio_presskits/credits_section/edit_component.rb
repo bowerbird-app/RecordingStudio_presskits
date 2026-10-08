@@ -47,6 +47,20 @@ module RecordingStudioPresskits
         helpers.credits_path
       end
 
+      def preview_actions
+        %w[
+          list:saved->recording-studio-presskits--credit-preview#sync
+          list:reordered->recording-studio-presskits--credit-preview#sync
+          collection-editor:selected->recording-studio-presskits--credit-preview#choose
+          input->recording-studio-presskits--credit-preview#role
+          click->recording-studio-presskits--credit-preview#drop
+        ].join(" ")
+      end
+
+      def credit_catalog_json
+        ERB::Util.json_escape(credit_catalog.to_json)
+      end
+
       private
 
       def kit_section_recording
@@ -55,6 +69,16 @@ module RecordingStudioPresskits
 
       def kit_recording
         kit_section_recording.parent_recording
+      end
+
+      def credit_catalog
+        Credits.active_for_root(@recording.root_recording).each_with_object({}) do |recording, catalog|
+          catalog[recording.id] = sanitized_credit_url(recording)
+        end
+      end
+
+      def sanitized_credit_url(recording)
+        FlatPack::AttributeSanitizer.sanitize_url(recording.recordable&.url).to_s
       end
     end
   end

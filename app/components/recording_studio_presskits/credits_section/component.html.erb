@@ -1,19 +1,17 @@
-<% if lines.any? %>
-  <div class="flex flex-col gap-5" data-credit-lines>
-    <% lines.each do |line| %>
-      <% credit = credit_for(line) %>
-      <div data-credit-line-id="<%= line.id %>">
-        <% if (role = line.recordable.role.to_s.strip.presence) %>
-          <p class="text-sm text-(--surface-muted-content-color)"><%= role %></p>
+<div class="flex flex-col gap-5" data-credit-lines>
+  <% lines.each do |line| %>
+    <% credit = credit_for(line) %>
+    <div data-credit-line-id="<%= line.id %>">
+      <% if (role = line.recordable.role.to_s.strip.presence) %>
+        <p class="text-sm text-(--surface-muted-content-color)" data-credit-role><%= role %></p>
+      <% end %>
+      <p class="text-base text-(--surface-content-color)" data-credit-name>
+        <% if (url = credit_url(credit)) %>
+          <%= link_to credit.name, url, target: "_blank", rel: "noopener noreferrer" %>
+        <% else %>
+          <%= credit.name %>
         <% end %>
-        <p class="text-base text-(--surface-content-color)">
-          <% if (url = credit_url(credit)) %>
-            <%= link_to credit.name, url, target: "_blank", rel: "noopener noreferrer" %>
-          <% else %>
-            <%= credit.name %>
-          <% end %>
-        </p>
-      </div>
-    <% end %>
-  </div>
-<% end %>
+      </p>
+    </div>
+  <% end %>
+</div>

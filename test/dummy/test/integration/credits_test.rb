@@ -215,6 +215,11 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_equal "flat-pack--unsaved-changes", heading["data-controller"]
     refute_includes heading.inner_html, "credit_lines"
     assert_select "#presskits-credit-lines[data-controller='flat-pack--unsaved-changes']", count: 0
+    assert_select "#presskits-section-preview [data-credit-lines]"
+    assert_select "#presskits-credit-lines[data-action*='collection-editor:selected->recording-studio-presskits--credit-preview#choose']"
+    assert_select "#presskits-credit-lines[data-action*='input->recording-studio-presskits--credit-preview#role']"
+    assert_select "#presskits-credit-lines[data-action*='click->recording-studio-presskits--credit-preview#drop']"
+    assert_equal({}, JSON.parse(css_select("script[data-credit-catalog]").first.text))
 
     assert_no_difference -> { RecordingStudioPresskits::Credit.count } do
       post recording_studio_presskits.credits_path, params: { credit: { name: "  ", usual_role: "PR" } }
@@ -281,6 +286,9 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_select "input[name='credit_lines[credit_lines_attributes][0][role]'][value='Photographer']"
     assert_select "#presskits-credit-lines[data-controller='recording-studio-presskits--credit-preview']"
     assert_select "#presskits-section-preview [data-credit-line-id='#{line.id}']"
+    assert_select "#presskits-section-preview [data-credit-role]", text: "Photographer"
+    assert_select "#presskits-section-preview [data-credit-name]", text: "Tom Ross"
+    assert_equal "https://example.com/tom", JSON.parse(css_select("script[data-credit-catalog]").first.text)[tom.id]
 
     save_lines(kit, section, {
       "0" => { id: line.id, credit_recording_id: tom.id, role: "Photography", _destroy: "0" }
@@ -343,6 +351,9 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Architecture"
     assert_includes response.body, "Studio Bright"
     assert_includes response.body, "https://studiobright.com.au"
+    catalog = JSON.parse(css_select("script[data-credit-catalog]").first.text)
+    assert_equal "https://studiobright.com.au", catalog[studio.id]
+    assert_equal "https://example.com/tom", catalog[tom.id]
 
     patch recording_studio_presskits.press_kit_section_credit_order_path(kit, section),
           params: { moving_recording_id: line.id, target_position: 1 },

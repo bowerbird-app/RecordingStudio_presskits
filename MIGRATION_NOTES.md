@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.20.0
+## 0.21.0
 
 Credits belong to the workspace. A line in a press kit only says what that credit did on that kit.
 
@@ -22,7 +22,7 @@ Trash a credit with `recording_studio_trashable_trash!`. Restore it with `record
 
 Create credits with `RecordingStudioPresskits::Credits.create!` on the workspace root. Add one to a section with `Credits.add!`. Revise the reusable fields with `Credits.revise!`. Revise one kit's role with `Credits.revise_role!`. List the workspace credits with `Credits.active_for_root`. A credit from another root is refused.
 
-The screens are `GET /credits` for the workspace list, and the Credits item in + Section for a kit. The section editor keeps Title and Subtitle on the heading form. Under it, a collection editor adds each line. The first column searches `GET /credits/search` and creates with `POST /credits` when the response is JSON. The second column is the role on this kit. **Save** patches the lines. A blank role on a new line still copies `usual_role`. Dragging a saved row patches `moving_recording_id` and a 1-based `target_position`. The response is `{ ok: true }`. The preview column then follows that order. `recording_id` with `before_recording_id` or `after_recording_id` still reorders a line.
+The screens are `GET /credits` for the workspace list, and the Credits item in + Section for a kit. The section editor keeps Title and Subtitle on the heading form. Under it, a collection editor adds each line. The first column searches `GET /credits/search` and creates with `POST /credits` when the response is JSON. The second column is the role on this kit. **Save** patches the lines. A blank role on a new line still copies `usual_role`. The preview column follows a chosen credit, a role edit, and a removed row before Save. A blank role on a new row shows that usual role. Dragging a saved row patches `moving_recording_id` and a 1-based `target_position`. The response is `{ ok: true }`. The preview follows that order too. `recording_id` with `before_recording_id` or `after_recording_id` still reorders a line. Reload the press kits JavaScript with this version.
 
 When Recording Studio API is loaded, credits expose index, show, create, and update. There is no credit destroy operation. Trash the recording so existing lines keep their id. `add_credit` and `reorder_credits` are on the credits section. `remove_credit` is on the line. A line's show payload is `role`, `name`, `url`, and `credit_id`. `name` and `url` are read from the credit when it is still active. The kit section payload stays `title`, `subtitle`, `content_type`, and `content_id`.
 

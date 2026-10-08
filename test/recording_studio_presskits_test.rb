@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.20.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.21.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -571,16 +571,30 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, "get :search"
     assert_includes routes, "resource :credit_lines, only: :update"
     assert_includes editor, "recording-studio-presskits--credit-preview"
-    assert_includes editor, "list:saved->recording-studio-presskits--credit-preview#sync"
+    assert_includes editor, "preview_actions"
+    assert_includes editor, "data-credit-catalog"
+    assert_includes component, "def preview_actions"
+    assert_includes component, "collection-editor:selected->recording-studio-presskits--credit-preview#choose"
+    assert_includes component, "input->recording-studio-presskits--credit-preview#role"
+    assert_includes component, "click->recording-studio-presskits--credit-preview#drop"
+    assert_includes component, "list:reordered->recording-studio-presskits--credit-preview#sync"
+    assert_includes component, "def credit_catalog"
     show = File.read(presskits_path(
                        "app/components/recording_studio_presskits/credits_section/component.html.erb"
                      ))
     assert_includes show, "data-credit-lines"
     assert_includes show, "data-credit-line-id"
+    assert_includes show, "data-credit-role"
+    assert_includes show, "data-credit-name"
+    refute_includes show, "if lines.any?"
     preview = File.read(presskits_path(
                           "app/javascript/recording_studio_presskits/controllers/credit_preview_controller.js"
                         ))
     assert_includes preview, "presskits-section-preview"
     assert_includes preview, "data-credit-line-id"
+    assert_includes preview, "choose(event)"
+    assert_includes preview, "role(event)"
+    assert_includes preview, "drop(event)"
+    assert_includes preview, "orderableUnsaved"
   end
 end

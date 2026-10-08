@@ -2,8 +2,9 @@
       id: "presskits-credit-lines", class: "flex flex-col gap-6",
       data: {
         controller: "recording-studio-presskits--credit-preview",
-        action: "list:saved->recording-studio-presskits--credit-preview#sync"
+        action: preview_actions
       } do |form| %>
+  <script type="application/json" data-credit-catalog><%== credit_catalog_json %></script>
   <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
 
   <%= render FlatPack::CollectionEditor::Component.new(
