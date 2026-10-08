@@ -1,5 +1,22 @@
 # Upgrade notes
 
+## 0.22.0
+
+The images section edits photos with Attachable's list and slides. List opens first. Slides shows one photo, its caption, credit, and alt text, and its own Save. Saving a slide stays on that slide. Saving the list still reloads the page. A refresh returns to List.
+
+Bump both gems:
+
+```ruby
+gem "recording_studio_attachable", "~> 0.8", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.8.0"
+gem "flat_pack", ">= 0.1.205", github: "bowerbird-app/flatpack", tag: "v0.1.205"
+```
+
+No Press Kits migration. Attachable 0.8 does not add columns. Reload FlatPack CSS and JavaScript, and reload Attachable's controllers. A host that already eager-loads `controllers/recording_studio_attachable` picks up `collection_display_controller`. A host that lists controller files one by one adds that file.
+
+`Images::EditComponent#attachment_collection_options` passes `displays: %i[list carousel]` and `default_display: :list`. A host that replaced that method, or that calls `attachment_collection_editor` itself, passes the same options to keep both views. The display is not part of the signed save token. Quote images stay a single upload on the quote screen.
+
+Save on a photo starts in the default style and turns primary when caption, credit, or alt text differs from the saved text.
+
 ## 0.21.0
 
 Credits belong to the workspace. A line in a press kit only says what that credit did on that kit.

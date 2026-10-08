@@ -25,7 +25,9 @@ module RecordingStudioPresskits
         {
           association: :images,
           fields: %i[caption credit alt_text],
-          preview: :natural
+          preview: :natural,
+          displays: %i[list carousel],
+          default_display: :list
         }
       end
 

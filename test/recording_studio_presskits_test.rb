@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.21.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.22.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -34,6 +34,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_kind_of Class, ::RecordingStudioPresskits::Engine
   end
 
+  def test_images_editor_offers_list_and_slides
+    source = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/images/edit_component.rb", __dir__)
+    )
+
+    assert_includes source, "displays: %i[list carousel]"
+    assert_includes source, "default_display: :list"
+    assert_includes source, "preview: :natural"
+    assert_includes source, "fields: %i[caption credit alt_text]"
+  end
+
   def test_gemspec_pins_recording_studio_and_accessible
     gemspec = File.read(File.expand_path("../recording_studio_presskits.gemspec", __dir__))
 
@@ -43,9 +54,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.204"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.205"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.1.0"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
@@ -58,12 +69,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.204"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.205"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.4.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
@@ -251,8 +262,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.204\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.204"'
+    assert_includes readme, "tag: \"v0.1.205\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.205"'
+    assert_includes readme, 'gem "recording_studio_attachable", "~> 0.8"'
+    assert_includes readme, "Slides"
     assert_includes readme, "FlatPack::Tabs::Component"
     assert_includes readme, "variant: :pills"
     assert_includes readme, "Section title"

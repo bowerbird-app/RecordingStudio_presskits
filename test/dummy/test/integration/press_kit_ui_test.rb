@@ -966,6 +966,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes columns.last.text, "Preview"
     assert_includes response.body, "No images yet."
     refute_includes response.body, ">Save<"
+    refute_select "[data-controller='recording-studio-attachable--collection-display']"
+    refute_select "a[href='#carousel']", text: "Slides"
     assert_select "[data-controller='recording-studio-attachable--upload']", count: 1
     refute_select "form[data-controller='recording-studio-attachable--upload']"
     assert_select "[data-controller='recording-studio-attachable--upload'] button[type='button']", text: "Upload"
@@ -1024,6 +1026,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Save"
     assert_select "button", text: "Trash"
     refute_includes response.body, "No images yet."
+    assert_image_list_and_slides(images, attachment)
 
     signed = css_select("input[name='attachment_collection[signed_editor]']").first["value"]
     return_to = recording_studio_presskits.edit_press_kit_section_path(kit, section)
@@ -1046,6 +1049,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal "Stage left", attachment.recordable.caption
     assert_equal "Ada", attachment.recordable.credit
     assert_equal "The stage", attachment.recordable.alt_text
+    assert_image_list_and_slides(images, attachment)
+    assert_select "input[name='attachment_collection[rows][][caption]'][value='Stage left']", count: 2
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
@@ -1594,6 +1599,29 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
   def section_content(section)
     RecordingStudioPresskits::KitQuery.section_content(section)
+  end
+
+  def assert_image_list_and_slides(images, attachment)
+    slide_form_id = "attachment-collection-#{images.id}-slide-#{attachment.id}"
+    display = css_select("[data-controller='recording-studio-attachable--collection-display']").first
+
+    assert_equal "list", display["data-display"]
+    assert_select "a[href='#list'][aria-current='page']", text: "List"
+    assert_select "a[href='#carousel']", text: "Slides"
+    refute_select "a[href='#carousel'][aria-current='page']"
+    assert_select "[data-recording-studio-attachable--collection-display-target='carousel'][hidden]"
+    assert_select "form#attachment-collection-#{images.id}"
+    assert_nil css_select("form#attachment-collection-#{images.id}").first["hidden"]
+    assert_select "form##{slide_form_id}"
+    assert_equal recording_studio_attachable.recording_attachment_collection_path(images),
+                 css_select("form##{slide_form_id}").first["action"]
+    assert_select "input[name='attachment_collection[rows][][caption]'][form='#{slide_form_id}']"
+    tokens = css_select("input[name='attachment_collection[signed_editor]']").map { |node| node["value"] }
+    assert_equal 1, tokens.uniq.size
+    assert tokens.first.present?
+    saves = css_select("button[type=submit]").select { |button| button.text.squish == "Save" }
+    assert_equal 2, saves.size
+    saves.each { |button| assert_equal "default", button["data-fp-style"] }
   end
 
   def attach_image(section, filename)
