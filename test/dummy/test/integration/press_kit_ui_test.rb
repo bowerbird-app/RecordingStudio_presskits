@@ -60,6 +60,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
     assert_page_nav_close
+    assert_layout_back_button(label: "Go back")
     assert_page_nav_without_access
 
     get recording_studio_presskits.press_kits_path(view: "table")
@@ -119,6 +120,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Quotes"
     assert_match(/Hero.*Quotes/m, response.body)
     assert_page_nav_close
+    assert_layout_back_button(label: "Press kits", href: recording_studio_presskits.press_kits_path)
     assert_access_slot_only
     refute_includes response.body, "Dummy host"
   end
@@ -431,7 +433,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_heading_form_save_button(kit, section)
     assert_select "button", text: "Upload", count: 0
     assert_select "button", text: "Save", count: 0
-    assert_includes response.body, "Back to kit"
+    assert_layout_back_button(label: "Back to kit", href: recording_studio_presskits.edit_press_kit_path(kit))
     refute section_editor_cancel?
     content_form = css_select("#presskits-section-content-form").first
     settings_form = css_select("#presskits-section-title-form").first
@@ -736,7 +738,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_rounded_default_layout
     assert_select "title", text: "Header"
     assert_select "h1", text: "Header"
-    assert_includes response.body, "Back to kit"
+    assert_layout_back_button(label: "Back to kit", href: recording_studio_presskits.edit_press_kit_path(kit))
     assert_page_nav_without_access
     assert_select "input[name='press_kit[title]'][value='Spring launch']"
     assert_select "textarea[name='press_kit[description]']", text: "Doors at noon."
@@ -1102,7 +1104,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "textarea[name='quote[body]']", count: 0
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
-    assert_includes response.body, "Back to kit"
+    assert_layout_back_button(label: "Back to kit", href: recording_studio_presskits.edit_press_kit_path(kit))
     refute section_editor_cancel?
     actions = css_select("#presskits-section-actions").to_html
     assert_includes actions, ">Quote<"

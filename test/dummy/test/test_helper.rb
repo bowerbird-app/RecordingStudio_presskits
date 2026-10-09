@@ -21,6 +21,17 @@ module RoundedDefaultLayoutAssertions
     refute_includes response.body, "Dummy host"
   end
 
+  def assert_layout_back_button(label:, href: nil)
+    assert_select ".flat-pack-page-nav [data-flat-pack--icon-name-value='chevron-left']", count: 1
+    if href
+      assert_select ".flat-pack-page-nav a[href='#{href}'][aria-label='#{label}']", count: 1
+      assert_select ".flat-pack-page-nav [data-action*='flat-pack--page-nav#back']", count: 0
+    else
+      assert_select ".flat-pack-page-nav [aria-label='#{label}'][data-action*='flat-pack--page-nav#back']", count: 1
+      assert_select ".flat-pack-page-nav a [data-flat-pack--icon-name-value='chevron-left']", count: 0
+    end
+  end
+
   def assert_page_nav_without_access
     refute_includes response.body, "+ Access"
     refute_includes response.body, "Sign out"

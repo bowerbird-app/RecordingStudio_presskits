@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.1] - 2026-10-08
+
+### Fixed
+- The dummy default layout was drawing two back chevrons. PageNav always draws a history back button, and the layout also turned the screen's back URL into `secondary_anchor_href`, which uses the same chevron. The layout now draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Close stays on `anchor_href`.
+
+### Changed
+- Version `0.22.1`
+
+### Upgrade notes
+- If a host copied the dummy default layout and assigns `page_nav_back_url` to `secondary_anchor_href`, remove that assignment. Render one back control from the layout. Keep close on `anchor_href`.
+
 ## [0.22.0] - 2026-10-08
 
 Facts & Figures.
@@ -498,7 +509,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...HEAD
+[0.22.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.19.0...v0.20.0

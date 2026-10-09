@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.22.1
+
+The dummy default layout draws one back control. A screen that sets `page_nav_back_url` gets that link. A screen that does not gets PageNav's history button. Close stays on `anchor_href`.
+
+If a host copied the earlier dummy layout, remove the line that assigns `page_nav_back_url` to `secondary_anchor_href`. That second control used the same chevron as PageNav's history button.
+
 ## 0.22.0
 
 Facts & Figures is a press kit section. The facts section stores how the facts look. Each fact is its own recording.

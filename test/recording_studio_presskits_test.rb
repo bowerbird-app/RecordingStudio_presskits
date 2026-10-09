@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.22.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.22.1", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -156,7 +156,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes default_layout, '<html data-theme="rounded">'
     assert_includes default_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
-    assert_includes default_layout, "page_nav_options[:secondary_anchor_href]"
+    refute_includes default_layout, "secondary_anchor_href"
+    assert_includes default_layout, "One back control from this layout"
+    assert_includes default_layout, "back_url.blank?"
     assert_includes default_layout, "anchor_tooltip:"
     refute_includes default_layout, "page_nav_options[:anchor_url]"
     refute_includes default_layout, "page_nav_options[:back_url]"
