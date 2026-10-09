@@ -80,8 +80,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute File.exist?(File.expand_path("../lib/recording_studio_presskits/services/example_service.rb", __dir__))
     refute File.exist?(File.expand_path("../lib/recording_studio_presskits/capabilities/example.rb", __dir__))
     refute File.exist?(File.expand_path("../app/controllers/recording_studio_presskits/home_controller.rb", __dir__))
-    refute File.exist?(File.expand_path("../app/javascript/recording_studio_presskits/controllers/editor_modal_controller.js", __dir__))
-    refute File.exist?(File.expand_path("../app/components/recording_studio_presskits/press_kits/editor_modal_component.rb", __dir__))
+    refute File.exist?(
+      File.expand_path("../app/javascript/recording_studio_presskits/controllers/editor_modal_controller.js", __dir__)
+    )
+    refute File.exist?(
+      File.expand_path("../app/components/recording_studio_presskits/press_kits/editor_modal_component.rb", __dir__)
+    )
   end
 
   def test_press_kit_declares_product_label_and_host_root_parent
@@ -432,7 +436,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'name: "press_kit[description]"'
     refute_includes show, 'text: "Save"'
     assert_includes kit_header, 'id="presskits-kit-header"'
-    assert_includes kit_header, 'text: edit_heading_label'
+    assert_includes kit_header, "text: edit_heading_label"
     refute_includes kit_header, "arrows-up-down"
     refute_includes kit_header, "trash"
     assert_includes header, 'name: "press_kit[title]"'
@@ -524,20 +528,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
     component = File.read(presskits_path("app/components/recording_studio_presskits/images/edit_component.rb"))
     show = File.read(presskits_path("app/components/recording_studio_presskits/images/component.html.erb"))
 
-    frame_path = "press_kits/section_frame_component.html.erb"
     editor_path = "press_kits/section_editor_component.html.erb"
-    frame = File.read(presskits_path("app/components/recording_studio_presskits/#{frame_path}"))
     section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
 
     refute_includes editor, 'name: "images[title]"'
     refute_includes editor, 'name: "images[subtitle]"'
     refute_includes editor, "images[caption]"
-    heading = File.read(presskits_path(
-                          "app/components/recording_studio_presskits/press_kits/section_heading_editor_component.html.erb"
-                        ))
-    heading_display = File.read(presskits_path(
-                                  "app/components/recording_studio_presskits/press_kits/section_heading_component.html.erb"
-                                ))
+    heading_editor = "press_kits/section_heading_editor_component.html.erb"
+    heading_view = "press_kits/section_heading_component.html.erb"
+    heading = File.read(presskits_path("app/components/recording_studio_presskits/#{heading_editor}"))
+    heading_display = File.read(presskits_path("app/components/recording_studio_presskits/#{heading_view}"))
     refute_includes section_editor, 'name: "kit_section[title]"'
     refute_includes section_editor, 'name: "kit_section[subtitle]"'
     assert_includes heading, 'name: "kit_section[title]"'
@@ -567,9 +567,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
   def test_section_heading_editor_is_shared_and_content_editors_omit_title_fields
     editor_path = "press_kits/section_editor_component.html.erb"
     section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
-    heading = File.read(presskits_path(
-                          "app/components/recording_studio_presskits/press_kits/section_heading_editor_component.html.erb"
-                        ))
+    heading_editor = "press_kits/section_heading_editor_component.html.erb"
+    heading = File.read(presskits_path("app/components/recording_studio_presskits/#{heading_editor}"))
     component_path = "press_kits/section_editor_component.rb"
     component = File.read(presskits_path("app/components/recording_studio_presskits/#{component_path}"))
     engine = File.read(presskits_path("lib/recording_studio_presskits/engine.rb"))
@@ -614,12 +613,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     editor_path = "app/components/recording_studio_presskits/press_kits/section_editor_component.html.erb"
     helper_path = "app/helpers/recording_studio_presskits/application_helper.rb"
     frame = File.read(presskits_path(frame_path))
-    heading = File.read(presskits_path(
-                          "app/components/recording_studio_presskits/press_kits/section_heading_editor_component.html.erb"
-                        ))
-    heading_component = File.read(presskits_path(
-                                    "app/components/recording_studio_presskits/press_kits/section_heading_editor_component.rb"
-                                  ))
+    heading_editor = "press_kits/section_heading_editor_component.html.erb"
+    heading_ruby = "press_kits/section_heading_editor_component.rb"
+    heading = File.read(presskits_path("app/components/recording_studio_presskits/#{heading_editor}"))
+    heading_component = File.read(presskits_path("app/components/recording_studio_presskits/#{heading_ruby}"))
     helper = File.read(presskits_path(helper_path))
 
     assert_includes source, "def section_heading"

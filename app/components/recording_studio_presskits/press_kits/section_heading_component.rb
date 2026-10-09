@@ -3,7 +3,7 @@
 module RecordingStudioPresskits
   module PressKits
     class SectionHeadingComponent < ViewComponent::Base
-      def initialize(title:, subtitle: nil, size: :lg, spacing: :lg, level: :h2, anchor_link: true)
+      def initialize(title:, subtitle: nil, size: :lg, spacing: :lg, level: :h2, anchor_link: true) # rubocop:disable Metrics/ParameterLists
         super()
         @title = title
         @subtitle = subtitle

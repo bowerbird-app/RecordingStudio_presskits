@@ -42,7 +42,7 @@ module RecordingStudioPresskits
       render_invalid_header(title, description)
     end
 
-    def respond_to_header_save
+    def respond_to_header_save # rubocop:disable Metrics/MethodLength
       notice = "Saved. That's what people see first."
       respond_to do |format|
         format.turbo_stream do

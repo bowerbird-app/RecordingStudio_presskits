@@ -13,7 +13,9 @@ module RecordingStudioPresskits
     end
 
     def presskits_editor_dialog?
-      respond_to?(:turbo_frame_request_id) && turbo_frame_request_id == presskits_editor_screen_id
+      return false unless respond_to?(:request) && request
+
+      request.headers["Turbo-Frame"].to_s == presskits_editor_screen_id
     end
 
     def presskits_editor_open_data

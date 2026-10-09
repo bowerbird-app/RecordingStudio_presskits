@@ -1,4 +1,4 @@
-<%= turbo_frame_tag section_id do %>
+<%= helpers.turbo_frame_tag section_id do %>
   <section
     id="<%= section_id %>-body"
     class="group/section relative rounded-[var(--radius-lg)] p-4 -mx-4 outline outline-2 outline-transparent transition-[outline-color] duration-[var(--duration-base)] hover:outline-[var(--color-primary)] focus-within:outline-[var(--color-primary)] <%= "ring-2 ring-[var(--color-primary)]" if highlight? %>"
