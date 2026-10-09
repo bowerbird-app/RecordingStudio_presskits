@@ -76,7 +76,7 @@ module RecordingStudioPresskits
       def surface_classes
         # Tailwind scans these literals: "aspect-[9/16]" "aspect-[21/9]" "max-w-xs"
         if hero?
-          "flex aspect-[21/9] min-h-64 w-full flex-col justify-end p-8 md:p-12"
+          "flex aspect-[21/9] min-h-64 w-full flex-col justify-end rounded-none p-8 md:p-12"
         elsif preview?
           "flex aspect-[9/16] w-full flex-col justify-end p-6"
         else

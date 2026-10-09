@@ -45,14 +45,26 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-editor-toolbar a", text: "Header"
     refute_select "#presskits-editor-toolbar a", text: "View"
     header = css_select("#presskits-kit-header").first
-    assert_includes header["class"], "pt-8"
-    assert_includes header["class"], "md:pt-10"
-    assert_includes header["class"], "lg:pt-12"
+    assert_includes header["class"], "after:inset-0"
+    assert_includes header["class"], "hover:after:bg-[color-mix(in_oklab,black_16%,transparent)]"
+    refute_includes header["class"], "pt-8"
+    refute_includes header["class"], "hover:bg-[var(--surface-muted-background-color)]"
     refute_includes header["class"], "-m-4"
     refute_includes header["class"], "pr-20"
     preview = css_select("#presskits-editor-preview").first
-    assert_includes preview["class"], "md:p-4"
-    assert_includes preview["class"], "lg:p-6"
+    assert_includes preview["class"], "overflow-hidden"
+    assert_includes preview["class"], "rounded-[var(--radius-lg)]"
+    refute_includes preview["class"], "md:p-4"
+    refute_includes preview["class"], "lg:p-6"
+    hero = css_select("#presskits-cover-hero").first
+    assert_includes hero["class"], "w-full"
+    assert_includes hero["class"], "rounded-none"
+    assert_includes hero["class"], "p-8"
+    assert_includes hero["class"], "md:p-12"
+    sections = css_select("#presskits-editor-sections").first
+    assert_includes sections["class"], "p-5"
+    assert_includes sections["class"], "md:p-8"
+    assert_includes sections["class"], "lg:p-10"
     assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     header_fab = css_select("#presskits-kit-header .fp-fab").first
     assert_includes header_fab["style"].to_s, "--fp-fab-offset: 1rem"

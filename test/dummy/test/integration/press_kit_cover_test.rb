@@ -243,6 +243,13 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-cover-hero [data-cover-text-color='#111827']"
     assert_select "#presskits-cover-hero [data-cover-ratio='21 / 9']"
     assert_includes response.body, "Doors at noon."
+    public_preview = css_select("#presskits-public-preview").first
+    assert_includes public_preview["class"], "overflow-hidden"
+    assert_includes public_preview["class"], "rounded-[var(--radius-lg)]"
+    public_hero = css_select("#presskits-cover-hero").first
+    assert_includes public_hero["class"], "rounded-none"
+    assert_includes public_hero["class"], "p-8"
+    assert_includes public_hero["class"], "md:p-12"
 
     sign_in @user
     switch_to_root(@root)
@@ -252,6 +259,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-cover-hero [data-cover-color='#059669']"
     assert_select "#presskits-cover-hero [data-cover-text-color='#111827']"
     assert_select "#presskits-cover-hero [data-cover-ratio='21 / 9']"
+    preview = css_select("#presskits-public-preview").first
+    assert_includes preview["class"], "overflow-hidden"
+    assert_includes preview["class"], "rounded-[var(--radius-lg)]"
   end
 
   test "press kit payload reads resolved cover fields" do

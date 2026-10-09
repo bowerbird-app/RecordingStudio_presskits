@@ -25,7 +25,7 @@ module RecordingStudioPresskits
       end
 
       def region_classes
-        EditorChrome.region_classes
+        EditorChrome.region_classes(header: true)
       end
 
       def fab_classes

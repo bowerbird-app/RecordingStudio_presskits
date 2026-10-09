@@ -283,7 +283,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "recording-studio-presskits--editor-chrome"
     assert_includes readme, "icon: :plus"
     assert_includes readme, "p-8 md:p-10 lg:p-12"
-    assert_includes readme, "md:p-4 lg:p-6"
+    assert_includes readme, "overflow-hidden"
+    assert_includes readme, "rounded-none"
     assert_includes readme, 'offset: "1rem"'
     refute_includes readme, "p-4 -m-4"
     assert_includes readme, "variant: :swatches"
@@ -435,6 +436,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover, "9 / 16"
     assert_includes cover, "21 / 9"
     assert_includes cover, "aspect-[9/16]"
+    assert_includes cover, "rounded-none p-8 md:p-12"
+    assert_includes cover_html, "<% if hero? %>"
+    refute_includes cover_html.split("<% else %>").first, "FlatPack::Card::Component"
     assert_includes cover_html, "--page-title-h1-size"
     assert_includes cover_html, "variant: heading_variant"
     refute_includes index, "card.media"
@@ -528,7 +532,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "md:pt-10 md:pb-10 md:px-10"
     assert_includes chrome, "lg:pt-12 lg:pb-12 lg:px-12"
     assert_includes chrome, "pr-20"
-    assert_includes chrome, "md:p-4 lg:p-6"
+    assert_includes chrome, "HEADER_REGION_CLASSES"
+    assert_includes chrome, "after:inset-0"
+    assert_includes chrome, "hover:after:bg-[color-mix(in_oklab,black_16%,transparent)]"
+    assert_includes chrome, "PREVIEW_CLASSES"
+    assert_includes chrome, "overflow-hidden"
+    assert_includes chrome, "p-5 md:p-8 lg:p-10"
+    refute_includes chrome, "md:p-4 lg:p-6"
     assert_includes chrome, 'FAB_OFFSET = "1rem"'
     refute_includes chrome, "-m-4"
     assert_includes chrome, "rounded-[var(--radius-lg)]"
@@ -536,6 +546,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, "recording-studio-presskits--editor-chrome"
     assert_includes editor, "onPointerDown"
     assert_includes editor, "EditorChrome::PREVIEW_CLASSES"
+    assert_includes editor, "EditorChrome::KIT_CARD_CLASSES"
+    assert_includes editor, "padding: :none"
+    public_kit = File.read(File.expand_path("press_kits/public_show_component.html.erb", components))
+    assert_includes public_kit, "EditorChrome::PREVIEW_CLASSES"
+    assert_includes public_kit, "EditorChrome::KIT_CARD_CLASSES"
+    assert_includes public_kit, "EditorChrome::KIT_SECTIONS_CLASSES"
+    assert_includes public_kit, "padding: :none"
+    kit_header_rb = File.read(File.expand_path("press_kits/kit_header_component.rb", components))
+    assert_includes kit_header_rb, "header: true"
     assert_includes chrome, 'CONTROLLER = "recording-studio-presskits--editor-chrome"'
     chrome_js = File.read(File.expand_path(
                             "../app/javascript/recording_studio_presskits/controllers/editor_chrome_controller.js",

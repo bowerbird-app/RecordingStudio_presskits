@@ -23,14 +23,18 @@
     <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
   </div>
 
-  <%= render FlatPack::Card::Component.new(style: :default, class: "w-full", padding: :lg) do %>
+  <%= render FlatPack::Card::Component.new(
+    style: :default,
+    class: RecordingStudioPresskits::PressKits::EditorChrome::KIT_CARD_CLASSES,
+    padding: :none
+  ) do %>
     <div id="presskits-editor-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>">
       <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
         press_kit_recording: @press_kit_recording,
         header_edit_path: @header_edit_path
       ) %>
 
-      <div id="presskits-editor-sections" class="flex w-full flex-col gap-6">
+      <div id="presskits-editor-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
         <% if @section_recordings.any? %>
           <% @section_recordings.each do |recording| %>
             <%= render RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
