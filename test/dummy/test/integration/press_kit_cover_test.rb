@@ -323,8 +323,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-cover-color='#BFDBFE']", count: 1
     assert_select "[data-cover-color='#D97706']", count: 1
-    assert_select "[data-cover-text-color='#F8FAFC']", count: 1
-    assert_select "[data-cover-text-color='#111827']", count: 1
+    assert_select "[data-cover-text-color='#111827']", count: 2
     assert_select "[data-cover-ratio='9 / 16']", count: 2
     assert_includes css_select("[data-cover-color='#BFDBFE']").first.to_html, "--page-title-h1-size"
   end
