@@ -1,5 +1,9 @@
 # Upgrade notes
 
+## 0.24.1
+
+Hovering a kit title or section draws the outline and shows **Edit heading** without a click. Rebuild host Tailwind so `[&:hover]:outline-[var(--color-primary)]` and `[.presskits-editable:hover_&]:opacity-100` generate. Section picker rows keep Flatpack List `hover: true`.
+
 ## 0.23.0
 
 The press kit index draws a sidebar. Library is a collapsible group, and Credits is the link under it. The Credits button next to Presskit is gone.

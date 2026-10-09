@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.24.1] - 2026-10-09
+
+### Fixed
+- Hovering a kit title or section draws the outline and shows **Edit heading** (and **Edit content**) without a click. Those styles use `&:hover`, not Tailwind's `hover:` variant, which compiles behind `@media (hover: hover)` and stays off on coarse pointers.
+- **Section** list rows use Flatpack List `hover: true`, plus the same ungated hover fill so a row highlights when the pointer is over it.
+
+### Changed
+- Version `0.24.1`
+
+### Upgrade notes
+- Rebuild host Tailwind so `[&:hover]:outline-[var(--color-primary)]`, `[.presskits-editable:hover_&]:opacity-100`, and `[&:hover]:bg-[var(--list-item-hover-background-color)]` generate.
+
 ## [0.24.0] - 2026-10-09
 
 ### Changed
@@ -537,7 +549,10 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.1...HEAD
+[0.24.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.0...v0.24.1
+[0.24.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.23.0...v0.24.0
+[0.23.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0

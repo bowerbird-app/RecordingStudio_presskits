@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.24.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.24.1", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -433,6 +433,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, "SectionDropdownComponent"
     refute_includes show, "view_public"
     assert_includes kit_header, "presskits_editor_open_data"
+    assert_includes kit_header, "chrome_class"
+    assert_includes kit_header, "controls_class"
+    chrome = File.read(File.expand_path("press_kits/editable_chrome.rb", components))
+    section = File.read(File.expand_path("press_kits/editable_section_component.html.erb", components))
+    assert_includes chrome, "[&:hover]:outline-[var(--color-primary)]"
+    assert_includes chrome, "[.presskits-editable:hover_&]:opacity-100"
+    refute_includes chrome, "group-hover/"
+    refute_includes chrome, "hover:outline-"
+    assert_includes section, "chrome_class"
+    assert_includes section, "controls_class"
     heading_editor = File.read(File.expand_path("press_kits/section_heading_editor_component.html.erb", components))
     helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/kit_editor_helper.rb", __dir__))
 
@@ -517,6 +527,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes dropdown, "icon: item[:icon]"
     assert_includes picker, "item[:description]"
     assert_includes picker, "item[:label]"
+    assert_includes picker, "hover: true"
+    assert_includes picker, "[&:hover]:bg-[var(--list-item-hover-background-color)]"
     assert_includes picker, "turbo_method: :post"
     assert_includes order, "orderable_url: @reorder_path"
     assert_includes order, 'param_uuid_name: "moving_recording_id"'
