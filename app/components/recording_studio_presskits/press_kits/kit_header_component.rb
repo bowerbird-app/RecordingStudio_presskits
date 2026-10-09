@@ -32,6 +32,10 @@ module RecordingStudioPresskits
         EditorChrome::FAB_CLASSES
       end
 
+      def fab_offset
+        EditorChrome::FAB_OFFSET
+      end
+
       def header_actions_label
         I18n.t("recording_studio_presskits.editor.header_actions")
       end

@@ -4,7 +4,7 @@
 
 The kit editor preview matches the public kit. In-flow **Edit heading**, **Edit content**, and the compact add-section dropdown are gone. On a pointer that can hover, hover or focus-within tints the region with `--surface-muted-background-color` and shows the FAB. Keyboard users get a `:focus-visible` outline and still see the FAB. On touch, the FAB is not always visible. A tap makes that section or the header the active region (tint and FAB). Tapping another region moves the active state. Tapping outside clears it.
 
-Each section has `FlatPack::Fab::Component.new(contained: true, position: :top_right, backdrop: false, size: :sm, icon: :plus, label: "Section actions")` on a `position: relative` region so the FAB pins to that section. The region uses `p-4 -m-4` and `rounded-[var(--radius-lg)]` so the hover/active tint sits off the content. The negative margin keeps the heading and body lined up with the public kit. Top corners open downward. Speed-dial actions:
+Each section has `FlatPack::Fab::Component.new(contained: true, position: :top_right, backdrop: false, size: :sm, icon: :plus, offset: "1rem", label: "Section actions")` on a `position: relative` region so the FAB pins to that section. The region uses `p-8` and `rounded-[var(--radius-lg)]` so the hover/active tint sits off the content and stays inset from the kit card. Sections add `pr-20` so the heading clears the FAB. The public page is unchanged. Top corners open downward. Speed-dial actions:
 
 - **Edit title** — shared heading screen in `pk-editor`
 - **Edit content** — that section's content screen
@@ -14,7 +14,7 @@ Each section has `FlatPack::Fab::Component.new(contained: true, position: :top_r
 
 The kit header FAB uses the same chrome: **Edit heading** and **Cover colours**. Both open the shared header screen. Cover colours hashes to `#presskits-header-colours`. The toolbar **Section** button still adds at the end or into an empty kit.
 
-Bump FlatPack to `>= 0.1.222` (dummy tag `v0.1.222`) and rebuild Tailwind so `size: :sm` and action `style: :danger` generate. Reload Flatpack CSS after the bump. Hosts that replaced those components should render the Flatpack FAB (`icon: :plus`) on a `p-4 -m-4` `rounded-[var(--radius-lg)]` region and drop the old ghost buttons. FAB has no hover-only visibility or tap-to-activate API. Desktop uses group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active`.
+Bump FlatPack to `>= 0.1.222` (dummy tag `v0.1.222`) and rebuild Tailwind so `size: :sm` and action `style: :danger` generate. Reload Flatpack CSS after the bump. Hosts that replaced those components should render the Flatpack FAB (`icon: :plus`, `offset: "1rem"`) on a `p-8` `rounded-[var(--radius-lg)]` region and drop the old ghost buttons. Sections also use `pr-20`. FAB has no hover-only visibility or tap-to-activate API. Desktop uses group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active`.
 
 ## 0.25.1
 

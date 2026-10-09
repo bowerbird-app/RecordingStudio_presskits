@@ -45,9 +45,12 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-editor-toolbar a", text: "Header"
     refute_select "#presskits-editor-toolbar a", text: "View"
     header = css_select("#presskits-kit-header").first
-    assert_includes header["class"], "p-4"
-    assert_includes header["class"], "-m-4"
+    assert_includes header["class"], "p-8"
+    refute_includes header["class"], "-m-4"
+    refute_includes header["class"], "pr-20"
     assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
+    header_fab = css_select("#presskits-kit-header .fp-fab").first
+    assert_includes header_fab["style"].to_s, "--fp-fab-offset: 1rem"
     assert_select "#presskits-kit-header button.fp-fab__trigger[aria-label='Header actions']"
     assert_select "#presskits-kit-header [role='menuitem'][aria-label='Edit heading']"
     assert_select "h1", text: "Spring launch"
@@ -81,11 +84,14 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes body["class"], "[@media(hover:none)]:opacity-100"
     assert_includes body["class"], "focus-visible:outline"
     assert_includes body["class"], "relative"
-    assert_includes body["class"], "p-4"
-    assert_includes body["class"], "-m-4"
+    assert_includes body["class"], "p-8"
+    assert_includes body["class"], "pr-20"
+    refute_includes body["class"], "-m-4"
     assert_includes body["class"], "rounded-[var(--radius-lg)]"
     refute_includes body["class"], "hover:outline-[var(--color-primary)]"
     assert_select "#presskits-section-#{section.id} .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
+    section_fab = css_select("#presskits-section-#{section.id} .fp-fab").first
+    assert_includes section_fab["style"].to_s, "--fp-fab-offset: 1rem"
     assert_select "#presskits-section-#{section.id} button.fp-fab__trigger[aria-label='Section actions']"
     assert_select "#presskits-section-#{section.id} button.fp-fab__trigger [data-flat-pack--icon-name-value='plus']"
     fab = css_select("#presskits-section-#{section.id} .fp-fab").first

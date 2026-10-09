@@ -44,11 +44,15 @@ module RecordingStudioPresskits
       end
 
       def region_classes
-        EditorChrome.region_classes(highlight: highlight?)
+        EditorChrome.region_classes(highlight: highlight?, reserve_fab: true)
       end
 
       def fab_classes
         EditorChrome::FAB_CLASSES
+      end
+
+      def fab_offset
+        EditorChrome::FAB_OFFSET
       end
 
       def edit_title_label

@@ -282,7 +282,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "FlatPack::Fab::Component"
     assert_includes readme, "recording-studio-presskits--editor-chrome"
     assert_includes readme, "icon: :plus"
-    assert_includes readme, "p-4 -m-4"
+    assert_includes readme, "p-8"
+    assert_includes readme, 'offset: "1rem"'
+    refute_includes readme, "p-4 -m-4"
     assert_includes readme, "variant: :swatches"
     refute_includes readme, "named radios"
     assert_includes readme, "Edit content"
@@ -475,6 +477,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes kit_header, "backdrop: false"
     assert_includes kit_header, "size: :sm"
     assert_includes kit_header, "icon: :plus"
+    assert_includes kit_header, "offset: fab_offset"
     refute_includes kit_header, "ellipsis_vertical"
     assert_includes kit_header, "edit_heading_label"
     assert_includes kit_header, "cover_colours_label"
@@ -487,6 +490,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section, "backdrop: false"
     assert_includes section, "size: :sm"
     assert_includes section, "icon: :plus"
+    assert_includes section, "offset: fab_offset"
     refute_includes section, "ellipsis_vertical"
     assert_includes section, "style: :danger"
     assert_includes section, "edit_title_label"
@@ -519,7 +523,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "group-data-[pk-edit-active]/pk-edit"
     refute_includes chrome, "[@media(hover:none)]:opacity-100"
     assert_includes chrome, "relative"
-    assert_includes chrome, "p-4 -m-4"
+    assert_includes chrome, "p-8"
+    assert_includes chrome, "pr-20"
+    assert_includes chrome, 'FAB_OFFSET = "1rem"'
+    refute_includes chrome, "-m-4"
     assert_includes chrome, "rounded-[var(--radius-lg)]"
     editor = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
     assert_includes editor, "recording-studio-presskits--editor-chrome"

@@ -4,10 +4,12 @@ module RecordingStudioPresskits
   module PressKits
     module EditorChrome
       CONTROLLER = "recording-studio-presskits--editor-chrome"
+      FAB_OFFSET = "1rem"
+      FAB_RESERVE_CLASS = "pr-20"
 
       REGION_CLASSES = [
         "group/pk-edit relative rounded-[var(--radius-lg)] bg-transparent",
-        "p-4 -m-4",
+        "p-8",
         "transition-colors duration-[var(--duration-base)]",
         "[@media(hover:hover)]:hover:bg-[var(--surface-muted-background-color)]",
         "focus-within:bg-[var(--surface-muted-background-color)]",
@@ -29,10 +31,12 @@ module RecordingStudioPresskits
         "[@media(hover:none)]:group-data-[pk-edit-active]/pk-edit:pointer-events-auto"
       ].join(" ").freeze
 
-      def self.region_classes(highlight: false)
-        return REGION_CLASSES unless highlight
+      def self.region_classes(highlight: false, reserve_fab: false)
+        classes = REGION_CLASSES
+        classes = "#{classes} #{FAB_RESERVE_CLASS}" if reserve_fab
+        return classes unless highlight
 
-        "#{REGION_CLASSES} #{HIGHLIGHT_CLASSES}"
+        "#{classes} #{HIGHLIGHT_CLASSES}"
       end
     end
   end
