@@ -42,14 +42,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_presskits.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.11"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.12"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.220"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.221"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.5"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.12"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.1.0"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
@@ -59,17 +59,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.3.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.12.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.220"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.4.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.6"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.221"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.5.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.5.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.12.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -241,6 +241,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes presskits_initializer, '"FakeBlock"'
     assert_includes initializer_source, '"AdminRoot"'
     assert_includes initializer_source, '"RecordingStudioPublishable::Publishable"'
+    assert_includes initializer_source, '"RecordingStudioAttachable::Library"'
+    assert_includes initializer_source, '"RecordingStudioAttachable::Placement"'
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
@@ -262,13 +264,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.3.0"
-    assert_includes readme, "v0.11.1"
+    assert_includes readme, "v0.12.1"
     assert_includes readme, "tag: \"v2.0.7\""
-    assert_includes readme, "tag: \"v0.2.5\""
-    assert_includes readme, "tag: \"v0.4.4\""
-    assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.220\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.220"'
+    assert_includes readme, "tag: \"v0.2.7\""
+    assert_includes readme, "tag: \"v0.5.0\""
+    assert_includes readme, "tag: \"v0.4.5\""
+    assert_includes readme, "tag: \"v0.1.221\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.221"'
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
     assert_includes readme, "flat_pack_modal_screen"
@@ -815,8 +817,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.1.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
   end
 
   def test_video_edit_calls_video_helpers_and_does_not_build_an_iframe

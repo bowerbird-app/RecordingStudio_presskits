@@ -6,37 +6,37 @@ Kits sit under your workspace. You can have many. You publish the kit, not each 
 
 ## Install
 
-Add the gem next to Recording Studio 4.3, Accessible 0.11, Admin 2.0, Publishable 0.4, and the three mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.3, Accessible 0.12, Admin 2.0, Publishable 0.5, and the three mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
 gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.3.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.12.1"
 gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"
-gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"
-gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"
-gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"
-gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.4.2"
-gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"
-gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"
-gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"
-gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.220"
+gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"
+gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.5.0"
+gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"
+gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.5.0"
+gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.12.0"
+gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
+gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
+gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.221"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
 
 ```ruby
 # gemspec / host Gemfile constraints
 gem "recording_studio", "~> 4.2"
-gem "recording_studio_accessible", "~> 0.11"
+gem "recording_studio_accessible", "~> 0.12"
 gem "recording_studio_admin", "~> 2.0"
 gem "recording_studio_orderable", "~> 0.2"
-gem "recording_studio_trashable", "~> 0.4"
+gem "recording_studio_trashable", "~> 0.5"
 gem "recording_studio_duplicatable", "~> 0.4"
-gem "recording_studio_publishable", "~> 0.4"
-gem "recording_studio_attachable", "~> 0.7"
+gem "recording_studio_publishable", "~> 0.5"
+gem "recording_studio_attachable", "~> 0.12"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
-gem "flat_pack", ">= 0.1.220"
+gem "flat_pack", ">= 0.1.221"
 ```
 
 Then:
@@ -218,7 +218,7 @@ The content class still declares that parent, and the host still lists the class
 
 `RecordingStudioPresskits::Text` stores HTML from FlatPack's content editor (`preset: :content`, `toolbar: :standard`). A new text section starts with `Text.opening_body` when the body is blank. The content editor shows Body, with Update under it. Title and Subtitle live on the shared heading editor. Trashable is on the text recording and on the kit section. Orderable stays on the kit for kit sections. Publishable stays off both. FlatPack's engine importmap pins TipTap, including the content preset. A host that skips that importmap has to pin those packages itself.
 
-`RecordingStudioPresskits::Images` stores no heading of its own. Photos are Attachable image attachments under the images recording, so one section holds many images. Attachable stays off PressKit and off KitSection. Upload and the photo editor sit in the content editor, and the upload returns to the section. Title, Subtitle, and Update sit on the shared heading editor. `attachment_collection_editor` edits each photo's caption, credit, and alt text on the images recording. The row preview keeps the file's proportions. Trash on a photo uses Attachable's remove and returns to the section. That remove trashes the attachment recording, so Trashable is on `RecordingStudioAttachable::Attachment`. Depend on `recording_studio_attachable`, `~> 0.7`, mount that engine, and wire Active Storage direct uploads. An empty images section shows an Add placeholder in the kit editor and stays off the public kit.
+`RecordingStudioPresskits::Images` stores no heading of its own. Photos are Attachable image attachments under the images recording, so one section holds many images. Attachable stays off PressKit and off KitSection. Upload and the photo editor sit in the content editor, and the upload returns to the section. Title, Subtitle, and Update sit on the shared heading editor. `attachment_collection_editor` edits each photo's caption, credit, and alt text on the images recording. The row preview keeps the file's proportions. Trash on a photo uses Attachable's remove and returns to the section. That remove trashes the attachment recording, so Trashable is on `RecordingStudioAttachable::Attachment`. Depend on `recording_studio_attachable`, `~> 0.12`, mount that engine, and wire Active Storage direct uploads. An empty images section shows an Add placeholder in the kit editor and stays off the public kit.
 
 Quotes use two recordings under the kit section. `RecordingStudioPresskits::QuoteSection` orders its quotes and stores no heading. Each `RecordingStudioPresskits::Quote` has `body`, `name`, and optional `role` and `organisation`. The UI creates a quotes section with the title Quotes. `create_section!` still takes an optional title. The preview and the public page show Quotes until someone saves a different title. A kit migrated from 0.16 copies the heading Quotes onto the kit section, because that is the heading the public page showed before. The section page uses the shared section editor. **+ Quote** and the quote list sit on the Content tab in column one. Title, Subtitle, and Update sit on Section title, with Update under those fields. + Quote is a primary button with a Heroicons plus icon and the label Quote. Column two, the kit preview, and the public page render each saved quote with `FlatPack::Quote::Component` at `size: :lg`. The citation is the name, role, and organisation. The row shows the quote, truncated to the column, with the name underneath. A blank quote uses Quote on the first line. A blank name leaves the second line off. + Quote opens that quote's edit screen. Orderable is on the quote section for its quotes. Attachable is on Quote for one image, and the upload stays on the quote screen. Publishable stays off the quote section and the quote. A blank body is left off the preview and the public page. Quote stays off the + Section menu because its parent is the quote section.
 
@@ -306,17 +306,17 @@ Dummy kit pins:
 | Gem | Pin |
 |-----|-----|
 | Recording Studio | `v4.3.0` |
-| Accessible | `v0.11.1` |
+| Accessible | `v0.12.1` |
 | Admin | `v2.0.7` |
-| Root Switchable | `v0.5.3` |
-| FlatPack | `v0.1.220` |
-| Attachable | `v0.7.1` |
-| Orderable | `v0.2.5` |
-| Trashable | `v0.4.4` |
-| Duplicatable | `v0.4.3` |
-| Publishable | `v0.4.2` |
-| External Embed | `v0.1.3` |
-| Video | `v0.1.0` |
+| Root Switchable | `v0.5.6` |
+| FlatPack | `v0.1.221` |
+| Attachable | `v0.12.0` |
+| Orderable | `v0.2.7` |
+| Trashable | `v0.5.0` |
+| Duplicatable | `v0.4.5` |
+| Publishable | `v0.5.0` |
+| External Embed | `v0.1.4` |
+| Video | `v0.1.1` |
 
 Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.3 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, and this gem so that layout is not an unstyled box.
 

@@ -21,6 +21,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioVideo::Video",
     "RecordingStudioPublishable::Publishable",
     "RecordingStudioAttachable::Attachment",
+    "RecordingStudioAttachable::Library",
+    "RecordingStudioAttachable::Placement",
     "FakeBlock"
   ]
 

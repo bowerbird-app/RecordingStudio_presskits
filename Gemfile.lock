@@ -8,10 +8,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_accessible.git
-  revision: fe2d86aa2d96b843bc05651dc25023fd4546ab37
-  tag: v0.11.1
+  revision: b374e9b55972b9fd75bede9420306d30ae5475ba
+  tag: v0.12.1
   specs:
-    recording_studio_accessible (0.11.0)
+    recording_studio_accessible (0.12.0)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
 
@@ -27,18 +27,18 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
-  revision: dadc3c53997c700bd80f5281e49fba86a26f8104
-  tag: v0.7.1
+  revision: d94ad213d9c58f5ce54872b8110dc926de05c5ad
+  tag: v0.12.0
   specs:
-    recording_studio_attachable (0.7.0)
-      flat_pack (>= 0.1.135)
+    recording_studio_attachable (0.12.0)
+      flat_pack (>= 0.1.213)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_duplicatable.git
-  revision: 6001239795ee988770ab3c8227cce06aff9c0623
-  tag: v0.4.3
+  revision: ca6477378462b0bd8659b86551cba52b561abf54
+  tag: v0.4.5
   specs:
     recording_studio_duplicatable (0.4.1)
       rails (~> 8.1.0)
@@ -47,8 +47,8 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_external_embed.git
-  revision: b8dcd6c1e75f815c281d356fe6363504ab246f4a
-  tag: v0.1.3
+  revision: f59684259cc16c41aacc44ad172c9d89b43c6ded
+  tag: v0.1.4
   specs:
     recording_studio_external_embed (0.1.1)
       rails (~> 8.1.0)
@@ -56,8 +56,8 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_orderable.git
-  revision: 78e7513878a8bacf1c4273333690e9914f828f7a
-  tag: v0.2.5
+  revision: eaf5fea3194686f5af0928f17f731f50c7df2473
+  tag: v0.2.7
   specs:
     recording_studio_orderable (0.2.3)
       flat_pack (>= 0.1.74)
@@ -66,28 +66,28 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_publishable.git
-  revision: 7cfe3d5a827b5d0cd4e62a6adfaf9ddccae3d254
-  tag: v0.4.2
+  revision: 29d5f4df7775da7eb61d6cd197606604d9c56f05
+  tag: v0.5.0
   specs:
-    recording_studio_publishable (0.4.0)
+    recording_studio_publishable (0.5.0)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
       view_component (>= 3.0, < 5.0)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_trashable.git
-  revision: 43759d46d191e1258a9498f6bb03a2d9f55efc5b
-  tag: v0.4.4
+  revision: 1f48d3bdacd46eb1e5090d04cfe4f44ce2be69bf
+  tag: v0.5.0
   specs:
-    recording_studio_trashable (0.4.2)
+    recording_studio_trashable (0.5.0)
       flat_pack (>= 0.1.74)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_video.git
-  revision: 724258430061c66abf8811eb6e55596477a617d6
-  tag: v0.1.0
+  revision: f0ac9820dca0b796bf444dd35ef0abdc7c908412
+  tag: v0.1.1
   specs:
     recording_studio_video (0.1.0)
       flat_pack (>= 0.1.135)
@@ -97,10 +97,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/flatpack.git
-  revision: b45257c5d53b230b5d1042e6e0ce8a7ef7bf1df1
-  tag: v0.1.220
+  revision: c50a08c1264d9d094ad8f5b3160483705c84bf60
+  tag: v0.1.221
   specs:
-    flat_pack (0.1.220)
+    flat_pack (0.1.221)
       pagy (~> 9.0)
       rails (>= 7.1, < 9)
       tailwind_merge (~> 0.13)
@@ -110,17 +110,17 @@ PATH
   remote: .
   specs:
     recording_studio_presskits (0.25.1)
-      flat_pack (>= 0.1.220)
+      flat_pack (>= 0.1.221)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
-      recording_studio_accessible (~> 0.11)
+      recording_studio_accessible (~> 0.12)
       recording_studio_admin (~> 2.0)
-      recording_studio_attachable (~> 0.7)
+      recording_studio_attachable (~> 0.12)
       recording_studio_duplicatable (~> 0.4)
       recording_studio_external_embed (~> 0.1.1)
       recording_studio_orderable (~> 0.2)
-      recording_studio_publishable (~> 0.4)
-      recording_studio_trashable (~> 0.4)
+      recording_studio_publishable (~> 0.5)
+      recording_studio_trashable (~> 0.5)
       recording_studio_video (~> 0.1.0)
 
 GEM
@@ -421,15 +421,15 @@ DEPENDENCIES
   flat_pack!
   puma
   recording_studio (~> 4.2)!
-  recording_studio_accessible (~> 0.11)!
+  recording_studio_accessible (~> 0.12)!
   recording_studio_admin (~> 2.0)!
-  recording_studio_attachable (~> 0.7)!
+  recording_studio_attachable (~> 0.12)!
   recording_studio_duplicatable (~> 0.4)!
   recording_studio_external_embed (~> 0.1.1)!
   recording_studio_orderable (~> 0.2)!
   recording_studio_presskits!
-  recording_studio_publishable (~> 0.4)!
-  recording_studio_trashable (~> 0.4)!
+  recording_studio_publishable (~> 0.5)!
+  recording_studio_trashable (~> 0.5)!
   recording_studio_video (~> 0.1.0)!
   rubocop
   rubocop-rails
@@ -464,7 +464,7 @@ CHECKSUMS
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
   erubi (1.13.1) sha256=a082103b0885dbc5ecf1172fede897f9ebdb745a4b97a5e8dc63953db1ee4ad9
-  flat_pack (0.1.220)
+  flat_pack (0.1.221)
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   io-console (0.9.4) sha256=a403304f32928ee85e56d457b4612ca43f2703b561a3258844992bd24085fbb1
@@ -513,15 +513,15 @@ CHECKSUMS
   rbs (4.2.0) sha256=51f7b886dcc05bc09e10b901daa6a81829f6adc03101d6ca9ea4aac6103e0674
   rdoc (8.1.0) sha256=befc37880a5cfd36dcb176c748b5fd5ee39dd3536a75e81824e4972ce230f60a
   recording_studio (4.3.0)
-  recording_studio_accessible (0.11.0)
+  recording_studio_accessible (0.12.0)
   recording_studio_admin (2.0.7)
-  recording_studio_attachable (0.7.0)
+  recording_studio_attachable (0.12.0)
   recording_studio_duplicatable (0.4.1)
   recording_studio_external_embed (0.1.1)
   recording_studio_orderable (0.2.3)
   recording_studio_presskits (0.25.1)
-  recording_studio_publishable (0.4.0)
-  recording_studio_trashable (0.4.2)
+  recording_studio_publishable (0.5.0)
+  recording_studio_trashable (0.5.0)
   recording_studio_video (0.1.0)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
   reline (0.7.0) sha256=5b012d8e55dbf9d450f12bde2cf7d15ff546ae80b3f8f3b30e570d431815583d

@@ -12,12 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Palette **Colour** and **Text colour** on the kit header screen use `FlatPack::RadioGroup` `variant: :swatches` (`size: :md`). The option label is the accessible name and the tooltip. `:any` still uses `FlatPack::ColorSwatch`.
 - Text colour **Auto** stays a separate inline radio with the same field name. Swatches need a CSS colour, and `auto` is not one.
-- FlatPack is `>= 0.1.220` (dummy tag `v0.1.220`).
+- FlatPack is `>= 0.1.221` (dummy tag `v0.1.221`).
+- Dummy and gemspec pins move to the latest GitHub releases: Accessible `0.12.1`, Attachable `0.12.0`, Orderable `0.2.7`, Trashable `0.5.0`, Duplicatable `0.4.5`, Publishable `0.5.0`, External Embed `0.1.4`, Video `0.1.1`, Root Switchable `v0.5.6`. Recording Studio stays `v4.3.0`. Admin stays `v2.0.7`.
 - Version `0.25.1`
 
 ### Upgrade notes
-- Bump FlatPack to at least `0.1.220` and rebuild Tailwind so the swatch utilities generate. Reload Flatpack CSS after the bump.
+- Bump FlatPack to at least `0.1.221` and rebuild Tailwind so the swatch utilities generate. Reload Flatpack CSS after the bump.
 - A host that replaced the shared header screen in `pk-editor` should render palette Colour and Text colour as `variant: :swatches`. Keep Auto as its own control. Keep ColorSwatch for `:any`.
+- Bump Accessible to `~> 0.12`, Attachable to `~> 0.12`, Publishable to `~> 0.5`, and Trashable to `~> 0.5`. Run `bin/rails generate recording_studio_attachable:migrations` and `db:migrate` for the new library and placement tables. Add `RecordingStudioAttachable::Library` and `RecordingStudioAttachable::Placement` to `config.recordable_types`. Press kit Images still attach files under the section; moving to placements is a later host change.
 
 ## [0.25.0] - 2026-10-09
 
