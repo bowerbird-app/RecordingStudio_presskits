@@ -61,7 +61,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.216"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"'

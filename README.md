@@ -308,7 +308,7 @@ Dummy kit pins:
 | Recording Studio | `v4.4.0` |
 | Accessible | `v0.13.0` |
 | Admin | `v2.0.7` |
-| Root Switchable | `v0.5.3` |
+| Root Switchable | `v0.6.0` |
 | FlatPack | `v0.1.216` |
 | Attachable | `v0.13.0` |
 | Orderable | `v0.2.5` |
