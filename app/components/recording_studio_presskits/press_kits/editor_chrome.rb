@@ -5,11 +5,12 @@ module RecordingStudioPresskits
     module EditorChrome
       CONTROLLER = "recording-studio-presskits--editor-chrome"
       FAB_OFFSET = "1rem"
-      FAB_RESERVE_CLASS = "pr-20"
+      FAB_RESERVE_CLASS = "pr-20 md:pr-20 lg:pr-20"
+      PREVIEW_CLASSES = "flex w-full flex-col gap-6 md:p-4 lg:p-6"
 
       REGION_CLASSES = [
         "group/pk-edit relative rounded-[var(--radius-lg)] bg-transparent",
-        "p-8",
+        "pt-8 pb-8 px-8 md:pt-10 md:pb-10 md:px-10 lg:pt-12 lg:pb-12 lg:px-12",
         "transition-colors duration-[var(--duration-base)]",
         "[@media(hover:hover)]:hover:bg-[var(--surface-muted-background-color)]",
         "focus-within:bg-[var(--surface-muted-background-color)]",

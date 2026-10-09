@@ -45,9 +45,14 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-editor-toolbar a", text: "Header"
     refute_select "#presskits-editor-toolbar a", text: "View"
     header = css_select("#presskits-kit-header").first
-    assert_includes header["class"], "p-8"
+    assert_includes header["class"], "pt-8"
+    assert_includes header["class"], "md:pt-10"
+    assert_includes header["class"], "lg:pt-12"
     refute_includes header["class"], "-m-4"
     refute_includes header["class"], "pr-20"
+    preview = css_select("#presskits-editor-preview").first
+    assert_includes preview["class"], "md:p-4"
+    assert_includes preview["class"], "lg:p-6"
     assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     header_fab = css_select("#presskits-kit-header .fp-fab").first
     assert_includes header_fab["style"].to_s, "--fp-fab-offset: 1rem"
@@ -57,7 +62,6 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"
     assert_select "#presskits-section-picker-modal"
-    preview = css_select("#presskits-editor-preview").first
     assert_includes preview.parent["class"], "rounded-[var(--radius-lg)]"
     assert_includes preview.parent["class"], "bg-[var(--card-background-color)]"
     editor = css_select("[data-controller='recording-studio-presskits--editor-chrome']").first
@@ -84,7 +88,9 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes body["class"], "[@media(hover:none)]:opacity-100"
     assert_includes body["class"], "focus-visible:outline"
     assert_includes body["class"], "relative"
-    assert_includes body["class"], "p-8"
+    assert_includes body["class"], "pt-8"
+    assert_includes body["class"], "md:pt-10"
+    assert_includes body["class"], "lg:pt-12"
     assert_includes body["class"], "pr-20"
     refute_includes body["class"], "-m-4"
     assert_includes body["class"], "rounded-[var(--radius-lg)]"
@@ -109,7 +115,9 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-picker-after-#{section.id} a[href*='after_recording_id=#{section.id}']"
     refute_select "#presskits-section-#{section.id} a", text: "Edit heading"
     refute_select "#presskits-section-dropdown-after-#{section.id}"
-    assert_select ".fp-section-title h2"
+    heading = css_select("#presskits-section-#{section.id} .fp-section-title h2").first
+    assert heading
+    assert_includes heading["class"], "text-2xl"
   end
 
   test "adding a section saves the type title and returns to the kit" do

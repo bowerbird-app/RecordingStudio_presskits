@@ -24,7 +24,7 @@
   </div>
 
   <%= render FlatPack::Card::Component.new(style: :default, class: "w-full", padding: :lg) do %>
-    <div id="presskits-editor-preview" class="flex w-full flex-col gap-6">
+    <div id="presskits-editor-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>">
       <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
         press_kit_recording: @press_kit_recording,
         header_edit_path: @header_edit_path

@@ -282,7 +282,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "FlatPack::Fab::Component"
     assert_includes readme, "recording-studio-presskits--editor-chrome"
     assert_includes readme, "icon: :plus"
-    assert_includes readme, "p-8"
+    assert_includes readme, "p-8 md:p-10 lg:p-12"
+    assert_includes readme, "md:p-4 lg:p-6"
     assert_includes readme, 'offset: "1rem"'
     refute_includes readme, "p-4 -m-4"
     assert_includes readme, "variant: :swatches"
@@ -523,14 +524,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "group-data-[pk-edit-active]/pk-edit"
     refute_includes chrome, "[@media(hover:none)]:opacity-100"
     assert_includes chrome, "relative"
-    assert_includes chrome, "p-8"
+    assert_includes chrome, "pt-8 pb-8 px-8"
+    assert_includes chrome, "md:pt-10 md:pb-10 md:px-10"
+    assert_includes chrome, "lg:pt-12 lg:pb-12 lg:px-12"
     assert_includes chrome, "pr-20"
+    assert_includes chrome, "md:p-4 lg:p-6"
     assert_includes chrome, 'FAB_OFFSET = "1rem"'
     refute_includes chrome, "-m-4"
     assert_includes chrome, "rounded-[var(--radius-lg)]"
     editor = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
     assert_includes editor, "recording-studio-presskits--editor-chrome"
     assert_includes editor, "onPointerDown"
+    assert_includes editor, "EditorChrome::PREVIEW_CLASSES"
     assert_includes chrome, 'CONTROLLER = "recording-studio-presskits--editor-chrome"'
     chrome_js = File.read(File.expand_path(
                             "../app/javascript/recording_studio_presskits/controllers/editor_chrome_controller.js",
@@ -749,6 +754,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "def default_section_heading"
     assert_operator source.index("def section_heading"), :<, source.index("default_section_heading")
     assert_includes frame, "RecordingStudioPresskits.section_heading"
+    assert_includes frame, "size: :lg"
     assert_includes frame, "def saved_title"
     assert_includes frame, "def content_visible?"
     assert_includes heading, "placeholder: section_title_fallback"
