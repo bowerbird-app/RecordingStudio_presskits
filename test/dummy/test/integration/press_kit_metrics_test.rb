@@ -61,11 +61,7 @@ class PressKitMetricsTest < ActiveSupport::TestCase
 
     @admin_root = AdminRoot.find_or_create_by!(name: "Admin")
     @admin_recording = RecordingStudio.root_recording_for(@admin_root)
-    staff_grant = RecordingStudioAccessible.bootstrap_owner_access!(
-      recording: @admin_recording,
-      actor: @staff
-    )
-    raise staff_grant.error if staff_grant.failure?
+    ensure_admin_access!(@staff)
   end
 
   teardown do
@@ -166,5 +162,24 @@ class PressKitMetricsTest < ActiveSupport::TestCase
   def grant_context(actor)
     grant = Struct.new(:actor).new(actor)
     Struct.new(:access_grant).new(grant)
+  end
+
+  def ensure_admin_access!(actor)
+    recording = @admin_recording
+    return if RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :view)
+
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: recording, actor: actor)
+    return if result.success?
+
+    manager = User.find_by(email: "admin@admin.com")
+    raise result.error if manager.blank? || manager == actor
+
+    grant = RecordingStudioAccessible.grant_access(
+      recording: recording,
+      actor: actor,
+      role: :admin,
+      manager_actor: manager
+    )
+    raise grant.error if grant.failure?
   end
 end
