@@ -2,8 +2,10 @@
       id: "presskits-credit-lines", class: "flex flex-col gap-6",
       data: {
         controller: "recording-studio-presskits--credit-preview flat-pack--unsaved-changes",
-        action: preview_actions
+        action: preview_actions,
+        turbo_stream: true
       } do |form| %>
+  <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
   <script type="application/json" data-credit-catalog><%== credit_catalog_json %></script>
 
   <%= render FlatPack::CollectionEditor::Component.new(

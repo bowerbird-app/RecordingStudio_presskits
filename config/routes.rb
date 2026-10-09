@@ -16,6 +16,9 @@ RecordingStudioPresskits::Engine.routes.draw do
     end
     resource :header, only: %i[edit update]
     resources :sections, only: %i[create edit update destroy] do
+      member do
+        get :heading
+      end
       resources :images, only: :destroy, controller: "section_images"
       resources :quotes, only: %i[create edit update destroy] do
         resource :image, only: :destroy, controller: "quote_images"

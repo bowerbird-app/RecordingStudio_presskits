@@ -27,7 +27,7 @@ module RecordingStudioPresskits
       return head :not_found unless quote_recording
 
       revise_quote
-      redirect_to quote_edit_path(quote_recording), notice: "Saved."
+      respond_with_preview_or_redirect(html_redirect: quote_edit_path(quote_recording), notice: "Saved.")
     end
 
     def destroy

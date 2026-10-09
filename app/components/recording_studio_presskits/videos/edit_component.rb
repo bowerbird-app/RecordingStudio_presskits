@@ -38,6 +38,10 @@ module RecordingStudioPresskits
         @video_recording&.persisted? ? :patch : :post
       end
 
+      def form_data
+        @video_recording&.persisted? ? { turbo_stream: true } : {}
+      end
+
       def cancel_path
         helpers.edit_press_kit_section_path(kit_recording, @section_recording)
       end

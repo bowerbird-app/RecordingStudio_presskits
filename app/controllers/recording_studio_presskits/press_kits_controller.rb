@@ -33,6 +33,7 @@ module RecordingStudioPresskits
 
       @section_recordings = KitQuery.sections_for(@press_kit_recording)
       @picker_types = RecordingStudioPresskits.picker_types
+      @highlight_id = params[:highlight]
     end
 
     def new

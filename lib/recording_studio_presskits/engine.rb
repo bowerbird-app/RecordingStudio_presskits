@@ -226,6 +226,10 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.i18n" do |app|
+      app.config.i18n.load_path += Dir[root.join("config/locales/**/*.{rb,yml}")]
+    end
+
     initializer "recording_studio_presskits.assets" do |app|
       app.config.assets.paths << root.join("app/javascript") if app.config.respond_to?(:assets)
     end

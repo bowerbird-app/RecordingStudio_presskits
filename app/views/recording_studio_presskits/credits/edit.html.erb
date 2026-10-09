@@ -1,14 +1,26 @@
-<% presskits_page_nav(
-  title: @credit.title,
-  back_url: credits_path,
-  back_label: "Credits",
-  close_url: credits_path
-) %>
+<% if presskits_editor_dialog? %>
+  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: @credit.title) do %>
+    <%= render RecordingStudioPresskits::Credits::FormComponent.new(
+      credit: @credit,
+      url: credit_path(@credit_recording),
+      method: :patch,
+      heading: @credit.title,
+      trash_path: credit_path(@credit_recording)
+    ) %>
+  <% end %>
+<% else %>
+  <% presskits_page_nav(
+    title: @credit.title,
+    back_url: credits_path,
+    back_label: "Credits",
+    close_url: credits_path
+  ) %>
 
-<%= render RecordingStudioPresskits::Credits::FormComponent.new(
-  credit: @credit,
-  url: credit_path(@credit_recording),
-  method: :patch,
-  heading: @credit.title,
-  trash_path: credit_path(@credit_recording)
-) %>
+  <%= render RecordingStudioPresskits::Credits::FormComponent.new(
+    credit: @credit,
+    url: credit_path(@credit_recording),
+    method: :patch,
+    heading: @credit.title,
+    trash_path: credit_path(@credit_recording)
+  ) %>
+<% end %>

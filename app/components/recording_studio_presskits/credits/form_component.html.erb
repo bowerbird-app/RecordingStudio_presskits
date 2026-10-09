@@ -1,5 +1,7 @@
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(title: @heading, variant: :h1) %>
+  <% unless helpers.presskits_editor_dialog? %>
+    <%= render FlatPack::PageTitle::Component.new(title: @heading, variant: :h1) %>
+  <% end %>
 
   <%= form_with url: @url, method: @method, id: "credit-form", local: true, class: "flex max-w-xl flex-col gap-4" do %>
     <%= render FlatPack::TextInput::Component.new(

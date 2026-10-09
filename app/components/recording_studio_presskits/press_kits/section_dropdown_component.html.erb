@@ -1,26 +1,31 @@
 <% if @items.any? %>
   <%= render FlatPack::Button::Dropdown::Component.new(
-    text: "Section",
+    text: button_text.to_s,
     icon: "plus",
-    style: :primary,
+    show_chevron: !@compact,
+    style: @compact ? :ghost : :primary,
+    size: @compact ? :sm : :md,
     placement: :bottom_left,
-    id: "presskits-section-dropdown"
+    id: dropdown_id,
+    trigger_attributes: @compact ? { aria: { label: I18n.t("recording_studio_presskits.editor.add_section") } } : {}
   ) do |dropdown| %>
     <% @items.each do |item| %>
       <% dropdown.menu_item(
         text: item[:label],
         href: add_path_for(item[:id]),
         icon: item[:icon],
-        data: { turbo_method: :post }
+        data: { turbo_method: :post, turbo_stream: true }
       ) %>
     <% end %>
   <% end %>
 <% else %>
   <%= render FlatPack::Button::Component.new(
-    text: "Section",
+    text: button_text,
     icon: "plus",
+    icon_only: @compact,
     style: :primary,
     disabled: true,
-    id: "presskits-section-dropdown"
+    id: dropdown_id,
+    aria: { label: I18n.t("recording_studio_presskits.editor.add_section") }
   ) %>
 <% end %>

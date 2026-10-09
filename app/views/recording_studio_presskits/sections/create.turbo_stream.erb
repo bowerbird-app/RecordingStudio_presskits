@@ -1,0 +1,41 @@
+<% if @section_recordings.size == 1 %>
+  <%= turbo_stream.update "presskits-editor-sections" do %>
+    <%= render editable_section_for(@section_recording, highlight: true) %>
+  <% end %>
+<% elsif @after_recording_id.present? %>
+  <%= turbo_stream.after "presskits-section-#{@after_recording_id}" do %>
+    <%= render editable_section_for(@section_recording, highlight: true) %>
+  <% end %>
+<% else %>
+  <%= turbo_stream.append "presskits-editor-sections" do %>
+    <%= render editable_section_for(@section_recording, highlight: true) %>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace "presskits-section-list" do %>
+  <%= render sections_order_for %>
+<% end %>
+
+<%= turbo_stream.append "presskits-toasts" do %>
+  <div
+    id="presskits-toast-<%= @section_recording.id %>"
+    class="pointer-events-auto flex items-center gap-2"
+    data-controller="recording-studio-presskits--toast-undo"
+    data-recording-studio-presskits--toast-undo-timeout-value="8000"
+  >
+    <%= render FlatPack::Toast::Component.new(
+      text: I18n.t("recording_studio_presskits.editor.added", title: RecordingStudioPresskits.section_heading(@section_recording)),
+      style: :success,
+      timeout: 8000
+    ) %>
+    <%= form_with url: press_kit_section_path(@press_kit_recording, @section_recording), method: :delete, data: { turbo_stream: true } do %>
+      <%= hidden_field_tag :from_kit_editor, "1" %>
+      <%= render FlatPack::Button::Component.new(
+        text: I18n.t("recording_studio_presskits.editor.undo"),
+        style: :ghost,
+        size: :sm,
+        type: "submit"
+      ) %>
+    <% end %>
+  </div>
+<% end %>

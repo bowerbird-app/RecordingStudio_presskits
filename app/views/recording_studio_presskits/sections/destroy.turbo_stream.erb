@@ -1,0 +1,16 @@
+<%= turbo_stream.remove "presskits-section-#{@section_recording.id}" %>
+<%= turbo_stream.remove "presskits-toast-#{@section_recording.id}" %>
+
+<% if @section_recordings.empty? %>
+  <%= turbo_stream.update "presskits-editor-sections" do %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: I18n.t("recording_studio_presskits.editor.empty_kit"),
+      description: I18n.t("recording_studio_presskits.editor.empty_kit_hint"),
+      icon: :inbox
+    ) %>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace "presskits-section-list" do %>
+  <%= render sections_order_for %>
+<% end %>

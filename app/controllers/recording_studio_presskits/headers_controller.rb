@@ -37,9 +37,31 @@ module RecordingStudioPresskits
       return render_missing_title(title, description) if title.blank?
 
       revise_header(title, description)
-      redirect_to edit_press_kit_header_path(@press_kit_recording), notice: "Saved. That's what people see first."
+      respond_to_header_save
     rescue ActiveRecord::RecordInvalid
       render_invalid_header(title, description)
+    end
+
+    def respond_to_header_save
+      notice = "Saved. That's what people see first."
+      respond_to do |format|
+        format.turbo_stream do
+          if from_kit_editor?
+            render :update
+          else
+            redirect_to after_header_save_path, notice: notice
+          end
+        end
+        format.html { redirect_to after_header_save_path, notice: notice }
+      end
+    end
+
+    def after_header_save_path
+      edit_press_kit_header_path(@press_kit_recording)
+    end
+
+    def from_kit_editor?
+      super || request.referer.to_s.include?("/press_kits/#{@press_kit_recording.id}/edit")
     end
 
     def header_fields

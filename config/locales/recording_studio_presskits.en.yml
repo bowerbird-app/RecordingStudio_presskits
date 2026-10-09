@@ -1,0 +1,24 @@
+en:
+  recording_studio_presskits:
+    editor:
+      add_section: "Section"
+      sections: "Sections"
+      header: "Header"
+      view_public: "View"
+      edit_heading: "Edit heading"
+      edit_content: "Edit content"
+      add_content: "Add…"
+      undo: "Undo"
+      added: "%{title} is in the kit."
+      heading_title: "Heading"
+      content_title: "Content"
+      empty_kit: "Nothing to show yet"
+      empty_kit_hint: "Add a section when you are ready."
+      placeholder:
+        text: "Add some copy"
+        images: "Add photos"
+        quotes: "Add a quote"
+        facts: "Add a figure"
+        credits: "Add a credit"
+        video: "Add a video"
+        generic: "Add something here"

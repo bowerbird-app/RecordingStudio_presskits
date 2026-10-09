@@ -1,10 +1,13 @@
 <div class="flex flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(title: "Quote", variant: :h1) %>
+  <% unless helpers.presskits_editor_dialog? %>
+    <%= render FlatPack::PageTitle::Component.new(title: "Quote", variant: :h1) %>
+  <% end %>
 
-  <%= form_with url: update_path, method: :patch, local: true, class: "flex flex-col gap-6", data: upload_data do %>
+  <%= form_with url: update_path, method: :patch, local: true, class: "flex flex-col gap-6", data: upload_data.merge(turbo_stream: true) do %>
+    <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
     <div id="presskits-quote-actions" class="flex flex-wrap items-center gap-3">
       <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
-      <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path) %>
+      <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path, data: helpers.presskits_editor_nav(:back)) %>
       <%= render FlatPack::Button::Component.new(
         text: "Upload",
         icon: "upload",

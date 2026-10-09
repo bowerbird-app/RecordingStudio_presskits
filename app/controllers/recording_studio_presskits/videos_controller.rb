@@ -38,7 +38,7 @@ module RecordingStudioPresskits
       return head :not_found unless video_recording
 
       revise_video
-      redirect_to video_edit_path(video_recording), notice: "Saved."
+      respond_with_preview_or_redirect(html_redirect: video_edit_path(video_recording), notice: "Saved.")
     rescue ActiveRecord::RecordInvalid => e
       @video = invalid_video(e)
       render :edit, status: :unprocessable_entity

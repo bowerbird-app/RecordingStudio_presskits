@@ -96,9 +96,17 @@ class FactsSectionTest < ActionDispatch::IntegrationTest
     assert_response :success
     section = facts_section(kit)
     new_fact = recording_studio_presskits.new_press_kit_section_fact_path(kit, section)
-    assert_select "h1", text: "Facts & Figures"
+    assert_equal "Facts & Figures", section.recordable.title
+    assert_select ".fp-section-title h2", text: "Facts & Figures"
+    assert_select "#presskits-section-placeholder"
+
+    get recording_studio_presskits.heading_press_kit_section_path(kit, section)
     assert_select "input[name='kit_section[title]'][placeholder=?]", "Facts & Figures"
     assert_select "input[name='kit_section[subtitle]']"
+
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_select "h1", text: "Facts & Figures"
+    refute_select "input[name='kit_section[title]']"
     assert_select "#presskits-section-actions a[href='#{new_fact}']", text: "Fact"
     assert_select "[data-flat-pack--icon-name-value='plus']"
     assert_select "select[name='facts_section[display_style]'], [name='facts_section[display_style]']"
@@ -156,11 +164,10 @@ class FactsSectionTest < ActionDispatch::IntegrationTest
     assert_equal "cards", content.reload.recordable.display_style
     assert_equal 4, content.recordable.columns
 
-    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_section_preview_card
-    assert_select "#presskits-section-preview .fp-section-title h2", text: "Company statistics"
-    assert_includes css_select("#presskits-section-preview").first.to_html, "grid-cols-4"
+    assert_select ".fp-section-title h2", text: "Company statistics"
+    assert_includes css_select("#presskits-editor-preview").first.to_html, "grid-cols-4"
     assert_includes response.body, "Projects"
     assert_includes response.body, "120"
     assert_includes response.body, "Employees"
@@ -194,9 +201,9 @@ class FactsSectionTest < ActionDispatch::IntegrationTest
     record_fact(content, label: "Completion", value: "2025")
     publish_facts_kit!(kit)
 
-    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    preview = css_select("#presskits-section-preview").first
+    preview = css_select("#presskits-editor-preview").first
     assert_select preview, "dt", text: "Floor area"
     assert_select preview, "dd", text: "420 m²"
     refute_includes preview.at_css("dd").text, "420  m²"
@@ -205,7 +212,8 @@ class FactsSectionTest < ActionDispatch::IntegrationTest
       facts_section: { display_style: "cards", columns: 2 }
     }
     follow_redirect!
-    preview = css_select("#presskits-section-preview").first.to_html
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    preview = css_select("#presskits-editor-preview").first.to_html
     assert_includes preview, "grid-cols-2"
     assert_includes preview, "420 m²"
     assert_includes preview, "Floor area"
@@ -214,10 +222,11 @@ class FactsSectionTest < ActionDispatch::IntegrationTest
       facts_section: { display_style: "table", columns: 3 }
     }
     follow_redirect!
-    assert_select "#presskits-section-preview th", text: "Fact"
-    assert_select "#presskits-section-preview th", text: "Value"
-    assert_select "#presskits-section-preview td", text: "Floor area"
-    assert_select "#presskits-section-preview td", text: "420 m²"
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_select "#presskits-editor-preview th", text: "Fact"
+    assert_select "#presskits-editor-preview th", text: "Value"
+    assert_select "#presskits-editor-preview td", text: "Floor area"
+    assert_select "#presskits-editor-preview td", text: "420 m²"
 
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-facts"
     assert_response :success
@@ -226,8 +235,10 @@ class FactsSectionTest < ActionDispatch::IntegrationTest
     assert_select "td", text: "420 m²"
 
     empty = add_facts_section(kit)
-    get recording_studio_presskits.edit_press_kit_section_path(kit, empty)
+    get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
+    assert_select "#presskits-section-#{empty.id} #presskits-section-placeholder"
+    get recording_studio_presskits.edit_press_kit_section_path(kit, empty)
     refute_section_preview_card
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-facts"
     assert_select "table", count: 1
@@ -368,13 +379,6 @@ class FactsSectionTest < ActionDispatch::IntegrationTest
   end
 
   def refute_section_preview_card
-    column = css_select("#presskits-section-preview").first
-    assert column
-    assert_nil column.at_css("[class*='card-border-color']")
-  end
-
-  def assert_section_preview_card
-    column = css_select("#presskits-section-preview").first
-    assert column&.at_css("[class*='card-border-color']")
+    refute_select "#presskits-section-preview"
   end
 end

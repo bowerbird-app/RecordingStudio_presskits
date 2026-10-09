@@ -1,12 +1,24 @@
-<% presskits_page_nav(
-  title: "Header",
-  back_url: edit_press_kit_path(@press_kit_recording),
-  back_label: "Back to kit",
-  close_url: edit_press_kit_path(@press_kit_recording)
-) %>
+<% if presskits_editor_dialog? %>
+  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: I18n.t("recording_studio_presskits.editor.header")) do %>
+    <%= render RecordingStudioPresskits::PressKits::HeaderEditorComponent.new(
+      press_kit_recording: @press_kit_recording,
+      title: @header_title,
+      description: @header_description
+    ) %>
+  <% end %>
+<% else %>
+  <% presskits_page_nav(
+    title: "Header",
+    back_url: edit_press_kit_path(@press_kit_recording),
+    back_label: "Back to kit",
+    close_url: edit_press_kit_path(@press_kit_recording)
+  ) %>
 
-<%= render RecordingStudioPresskits::PressKits::HeaderEditorComponent.new(
-  press_kit_recording: @press_kit_recording,
-  title: @header_title,
-  description: @header_description
-) %>
+  <%= render FlatPack::PageTitle::Component.new(title: "Header", variant: :h1) %>
+
+  <%= render RecordingStudioPresskits::PressKits::HeaderEditorComponent.new(
+    press_kit_recording: @press_kit_recording,
+    title: @header_title,
+    description: @header_description
+  ) %>
+<% end %>

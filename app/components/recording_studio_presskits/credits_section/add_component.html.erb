@@ -4,11 +4,13 @@
   data-action="change->recording-studio-presskits--add-credit#choose"
   data-recording-studio-presskits--add-credit-credits-value="<%= credits_payload.to_json %>"
 >
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Add credit",
-    subtitle: subtitle,
-    variant: :h1
-  ) %>
+  <% unless helpers.presskits_editor_dialog? %>
+    <%= render FlatPack::PageTitle::Component.new(
+      title: "Add credit",
+      subtitle: subtitle,
+      variant: :h1
+    ) %>
+  <% end %>
 
   <% if credits.any? %>
     <div class="flex flex-col gap-4">
