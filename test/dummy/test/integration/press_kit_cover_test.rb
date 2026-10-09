@@ -239,9 +239,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    assert_select "#presskits-cover-hero [data-cover-color='#059669']"
-    assert_select "#presskits-cover-hero [data-cover-text-color='#111827']"
-    assert_select "#presskits-cover-hero [data-cover-ratio='21 / 9']"
+    assert_select "#presskits-cover-hero[data-cover-color='#059669']"
+    assert_select "#presskits-cover-hero[data-cover-text-color='#111827']"
+    assert_select "#presskits-cover-hero[data-cover-ratio='21 / 9']"
     assert_includes response.body, "Doors at noon."
     public_preview = css_select("#presskits-public-preview").first
     assert_includes public_preview["class"], "overflow-hidden"
@@ -256,9 +256,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.preview_press_kit_path(kit)
     assert_response :success
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    assert_select "#presskits-cover-hero [data-cover-color='#059669']"
-    assert_select "#presskits-cover-hero [data-cover-text-color='#111827']"
-    assert_select "#presskits-cover-hero [data-cover-ratio='21 / 9']"
+    assert_select "#presskits-cover-hero[data-cover-color='#059669']"
+    assert_select "#presskits-cover-hero[data-cover-text-color='#111827']"
+    assert_select "#presskits-cover-hero[data-cover-ratio='21 / 9']"
     preview = css_select("#presskits-public-preview").first
     assert_includes preview["class"], "overflow-hidden"
     assert_includes preview["class"], "rounded-[var(--radius-lg)]"
