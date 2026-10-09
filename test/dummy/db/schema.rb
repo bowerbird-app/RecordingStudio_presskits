@@ -114,6 +114,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_120000) do
     t.index ["root_recording_id"], name: "index_rs_attachable_attachments_on_root_recording_id"
   end
 
+  create_table "recording_studio_attachable_libraries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "key", default: "default", null: false
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_recording_studio_attachable_libraries_on_key"
+  end
+
+  create_table "recording_studio_attachable_placements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "attachment_recording_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["attachment_recording_id"], name: "idx_on_attachment_recording_id_76c6286907"
+  end
+
   create_table "recording_studio_credit_lines", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.uuid "credit_recording_id", null: false
