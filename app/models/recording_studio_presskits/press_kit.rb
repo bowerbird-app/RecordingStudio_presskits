@@ -19,77 +19,25 @@ module RecordingStudioPresskits
       public_action: :show,
       public_layout: "recording_studio_presskits/blank"
     )
+    include CoverAttributes
 
     # The header is the kit itself. Title is required. The short description
     # can be blank. It is not a child, so it cannot be trashed or reordered.
     SHORT_DESCRIPTION_LIMIT = 280
     COVER_STYLES = %w[color].freeze
+    AUTO_COVER_TEXT = CoverAttributes::AUTO_COVER_TEXT
 
     validates :title, presence: true
     validates :description, length: { maximum: SHORT_DESCRIPTION_LIMIT }, allow_nil: true
     validates :cover_style, inclusion: { in: COVER_STYLES }, allow_nil: true
-    validate :cover_color_must_be_hex
-    validate :cover_color_must_be_allowed, if: :validate_cover_palette?
 
     before_validation :normalize_header
-
-    def cover_color=(value)
-      unless instance_variable_defined?(:@stored_cover_color_before_assign)
-        @stored_cover_color_before_assign = cover_color
-      end
-      @cover_color_assigned = true
-      super
-    end
-
-    def resolved_cover_style
-      cover_style.presence || "color"
-    end
-
-    def resolved_cover_color
-      Cover::Hex.normalize(cover_color) || RecordingStudioPresskits.default_cover_color
-    end
-
-    def overlay_text_color
-      Cover::Contrast.text_on(resolved_cover_color)
-    end
 
     private
 
     def normalize_header
-      assigned = @cover_color_assigned
-      previous = @stored_cover_color_before_assign
       self.description = description.to_s.strip.presence
-      self.cover_style = cover_style.to_s.strip.presence
-      normalize_cover_color
-      @cover_color_assigned = assigned
-      @stored_cover_color_before_assign = previous
-    end
-
-    def normalize_cover_color
-      raw = read_attribute(:cover_color)
-      write_attribute(:cover_color, nil) if raw.blank?
-      return if raw.blank?
-
-      normalized = Cover::Hex.normalize(raw)
-      write_attribute(:cover_color, normalized) if normalized
-    end
-
-    def cover_color_must_be_hex
-      return if cover_color.blank? || Cover::Hex.valid?(cover_color)
-
-      errors.add(:cover_color, "must be a hex colour")
-    end
-
-    def validate_cover_palette?
-      @cover_color_assigned && cover_color.present? && !RecordingStudioPresskits.any_cover_color?
-    end
-
-    def cover_color_must_be_allowed
-      hex = Cover::Hex.normalize(cover_color)
-      return if RecordingStudioPresskits.cover_palette.include?(hex)
-      return if Cover::Hex.normalize(@stored_cover_color_before_assign) == hex
-
-      errors.add(:cover_color, "must be one of the host colours")
+      normalize_cover
     end
   end
 end

@@ -2,19 +2,23 @@ import { Controller } from "@hotwired/stimulus"
 
 const LIGHT = "#F8FAFC"
 const DARK = "#111827"
+const AUTO = "auto"
+const AA_RATIO = 4.5
 
 export default class extends Controller {
-  static targets = ["surface"]
+  static targets = ["surface", "contrastHint"]
 
   connect() {
     this.sync()
   }
 
-  sync() {
+  sync(event) {
     if (!this.hasSurfaceTarget) return
 
+    this.captureCustomText(event)
+
     const color = this.selectedColor()
-    const textColor = this.contrastText(color)
+    const textColor = this.selectedTextColor(color)
     const title = this.titleValue()
     const description = this.descriptionValue()
 
@@ -38,6 +42,22 @@ export default class extends Controller {
       subtitle.textContent = ""
       subtitle.hidden = true
     }
+
+    this.toggleContrastHint(color, textColor)
+  }
+
+  captureCustomText(event) {
+    const input = event?.target
+    if (input?.name !== "press_kit[cover_text_swatch]") return
+
+    const hex = this.normalizeHex(input.value)
+    if (!hex) return
+
+    const custom = this.customTextRadio()
+    if (!custom) return
+
+    custom.value = hex
+    custom.checked = true
   }
 
   selectedColor() {
@@ -46,6 +66,22 @@ export default class extends Controller {
 
     const colorInput = this.element.querySelector("[name='press_kit[cover_color]']")
     return this.normalizeHex(colorInput?.value) || "#1F2937"
+  }
+
+  selectedTextColor(background) {
+    const named = this.element.querySelector("[name='press_kit[cover_text_color]']:checked")
+    if (!named || this.isAuto(named.value)) return this.contrastText(background)
+
+    return this.normalizeHex(named.value) || this.contrastText(background)
+  }
+
+  customTextRadio() {
+    return [...this.element.querySelectorAll("[name='press_kit[cover_text_color]']")]
+      .find((radio) => !this.isAuto(radio.value))
+  }
+
+  isAuto(value) {
+    return `${value || ""}`.trim().toLowerCase() === AUTO
   }
 
   titleValue() {
@@ -62,9 +98,23 @@ export default class extends Controller {
     return heading.nextElementSibling
   }
 
+  toggleContrastHint(background, foreground) {
+    if (!this.hasContrastHintTarget) return
+
+    this.contrastHintTarget.hidden = !this.lowContrast(background, foreground)
+  }
+
+  lowContrast(background, foreground) {
+    const bg = this.normalizeHex(background)
+    const fg = this.normalizeHex(foreground)
+    if (!bg || !fg) return false
+
+    return this.contrast(bg, fg) < AA_RATIO
+  }
+
   normalizeHex(value) {
     const raw = `${value || ""}`.trim()
-    if (!raw) return null
+    if (!raw || this.isAuto(raw)) return null
 
     const digits = raw.replace(/^#/, "")
     if (!/^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(digits)) return null

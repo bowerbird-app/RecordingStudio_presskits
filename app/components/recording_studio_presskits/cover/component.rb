@@ -6,13 +6,14 @@ module RecordingStudioPresskits
       SIZES = %i[card preview hero].freeze
 
       def initialize(recording: nil, title: nil, description: nil, cover_color: nil, # rubocop:disable Metrics/ParameterLists
-                     cover_style: nil, size: :card, href: nil, id: nil)
+                     cover_style: nil, cover_text_color: nil, size: :card, href: nil, id: nil)
         super()
         @recording = recording
         @title = title
         @description = description
         @cover_color = cover_color
         @cover_style = cover_style
+        @cover_text_color = cover_text_color
         @size = SIZES.include?(size&.to_sym) ? size.to_sym : :card
         @href = href
         @id = id
@@ -37,7 +38,8 @@ module RecordingStudioPresskits
       end
 
       def text_color
-        Contrast.text_on(cover_color)
+        Hex.normalize(@cover_text_color.presence || recordable&.try(:resolved_cover_text_color)) ||
+          Contrast.text_on(cover_color)
       end
 
       def card?

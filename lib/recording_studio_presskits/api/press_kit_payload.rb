@@ -8,7 +8,8 @@ module RecordingStudioPresskits
           title: recordable.title,
           description: recordable.description,
           cover_style: recordable.resolved_cover_style,
-          cover_color: recordable.resolved_cover_color
+          cover_color: recordable.resolved_cover_color,
+          cover_text_color: recordable.resolved_cover_text_color
         }
       end
     end

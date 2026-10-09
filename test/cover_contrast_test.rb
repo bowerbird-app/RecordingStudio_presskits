@@ -34,4 +34,9 @@ class CoverContrastTest < Minitest::Test
     assert_operator light, :>, dark
     assert_operator light, :>=, 4.5
   end
+
+  def test_low_contrast_detects_a_weak_pair
+    refute RecordingStudioPresskits::Cover::Contrast.low_contrast?("#1F2937", "#F8FAFC")
+    assert RecordingStudioPresskits::Cover::Contrast.low_contrast?("#D97706", "#E5E7EB")
+  end
 end

@@ -7,6 +7,12 @@ development:
     - "#059669"
     - "#D97706"
   default_cover_color: "#1F2937"
+  cover_text_colors:
+    - "#F8FAFC"
+    - "#111827"
+    - "#E5E7EB"
+    - "#6B7280"
+  cover_text_auto: true
 
 production:
   parent_root_type: "Workspace"
@@ -17,3 +23,9 @@ production:
     - "#059669"
     - "#D97706"
   default_cover_color: "#1F2937"
+  cover_text_colors:
+    - "#F8FAFC"
+    - "#111827"
+    - "#E5E7EB"
+    - "#6B7280"
+  cover_text_auto: true

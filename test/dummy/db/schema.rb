@@ -186,6 +186,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_120000) do
     t.text "description"
     t.string "cover_style"
     t.string "cover_color"
+    t.string "cover_text_color"
   end
 
   create_table "recording_studio_publishable_publishables", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

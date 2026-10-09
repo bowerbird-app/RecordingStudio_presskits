@@ -2,19 +2,19 @@
 
 ## 0.23.1
 
-A press kit can store a colour cover. `cover_style` is `color` for now (`nil` means colour with the host default). `cover_color` is a hex string.
+A press kit can store a colour cover. `cover_style` is `color` for now (`nil` means colour with the host default). `cover_color` is a hex string. `cover_text_color` is an optional hex for the title and description. `nil` text colour is Auto: light or dark from WCAG contrast.
 
-Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds nullable `cover_style` and `cover_color` on `recording_studio_press_kits`. Existing kits keep their title and render the default colour.
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds nullable `cover_style`, `cover_color`, and `cover_text_color` on `recording_studio_press_kits`. Existing kits keep their title and render the default colour with Auto text.
 
-Hosts set `config.cover_colors` to a palette or `:any`, and `config.default_cover_color`. The default palette is `#1F2937`, `#7C3AED`, `#DB2777`, `#059669`, and `#D97706`. The default colour is `#1F2937`. Writes must be a valid hex. In palette mode they must be one of those colours. A stored colour that later leaves the palette still renders.
+Hosts set `config.cover_colors` to a palette or `:any`, and `config.default_cover_color`. The default palette is `#1F2937`, `#7C3AED`, `#DB2777`, `#059669`, and `#D97706`. The default colour is `#1F2937`. `cover_text_colors` defaults to `#F8FAFC`, `#111827`, `#E5E7EB`, and `#6B7280`, or `:any`. `cover_text_auto` (default true) adds an Auto choice. Writes must be a valid hex. In palette mode they must be one of those colours. A stored colour that later leaves the palette still renders.
 
-Overlay text is light or dark from WCAG contrast. People do not pick a text colour.
+A low-contrast text colour is allowed. The header editor may hint.
 
 `RecordingStudioPresskits::Cover::Component` paints `:card` and `:preview` as 9/16 story tiles, and `:hero` as a wide 21/9 band on the public kit. A full-width 9/16 hero would bury the kit. Title sits on the colour at the page-title size. A card description clamps to two lines. Press Centers and hosts can render the same card.
 
-The header screen adds **Colour**. A palette uses `FlatPack::RadioGroup` `variant: :inline` (named radios — FlatPack has no filled swatch-radio yet). `:any` uses `FlatPack::ColorSwatch`. Column two previews the cover live.
+The header screen adds **Colour** and **Text colour**. A palette uses `FlatPack::RadioGroup` `variant: :inline` (named radios — FlatPack has no filled swatch-radio yet). `:any` uses `FlatPack::ColorSwatch`. Text colour includes **Auto**. Column two previews the cover live.
 
-When Recording Studio API is loaded, a press kit show and update include `cover_style` and `cover_color`. Those two keys are writable. Title and description stay on the header screen. MCP uses the same payload. Duplicating a kit copies both fields.
+When Recording Studio API is loaded, a press kit show and update include `cover_style`, `cover_color`, and `cover_text_color`. Those keys are writable. Title and description stay on the header screen. MCP uses the same payload. Duplicating a kit copies those fields.
 
 Bump FlatPack to at least `0.1.214` and reload its CSS and JavaScript. Importmap hosts that already pin Flatpack controllers load `flat-pack--color-swatch` with no new register call. Reload the press kits JavaScript so the header preview follows Colour.
 

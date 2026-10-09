@@ -5,12 +5,21 @@ module RecordingStudioPresskits
     class Contrast
       LIGHT = "#F8FAFC"
       DARK = "#111827"
+      AA_RATIO = 4.5
 
       def self.text_on(background)
         hex = Hex.normalize(background)
         return DARK unless hex
 
         contrast(hex, LIGHT) >= contrast(hex, DARK) ? LIGHT : DARK
+      end
+
+      def self.low_contrast?(background, foreground)
+        bg = Hex.normalize(background)
+        fg = Hex.normalize(foreground)
+        return false unless bg && fg
+
+        contrast(bg, fg) < AA_RATIO
       end
 
       def self.contrast(one, two)

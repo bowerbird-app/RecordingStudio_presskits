@@ -20,6 +20,22 @@ class CoverPaletteTest < Minitest::Test
     assert_equal "#ABCDEF", palette.label_for("#abcdef")
     assert_equal "Ink", palette.options.first[:label]
     assert_equal "#1F2937", palette.options.first[:value]
+    auto = palette.options(auto: true)
+
+    assert_equal "Auto", auto.first[:label]
+    assert_equal RecordingStudioPresskits::Cover::Palette::AUTO_VALUE, auto.first[:value]
+    assert palette.auto?("auto")
+  end
+
+  def test_text_palette_falls_back_to_the_text_defaults
+    palette = RecordingStudioPresskits::Cover::Palette.new(
+      colors: [],
+      fallback_colors: RecordingStudioPresskits::Cover::Palette::DEFAULT_TEXT_COLORS
+    )
+
+    assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_TEXT_COLORS, palette.colors
+    assert_equal "Snow", palette.label_for("#F8FAFC")
+    assert_equal "Slate", palette.label_for("#6B7280")
   end
 
   def test_any_mode_accepts_every_colour
