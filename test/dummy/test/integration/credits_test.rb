@@ -184,12 +184,28 @@ class CreditsTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.credits_path}']", text: "Credits"
+    assert_select "a[data-flat-pack-sidebar-item='true'][href='#{recording_studio_presskits.credits_path}'] span.fp-sidebar-label",
+                  text: "Credits"
+    assert_select "a.fp-button[href='#{recording_studio_presskits.credits_path}']", count: 0
 
     get recording_studio_presskits.credits_path
     assert_response :success
     assert_select "h1", text: "Credits"
+    assert_includes response.body, "People, companies and organisations that you credit in Press kits"
+    credit_button = css_select("a.fp-button[href='#{recording_studio_presskits.new_credit_path}']").first
+    assert_includes credit_button["class"], "self-start"
+    refute_includes credit_button["class"], "w-full"
+    assert_equal "Credit", credit_button.at_css("span").text
     assert_rounded_default_layout
+
+    get recording_studio_presskits.new_credit_path
+    assert_response :success
+    new_form = css_select("form[action='#{recording_studio_presskits.credits_path}']").first
+    assert_operator new_form.inner_html.index('name="credit[name]"'), :<, new_form.inner_html.index("Create")
+    create_button = css_select("form[action='#{recording_studio_presskits.credits_path}'] button[type=submit]").first
+    assert_includes create_button["class"], "self-start"
+    assert_select "[role=separator]", count: 0
+    assert_select "button", text: "Trash", count: 0
 
     empty_kit = record_kit("Empty credits")
     post recording_studio_presskits.press_kit_sections_path(empty_kit),
@@ -244,6 +260,22 @@ class CreditsTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "input[name='credit[name]'][value='Tom Ross']"
     assert_select "input[name='credit[usual_role]'][value='Photography']"
+    edit_form = css_select("form[action='#{recording_studio_presskits.credit_path(tom)}']").first
+    assert_operator edit_form.inner_html.index('name="credit[url]"'), :<, edit_form.inner_html.index("Save")
+    save_button = css_select("form[action='#{recording_studio_presskits.credit_path(tom)}'] button[type=submit]").first
+    assert_equal "Save", save_button.text.squish
+    assert_includes save_button["class"], "self-start"
+    refute_includes save_button["class"], "w-full"
+    assert_operator response.body.index("</form>"), :<, response.body.index('role="separator"')
+    assert_operator response.body.index('role="separator"'), :<, response.body.index(">Trash<")
+    assert_select "div.justify-end button", text: "Trash"
+
+    get recording_studio_presskits.credits_path
+    assert_select "th", text: "Name"
+    assert_select "thead th", count: 1
+    assert_select "a", text: "Tom Ross"
+    refute_includes response.body, "Usual role"
+    refute_includes response.body, "https://example.com/tom"
 
     patch recording_studio_presskits.credit_path(tom), params: {
       credit: { name: "Tom Ross", usual_role: "Photographer", url: "https://example.com/tom" }

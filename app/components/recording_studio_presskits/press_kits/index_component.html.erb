@@ -1,80 +1,93 @@
-<div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "My presskits",
-    subtitle: "The folders you fill. Sections drop in later.",
-    variant: :h1
-  ) %>
-
-  <div class="flex flex-wrap items-center gap-3">
-    <%= render FlatPack::Button::Component.new(
-      text: "Presskit",
-      icon: "plus",
-      style: :primary,
-      href: @new_path
-    ) %>
-
-    <%= render FlatPack::Button::Component.new(
-      text: "Credits",
-      icon: "user-group",
-      style: :secondary,
-      href: @credits_path
-    ) %>
-
-    <%= render FlatPack::ButtonGroup::Component.new do |group| %>
-      <% group.button(FlatPack::Button::Component.new(
-        icon: "squares-2x2",
-        icon_only: true,
-        style: table_view? ? :secondary : :primary,
-        href: @cards_path,
-        aria: { label: "Cards", pressed: !table_view? }
-      )) %>
-      <% group.button(FlatPack::Button::Component.new(
-        icon: "table-cells",
-        icon_only: true,
-        style: table_view? ? :primary : :secondary,
-        href: @table_path,
-        aria: { label: "Table", pressed: table_view? }
-      )) %>
-    <% end %>
-  </div>
-
-  <% if @press_kit_recordings.empty? %>
-    <%= render FlatPack::EmptyState::Component.new(
-      title: "Nothing here yet",
-      description: "Make a press kit and start filling it.",
-      icon: :inbox
-    ) %>
-  <% elsif table_view? %>
-    <%= render FlatPack::Table::Component.new(data: @press_kit_recordings) do |table| %>
-      <% table.column(title: "Name", html: ->(recording) { helpers.link_to(helpers.presskits_title_for(recording), @show_path.call(recording)) }) %>
-      <% table.column(title: "Added", html: ->(recording) { recording.created_at&.to_fs(:long) }) %>
-    <% end %>
-  <% else %>
-    <%= render FlatPack::Grid::Component.new(cols: 3, gap: :md) do %>
-      <% @press_kit_recordings.each do |recording| %>
-        <%= render FlatPack::Card::Component.new(
-          style: :interactive,
-          clickable: true,
-          href: @show_path.call(recording)
-        ) do |card| %>
-          <% card.media(aspect_ratio: "16/9", padding: :none, class: "relative bg-(--card-background-muted-color)") do %>
-            <% cover_url = helpers.presskits_cover_url_for(recording) %>
-            <% if cover_url.present? %>
-              <%= image_tag cover_url, alt: "", class: "absolute inset-0 h-full w-full object-cover" %>
-            <% else %>
-              <div class="absolute inset-0 flex items-center justify-center text-(--surface-muted-content-color)" aria-hidden="true">
-                <%= render FlatPack::Shared::IconComponent.new(name: "photo", size: :xl) %>
-              </div>
-            <% end %>
-          <% end %>
-
-          <% card.body do %>
-            <p class="text-base font-semibold text-(--surface-content-color)">
-              <%= helpers.presskits_title_for(recording) %>
-            </p>
+<%= render FlatPack::SidebarLayout::Component.new(side: :left, storage_key: "presskits-sidebar") do |layout| %>
+  <% layout.sidebar do %>
+    <%= render FlatPack::Sidebar::Component.new(side: :left) do |sidebar| %>
+      <% sidebar.items do %>
+        <%= render FlatPack::Sidebar::Group::Component.new(title: "Library", icon: "folder", open: true) do |group| %>
+          <% group.items do %>
+            <%= render FlatPack::Sidebar::Item::Component.new(
+              text: "Credits",
+              href: @credits_path,
+              icon: "user-group"
+            ) %>
           <% end %>
         <% end %>
       <% end %>
     <% end %>
   <% end %>
-</div>
+
+  <% layout.main do %>
+    <div class="flex w-full flex-col gap-6 p-6">
+      <%= render FlatPack::PageTitle::Component.new(
+        title: "My presskits",
+        subtitle: "The folders you fill. Sections drop in later.",
+        variant: :h1
+      ) %>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <%= render FlatPack::Button::Component.new(
+          text: "Presskit",
+          icon: "plus",
+          style: :primary,
+          href: @new_path
+        ) %>
+
+        <%= render FlatPack::ButtonGroup::Component.new do |group| %>
+          <% group.button(FlatPack::Button::Component.new(
+            icon: "squares-2x2",
+            icon_only: true,
+            style: table_view? ? :secondary : :primary,
+            href: @cards_path,
+            aria: { label: "Cards", pressed: !table_view? }
+          )) %>
+          <% group.button(FlatPack::Button::Component.new(
+            icon: "table-cells",
+            icon_only: true,
+            style: table_view? ? :primary : :secondary,
+            href: @table_path,
+            aria: { label: "Table", pressed: table_view? }
+          )) %>
+        <% end %>
+      </div>
+
+      <% if @press_kit_recordings.empty? %>
+        <%= render FlatPack::EmptyState::Component.new(
+          title: "Nothing here yet",
+          description: "Make a press kit and start filling it.",
+          icon: :inbox
+        ) %>
+      <% elsif table_view? %>
+        <%= render FlatPack::Table::Component.new(data: @press_kit_recordings) do |table| %>
+          <% table.column(title: "Name", html: ->(recording) { helpers.link_to(helpers.presskits_title_for(recording), @show_path.call(recording)) }) %>
+          <% table.column(title: "Added", html: ->(recording) { recording.created_at&.to_fs(:long) }) %>
+        <% end %>
+      <% else %>
+        <%= render FlatPack::Grid::Component.new(cols: 3, gap: :md) do %>
+          <% @press_kit_recordings.each do |recording| %>
+            <%= render FlatPack::Card::Component.new(
+              style: :interactive,
+              clickable: true,
+              href: @show_path.call(recording)
+            ) do |card| %>
+              <% card.media(aspect_ratio: "16/9", padding: :none, class: "relative bg-(--card-background-muted-color)") do %>
+                <% cover_url = helpers.presskits_cover_url_for(recording) %>
+                <% if cover_url.present? %>
+                  <%= image_tag cover_url, alt: "", class: "absolute inset-0 h-full w-full object-cover" %>
+                <% else %>
+                  <div class="absolute inset-0 flex items-center justify-center text-(--surface-muted-content-color)" aria-hidden="true">
+                    <%= render FlatPack::Shared::IconComponent.new(name: "photo", size: :xl) %>
+                  </div>
+                <% end %>
+              <% end %>
+
+              <% card.body do %>
+                <p class="text-base font-semibold text-(--surface-content-color)">
+                  <%= helpers.presskits_title_for(recording) %>
+                </p>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

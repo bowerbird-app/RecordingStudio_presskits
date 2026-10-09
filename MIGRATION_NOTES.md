@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.23.0
+
+The press kit index draws a sidebar. Library is a collapsible group, and Credits is the link under it. The Credits button next to Presskit is gone.
+
+The credits list shows each name. Usual role and URL stay on the credit form. Save sits under those fields. A divider sits between that form and Trash, and Trash sits on the right.
+
 ## 0.22.1
 
 The dummy default layout draws one back control. A screen that sets `page_nav_back_url` gets that link. A screen that does not gets PageNav's history button. Close stays on `anchor_href`.

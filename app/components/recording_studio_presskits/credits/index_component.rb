@@ -17,17 +17,6 @@ module RecordingStudioPresskits
       def edit_href(recording)
         @edit_path.call(recording)
       end
-
-      def usual_role(recording)
-        recording.recordable.usual_role.to_s.strip.presence
-      end
-
-      def url_cell(recording)
-        url = FlatPack::AttributeSanitizer.sanitize_url(recording.recordable.url)
-        return if url.blank?
-
-        helpers.link_to(recording.recordable.url.to_s.strip, url, target: "_blank", rel: "noopener noreferrer")
-      end
     end
   end
 end

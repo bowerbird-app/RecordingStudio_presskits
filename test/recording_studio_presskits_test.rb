@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.22.1", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.23.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -439,6 +439,34 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, "SectionPickerComponent"
     refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"
+    assert_includes index, "FlatPack::SidebarLayout::Component"
+    assert_includes index, "FlatPack::Sidebar::Group::Component"
+    assert_includes index, 'title: "Library"'
+    assert_includes index, "open: true"
+    assert_includes index, 'text: "Credits"'
+    assert_includes index, 'icon: "user-group"'
+    assert_includes index, "@credits_path"
+    refute_match(/Button::Component\.new\(\s*text: "Credits"/m, index)
+  end
+
+  def test_credits_list_shows_the_name_and_save_sits_under_the_fields
+    components = File.expand_path("../app/components/recording_studio_presskits/credits", __dir__)
+    index = File.read(File.expand_path("index_component.html.erb", components))
+    index_ruby = File.read(File.expand_path("index_component.rb", components))
+    form = File.read(File.expand_path("form_component.html.erb", components))
+
+    assert_includes index, 'subtitle: "People, companies and organisations that you credit in Press kits"'
+    assert_includes index, 'text: "Credit"'
+    assert_includes index, 'class: "self-start"'
+    assert_includes index, 'title: "Name"'
+    refute_includes index, "Usual role"
+    refute_includes index, 'title: "URL"'
+    refute_includes index_ruby, "def usual_role"
+    refute_includes index_ruby, "def url_cell"
+    assert_operator form.index('name: "credit[url]"'), :<, form.index('type: "submit"')
+    assert_includes form, 'class: "self-start"'
+    assert_operator form.index("FlatPack::Divider::Component"), :<, form.index('text: "Trash"')
+    assert_includes form, 'class="flex justify-end"'
   end
 
   def test_section_dropdown_passes_a_menu_icon

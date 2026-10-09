@@ -1,7 +1,7 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Credits",
-    subtitle: "People and studios you can drop into any kit.",
+    subtitle: "People, companies and organisations that you credit in Press kits",
     variant: :h1
   ) %>
 
@@ -9,7 +9,8 @@
     text: "Credit",
     icon: "plus",
     style: :primary,
-    href: @new_path
+    href: @new_path,
+    class: "self-start"
   ) %>
 
   <% if rows.empty? %>
@@ -21,8 +22,6 @@
   <% else %>
     <%= render FlatPack::Table::Component.new(data: rows) do |table| %>
       <% table.column(title: "Name", html: ->(recording) { helpers.link_to(recording.recordable.name, edit_href(recording)) }) %>
-      <% table.column(title: "Usual role", html: ->(recording) { usual_role(recording) }) %>
-      <% table.column(title: "URL", html: ->(recording) { url_cell(recording) }) %>
     <% end %>
   <% end %>
 </div>
