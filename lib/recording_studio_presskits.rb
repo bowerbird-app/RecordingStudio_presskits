@@ -11,10 +11,15 @@ require "recording_studio_admin"
 require "flat_pack"
 require "recording_studio_presskits/version"
 require "recording_studio_presskits/engine"
+require "recording_studio_presskits/cover/hex"
+require "recording_studio_presskits/cover/contrast"
+require "recording_studio_presskits/cover/palette"
+require "recording_studio_presskits/cover_settings"
 require "recording_studio_presskits/configuration"
 require "recording_studio_presskits/kit_query"
 require "recording_studio_presskits/section_composer"
 require "recording_studio_presskits/legacy_section_tree"
+require "recording_studio_presskits/api/press_kit_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/admin"
 require "recording_studio_presskits/api"
@@ -26,6 +31,8 @@ require "recording_studio_presskits/credit_line_batch/sync"
 
 module RecordingStudioPresskits
   class << self
+    include CoverSettings
+
     def configuration
       @configuration ||= Configuration.new
     end

@@ -1,5 +1,8 @@
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(**page_title_options) %>
+  <%= render RecordingStudioPresskits::Cover::Component.new(
+    recording: @press_kit_recording,
+    size: :hero
+  ) %>
 
   <% if preview? && !live? %>
     <%= render FlatPack::Alert::Component.new(

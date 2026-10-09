@@ -3,7 +3,8 @@
 module RecordingStudioPresskits
   class Configuration
     attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
-                  :section_components, :section_editors, :section_prepares, :excluded_picker_types
+                  :section_components, :section_editors, :section_prepares, :excluded_picker_types,
+                  :cover_colors, :default_cover_color, :cover_text_colors, :cover_text_auto
     attr_reader :hooks
 
     def initialize
@@ -15,20 +16,35 @@ module RecordingStudioPresskits
       @section_editors = {}
       @section_prepares = {}
       @excluded_picker_types = []
+      assign_cover_defaults
       @hooks = RecordingStudio::Hooks.new
     end
 
+    def cover_palette
+      Cover::Palette.new(colors: cover_colors, default_color: default_cover_color)
+    end
+
+    def any_cover_color?
+      cover_palette.any?
+    end
+
+    def cover_text_palette
+      Cover::Palette.new(
+        colors: cover_text_colors,
+        fallback_colors: Cover::Palette::DEFAULT_TEXT_COLORS
+      )
+    end
+
+    def any_cover_text_color?
+      cover_text_palette.any?
+    end
+
+    def cover_text_auto?
+      ActiveModel::Type::Boolean.new.cast(@cover_text_auto)
+    end
+
     def to_h
-      {
-        parent_root_type: parent_root_type,
-        authentication_method: authentication_method,
-        current_actor_method: current_actor_method,
-        section_types: Array(section_types).map(&:to_s),
-        section_components: section_components.dup,
-        section_editors: section_editors.dup,
-        excluded_picker_types: Array(excluded_picker_types).map(&:to_s),
-        hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
-      }
+      base_settings.merge(cover_settings).merge(hooks_registered: hook_counts)
     end
 
     def merge!(hash)
@@ -39,6 +55,40 @@ module RecordingStudioPresskits
         setter = "#{key}="
         public_send(setter, v) if respond_to?(setter)
       end
+    end
+
+    private
+
+    def assign_cover_defaults
+      @cover_colors = Cover::Palette::DEFAULT_COLORS.dup
+      @default_cover_color = Cover::Palette::DEFAULT_COLOR
+      @cover_text_colors = Cover::Palette::DEFAULT_TEXT_COLORS.dup
+      @cover_text_auto = true
+    end
+
+    def base_settings
+      {
+        parent_root_type: parent_root_type,
+        authentication_method: authentication_method,
+        current_actor_method: current_actor_method,
+        section_types: Array(section_types).map(&:to_s),
+        section_components: section_components.dup,
+        section_editors: section_editors.dup,
+        excluded_picker_types: Array(excluded_picker_types).map(&:to_s)
+      }
+    end
+
+    def cover_settings
+      {
+        cover_colors: any_cover_color? ? :any : cover_palette.colors,
+        default_cover_color: cover_palette.default_color,
+        cover_text_colors: any_cover_text_color? ? :any : cover_text_palette.colors,
+        cover_text_auto: cover_text_auto?
+      }
+    end
+
+    def hook_counts
+      hooks.instance_variable_get(:@registry).transform_values(&:size)
     end
   end
 end

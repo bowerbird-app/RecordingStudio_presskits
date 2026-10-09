@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.24.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.25.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -17,6 +17,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261007120000_create_recording_studio_video_sections.rb",
       "db/migrate/20261008120000_create_recording_studio_credits.rb",
       "db/migrate/20261008180000_create_recording_studio_facts.rb",
+      "db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
@@ -24,6 +25,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261007120000_create_recording_studio_video_sections.rb",
       "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261008180000_create_recording_studio_facts.rb",
+      "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
@@ -135,7 +137,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes source, "capability_actions: %i[create_section reorder_sections]"
     assert_includes source, "capability_actions: %i[remove_section]"
-    assert_includes source, "operations: %i[show]"
+    assert_includes source, "operations: %i[show update]"
+    assert_includes source, "output_keys: %i[title description cover_style cover_color cover_text_color]"
+    assert_includes source, "writable_attributes: %i[cover_style cover_color cover_text_color]"
     assert_includes source, "operations: %i[index show update]"
     assert_includes source, "register_section_actions"
     refute_includes source, "operations: %i[create"
@@ -411,10 +415,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes index, "justify-between"
     refute_includes index, 'text: "Cards"'
     refute_includes index, 'text: "Table"'
-    assert_includes index, "FlatPack::Card::Component"
-    assert_includes index, "card.media"
-    assert_includes index, 'name: "photo"'
-    assert_includes index, "presskits_cover_url_for"
+    assert_includes index, "RecordingStudioPresskits::Cover::Component"
+    assert_includes index, "size: :card"
+    cover = File.read(File.expand_path("cover/component.rb", components))
+    cover_html = File.read(File.expand_path("cover/component.html.erb", components))
+    assert_includes cover, "9 / 16"
+    assert_includes cover, "21 / 9"
+    assert_includes cover, "aspect-[9/16]"
+    assert_includes cover_html, "--page-title-h1-size"
+    assert_includes cover_html, "variant: heading_variant"
+    refute_includes index, "card.media"
+    refute_includes index, 'name: "photo"'
+    refute_includes index, "presskits_cover_url_for"
     assert_includes index, "FlatPack::Table::Component"
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
@@ -446,16 +458,32 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'name: "press_kit[description]"'
     refute_includes show, 'text: "Save"'
     assert_includes kit_header, 'id="presskits-kit-header"'
+    assert_includes kit_header, "Cover::Component"
     assert_includes kit_header, "text: edit_heading_label"
     refute_includes kit_header, "arrows-up-down"
     refute_includes kit_header, "trash"
     assert_includes header, 'name: "press_kit[title]"'
     assert_includes header, 'name: "press_kit[description]"'
+    assert_includes header, 'name: "press_kit[cover_color]"'
+    assert_includes header, 'name: "press_kit[cover_text_color]"'
+    assert_includes header, "Text colour"
+    assert_includes header, "FlatPack::RadioGroup::Component"
+    assert_includes header, "variant: :inline"
+    assert_includes header, "FlatPack::ColorSwatch::Component"
+    assert_includes header, "auto_text_value"
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, "flat-pack--unsaved-changes"
     refute_includes header, 'text: "Cancel"'
     refute_includes header, "cols: 2"
-    refute_includes header, 'id: "presskits-header-edit-preview"'
+    assert_includes header, 'id: "presskits-header-edit-preview"'
+    assert_includes header, "Cover::Component"
+    preview_js = File.read(File.expand_path(
+                             "../app/javascript/recording_studio_presskits/controllers/cover_preview_controller.js",
+                             __dir__
+                           ))
+    assert_includes preview_js, "heading.style.color = textColor"
+    assert_includes preview_js, "subtitle.style.color = textColor"
+    assert_operator header.index('name: "press_kit[title]"'), :<, header.index('id: "presskits-header-edit-preview"')
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
     refute_includes show, "FlatPack::Picker::Component"

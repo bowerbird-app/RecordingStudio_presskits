@@ -19,20 +19,25 @@ module RecordingStudioPresskits
       public_action: :show,
       public_layout: "recording_studio_presskits/blank"
     )
+    include CoverAttributes
 
     # The header is the kit itself. Title is required. The short description
     # can be blank. It is not a child, so it cannot be trashed or reordered.
     SHORT_DESCRIPTION_LIMIT = 280
+    COVER_STYLES = %w[color].freeze
+    AUTO_COVER_TEXT = CoverAttributes::AUTO_COVER_TEXT
 
     validates :title, presence: true
     validates :description, length: { maximum: SHORT_DESCRIPTION_LIMIT }, allow_nil: true
+    validates :cover_style, inclusion: { in: COVER_STYLES }, allow_nil: true
 
-    before_validation :clear_blank_description
+    before_validation :normalize_header
 
     private
 
-    def clear_blank_description
+    def normalize_header
       self.description = description.to_s.strip.presence
+      normalize_cover
     end
   end
 end

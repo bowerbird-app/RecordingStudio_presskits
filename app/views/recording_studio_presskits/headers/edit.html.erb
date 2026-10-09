@@ -3,7 +3,10 @@
     <%= render RecordingStudioPresskits::PressKits::HeaderEditorComponent.new(
       press_kit_recording: @press_kit_recording,
       title: @header_title,
-      description: @header_description
+      description: @header_description,
+      cover_style: @header_cover_style,
+      cover_color: @header_cover_color,
+      cover_text_color: @header_cover_text_color
     ) %>
   <% end %>
 <% else %>
@@ -19,6 +22,9 @@
   <%= render RecordingStudioPresskits::PressKits::HeaderEditorComponent.new(
     press_kit_recording: @press_kit_recording,
     title: @header_title,
-    description: @header_description
+    description: @header_description,
+    cover_style: @header_cover_style,
+    cover_color: @header_cover_color,
+    cover_text_color: @header_cover_text_color
   ) %>
 <% end %>

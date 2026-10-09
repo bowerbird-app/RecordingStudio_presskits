@@ -54,8 +54,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_presskit_create_button
     assert_library_sidebar
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
-    assert_select "[data-flat-pack--icon-name-value='photo']", count: 1
-    assert_includes response.body, "bg-(--card-background-muted-color)"
+    assert_select "[data-cover-color='#1F2937']", count: 1
+    assert_includes response.body, "aspect-[9/16]"
+    refute_includes response.body, "data-flat-pack--icon-name-value='photo'"
     assert_select "a[aria-label='Cards'] [data-flat-pack--icon-name-value='squares-2x2']", count: 1
     assert_select "a[aria-label='Table'] [data-flat-pack--icon-name-value='table-cells']", count: 1
     refute_includes response.body, ">Cards<"
@@ -73,25 +74,23 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_presskit_create_button
     assert_library_sidebar
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
-    assert_select "[data-flat-pack--icon-name-value='photo']", count: 0
+    assert_select "[data-cover-color]", count: 0
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
   end
 
-  test "card view renders a cover image when the kit provides a safe url" do
-    record_kit("Spring launch")
-    RecordingStudioPresskits::PressKit.define_method(:cover_image_url) { "https://cdn.example/cover.jpg" }
+  test "card view paints the kit colour with the title on top" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.cover_color = "#DB2777" }
     sign_in @user
     switch_to_root(@root)
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "img[src='https://cdn.example/cover.jpg'][alt='']", count: 1
-    assert_select "[data-flat-pack--icon-name-value='photo']", count: 0
-  ensure
-    if RecordingStudioPresskits::PressKit.method_defined?(:cover_image_url)
-      RecordingStudioPresskits::PressKit.remove_method(:cover_image_url)
-    end
+    assert_select "[data-cover-color='#DB2777']", count: 1
+    cover = css_select("[data-cover-color='#DB2777']").first
+    assert_includes cover.to_html, "Spring launch"
+    refute_includes response.body, "https://cdn.example/cover.jpg"
   end
 
   test "empty index explains what to do next" do
@@ -749,6 +748,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_page_nav_without_access
     assert_select "input[name='press_kit[title]'][value='Spring launch']"
     assert_select "textarea[name='press_kit[description]']", text: "Doors at noon."
+    assert_select "input[name='press_kit[cover_style]'][value='color']"
+    assert_select "input[name='press_kit[cover_color]'][value='#1F2937'][type='radio'][checked]"
+    assert_select "input[name='press_kit[cover_text_color]'][value='auto'][type='radio'][checked]"
+    assert_includes response.body, "Colour"
     assert_includes response.body, "/280 characters"
     update = css_select("#presskits-header-actions button[type=submit]").first
     assert_equal "Update", update.text.squish
@@ -757,11 +760,16 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     form = css_select("form[action='#{recording_studio_presskits.press_kit_header_path(kit)}']").first
     form_html = form.to_html
     assert_includes form_html, "flat-pack--unsaved-changes"
+    assert_includes form_html, 'name="press_kit[cover_color]"'
+    assert_includes form_html, 'name="press_kit[cover_text_color]"'
     assert_operator form_html.index('name="press_kit[title]"'), :<, form_html.index('name="press_kit[description]"')
     assert_operator form_html.index('name="press_kit[description]"'), :<, form_html.index("Update")
-    refute_includes form_html, "presskits-header-edit-preview"
     refute_includes response.body, "md:grid-cols-2"
     refute_select "a", text: "Cancel"
+    preview = css_select("#presskits-header-edit-preview").first
+    assert_includes preview["class"], "border-[var(--card-border-color)]"
+    assert_select "#presskits-header-edit-preview h1", text: "Spring launch"
+    assert_select "#presskits-header-edit-preview p", text: "Doors at noon."
     assert_select "button", text: "Remove", count: 0
   end
 
@@ -781,6 +789,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       press_kit: {
         title: "Spring launch, take two",
         description: "Doors at noon.",
+        cover_style: "color",
+        cover_color: "#7C3AED",
+        cover_text_color: "#111827",
         decoy: "nope"
       }
     }
@@ -795,6 +806,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_not_equal original_id, kit.recordable_id
     assert_equal "Spring launch, take two", kit.recordable.title
     assert_equal "Doors at noon.", kit.recordable.description
+    assert_equal "color", kit.recordable.cover_style
+    assert_equal "#7C3AED", kit.recordable.cover_color
+    assert_equal "#111827", kit.recordable.cover_text_color
     refute_includes kit.recordable.attributes.values, "nope"
     original = RecordingStudioPresskits::PressKit.find(original_id)
     assert_equal "Spring launch", original.title

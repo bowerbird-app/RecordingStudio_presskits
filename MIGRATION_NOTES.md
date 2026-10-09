@@ -1,5 +1,23 @@
 # Upgrade notes
 
+## 0.25.0
+
+A press kit can store a colour cover. `cover_style` is `color` for now (`nil` means colour with the host default). `cover_color` is a hex string. `cover_text_color` is an optional hex for the title and description. `nil` text colour is Auto: light or dark from WCAG contrast.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds nullable `cover_style`, `cover_color`, and `cover_text_color` on `recording_studio_press_kits`. Existing kits keep their title and render the default colour with Auto text.
+
+Hosts set `config.cover_colors` to a palette or `:any`, and `config.default_cover_color`. The default palette is `#1F2937`, `#7C3AED`, `#DB2777`, `#059669`, and `#D97706`. The default colour is `#1F2937`. `cover_text_colors` defaults to `#F8FAFC`, `#111827`, `#E5E7EB`, and `#6B7280`, or `:any`. `cover_text_auto` (default true) adds an Auto choice. Writes must be a valid hex. In palette mode they must be one of those colours. A stored colour that later leaves the palette still renders.
+
+A low-contrast text colour is allowed. The header editor may hint.
+
+`RecordingStudioPresskits::Cover::Component` paints `:card` and `:preview` as 9/16 story tiles, and `:hero` as a wide 21/9 band on the public kit. A full-width 9/16 hero would bury the kit. Title sits on the colour at the page-title size. A card description clamps to two lines. Press Centers and hosts can render the same card.
+
+The shared kit header screen in `pk-editor` adds **Colour** and **Text colour**. A palette uses `FlatPack::RadioGroup` `variant: :inline` (named radios — FlatPack has no filled swatch-radio yet). `:any` uses `FlatPack::ColorSwatch`. Text colour includes **Auto**. A preview tile follows the cover live. The kit header on the live editor uses the same `Cover::Component` at `:hero` and refreshes through the existing Turbo Stream save.
+
+When Recording Studio API is loaded, a press kit show and update include `cover_style`, `cover_color`, and `cover_text_color`. Those keys are writable. Title and description stay on the header screen. MCP uses the same payload. Duplicating a kit copies those fields.
+
+Reload the press kits JavaScript so the header preview follows Colour and Text colour. Importmap hosts that already pin Flatpack controllers load `flat-pack--color-swatch` with no new register call.
+
 ## 0.23.0
 
 The press kit index draws a sidebar. Library is a collapsible group, and Credits is the link under it. The Credits button next to Presskit is gone.
