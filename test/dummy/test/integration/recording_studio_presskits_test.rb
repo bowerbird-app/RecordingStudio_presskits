@@ -19,6 +19,19 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_includes css, "radius-lg"
   end
 
+  test "dummy FlatPack 0.1.210 pins SectionTitle options and stacked collection rows" do
+    assert_equal "0.1.210", FlatPack::VERSION
+    css = FlatPack::Engine.root.join("app/assets/stylesheets/flat_pack/application.css").read
+    title = FlatPack::Engine.root.join("app/components/flat_pack/section_title/component.rb").read
+
+    assert_includes css, "@media (min-width: 40rem)"
+    assert_includes css, ".flat-pack-collection-editor-row"
+    assert_includes css, ".flat-pack-collection-editor-fields"
+    assert_includes title, "size:"
+    assert_includes title, "spacing:"
+    assert_includes title, "level:"
+  end
+
   test "dummy app validates recordable declarations" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_equal [ "AdminRoot", "Workspace" ].sort, RecordingStudio.root_recordable_types.sort
@@ -279,7 +292,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_includes layout, '<html data-theme="rounded">'
     assert_includes layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes layout, "page_nav_options[:anchor_href]"
-    assert_includes layout, "page_nav_options[:secondary_anchor_href]"
+    refute_includes layout, "page_nav_options[:secondary_anchor_href]"
     assert_includes layout, "anchor_tooltip:"
     refute_includes layout, "page_nav_options[:anchor_url]"
     refute_includes layout, "page_nav_options[:back_url]"

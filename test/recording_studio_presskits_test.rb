@@ -4,7 +4,11 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.22.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.22.1", ::RecordingStudioPresskits::VERSION
+    changelog = File.read(File.expand_path("../CHANGELOG.md", __dir__))
+    assert_includes changelog, "## [0.22.1]"
+    assert_includes changelog, "`>= 0.1.210`"
+    assert_includes changelog, "v0.1.210"
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -45,7 +49,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.204"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.210"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -60,7 +64,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.207"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.210"'
+    root_lock = File.read(File.expand_path("../Gemfile.lock", __dir__))
+    dummy_lock = File.read(File.expand_path("dummy/Gemfile.lock", __dir__))
+    assert_includes root_lock, "tag: v0.1.210"
+    assert_includes dummy_lock, "tag: v0.1.210"
+    assert_includes root_lock, "flat_pack (0.1.210)"
+    assert_includes dummy_lock, "flat_pack (0.1.210)"
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -156,7 +166,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes default_layout, '<html data-theme="rounded">'
     assert_includes default_layout, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
-    assert_includes default_layout, "page_nav_options[:secondary_anchor_href]"
+    refute_includes default_layout, "page_nav_options[:secondary_anchor_href]"
+    assert_includes default_layout, "Do not pass page_nav_back_url as secondary_anchor_href"
     assert_includes default_layout, "anchor_tooltip:"
     refute_includes default_layout, "page_nav_options[:anchor_url]"
     refute_includes default_layout, "page_nav_options[:back_url]"
@@ -255,8 +266,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.207\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.204"'
+    assert_includes readme, "tag: \"v0.1.210\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.210"'
     assert_includes readme, "FlatPack::Tabs::Component"
     assert_includes readme, "variant: :pills"
     assert_includes readme, "Section title"
@@ -659,6 +670,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes fields, 'label: "Usual role"'
     assert_includes fields, 'create_field: "usual_role"'
     assert_includes fields, 'form: "collection-editor-unattached"'
+    refute_includes fields, "update_url"
+    refute_includes editor, "update_url"
     assert_includes order, "moving_recording_id"
     assert_includes order, "target_position"
     assert_includes routes, "get :search"
