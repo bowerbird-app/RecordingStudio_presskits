@@ -466,12 +466,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes index, 'title: "URL"'
     refute_includes index_ruby, "def usual_role"
     refute_includes index_ruby, "def url_cell"
-    assert_operator form.index('name: "credit[url]"'), :<, form.index('text: button_text')
+    assert_operator form.index('name: "credit[url]"'), :<, form.index("text: button_text")
     assert_includes form, 'id: "credit-form"'
     assert_includes form, 'form: "credit-form"'
     assert_includes form, 'class: "w-fit"'
     assert_includes form, 'class="flex w-full max-w-xl items-center justify-between gap-3"'
-    assert_includes form, 'style: :danger'
+    assert_includes form, "style: :danger"
     refute_includes form, "Divider"
   end
 
