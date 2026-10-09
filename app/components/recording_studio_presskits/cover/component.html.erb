@@ -9,13 +9,14 @@
     data-cover-ratio="<%= cover_ratio %>"
     data-recording-studio-presskits--cover-preview-target="surface"
   >
-    <%= render FlatPack::PageTitle::Component.new(
-      title: title,
-      subtitle: description,
-      variant: heading_variant,
-      title_color: text_color,
-      subtitle_color: text_color
-    ) %>
+    <div class="<%= hero_copy_classes %>">
+      <h1 class="<%= hero_title_classes %>" style="color: <%= text_color %>;">
+        <%= title %>
+      </h1>
+      <% if description.present? %>
+        <p class="<%= hero_description_classes %>" style="color: <%= text_color %>;"><%= description %></p>
+      <% end %>
+    </div>
   </div>
 <% else %>
   <%= render FlatPack::Card::Component.new(
