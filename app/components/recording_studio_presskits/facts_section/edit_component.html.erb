@@ -2,11 +2,10 @@
   <%= form_with url: update_path, method: :patch, local: true,
         id: "presskits-facts-display-form",
         class: "flex flex-col gap-6",
-        data: {
+        data: helpers.presskits_editor_save_data.merge(
           controller: "recording-studio-presskits--facts-display flat-pack--unsaved-changes",
-          action: "change->recording-studio-presskits--facts-display#toggle",
-          turbo_stream: true
-        } do %>
+          action: "change->recording-studio-presskits--facts-display#toggle"
+        ) do %>
     <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
     <%= render FlatPack::Select::Component.new(
       name: "facts_section[display_style]",

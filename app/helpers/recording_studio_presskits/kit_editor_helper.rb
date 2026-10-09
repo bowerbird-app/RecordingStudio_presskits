@@ -31,6 +31,14 @@ module RecordingStudioPresskits
       { fp_nav: action.to_s }
     end
 
+    # Turbo Streams refresh the preview behind the modal. Target `_top` so the
+    # navigable screen frame does not swallow the response and sit on loading.
+    def presskits_editor_save_data
+      data = { turbo_stream: true }
+      data[:turbo_frame] = "_top" if presskits_editor_dialog?
+      data
+    end
+
     def from_kit_editor?
       presskits_editor_dialog? || params[:from_kit_editor].present?
     end

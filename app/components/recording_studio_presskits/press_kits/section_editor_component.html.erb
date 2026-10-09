@@ -3,7 +3,7 @@
     <%= form_with url: @update_path, method: :patch,
           id: "presskits-section-content-form",
           class: "flex flex-col gap-6",
-          data: { controller: "flat-pack--unsaved-changes" } do %>
+          data: helpers.presskits_editor_save_data.merge(controller: "flat-pack--unsaved-changes") do %>
       <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
       <%= render editor_view %>
       <div id="presskits-section-content-update" class="flex flex-wrap items-center gap-3">

@@ -1,7 +1,7 @@
 <%= form_with url: helpers.press_kit_header_path(@press_kit_recording), method: :patch,
       id: "presskits-header-form",
       class: "flex flex-col gap-6",
-      data: { controller: "flat-pack--unsaved-changes" } do %>
+      data: helpers.presskits_editor_save_data.merge(controller: "flat-pack--unsaved-changes") do %>
   <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
   <%= render FlatPack::TextInput::Component.new(
     name: "press_kit[title]",

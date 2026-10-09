@@ -154,6 +154,7 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#pk-editor-screen"
     assert_select "[data-fp-screen][data-title='Heading']"
     assert_select "input[name='kit_section[title]']"
+    assert_select "form#presskits-section-title-form[data-turbo-frame='_top']"
     refute_select ".fp-page-title"
 
     get recording_studio_presskits.edit_press_kit_section_path(kit, section),
@@ -161,6 +162,7 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "turbo-frame#pk-editor-screen"
     assert_select "a[data-fp-nav='push']", text: "Fact"
+    assert_select "form#presskits-facts-display-form[data-turbo-frame='_top']"
   end
 
   test "heading turbo stream updates the preview and leaves the modal" do

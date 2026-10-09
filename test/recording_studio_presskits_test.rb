@@ -269,6 +269,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "navigable: true"
     assert_includes readme, "flat_pack_modal_screen"
     assert_includes readme, "pk-editor"
+    assert_includes readme, 'data-turbo-frame="_top"'
     assert_includes readme, "Edit heading"
     assert_includes readme, "Edit content"
     refute_includes readme, "Section settings"
@@ -429,6 +430,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "EditableSectionComponent"
     assert_includes show, "navigable: true"
     assert_includes show, "presskits_editor_open_data"
+    heading_editor = File.read(File.expand_path("press_kits/section_heading_editor_component.html.erb", components))
+    helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/kit_editor_helper.rb", __dir__))
+
+    assert_includes helper, "presskits_editor_save_data"
+    assert_includes helper, 'data[:turbo_frame] = "_top"'
+    assert_includes heading_editor, "presskits_editor_save_data"
     refute_includes show, 'turbo_frame: "presskits-editor-dialog"'
     refute_includes show, "EditorModalComponent"
     refute_includes show, "md:grid-cols-2"
@@ -587,7 +594,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_operator section_editor.index("section_actions"), :<, section_editor.index("below_editor?")
     assert_includes section_editor, 'id: "presskits-section-content-form"'
     assert_includes heading, 'id: "presskits-section-title-form"'
-    assert_includes heading, 'data: { controller: "flat-pack--unsaved-changes" }'
+    assert_includes heading, "presskits_editor_save_data.merge(controller: \"flat-pack--unsaved-changes\")"
     assert_operator heading.index('name: "kit_section[title]"'), :<,
                     heading.index('name: "kit_section[subtitle]"')
     assert_operator heading.index('name: "kit_section[subtitle]"'), :<,

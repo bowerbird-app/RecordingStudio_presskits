@@ -1,10 +1,9 @@
 <%= form_with model: batch, url: lines_path, method: :patch, local: true,
       id: "presskits-credit-lines", class: "flex flex-col gap-6",
-      data: {
+      data: helpers.presskits_editor_save_data.merge(
         controller: "recording-studio-presskits--credit-preview flat-pack--unsaved-changes",
-        action: preview_actions,
-        turbo_stream: true
-      } do |form| %>
+        action: preview_actions
+      ) do |form| %>
   <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
   <script type="application/json" data-credit-catalog><%== credit_catalog_json %></script>
 

@@ -26,6 +26,7 @@ module RecordingStudioPresskits
     helper_method :presskits_editor_screen_id
     helper_method :presskits_editor_open_data
     helper_method :presskits_editor_nav
+    helper_method :presskits_editor_save_data
     helper_method :from_kit_editor?
     helper_method :editor_picker_items
     helper_method :editable_section_for

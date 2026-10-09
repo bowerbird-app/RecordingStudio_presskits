@@ -7,7 +7,7 @@
     <%= render FlatPack::Button::Component.new(text: "Edit credit", style: :secondary, href: credit_edit_path, data: helpers.presskits_editor_nav(:push)) %>
   <% end %>
 
-  <%= form_with url: update_path, method: :patch, local: true, class: "flex flex-col gap-4", data: { turbo_stream: true } do %>
+  <%= form_with url: update_path, method: :patch, local: true, class: "flex flex-col gap-4", data: helpers.presskits_editor_save_data do %>
     <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
     <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
     <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path, data: helpers.presskits_editor_nav(:back)) %>

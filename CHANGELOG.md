@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The kit editor is the live kit, full width. A slim toolbar holds **Section**, **Sections**, **Header**, publish, and **View**. Each section has a hover and focus outline, **Edit heading**, and **Edit content**. Those editors open in a Flatpack Modal. Keyboard can reach the controls.
 - Heading editing is one shared form for every section type: Title, Subtitle, then Update. Content editors no longer carry those fields. Public and preview headings go through `SectionHeadingComponent` and Flatpack `SectionTitle` (`size:`, `spacing:`, `level:`).
 - **+ Section** creates the section at once, with that type's label as the title, then stays on the kit. Orderable places it after the current section or at the end. The new block scrolls into view and highlights. A Flatpack toast offers **Undo**. Empty sections show an Add placeholder in the editor and stay off the public kit.
-- Saves refresh the changed section behind the modal with Turbo streams and stay on the current screen. Reorder lives in the Sections modal, using the existing Orderable list.
+- Saves refresh the changed section behind the modal with Turbo streams and stay on the current screen. Save forms in `pk-editor` set `data-turbo-frame="_top"` so the navigable screen does not sit on loading. Reorder lives in the Sections modal, using the existing Orderable list.
 - Heading, content, and child item screens share one navigable Flatpack Modal (`id: "pk-editor"`). Screens wrap in `flat_pack_modal_screen`. Drill-down uses `data-fp-nav="push"`. Back re-fetches the previous URL. Do not nest modals.
 - FlatPack is `>= 0.1.216` (dummy tag `v0.1.216`).
 - Version `0.24.0`

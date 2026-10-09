@@ -29,7 +29,7 @@ module RecordingStudioPresskits
       end
 
       def form_data
-        @fact_recording&.persisted? ? { turbo_stream: true } : {}
+        @fact_recording&.persisted? ? helpers.presskits_editor_save_data : {}
       end
 
       def cancel_path
