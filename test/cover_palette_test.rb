@@ -25,6 +25,7 @@ class CoverPaletteTest < Minitest::Test
     assert_equal "Auto", auto.first[:label]
     assert_equal RecordingStudioPresskits::Cover::Palette::AUTO_VALUE, auto.first[:value]
     assert palette.auto?("auto")
+    assert_equal "auto", palette.class::AUTO_VALUE
   end
 
   def test_text_palette_falls_back_to_the_text_defaults

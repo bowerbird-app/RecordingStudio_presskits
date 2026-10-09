@@ -5,7 +5,7 @@ module RecordingStudioPresskits
     module CoverAttributes
       extend ActiveSupport::Concern
 
-      AUTO_COVER_TEXT = RecordingStudioPresskits::Cover::Palette::AUTO_VALUE
+      AUTO_COVER_TEXT = "auto"
 
       included do
         validate :cover_color_must_be_hex
