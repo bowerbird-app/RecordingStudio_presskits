@@ -37,7 +37,11 @@ module RecordingStudioPresskits
       end
 
       def header_cover_text_value
-        header_cover_text_color.presence || Cover::Palette::AUTO_VALUE
+        header_cover_text_color.presence || auto_text_value
+      end
+
+      def auto_text_value
+        RecordingStudioPresskits::Cover::Palette::AUTO_VALUE
       end
 
       def header_text_swatch_color
