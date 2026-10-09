@@ -10,9 +10,9 @@ Hosts set `config.cover_colors` to a palette or `:any`, and `config.default_cove
 
 Overlay text is light or dark from WCAG contrast. People do not pick a text colour.
 
-`RecordingStudioPresskits::Cover::Component` paints `:card` (16/9 grid tile), `:preview` (header editor), and `:hero` (public kit). Title sits on the colour. A card description clamps to two lines. Press Centers and hosts can render the same card.
+`RecordingStudioPresskits::Cover::Component` paints `:card` and `:preview` as 9/16 story tiles, and `:hero` as a wide 21/9 band on the public kit. A full-width 9/16 hero would bury the kit. Title sits on the colour at the page-title size. A card description clamps to two lines. Press Centers and hosts can render the same card.
 
-The header screen adds **Colour**. A palette uses `FlatPack::RadioGroup` `variant: :inline`. `:any` uses `FlatPack::ColorSwatch`. Column two previews the cover live.
+The header screen adds **Colour**. A palette uses `FlatPack::RadioGroup` `variant: :inline` (named radios — FlatPack has no filled swatch-radio yet). `:any` uses `FlatPack::ColorSwatch`. Column two previews the cover live.
 
 When Recording Studio API is loaded, a press kit show and update include `cover_style` and `cover_color`. Those two keys are writable. Title and description stay on the header screen. MCP uses the same payload. Duplicating a kit copies both fields.
 

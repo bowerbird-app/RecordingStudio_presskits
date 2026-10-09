@@ -96,7 +96,8 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Ink"
     assert_includes response.body, "Honey"
     refute_includes response.body, "flat-pack-color-swatch"
-    assert_select "#presskits-header-edit-preview h2", text: "Spring launch"
+    assert_select "#presskits-header-edit-preview h1", text: "Spring launch"
+    assert_select "#presskits-header-edit-preview [data-cover-ratio='9 / 16']"
     assert_select "#presskits-header-edit-preview [data-recording-studio-presskits--cover-preview-target=surface]"
     assert_includes response.body, "recording-studio-presskits--cover-preview"
   end
@@ -112,6 +113,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "input[type=color][name='press_kit[cover_color]'][value='#ABCDEF']"
     assert_select "input[type=radio][name='press_kit[cover_color]']", count: 0
+    assert_includes response.body, "flat-pack--color-swatch"
     assert_includes response.body, "Colour"
   end
 
@@ -141,6 +143,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
     assert_select "#presskits-cover-hero [data-cover-color='#059669']"
+    assert_select "#presskits-cover-hero [data-cover-ratio='21 / 9']"
     assert_includes response.body, "Doors at noon."
 
     sign_in @user
@@ -149,6 +152,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
     assert_select "#presskits-cover-hero [data-cover-color='#059669']"
+    assert_select "#presskits-cover-hero [data-cover-ratio='21 / 9']"
   end
 
   test "press kit payload reads resolved cover fields" do
@@ -176,7 +180,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     )
   end
 
-  test "grid cards keep a shared 16 by 9 height" do
+  test "grid cards keep a shared 9 by 16 height" do
     first = record_kit("Spring launch")
     second = record_kit("Autumn recap")
     @root.revise(first) { |press_kit| press_kit.cover_color = "#7C3AED" }
@@ -191,7 +195,8 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-cover-color='#7C3AED']", count: 1
     assert_select "[data-cover-color='#D97706']", count: 1
-    assert_select "[class*='aspect-video']", count: 2
+    assert_select "[data-cover-ratio='9 / 16']", count: 2
+    assert_includes css_select("[data-cover-color='#7C3AED']").first.to_html, "--page-title-h1-size"
   end
 
   private

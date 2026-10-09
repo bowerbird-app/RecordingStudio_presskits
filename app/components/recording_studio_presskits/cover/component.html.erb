@@ -5,21 +5,24 @@
   padding: :none,
   theme: { background: cover_color, text: text_color },
   id: wrapper_id,
-  class: "h-full w-full overflow-hidden"
+  class: wrapper_classes
 ) do |card| %>
   <% card.body do %>
     <div
       class="<%= surface_classes %>"
-      style="background-color: <%= cover_color %>; color: <%= text_color %>;"
+      style="<%= surface_style %>"
       data-cover-color="<%= cover_color %>"
       data-cover-text-color="<%= text_color %>"
       data-cover-style="<%= cover_style %>"
+      data-cover-ratio="<%= cover_ratio %>"
       data-recording-studio-presskits--cover-preview-target="surface"
     >
       <% if card? %>
-        <p class="text-lg font-semibold tracking-tight text-balance"><%= title %></p>
+        <h1 class="font-bold leading-tight tracking-tight text-balance" style="font-size: var(--page-title-h1-size); color: <%= text_color %>;">
+          <%= title %>
+        </h1>
         <% if description.present? %>
-          <p class="mt-2 line-clamp-2 text-sm text-pretty"><%= description %></p>
+          <p class="mt-2 line-clamp-2 text-base text-pretty" style="color: <%= text_color %>;"><%= description %></p>
         <% end %>
       <% else %>
         <%= render FlatPack::PageTitle::Component.new(

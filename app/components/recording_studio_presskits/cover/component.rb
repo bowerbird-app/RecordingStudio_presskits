@@ -64,17 +64,30 @@ module RecordingStudioPresskits
       end
 
       def heading_variant
-        hero? ? :h1 : :h2
+        :h1
+      end
+
+      def cover_ratio
+        hero? ? "21 / 9" : "9 / 16"
       end
 
       def surface_classes
+        # Tailwind scans these literals: "aspect-[9/16]" "aspect-[21/9]" "max-w-xs"
         if hero?
-          "flex min-h-80 w-full flex-col justify-end p-8 md:min-h-96 md:p-12"
+          "flex aspect-[21/9] min-h-64 w-full flex-col justify-end p-8 md:p-12"
         elsif preview?
-          "flex aspect-video w-full flex-col justify-end p-6"
+          "flex aspect-[9/16] w-full flex-col justify-end p-6"
         else
-          "flex aspect-video h-full w-full flex-col justify-end p-5"
+          "flex aspect-[9/16] w-full flex-col justify-end p-5"
         end
+      end
+
+      def wrapper_classes
+        preview? ? "max-w-xs w-full overflow-hidden" : "h-full w-full overflow-hidden"
+      end
+
+      def surface_style
+        "background-color: #{cover_color}; color: #{text_color}; aspect-ratio: #{cover_ratio};"
       end
 
       def wrapper_id
