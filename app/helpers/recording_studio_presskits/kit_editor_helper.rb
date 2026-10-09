@@ -43,14 +43,48 @@ module RecordingStudioPresskits
       presskits_editor_dialog? || params[:from_kit_editor].present?
     end
 
+    def presskits_editor_region_classes(highlight: false)
+      [
+        "group/pk-edit relative",
+        "rounded-[var(--radius-lg)]",
+        "bg-transparent",
+        "transition-colors duration-[var(--duration-base)]",
+        "hover:bg-[var(--surface-muted-background-color)]",
+        "focus-within:bg-[var(--surface-muted-background-color)]",
+        "outline-none",
+        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]",
+        ("ring-2 ring-[var(--color-primary)]" if highlight)
+      ].compact.join(" ")
+    end
+
+    def presskits_editor_fab_classes
+      [
+        "opacity-0 pointer-events-none",
+        "transition-opacity duration-[var(--duration-base)]",
+        "group-hover/pk-edit:opacity-100 group-hover/pk-edit:pointer-events-auto",
+        "group-focus-within/pk-edit:opacity-100 group-focus-within/pk-edit:pointer-events-auto",
+        "focus-within:opacity-100 focus-within:pointer-events-auto",
+        "[@media(hover:none)]:opacity-100 [@media(hover:none)]:pointer-events-auto"
+      ].join(" ")
+    end
+
     def editor_picker_items
       RecordingStudioPresskits.picker_types.map do |type_name|
         {
           id: type_name,
           label: RecordingStudio.recordable_type_label(type_name),
-          icon: type_name.to_s.safe_constantize.try(:section_menu_icon).presence
+          icon: type_name.to_s.safe_constantize.try(:section_menu_icon).presence,
+          description: picker_description_for(type_name)
         }
       end
+    end
+
+    def picker_description_for(type_name)
+      key = type_name.to_s.demodulize.underscore
+      I18n.t(
+        "recording_studio_presskits.editor.picker_descriptions.#{key}",
+        default: I18n.t("recording_studio_presskits.editor.picker_descriptions.generic")
+      )
     end
 
     def editable_section_for(recording, highlight: false)
@@ -59,6 +93,7 @@ module RecordingStudioPresskits
         heading_path: heading_press_kit_section_path(@press_kit_recording, recording),
         content_path: edit_press_kit_section_path(@press_kit_recording, recording),
         add_path: press_kit_sections_path(@press_kit_recording),
+        remove_path: press_kit_section_path(@press_kit_recording, recording),
         picker_items: editor_picker_items,
         highlight: highlight
       )

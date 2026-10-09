@@ -1,5 +1,21 @@
 # Upgrade notes
 
+## 0.26.0
+
+The kit editor preview matches the public kit. In-flow **Edit heading**, **Edit content**, and the compact add-section dropdown are gone. Hover or focus-within tints the region with `--surface-muted-background-color`. Keyboard users get a `:focus-visible` outline. Touch devices see the FAB (`@media (hover: none)`); a tap also focuses the region.
+
+Each section has `FlatPack::Fab::Component.new(contained: true, position: :top_right, backdrop: false, icon: :ellipsis_vertical, label: "Section actions")`. Speed-dial actions:
+
+- **Edit title** — shared heading screen in `pk-editor`
+- **Edit content** — that section's content screen
+- **Reorder** — existing Reorder modal, fragment focused on this section when the browser honors it
+- **Trash** — `DELETE` through Trashable, with `data-turbo-confirm`
+- **Add new section** — the section picker, with `after_recording_id` so the new block lands below this one
+
+The kit header FAB uses the same chrome: **Edit heading** and **Cover colours**. Both open the shared header screen. Cover colours hashes to `#presskits-header-colours`. The toolbar **Section** button still adds at the end or into an empty kit.
+
+Hosts that replaced those components should render the Flatpack FAB and drop the old ghost buttons. Flatpack gaps, do not invent them here: no FAB size under 56px, no danger style on speed-dial actions, no hover-only visibility API (the editor uses group-hover classes), and no way to mark one action as destructive. Rebuild Tailwind after the bump.
+
 ## 0.25.1
 
 Bump FlatPack to `>= 0.1.221` (dummy tag `v0.1.221`) and rebuild Tailwind so the swatch utilities generate. Reload Flatpack CSS after the bump.

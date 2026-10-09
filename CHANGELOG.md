@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-10-09
+
+### Changed
+- Kit editor sections and the kit header no longer put Edit heading, Edit content, or Add section in the page flow. The live preview matches the public kit: heading, then content.
+- Hover or focus-within tints the region with `--surface-muted-background-color`. Keyboard focus uses `:focus-visible` only. Touch shows the FAB (`@media (hover: none)`) and a tap focuses the region.
+- Each section has a contained Flatpack FAB (`position: :top_right`, `backdrop: false`, label **Section actions**). Speed-dial: **Edit title** (shared heading screen in `pk-editor`), **Edit content**, **Reorder** (existing Reorder modal, fragment on this section), **Trash** (Trashable delete plus confirm), and **Add new section** (section picker, placed below this one).
+- The kit header FAB is the same pattern: **Edit heading** and **Cover colours**, both opening the shared header screen. **Cover colours** lands on `#presskits-header-colours`.
+- The toolbar **Section** button still adds at the end or into an empty kit.
+- Version `0.26.0`
+
+### Upgrade notes
+- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`) and drop the in-flow ghost buttons, compact dropdown, and custom hover outline.
+- Flatpack FAB sizes start at 56px (`:md`). There is no small size. Speed-dial actions have no danger style, so Trash looks like the other actions. FAB has no hover-only visibility API; the editor hides the control with group-hover / focus-within / `@media (hover: none)` classes on the root. Do not hand-roll a smaller FAB or a danger action.
+- Rebuild Tailwind so the hover tint and FAB visibility utilities generate.
+
 ## [0.25.1] - 2026-10-09
 
 ### Changed
@@ -575,7 +590,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...HEAD
+[0.26.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.1...v0.26.0
 [0.25.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.23.0...v0.24.0

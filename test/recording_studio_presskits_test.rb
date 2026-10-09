@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.25.1", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.26.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -277,6 +277,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "pk-editor"
     assert_includes readme, 'data-turbo-frame="_top"'
     assert_includes readme, "Edit heading"
+    assert_includes readme, "Edit title"
+    assert_includes readme, "Section actions"
+    assert_includes readme, "FlatPack::Fab::Component"
     assert_includes readme, "variant: :swatches"
     refute_includes readme, "named radios"
     assert_includes readme, "Edit content"
@@ -463,9 +466,29 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'text: "Save"'
     assert_includes kit_header, 'id="presskits-kit-header"'
     assert_includes kit_header, "Cover::Component"
-    assert_includes kit_header, "text: edit_heading_label"
+    assert_includes kit_header, "FlatPack::Fab::Component"
+    assert_includes kit_header, "contained: true"
+    assert_includes kit_header, "position: :top_right"
+    assert_includes kit_header, "backdrop: false"
+    assert_includes kit_header, "edit_heading_label"
+    assert_includes kit_header, "cover_colours_label"
     refute_includes kit_header, "arrows-up-down"
     refute_includes kit_header, "trash"
+    section = File.read(File.expand_path("press_kits/editable_section_component.html.erb", components))
+    assert_includes section, "FlatPack::Fab::Component"
+    assert_includes section, "contained: true"
+    assert_includes section, "position: :top_right"
+    assert_includes section, "backdrop: false"
+    assert_includes section, "edit_title_label"
+    assert_includes section, "edit_content_label"
+    assert_includes section, "reorder_label"
+    assert_includes section, "trash_label"
+    assert_includes section, "add_new_section_label"
+    assert_includes section, "turbo_confirm"
+    assert_includes section, "SectionPickerComponent"
+    refute_includes section, "SectionDropdownComponent"
+    refute_includes section, "hover:outline-[var(--color-primary)]"
+    refute_includes section, "p-4 -mx-4"
     assert_includes header, 'name: "press_kit[title]"'
     assert_includes header, 'name: "press_kit[description]"'
     assert_includes header, 'name: "press_kit[cover_color]"'
@@ -477,6 +500,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, "cover_text_swatch_options"
     assert_includes header, "variant: :inline"
     assert_includes header, "FlatPack::ColorSwatch::Component"
+    assert_includes header, 'id="presskits-header-colours"'
+    assert_includes helper, "presskits_editor_region_classes"
+    assert_includes helper, "presskits_editor_fab_classes"
+    assert_includes helper, "--surface-muted-background-color"
     assert_includes header, "auto_text_value"
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, "flat-pack--unsaved-changes"

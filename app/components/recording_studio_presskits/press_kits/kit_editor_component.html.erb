@@ -20,13 +20,13 @@
   </div>
 
   <%= render FlatPack::Card::Component.new(style: :default, class: "w-full", padding: :lg) do %>
-    <div id="presskits-editor-preview" class="w-full">
+    <div id="presskits-editor-preview" class="flex w-full flex-col gap-6">
       <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
         press_kit_recording: @press_kit_recording,
         header_edit_path: @header_edit_path
       ) %>
 
-      <div id="presskits-editor-sections" class="flex w-full flex-col gap-2">
+      <div id="presskits-editor-sections" class="flex w-full flex-col gap-6">
         <% if @section_recordings.any? %>
           <% @section_recordings.each do |recording| %>
             <%= render RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
@@ -34,6 +34,7 @@
               heading_path: @heading_path.call(recording),
               content_path: @edit_path.call(recording),
               add_path: @add_path,
+              remove_path: @remove_path.call(recording),
               picker_items: picker_items,
               highlight: highlight?(recording)
             ) %>

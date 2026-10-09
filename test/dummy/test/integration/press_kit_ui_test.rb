@@ -152,7 +152,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-editor-grid"
     refute_includes response.body, "md:grid-cols-2"
     header_path = recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_select "#presskits-kit-header a[href='#{header_path}']", text: "Edit heading"
+    assert_select "#presskits-kit-header [role='menuitem'][href='#{header_path}'][aria-label='Edit heading']"
+    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Cover colours']"
+    assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right']"
     refute_select "#presskits-editor-toolbar a[href='#{header_path}']"
     refute_select "#presskits-editor-toolbar a", text: "Header"
     assert_select "#presskits-kit-header input", count: 0
@@ -209,7 +211,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "Empty launch"
     header_path = recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_select "#presskits-kit-header a[href='#{header_path}']", text: "Edit heading"
+    assert_select "#presskits-kit-header [role='menuitem'][href='#{header_path}'][aria-label='Edit heading']"
     assert_select "#presskits-kit-header input", count: 0
     assert_select "#presskits-kit-header textarea", count: 0
     assert_select "input[name='press_kit[title]']", count: 0
@@ -233,9 +235,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}']", text: "Edit content"
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}']", text: "Edit content"
-    assert_select "a[href='#{recording_studio_presskits.heading_press_kit_section_path(kit, hero)}']", text: "Edit heading"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}'][role='menuitem'][aria-label='Edit content']"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}'][role='menuitem'][aria-label='Edit content']"
+    assert_select "a[href='#{recording_studio_presskits.heading_press_kit_section_path(kit, hero)}'][role='menuitem'][aria-label='Edit title']"
     refute_includes response.body, "Fake block: Hero"
     refute_includes response.body, "Fake block: Quotes"
     assert_select "button", text: "Move up", count: 0
@@ -878,7 +880,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     refute_includes css_select("#presskits-kit-header").text, "Doors at noon"
     assert_select "#presskits-editor-preview"
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_header_path(kit)}']", text: "Edit heading"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_header_path(kit)}'][role='menuitem'][aria-label='Edit heading']"
   end
 
   test "header edit refuses someone without access" do

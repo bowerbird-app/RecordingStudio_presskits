@@ -26,6 +26,7 @@
       class: "w-full"
     ) %>
 
+    <div id="presskits-header-colours" class="flex flex-col gap-6">
     <% if any_cover_color? %>
       <%= render FlatPack::FormField::Component.new(
         field_id: "press_kit_cover_color",
@@ -117,6 +118,7 @@
         description: "That text may be hard to read on this colour.",
         style: :warning
       ) %>
+    </div>
     </div>
 
     <%= render RecordingStudioPresskits::Cover::Component.new(

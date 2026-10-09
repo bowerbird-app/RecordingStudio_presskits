@@ -24,8 +24,24 @@ module RecordingStudioPresskits
         @press_kit_recording.recordable.try(:description).to_s.strip.presence
       end
 
+      def region_classes
+        helpers.presskits_editor_region_classes
+      end
+
+      def fab_classes
+        helpers.presskits_editor_fab_classes
+      end
+
+      def header_actions_label
+        I18n.t("recording_studio_presskits.editor.header_actions")
+      end
+
       def edit_heading_label
         I18n.t("recording_studio_presskits.editor.edit_heading")
+      end
+
+      def cover_colours_label
+        I18n.t("recording_studio_presskits.editor.cover_colours")
       end
     end
   end
