@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.1] - 2026-10-09
+
+### Fixed
+- Press kit metrics authorization resolves the admin root with
+  `site_admin_recording_resolver`, then `access_recording_resolver`.
+  If that resolver raises, `can_view?` denies access. The `:view` decision
+  still goes through Accessible.
+
+### Changed
+- Version `0.26.1`
+
+### Upgrade notes
+- Bump to `0.26.1`. No migration.
+- Site-wide metrics prefer `config.site_admin_recording_resolver`. A host that
+  only sets `access_recording_resolver` still uses that fallback. If the
+  fallback needs a controller, set the site resolver to the admin root so
+  metrics discovery does not depend on one.
+- A resolver error is treated as no access.
+
 ## [0.26.0] - 2026-10-09
 
 Site-wide press kit metrics register with Recording Studio Metrics for the operations API.
@@ -592,7 +611,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.1...HEAD
+[0.26.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...v0.26.1
 [0.26.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.23.0...v0.24.0
