@@ -537,10 +537,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "hover:after:bg-[color-mix(in_oklab,black_16%,transparent)]"
     assert_includes chrome, "PREVIEW_CLASSES"
     assert_includes chrome, "overflow-hidden"
-    assert_includes chrome, "p-5 md:p-8 lg:p-10"
+    assert_includes chrome, "SECTION_PAD_CLASSES"
+    assert_includes chrome, "KIT_SECTIONS_CLASSES = \"flex w-full flex-col\""
+    refute_includes chrome, "p-5 md:p-8 lg:p-10"
     refute_includes chrome, "md:p-4 lg:p-6"
+    refute_includes chrome, "gap-6"
     assert_includes chrome, 'FAB_OFFSET = "1rem"'
     refute_includes chrome, "-m-4"
+    assert_includes chrome, "rounded-none"
     assert_includes chrome, "rounded-[var(--radius-lg)]"
     editor = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
     assert_includes editor, "recording-studio-presskits--editor-chrome"
@@ -552,7 +556,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes public_kit, "EditorChrome::PREVIEW_CLASSES"
     assert_includes public_kit, "EditorChrome::KIT_CARD_CLASSES"
     assert_includes public_kit, "EditorChrome::KIT_SECTIONS_CLASSES"
+    assert_includes public_kit, "EditorChrome::SECTION_PAD_CLASSES"
     assert_includes public_kit, "padding: :none"
+    frame = File.read(File.expand_path("press_kits/section_frame_component.html.erb", components))
+    assert_includes frame, "EditorChrome::SECTION_PAD_CLASSES"
     kit_header_rb = File.read(File.expand_path("press_kits/kit_header_component.rb", components))
     assert_includes kit_header_rb, "header: true"
     assert_includes chrome, 'CONTROLLER = "recording-studio-presskits--editor-chrome"'

@@ -62,9 +62,11 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes hero["class"], "p-8"
     assert_includes hero["class"], "md:p-12"
     sections = css_select("#presskits-editor-sections").first
-    assert_includes sections["class"], "p-5"
-    assert_includes sections["class"], "md:p-8"
-    assert_includes sections["class"], "lg:p-10"
+    assert_includes sections["class"], "flex"
+    refute_includes sections["class"], "p-5"
+    refute_includes sections["class"], "gap-6"
+    refute_includes sections["class"], "md:p-8"
+    refute_includes sections["class"], "lg:p-10"
     assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     header_fab = css_select("#presskits-kit-header .fp-fab").first
     assert_includes header_fab["style"].to_s, "--fp-fab-offset: 1rem"
@@ -105,7 +107,8 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "lg:pt-12"
     assert_includes body["class"], "pr-20"
     refute_includes body["class"], "-m-4"
-    assert_includes body["class"], "rounded-[var(--radius-lg)]"
+    assert_includes body["class"], "rounded-none"
+    refute_includes body["class"], "rounded-[var(--radius-lg)]"
     refute_includes body["class"], "hover:outline-[var(--color-primary)]"
     assert_select "#presskits-section-#{section.id} .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     section_fab = css_select("#presskits-section-#{section.id} .fp-fab").first

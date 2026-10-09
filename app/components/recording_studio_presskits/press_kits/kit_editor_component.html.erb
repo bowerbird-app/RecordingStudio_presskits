@@ -48,11 +48,13 @@
             ) %>
           <% end %>
         <% else %>
-          <%= render FlatPack::EmptyState::Component.new(
-            title: I18n.t("recording_studio_presskits.editor.empty_kit"),
-            description: I18n.t("recording_studio_presskits.editor.empty_kit_hint"),
-            icon: :inbox
-          ) %>
+          <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
+            <%= render FlatPack::EmptyState::Component.new(
+              title: I18n.t("recording_studio_presskits.editor.empty_kit"),
+              description: I18n.t("recording_studio_presskits.editor.empty_kit_hint"),
+              icon: :inbox
+            ) %>
+          </div>
         <% end %>
       </div>
     </div>

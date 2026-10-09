@@ -1,5 +1,7 @@
-<%= render heading_component %>
+<div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
+  <%= render heading_component %>
 
-<% if (view = content_view) %>
-  <%= render view %>
-<% end %>
+  <% if (view = content_view) %>
+    <%= render view %>
+  <% end %>
+</div>

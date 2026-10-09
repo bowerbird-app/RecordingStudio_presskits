@@ -250,6 +250,13 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes public_hero["class"], "rounded-none"
     assert_includes public_hero["class"], "p-8"
     assert_includes public_hero["class"], "md:p-12"
+    public_sections = css_select("#presskits-public-sections").first
+    refute_includes public_sections["class"], "gap-6"
+    refute_includes public_sections["class"], "p-5"
+    section_pad = css_select("#presskits-public-sections > div").first
+    assert_includes section_pad["class"], "pt-8"
+    assert_includes section_pad["class"], "md:pt-10"
+    assert_includes section_pad["class"], "lg:pt-12"
 
     sign_in @user
     switch_to_root(@root)
