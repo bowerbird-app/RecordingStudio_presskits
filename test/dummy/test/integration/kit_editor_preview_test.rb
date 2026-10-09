@@ -165,6 +165,32 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "form#presskits-facts-display-form[data-turbo-frame='_top']"
   end
 
+  test "fact turbo stream updates the preview and leaves the modal" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::FactsSection" }
+    section = content_section(kit, RecordingStudioPresskits::FactsSection)
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    fact = content.record(RecordingStudioPresskits::Fact, parent_recording: content, actor: @user) do |recordable|
+      recordable.label = "Projects"
+      recordable.value = "120"
+    end
+
+    patch recording_studio_presskits.press_kit_section_fact_path(kit, section, fact),
+          params: {
+            fact: { label: "Projects", value: "121" },
+            from_kit_editor: "1"
+          },
+          as: :turbo_stream
+    assert_response :success
+    assert_equal "121", fact.reload.recordable.value
+    assert_includes response.body, "presskits-section-#{section.id}"
+    assert_includes response.body, "121"
+    refute_includes response.body, "turbo-stream action=\"update\" target=\"pk-editor\""
+  end
+
   test "heading turbo stream updates the preview and leaves the modal" do
     kit = record_kit("Spring launch")
     sign_in @user

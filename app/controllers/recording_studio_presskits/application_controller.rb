@@ -86,7 +86,7 @@ module RecordingStudioPresskits
       respond_to do |format|
         format.turbo_stream do
           if from_kit_editor?
-            render "editor/preview_section"
+            render template: "recording_studio_presskits/editor/preview_section"
           else
             redirect_to html_redirect, notice: notice
           end
