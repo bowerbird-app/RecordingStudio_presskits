@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-10-09
+
+Site-wide press kit metrics register with Recording Studio Metrics for the operations API.
+
+### Added
+- `RecordingStudioPresskits::Metrics.register!` registers a `:press_kits` resource
+  (`blast_radius: :site`) with RecordingStudioMetrics. Metrics:
+  `press_kits.total` (Live press kits), `press_kits.created_over_time` (Press kits
+  created over time), and `press_kits.by_section_type` (sections across live kits
+  by content type). Each is exposed on `:operations` only. Counts use
+  `RecordingStudio::Recording` with `recordable_type` and `trashed_at: nil`.
+  `api_authorize` uses `RecordingStudioPresskits::Api::Access.can_view?`
+  (AdminRoot `:view`).
+- Runtime dependency `recording_studio_metrics` `~> 0.2` (GitHub tag `v0.2.0`).
+- `by_publish_status` is omitted. Publish state is not a column on PressKit or
+  Recording; it lives on Publishable child records and needs `indexable` /
+  `published` joins.
+
+### Changed
+- Version `0.26.0`
+
+### Upgrade notes
+- Bump to `0.26.0`. No migration.
+- Add `recording_studio_metrics` at tag `v0.2.0`.
+- This gem does not call `RecordingStudioMetrics::Api.register!`. The host
+  registers Metrics endpoints once:
+
+```ruby
+RecordingStudioMetrics::Api.register!(api: :operations)
+```
+
 ## [0.25.0] - 2026-10-09
 
 Kit covers on the live kit editor from `0.24.0`.
@@ -561,7 +592,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...HEAD
+[0.26.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...v0.23.0
