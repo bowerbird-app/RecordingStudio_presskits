@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.25.1] - 2026-10-09
+
+### Changed
+- Palette **Colour** and **Text colour** on the kit header screen use `FlatPack::RadioGroup` `variant: :swatches` (`size: :md`). The option label is the accessible name and the tooltip. `:any` still uses `FlatPack::ColorSwatch`.
+- Text colour **Auto** stays a separate inline radio with the same field name. Swatches need a CSS colour, and `auto` is not one.
+- FlatPack is `>= 0.1.220` (dummy tag `v0.1.220`).
+- Version `0.25.1`
+
+### Upgrade notes
+- Bump FlatPack to at least `0.1.220` and rebuild Tailwind so the swatch utilities generate. Reload Flatpack CSS after the bump.
+- A host that replaced the shared header screen in `pk-editor` should render palette Colour and Text colour as `variant: :swatches`. Keep Auto as its own control. Keep ColorSwatch for `:any`.
+
 ## [0.25.0] - 2026-10-09
 
 Kit covers on the live kit editor from `0.24.0`.
@@ -17,7 +29,7 @@ Kit covers on the live kit editor from `0.24.0`.
 - Writes must be a valid hex. In palette mode they must be one of those colours. A stored colour that later leaves the palette still renders.
 - Overlay text uses `cover_text_color` when set. Auto picks light or dark from WCAG contrast. A low-contrast pair is allowed; the editor may hint.
 - `RecordingStudioPresskits::Cover::Component` paints `:card` and `:preview` as 9/16 story tiles, and `:hero` as a wide 21/9 band. Title sits on the colour at the page-title size. A card description clamps to two lines.
-- The shared kit header screen in `pk-editor` has **Colour** and **Text colour**. Each is a `FlatPack::RadioGroup` `variant: :inline` for a palette, or a `FlatPack::ColorSwatch` when the host allows any colour. Text colour includes **Auto**. FlatPack has no swatch-radio yet, so a palette stays named radios. A preview tile follows the colours as you edit.
+- The shared kit header screen in `pk-editor` has **Colour** and **Text colour**. Each is a `FlatPack::RadioGroup` for a palette, or a `FlatPack::ColorSwatch` when the host allows any colour. Text colour includes **Auto**. A preview tile follows the colours as you edit. `0.25.1` paints those palette radios as swatches.
 - The kit index cards, the kit header on the live editor, and the public kit use that component. Saving the header refreshes the editor hero through the existing Turbo Stream replace. Press Centers and hosts can render it too.
 - When Recording Studio API is loaded, a press kit show and update include `cover_style`, `cover_color`, and `cover_text_color`. MCP uses the same payload. Duplicating a kit copies those fields.
 
@@ -561,7 +573,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.1...HEAD
+[0.25.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...v0.23.0

@@ -108,7 +108,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_equal "#010101", kit.reload.recordable.cover_text_color
   end
 
-  test "header editor shows named colour radios and a live preview card" do
+  test "header editor shows colour swatch radios and a live preview card" do
     kit = record_kit("Spring launch")
     @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
     sign_in @user
@@ -120,12 +120,15 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio][name='press_kit[cover_color]'][value='#1F2937'][checked]"
     assert_select "input[type=radio][name='press_kit[cover_text_color]'][value='auto'][checked]"
     assert_select "input[type=radio][name='press_kit[cover_text_color]'][value='#F8FAFC']"
+    assert_select ".flat-pack-radio-swatch", minimum: 9
+    assert_select ".flat-pack-radio-swatch input[value='auto']", count: 0
     assert_includes response.body, "Ink"
     assert_includes response.body, "Honey"
     assert_includes response.body, "Text colour"
     assert_includes response.body, "Auto"
     assert_includes response.body, "Snow"
     refute_includes response.body, "flat-pack-color-swatch"
+    refute_includes response.body, "flat-pack--color-swatch"
     assert_select "#presskits-header-edit-preview h1", text: "Spring launch"
     assert_select "#presskits-header-edit-preview [data-cover-ratio='9 / 16']"
     assert_select "#presskits-header-edit-preview [data-recording-studio-presskits--cover-preview-target=surface]"

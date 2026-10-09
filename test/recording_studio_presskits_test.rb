@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.25.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.25.1", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -47,7 +47,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.216"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.220"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -62,7 +62,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.216"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.220"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.4.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
@@ -267,14 +267,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.5\""
     assert_includes readme, "tag: \"v0.4.4\""
     assert_includes readme, "tag: \"v0.4.2\""
-    assert_includes readme, "tag: \"v0.1.216\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.216"'
+    assert_includes readme, "tag: \"v0.1.220\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.220"'
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
     assert_includes readme, "flat_pack_modal_screen"
     assert_includes readme, "pk-editor"
     assert_includes readme, 'data-turbo-frame="_top"'
     assert_includes readme, "Edit heading"
+    assert_includes readme, "variant: :swatches"
+    refute_includes readme, "named radios"
     assert_includes readme, "Edit content"
     refute_includes readme, "Section settings"
     refute_includes readme, "FlatPack::Fieldset::Component"
@@ -468,6 +470,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, 'name: "press_kit[cover_text_color]"'
     assert_includes header, "Text colour"
     assert_includes header, "FlatPack::RadioGroup::Component"
+    assert_includes header, "variant: :swatches"
+    assert_includes header, "size: :md"
+    assert_includes header, "cover_text_swatch_options"
     assert_includes header, "variant: :inline"
     assert_includes header, "FlatPack::ColorSwatch::Component"
     assert_includes header, "auto_text_value"
