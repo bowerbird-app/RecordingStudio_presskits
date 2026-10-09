@@ -25,11 +25,11 @@ module RecordingStudioPresskits
       end
 
       def region_classes
-        helpers.presskits_editor_region_classes
+        EditorChrome.region_classes
       end
 
       def fab_classes
-        helpers.presskits_editor_fab_classes
+        EditorChrome::FAB_CLASSES
       end
 
       def header_actions_label

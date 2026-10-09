@@ -3,7 +3,8 @@
 module RecordingStudioPresskits
   module PressKits
     class EditableSectionComponent < ViewComponent::Base
-      def initialize(section_recording:, heading_path:, content_path:, add_path:, remove_path:, picker_items:, highlight: false) # rubocop:disable Metrics/ParameterLists
+      def initialize(section_recording:, heading_path:, content_path:, add_path:, # rubocop:disable Metrics/ParameterLists
+                     remove_path:, picker_items:, highlight: false)
         super()
         @section_recording = section_recording
         @heading_path = heading_path
@@ -43,11 +44,11 @@ module RecordingStudioPresskits
       end
 
       def region_classes
-        helpers.presskits_editor_region_classes(highlight: highlight?)
+        EditorChrome.region_classes(highlight: highlight?)
       end
 
       def fab_classes
-        helpers.presskits_editor_fab_classes
+        EditorChrome::FAB_CLASSES
       end
 
       def edit_title_label

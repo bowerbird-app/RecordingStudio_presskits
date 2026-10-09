@@ -501,9 +501,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, "variant: :inline"
     assert_includes header, "FlatPack::ColorSwatch::Component"
     assert_includes header, 'id="presskits-header-colours"'
-    assert_includes helper, "presskits_editor_region_classes"
-    assert_includes helper, "presskits_editor_fab_classes"
-    assert_includes helper, "--surface-muted-background-color"
+    chrome = File.read(File.expand_path("press_kits/editor_chrome.rb", components))
+    assert_includes chrome, "--surface-muted-background-color"
+    assert_includes chrome, "focus-visible:outline"
+    assert_includes chrome, "[@media(hover:none)]"
     assert_includes header, "auto_text_value"
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, "flat-pack--unsaved-changes"

@@ -15,7 +15,7 @@ module RecordingStudioPresskits
         query = ["type=#{ERB::Util.url_encode(type_name)}"]
         query << "after_recording_id=#{ERB::Util.url_encode(@after_recording_id)}" if @after_recording_id.present?
         separator = uri.include?("?") ? "&" : "?"
-        "#{uri}#{separator}#{query.join("&")}"
+        "#{uri}#{separator}#{query.join('&')}"
       end
     end
   end
