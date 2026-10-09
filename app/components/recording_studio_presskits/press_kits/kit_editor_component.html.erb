@@ -1,62 +1,53 @@
 <div class="flex flex-col gap-6">
   <div id="presskits-editor-toolbar" class="flex flex-wrap items-center gap-3">
-    <%= render RecordingStudioPresskits::PressKits::SectionDropdownComponent.new(
-      items: picker_items,
-      add_path: @add_path
+    <%= render FlatPack::Button::Component.new(
+      text: I18n.t("recording_studio_presskits.editor.add_section"),
+      icon: "plus",
+      style: :primary,
+      id: "presskits-section-picker",
+      disabled: picker_items.empty?,
+      data: { modal_id: "presskits-section-picker-modal" }
     ) %>
 
     <%= render FlatPack::Button::Component.new(
-      text: I18n.t("recording_studio_presskits.editor.sections"),
+      text: I18n.t("recording_studio_presskits.editor.order"),
       icon: "bars-3-bottom-left",
       style: :default,
       data: { modal_id: "presskits-sections-modal" }
     ) %>
 
-    <%= render FlatPack::Button::Component.new(
-      text: I18n.t("recording_studio_presskits.editor.header"),
-      style: :default,
-      href: @header_edit_path,
-      data: helpers.presskits_editor_open_data
-    ) %>
-
     <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
-
-    <% if public_path.present? %>
-      <%= render FlatPack::Button::Component.new(
-        text: I18n.t("recording_studio_presskits.editor.view_public"),
-        style: :ghost,
-        href: public_path
-      ) %>
-    <% end %>
   </div>
 
-  <div id="presskits-editor-preview" class="w-full">
-    <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
-      press_kit_recording: @press_kit_recording,
-      header_edit_path: @header_edit_path
-    ) %>
+  <%= render FlatPack::Card::Component.new(style: :default, class: "w-full", padding: :lg) do %>
+    <div id="presskits-editor-preview" class="w-full">
+      <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
+        press_kit_recording: @press_kit_recording,
+        header_edit_path: @header_edit_path
+      ) %>
 
-    <div id="presskits-editor-sections" class="flex w-full flex-col gap-2">
-      <% if @section_recordings.any? %>
-        <% @section_recordings.each do |recording| %>
-          <%= render RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
-            section_recording: recording,
-            heading_path: @heading_path.call(recording),
-            content_path: @edit_path.call(recording),
-            add_path: @add_path,
-            picker_items: picker_items,
-            highlight: highlight?(recording)
+      <div id="presskits-editor-sections" class="flex w-full flex-col gap-2">
+        <% if @section_recordings.any? %>
+          <% @section_recordings.each do |recording| %>
+            <%= render RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
+              section_recording: recording,
+              heading_path: @heading_path.call(recording),
+              content_path: @edit_path.call(recording),
+              add_path: @add_path,
+              picker_items: picker_items,
+              highlight: highlight?(recording)
+            ) %>
+          <% end %>
+        <% else %>
+          <%= render FlatPack::EmptyState::Component.new(
+            title: I18n.t("recording_studio_presskits.editor.empty_kit"),
+            description: I18n.t("recording_studio_presskits.editor.empty_kit_hint"),
+            icon: :inbox
           ) %>
         <% end %>
-      <% else %>
-        <%= render FlatPack::EmptyState::Component.new(
-          title: I18n.t("recording_studio_presskits.editor.empty_kit"),
-          description: I18n.t("recording_studio_presskits.editor.empty_kit_hint"),
-          icon: :inbox
-        ) %>
-      <% end %>
+      </div>
     </div>
-  </div>
+  <% end %>
 
   <div id="presskits-toasts" class="pointer-events-none fixed right-4 bottom-4 z-[60] flex flex-col gap-3"></div>
 
@@ -69,8 +60,22 @@
   ) %>
 
   <%= render FlatPack::Modal::Component.new(
+    id: "presskits-section-picker-modal",
+    title: I18n.t("recording_studio_presskits.editor.picker_title"),
+    size: :md,
+    scroll: :page
+  ) do |modal| %>
+    <% modal.body do %>
+      <%= render RecordingStudioPresskits::PressKits::SectionPickerComponent.new(
+        items: picker_items,
+        add_path: @add_path
+      ) %>
+    <% end %>
+  <% end %>
+
+  <%= render FlatPack::Modal::Component.new(
     id: "presskits-sections-modal",
-    title: I18n.t("recording_studio_presskits.editor.sections"),
+    title: I18n.t("recording_studio_presskits.editor.reorder"),
     size: :md,
     scroll: :page
   ) do |modal| %>

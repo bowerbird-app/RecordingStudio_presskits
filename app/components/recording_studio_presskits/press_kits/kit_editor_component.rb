@@ -23,13 +23,10 @@ module RecordingStudioPresskits
           {
             id: type_name,
             label: RecordingStudio.recordable_type_label(type_name),
-            icon: section_menu_icon_for(type_name)
+            icon: section_menu_icon_for(type_name),
+            description: picker_description_for(type_name)
           }
         end
-      end
-
-      def public_path
-        helpers.presskits_public_path_for(@press_kit_recording)
       end
 
       def highlight?(recording)
@@ -40,6 +37,14 @@ module RecordingStudioPresskits
 
       def section_menu_icon_for(type_name)
         type_name.to_s.safe_constantize.try(:section_menu_icon).presence
+      end
+
+      def picker_description_for(type_name)
+        key = type_name.to_s.demodulize.underscore
+        I18n.t(
+          "recording_studio_presskits.editor.picker_descriptions.#{key}",
+          default: I18n.t("recording_studio_presskits.editor.picker_descriptions.generic")
+        )
       end
     end
   end

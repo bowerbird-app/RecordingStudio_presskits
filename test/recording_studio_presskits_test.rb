@@ -421,15 +421,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
     header = File.read(File.expand_path("press_kits/header_editor_component.html.erb", components))
     kit_header = File.read(File.expand_path("press_kits/kit_header_component.html.erb", components))
 
-    assert_includes show, "SectionDropdownComponent"
+    assert_includes show, "SectionPickerComponent"
     assert_includes show, "render_publishable_quick_actions"
     assert_includes show, "SectionsOrderComponent"
+    assert_includes show, "FlatPack::Card::Component"
     assert_includes show, 'id="presskits-editor-toolbar"'
     assert_includes show, 'id="presskits-editor-preview"'
     assert_includes show, "KitHeaderComponent"
     assert_includes show, "EditableSectionComponent"
     assert_includes show, "navigable: true"
-    assert_includes show, "presskits_editor_open_data"
+    refute_includes show, "SectionDropdownComponent"
+    refute_includes show, "view_public"
+    assert_includes kit_header, "presskits_editor_open_data"
     heading_editor = File.read(File.expand_path("press_kits/section_heading_editor_component.html.erb", components))
     helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/kit_editor_helper.rb", __dir__))
 
@@ -455,7 +458,6 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes header, 'id: "presskits-header-edit-preview"'
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
-    refute_includes show, "SectionPickerComponent"
     refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"
     assert_includes index, "FlatPack::SidebarLayout::Component"
@@ -504,8 +506,27 @@ class RecordingStudioPresskitsTest < Minitest::Test
     quotes = File.read(presskits_path("app/models/recording_studio_presskits/quote_section.rb"))
     videos = File.read(presskits_path("app/models/recording_studio_presskits/video_section.rb"))
 
+    picker = File.read(presskits_path(
+                         "app/components/recording_studio_presskits/press_kits/section_picker_component.html.erb"
+                       ))
+    order = File.read(presskits_path(
+                       "app/components/recording_studio_presskits/press_kits/sections_order_component.html.erb"
+                     ))
+    orders = File.read(presskits_path("app/controllers/recording_studio_presskits/orders_controller.rb"))
+
     assert_includes dropdown, "icon: item[:icon]"
+    assert_includes picker, "item[:description]"
+    assert_includes picker, "item[:label]"
+    assert_includes picker, "turbo_method: :post"
+    assert_includes order, "orderable_url: @reorder_path"
+    assert_includes order, 'param_uuid_name: "moving_recording_id"'
+    assert_includes order, 'param_target_position_name: "target_position"'
+    refute_includes order, "recording-studio-presskits--section-order"
+    assert_includes orders, "recording_studio_orderable_move!"
+    assert_includes orders, "moving_recording_id"
+    assert_includes orders, "target_position"
     assert_includes editor, "section_menu_icon_for"
+    assert_includes editor, "picker_description_for"
     assert_includes text, '"document-text"'
     assert_includes images, '"photo"'
     assert_includes quotes, '"chat-bubble-bottom-center-text"'

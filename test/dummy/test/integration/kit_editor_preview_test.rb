@@ -40,13 +40,18 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "md:grid-cols-2"
     refute_select "#presskits-editor-grid"
     refute_select "#presskits-editor-actions"
-    assert_select "#presskits-section-dropdown span", text: "Section"
-    assert_select "#presskits-editor-toolbar", text: /Sections/
-    assert_select "#presskits-editor-toolbar", text: /Header/
+    assert_select "#presskits-section-picker", text: "Section"
+    assert_select "#presskits-editor-toolbar", text: /Order/
+    refute_select "#presskits-editor-toolbar a", text: "Header"
+    refute_select "#presskits-editor-toolbar a", text: "View"
     assert_select "#presskits-kit-header a", text: "Edit heading"
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"
+    assert_select "#presskits-section-picker-modal"
+    preview = css_select("#presskits-editor-preview").first
+    assert_includes preview.parent["class"], "rounded-[var(--radius-lg)]"
+    assert_includes preview.parent["class"], "bg-[var(--card-background-color)]"
   end
 
   test "each section has heading and content controls" do
@@ -152,7 +157,7 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
         headers: { "Turbo-Frame" => "pk-editor-screen" }
     assert_response :success
     assert_select "turbo-frame#pk-editor-screen"
-    assert_select "[data-fp-screen][data-title='Heading']"
+    assert_select "[data-fp-screen][data-title='Section heading']"
     assert_select "input[name='kit_section[title]']"
     assert_select "form#presskits-section-title-form[data-turbo-frame='_top']"
     refute_select ".fp-page-title"

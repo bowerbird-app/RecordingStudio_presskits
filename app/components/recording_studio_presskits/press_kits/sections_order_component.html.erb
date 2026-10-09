@@ -1,11 +1,17 @@
 <div id="presskits-section-list">
   <% if @section_recordings.any? %>
     <div
-      data-controller="recording-studio-presskits--section-order"
-      data-action="list:reordered->recording-studio-presskits--section-order#save"
-      data-recording-studio-presskits--section-order-url-value="<%= @reorder_path %>"
+      data-controller="recording-studio-presskits--kit-preview-reload"
+      data-action="list:saved->recording-studio-presskits--kit-preview-reload#reload"
     >
-      <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
+      <%= render FlatPack::List::Component.new(
+        orderable: true,
+        divider: true,
+        class: "w-full",
+        orderable_url: @reorder_path,
+        param_uuid_name: "moving_recording_id",
+        param_target_position_name: "target_position"
+      ) do %>
         <% @section_recordings.each do |recording| %>
           <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
             recording: recording,
