@@ -2,9 +2,9 @@
 
 ## 0.26.0
 
-The kit editor preview matches the public kit. In-flow **Edit heading**, **Edit content**, and the compact add-section dropdown are gone. Hover or focus-within tints the region with `--surface-muted-background-color`. Keyboard users get a `:focus-visible` outline. Touch devices see the FAB (`@media (hover: none)`); a tap also focuses the region.
+The kit editor preview matches the public kit. In-flow **Edit heading**, **Edit content**, and the compact add-section dropdown are gone. On a pointer that can hover, hover or focus-within tints the region with `--surface-muted-background-color` and shows the FAB. Keyboard users get a `:focus-visible` outline and still see the FAB. On touch, the FAB is not always visible. A tap makes that section or the header the active region (tint and FAB). Tapping another region moves the active state. Tapping outside clears it.
 
-Each section has `FlatPack::Fab::Component.new(contained: true, position: :top_right, backdrop: false, size: :sm, icon: :ellipsis_vertical, label: "Section actions")` on a `position: relative` region so the FAB pins to that section. Top corners open downward. Speed-dial actions:
+Each section has `FlatPack::Fab::Component.new(contained: true, position: :top_right, backdrop: false, size: :sm, icon: :plus, label: "Section actions")` on a `position: relative` region so the FAB pins to that section. Top corners open downward. Speed-dial actions:
 
 - **Edit title** — shared heading screen in `pk-editor`
 - **Edit content** — that section's content screen
@@ -14,7 +14,7 @@ Each section has `FlatPack::Fab::Component.new(contained: true, position: :top_r
 
 The kit header FAB uses the same chrome: **Edit heading** and **Cover colours**. Both open the shared header screen. Cover colours hashes to `#presskits-header-colours`. The toolbar **Section** button still adds at the end or into an empty kit.
 
-Bump FlatPack to `>= 0.1.222` (dummy tag `v0.1.222`) and rebuild Tailwind so `size: :sm` and action `style: :danger` generate. Reload Flatpack CSS after the bump. Hosts that replaced those components should render the Flatpack FAB and drop the old ghost buttons. FAB still has no hover-only visibility API — the editor uses group-hover / focus-within / `@media (hover: none)` classes on the root.
+Bump FlatPack to `>= 0.1.222` (dummy tag `v0.1.222`) and rebuild Tailwind so `size: :sm` and action `style: :danger` generate. Reload Flatpack CSS after the bump. Hosts that replaced those components should render the Flatpack FAB (`icon: :plus`) and drop the old ghost buttons. FAB has no hover-only visibility or tap-to-activate API. Desktop uses group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active`.
 
 ## 0.25.1
 

@@ -280,6 +280,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Edit title"
     assert_includes readme, "Section actions"
     assert_includes readme, "FlatPack::Fab::Component"
+    assert_includes readme, "recording-studio-presskits--editor-chrome"
+    assert_includes readme, "icon: :plus"
     assert_includes readme, "variant: :swatches"
     refute_includes readme, "named radios"
     assert_includes readme, "Edit content"
@@ -471,6 +473,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes kit_header, "position: :top_right"
     assert_includes kit_header, "backdrop: false"
     assert_includes kit_header, "size: :sm"
+    assert_includes kit_header, "icon: :plus"
+    refute_includes kit_header, "ellipsis_vertical"
     assert_includes kit_header, "edit_heading_label"
     assert_includes kit_header, "cover_colours_label"
     refute_includes kit_header, "arrows-up-down"
@@ -481,6 +485,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section, "position: :top_right"
     assert_includes section, "backdrop: false"
     assert_includes section, "size: :sm"
+    assert_includes section, "icon: :plus"
+    refute_includes section, "ellipsis_vertical"
     assert_includes section, "style: :danger"
     assert_includes section, "edit_title_label"
     assert_includes section, "edit_content_label"
@@ -507,8 +513,23 @@ class RecordingStudioPresskitsTest < Minitest::Test
     chrome = File.read(File.expand_path("press_kits/editor_chrome.rb", components))
     assert_includes chrome, "--surface-muted-background-color"
     assert_includes chrome, "focus-visible:outline"
-    assert_includes chrome, "[@media(hover:none)]"
+    assert_includes chrome, "[@media(hover:hover)]"
+    assert_includes chrome, "data-[pk-edit-active]"
+    assert_includes chrome, "group-data-[pk-edit-active]/pk-edit"
+    refute_includes chrome, "[@media(hover:none)]:opacity-100"
     assert_includes chrome, "relative"
+    editor = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
+    assert_includes editor, "recording-studio-presskits--editor-chrome"
+    assert_includes editor, "onPointerDown"
+    assert_includes chrome, 'CONTROLLER = "recording-studio-presskits--editor-chrome"'
+    chrome_js = File.read(File.expand_path(
+                            "../app/javascript/recording_studio_presskits/controllers/editor_chrome_controller.js",
+                            __dir__
+                          ))
+    assert_includes chrome_js, "(hover: none)"
+    assert_includes chrome_js, "data-pk-edit-active"
+    assert_includes chrome_js, "data-presskits-editor-region"
+    refute_includes chrome_js, "opacity-100"
     assert_includes header, "auto_text_value"
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, "flat-pack--unsaved-changes"

@@ -54,6 +54,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     preview = css_select("#presskits-editor-preview").first
     assert_includes preview.parent["class"], "rounded-[var(--radius-lg)]"
     assert_includes preview.parent["class"], "bg-[var(--card-background-color)]"
+    editor = css_select("[data-controller='recording-studio-presskits--editor-chrome']").first
+    assert editor
+    assert_includes editor["data-action"], "onPointerDown"
+    assert_select "#presskits-kit-header button.fp-fab__trigger [data-flat-pack--icon-name-value='plus']"
   end
 
   test "each section has heading and content controls" do
@@ -69,6 +73,9 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     remove = recording_studio_presskits.press_kit_section_path(kit, section)
     body = css_select("#presskits-section-#{section.id}-body").first
     assert_includes body["class"], "hover:bg-[var(--surface-muted-background-color)]"
+    assert_includes body["class"], "[@media(hover:hover)]"
+    assert_includes body["class"], "data-[pk-edit-active]"
+    refute_includes body["class"], "[@media(hover:none)]:opacity-100"
     assert_includes body["class"], "focus-visible:outline"
     assert_includes body["class"], "relative"
     refute_includes body["class"], "p-4"
@@ -76,6 +83,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes body["class"], "hover:outline-[var(--color-primary)]"
     assert_select "#presskits-section-#{section.id} .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     assert_select "#presskits-section-#{section.id} button.fp-fab__trigger[aria-label='Section actions']"
+    assert_select "#presskits-section-#{section.id} button.fp-fab__trigger [data-flat-pack--icon-name-value='plus']"
+    fab = css_select("#presskits-section-#{section.id} .fp-fab").first
+    assert_includes fab["class"], "group-data-[pk-edit-active]/pk-edit"
+    refute_includes fab["class"], "[@media(hover:none)]:opacity-100"
     refute_select "#presskits-section-#{section.id} .fp-fab__backdrop"
     assert_select "a[href='#{heading}'][role='menuitem'][aria-label='Edit title']"
     assert_select "a[href='#{content}'][role='menuitem'][aria-label='Edit content']"

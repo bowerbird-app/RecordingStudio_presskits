@@ -1,4 +1,8 @@
-<div class="flex flex-col gap-6">
+<div
+  class="flex flex-col gap-6"
+  data-controller="recording-studio-presskits--editor-chrome"
+  data-action="pointerdown@window->recording-studio-presskits--editor-chrome#onPointerDown"
+>
   <div id="presskits-editor-toolbar" class="flex flex-wrap items-center gap-3">
     <%= render FlatPack::Button::Component.new(
       text: I18n.t("recording_studio_presskits.editor.add_section"),
