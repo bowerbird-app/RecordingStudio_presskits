@@ -446,6 +446,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, 'text: "Credits"'
     assert_includes index, 'icon: "user-group"'
     assert_includes index, "@credits_path"
+    assert_includes index, 'aria: { label: "Open sidebar" }'
+    assert_includes index, "toggleMobile"
+    assert_includes index, 'class: "md:hidden"'
     refute_match(/Button::Component\.new\(\s*text: "Credits"/m, index)
   end
 
@@ -457,14 +460,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes index, 'subtitle: "People, companies and organisations that you credit in Press kits"'
     assert_includes index, 'text: "Credit"'
-    assert_includes index, 'class: "self-start"'
+    assert_includes index, 'class: "w-fit"'
     assert_includes index, 'title: "Name"'
     refute_includes index, "Usual role"
     refute_includes index, 'title: "URL"'
     refute_includes index_ruby, "def usual_role"
     refute_includes index_ruby, "def url_cell"
     assert_operator form.index('name: "credit[url]"'), :<, form.index('type: "submit"')
-    assert_includes form, 'class: "self-start"'
+    assert_includes form, 'class: "w-fit"'
     assert_operator form.index("FlatPack::Divider::Component"), :<, form.index('text: "Trash"')
     assert_includes form, 'class="flex justify-end"'
   end

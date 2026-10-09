@@ -193,7 +193,7 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Credits"
     assert_includes response.body, "People, companies and organisations that you credit in Press kits"
     credit_button = css_select("a.fp-button[href='#{recording_studio_presskits.new_credit_path}']").first
-    assert_includes credit_button["class"], "self-start"
+    assert_includes credit_button["class"], "w-fit"
     refute_includes credit_button["class"], "w-full"
     assert_equal "Credit", credit_button.at_css("span").text
     assert_rounded_default_layout
@@ -203,7 +203,7 @@ class CreditsTest < ActionDispatch::IntegrationTest
     new_form = css_select("form[action='#{recording_studio_presskits.credits_path}']").first
     assert_operator new_form.inner_html.index('name="credit[name]"'), :<, new_form.inner_html.index("Create")
     create_button = css_select("form[action='#{recording_studio_presskits.credits_path}'] button[type=submit]").first
-    assert_includes create_button["class"], "self-start"
+    assert_includes create_button["class"], "w-fit"
     assert_select "[role=separator]", count: 0
     assert_select "button", text: "Trash", count: 0
 
@@ -264,7 +264,7 @@ class CreditsTest < ActionDispatch::IntegrationTest
     assert_operator edit_form.inner_html.index('name="credit[url]"'), :<, edit_form.inner_html.index("Save")
     save_button = css_select("form[action='#{recording_studio_presskits.credit_path(tom)}'] button[type=submit]").first
     assert_equal "Save", save_button.text.squish
-    assert_includes save_button["class"], "self-start"
+    assert_includes save_button["class"], "w-fit"
     refute_includes save_button["class"], "w-full"
     assert_operator response.body.index("</form>"), :<, response.body.index('role="separator"')
     assert_operator response.body.index('role="separator"'), :<, response.body.index(">Trash<")

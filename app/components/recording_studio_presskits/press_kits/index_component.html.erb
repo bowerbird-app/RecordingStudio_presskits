@@ -15,6 +15,23 @@
     <% end %>
   <% end %>
 
+  <% layout.top_nav do %>
+    <%= render FlatPack::TopNav::Component.new(mobile_menu: false, class: "md:hidden") do |nav| %>
+      <% nav.left do %>
+        <%= render FlatPack::Button::Component.new(
+          icon: "menu",
+          icon_only: true,
+          style: :ghost,
+          aria: { label: "Open sidebar" },
+          data: {
+            "flat-pack--sidebar-layout-target": "mobileToggle",
+            action: "click->flat-pack--sidebar-layout#toggleMobile"
+          }
+        ) %>
+      <% end %>
+    <% end %>
+  <% end %>
+
   <% layout.main do %>
     <div class="flex w-full flex-col gap-6 p-6">
       <%= render FlatPack::PageTitle::Component.new(
