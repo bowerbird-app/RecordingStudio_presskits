@@ -5,7 +5,8 @@ module RecordingStudioPresskits
     class Component < ViewComponent::Base
       SIZES = %i[card preview hero].freeze
 
-      def initialize(recording: nil, title: nil, description: nil, cover_color: nil, cover_style: nil, size: :card, href: nil, id: nil) # rubocop:disable Metrics/ParameterLists
+      def initialize(recording: nil, title: nil, description: nil, cover_color: nil, # rubocop:disable Metrics/ParameterLists
+                     cover_style: nil, size: :card, href: nil, id: nil)
         super()
         @recording = recording
         @title = title

@@ -5,17 +5,15 @@
   padding: :none,
   theme: { background: cover_color, text: text_color },
   id: wrapper_id,
-  class: "h-full w-full overflow-hidden",
-  data: {
-    cover_color: cover_color,
-    cover_text_color: text_color,
-    cover_style: cover_style
-  }
+  class: "h-full w-full overflow-hidden"
 ) do |card| %>
   <% card.body do %>
     <div
       class="<%= surface_classes %>"
       style="background-color: <%= cover_color %>; color: <%= text_color %>;"
+      data-cover-color="<%= cover_color %>"
+      data-cover-text-color="<%= text_color %>"
+      data-cover-style="<%= cover_style %>"
       data-recording-studio-presskits--cover-preview-target="surface"
     >
       <% if card? %>

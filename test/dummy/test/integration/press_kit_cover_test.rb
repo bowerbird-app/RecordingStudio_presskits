@@ -58,6 +58,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   test "a stored colour stays after the host drops it from the palette" do
     kit = record_kit("Spring launch")
     @root.revise(kit) { |press_kit| press_kit.cover_color = "#DB2777" }
+    kit.reload
     RecordingStudioPresskits.configuration.cover_colors = %w[#1F2937 #7C3AED]
 
     @root.revise(kit) { |press_kit| press_kit.description = "Still rose." }
