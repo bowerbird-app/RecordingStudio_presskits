@@ -6,7 +6,7 @@ Kits sit under your workspace. You can have many. You publish the kit, not each 
 
 ## Install
 
-Add the gem next to Recording Studio 4.4, Accessible 0.13, Admin 2.0, Publishable 0.4, and the three mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.4, Accessible 0.13, Admin 2.0, Publishable 0.6, and the three mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
@@ -16,7 +16,7 @@ gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"
-gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.4.2"
+gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.6.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"
@@ -32,7 +32,7 @@ gem "recording_studio_admin", "~> 2.0"
 gem "recording_studio_orderable", "~> 0.2"
 gem "recording_studio_trashable", "~> 0.6"
 gem "recording_studio_duplicatable", "~> 0.4"
-gem "recording_studio_publishable", "~> 0.4"
+gem "recording_studio_publishable", "~> 0.6"
 gem "recording_studio_attachable", "~> 0.13"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
@@ -314,7 +314,7 @@ Dummy kit pins:
 | Orderable | `v0.2.5` |
 | Trashable | `v0.6.0` |
 | Duplicatable | `v0.4.3` |
-| Publishable | `v0.4.2` |
+| Publishable | `v0.6.0` |
 | External Embed | `v0.1.3` |
 | Video | `v0.1.0` |
 
