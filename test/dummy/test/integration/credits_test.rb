@@ -200,9 +200,10 @@ class CreditsTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.new_credit_path
     assert_response :success
-    new_form = css_select("form[action='#{recording_studio_presskits.credits_path}']").first
-    assert_operator new_form.inner_html.index('name="credit[name]"'), :<, new_form.inner_html.index("Create")
-    create_button = css_select("form[action='#{recording_studio_presskits.credits_path}'] button[type=submit]").first
+    assert_select "form#credit-form input[name='credit[name]']"
+    create_button = css_select("button[type=submit][form='credit-form']").first
+    assert_operator response.body.index('id="credit-form"'), :<, response.body.index("Create")
+    assert_equal "Create", create_button.text.squish
     assert_includes create_button["class"], "w-fit"
     assert_select "[role=separator]", count: 0
     assert_select "button", text: "Trash", count: 0
@@ -260,15 +261,17 @@ class CreditsTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "input[name='credit[name]'][value='Tom Ross']"
     assert_select "input[name='credit[usual_role]'][value='Photography']"
-    edit_form = css_select("form[action='#{recording_studio_presskits.credit_path(tom)}']").first
-    assert_operator edit_form.inner_html.index('name="credit[url]"'), :<, edit_form.inner_html.index("Save")
-    save_button = css_select("form[action='#{recording_studio_presskits.credit_path(tom)}'] button[type=submit]").first
+    edit_form = css_select("form#credit-form").first
+    assert edit_form.inner_html.include?('name="credit[url]"')
+    save_button = css_select("button[type=submit][form='credit-form']").first
     assert_equal "Save", save_button.text.squish
     assert_includes save_button["class"], "w-fit"
     refute_includes save_button["class"], "w-full"
-    assert_operator response.body.index("</form>"), :<, response.body.index('role="separator"')
-    assert_operator response.body.index('role="separator"'), :<, response.body.index(">Trash<")
-    assert_select "div.justify-end button", text: "Trash"
+    assert_select "[role=separator]", count: 0
+    actions = css_select("div.justify-between").first
+    assert_operator actions.inner_html.index("Save"), :<, actions.inner_html.index("Trash")
+    trash_button = css_select("div.justify-between button[data-fp-style='danger']").first
+    assert_equal "Trash", trash_button.text.squish
 
     get recording_studio_presskits.credits_path
     assert_select "th", text: "Name"
