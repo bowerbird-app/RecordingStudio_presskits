@@ -8,6 +8,7 @@ module RecordingStudioPresskits
       FAB_RESERVE_CLASS = "pr-20 md:pr-20 lg:pr-20"
       PREVIEW_CLASSES = "flex w-full flex-col gap-6 md:p-4 lg:p-6"
 
+      # Split p-8 / md:p-10 / lg:p-12 so pr-20 still wins on the right.
       REGION_CLASSES = [
         "group/pk-edit relative rounded-[var(--radius-lg)] bg-transparent",
         "pt-8 pb-8 px-8 md:pt-10 md:pb-10 md:px-10 lg:pt-12 lg:pb-12 lg:px-12",
