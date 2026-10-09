@@ -154,7 +154,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     header_path = recording_studio_presskits.edit_press_kit_header_path(kit)
     assert_select "#presskits-kit-header [role='menuitem'][href='#{header_path}'][aria-label='Edit heading']"
     assert_select "#presskits-kit-header [role='menuitem'][aria-label='Cover colours']"
-    assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right']"
+    assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     refute_select "#presskits-editor-toolbar a[href='#{header_path}']"
     refute_select "#presskits-editor-toolbar a", text: "Header"
     assert_select "#presskits-kit-header input", count: 0

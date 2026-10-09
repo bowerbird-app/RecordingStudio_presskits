@@ -12,15 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Kit editor sections and the kit header no longer put Edit heading, Edit content, or Add section in the page flow. The live preview matches the public kit: heading, then content.
 - Hover or focus-within tints the region with `--surface-muted-background-color`. Keyboard focus uses `:focus-visible` only. Touch shows the FAB (`@media (hover: none)`) and a tap focuses the region.
-- Each section has a contained Flatpack FAB (`position: :top_right`, `backdrop: false`, label **Section actions**). Speed-dial: **Edit title** (shared heading screen in `pk-editor`), **Edit content**, **Reorder** (existing Reorder modal, fragment on this section), **Trash** (Trashable delete plus confirm), and **Add new section** (section picker, placed below this one).
+- Each section has a contained Flatpack FAB (`size: :sm`, `position: :top_right`, `backdrop: false`, label **Section actions**). The region is `position: relative` so the FAB pins to that section; top corners open downward. Speed-dial: **Edit title** (shared heading screen in `pk-editor`), **Edit content**, **Reorder** (existing Reorder modal, fragment on this section), **Trash** (`style: :danger`, Trashable delete plus confirm), and **Add new section** (section picker, placed below this one).
 - The kit header FAB is the same pattern: **Edit heading** and **Cover colours**, both opening the shared header screen. **Cover colours** lands on `#presskits-header-colours`.
 - The toolbar **Section** button still adds at the end or into an empty kit.
+- FlatPack is `>= 0.1.222` (dummy tag `v0.1.222`).
 - Version `0.26.0`
 
 ### Upgrade notes
-- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`) and drop the in-flow ghost buttons, compact dropdown, and custom hover outline.
-- Flatpack FAB sizes start at 56px (`:md`). There is no small size. Speed-dial actions have no danger style, so Trash looks like the other actions. FAB has no hover-only visibility API; the editor hides the control with group-hover / focus-within / `@media (hover: none)` classes on the root. Do not hand-roll a smaller FAB or a danger action.
-- Rebuild Tailwind so the hover tint and FAB visibility utilities generate.
+- Bump FlatPack to at least `0.1.222` and rebuild Tailwind so FAB `size: :sm` and action `style: :danger` generate. Reload Flatpack CSS after the bump.
+- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`, `size: :sm`) on a `position: relative` region, and drop the in-flow ghost buttons, compact dropdown, and custom hover outline. Trash uses `with_action(..., style: :danger)`.
+- FAB has no hover-only visibility API; the editor hides the control with group-hover / focus-within / `@media (hover: none)` classes on the root.
 
 ## [0.25.1] - 2026-10-09
 

@@ -22,6 +22,7 @@
       contained: true,
       position: :top_right,
       backdrop: false,
+      size: :sm,
       icon: :ellipsis_vertical,
       label: section_actions_label,
       class: fab_classes
@@ -47,6 +48,7 @@
       <% fab.with_action(
         icon: :trash,
         label: trash_label,
+        style: :danger,
         href: @remove_path,
         data: {
           turbo_method: :delete,

@@ -47,7 +47,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.221"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.222"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.12"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -62,7 +62,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.12.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.6"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.221"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.222"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
@@ -269,8 +269,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.7\""
     assert_includes readme, "tag: \"v0.5.0\""
     assert_includes readme, "tag: \"v0.4.5\""
-    assert_includes readme, "tag: \"v0.1.221\""
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.221"'
+    assert_includes readme, "tag: \"v0.1.222\""
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.222"'
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
     assert_includes readme, "flat_pack_modal_screen"
@@ -470,6 +470,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes kit_header, "contained: true"
     assert_includes kit_header, "position: :top_right"
     assert_includes kit_header, "backdrop: false"
+    assert_includes kit_header, "size: :sm"
     assert_includes kit_header, "edit_heading_label"
     assert_includes kit_header, "cover_colours_label"
     refute_includes kit_header, "arrows-up-down"
@@ -479,6 +480,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section, "contained: true"
     assert_includes section, "position: :top_right"
     assert_includes section, "backdrop: false"
+    assert_includes section, "size: :sm"
+    assert_includes section, "style: :danger"
     assert_includes section, "edit_title_label"
     assert_includes section, "edit_content_label"
     assert_includes section, "reorder_label"
@@ -505,6 +508,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "--surface-muted-background-color"
     assert_includes chrome, "focus-visible:outline"
     assert_includes chrome, "[@media(hover:none)]"
+    assert_includes chrome, "relative"
     assert_includes header, "auto_text_value"
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, "flat-pack--unsaved-changes"
