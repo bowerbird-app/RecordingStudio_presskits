@@ -44,6 +44,9 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-editor-toolbar", text: /Order/
     refute_select "#presskits-editor-toolbar a", text: "Header"
     refute_select "#presskits-editor-toolbar a", text: "View"
+    header = css_select("#presskits-kit-header").first
+    assert_includes header["class"], "p-4"
+    assert_includes header["class"], "-m-4"
     assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     assert_select "#presskits-kit-header button.fp-fab__trigger[aria-label='Header actions']"
     assert_select "#presskits-kit-header [role='menuitem'][aria-label='Edit heading']"
@@ -78,8 +81,9 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes body["class"], "[@media(hover:none)]:opacity-100"
     assert_includes body["class"], "focus-visible:outline"
     assert_includes body["class"], "relative"
-    refute_includes body["class"], "p-4"
-    refute_includes body["class"], "-mx-4"
+    assert_includes body["class"], "p-4"
+    assert_includes body["class"], "-m-4"
+    assert_includes body["class"], "rounded-[var(--radius-lg)]"
     refute_includes body["class"], "hover:outline-[var(--color-primary)]"
     assert_select "#presskits-section-#{section.id} .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     assert_select "#presskits-section-#{section.id} button.fp-fab__trigger[aria-label='Section actions']"

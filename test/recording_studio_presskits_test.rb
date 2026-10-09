@@ -282,6 +282,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "FlatPack::Fab::Component"
     assert_includes readme, "recording-studio-presskits--editor-chrome"
     assert_includes readme, "icon: :plus"
+    assert_includes readme, "p-4 -m-4"
     assert_includes readme, "variant: :swatches"
     refute_includes readme, "named radios"
     assert_includes readme, "Edit content"
@@ -518,6 +519,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "group-data-[pk-edit-active]/pk-edit"
     refute_includes chrome, "[@media(hover:none)]:opacity-100"
     assert_includes chrome, "relative"
+    assert_includes chrome, "p-4 -m-4"
+    assert_includes chrome, "rounded-[var(--radius-lg)]"
     editor = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
     assert_includes editor, "recording-studio-presskits--editor-chrome"
     assert_includes editor, "onPointerDown"

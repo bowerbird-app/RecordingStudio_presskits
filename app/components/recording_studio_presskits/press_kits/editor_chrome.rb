@@ -7,6 +7,7 @@ module RecordingStudioPresskits
 
       REGION_CLASSES = [
         "group/pk-edit relative rounded-[var(--radius-lg)] bg-transparent",
+        "p-4 -m-4",
         "transition-colors duration-[var(--duration-base)]",
         "[@media(hover:hover)]:hover:bg-[var(--surface-muted-background-color)]",
         "focus-within:bg-[var(--surface-muted-background-color)]",

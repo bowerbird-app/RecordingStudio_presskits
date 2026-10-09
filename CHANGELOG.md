@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Kit editor sections and the kit header no longer put Edit heading, Edit content, or Add section in the page flow. The live preview matches the public kit: heading, then content.
 - On a pointer that can hover, hover or focus-within tints the region with `--surface-muted-background-color` and shows the FAB. Keyboard focus uses `:focus-visible` only, and still reveals the FAB. On touch, the FAB is not always visible. A tap makes that section or the header the active region (tint and FAB). Tapping another region moves the active state. Tapping outside clears it. Flatpack has no tap-to-activate or hover-only visibility API, so `recording-studio-presskits--editor-chrome` owns the touch active state.
+- Each editor region uses `p-4 -m-4` and `rounded-[var(--radius-lg)]` so the tint sits off the content. The negative margin keeps the heading and body lined up with the public kit; the public page is not padded.
 - Each section has a contained Flatpack FAB (`size: :sm`, `icon: :plus`, `position: :top_right`, `backdrop: false`, label **Section actions**). The region is `position: relative` so the FAB pins to that section; top corners open downward. Speed-dial: **Edit title** (shared heading screen in `pk-editor`), **Edit content**, **Reorder** (existing Reorder modal, fragment on this section), **Trash** (`style: :danger`, Trashable delete plus confirm), and **Add new section** (section picker, placed below this one).
 - The kit header FAB is the same pattern: **Edit heading** and **Cover colours**, both opening the shared header screen. **Cover colours** lands on `#presskits-header-colours`.
 - The toolbar **Section** button still adds at the end or into an empty kit.
@@ -20,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Upgrade notes
 - Bump FlatPack to at least `0.1.222` and rebuild Tailwind so FAB `size: :sm` and action `style: :danger` generate. Reload Flatpack CSS after the bump.
-- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`, `size: :sm`, `icon: :plus`) on a `position: relative` region, and drop the in-flow ghost buttons, compact dropdown, and custom hover outline. Trash uses `with_action(..., style: :danger)`.
+- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`, `size: :sm`, `icon: :plus`) on a `position: relative` region with `p-4 -m-4` and `rounded-[var(--radius-lg)]`, and drop the in-flow ghost buttons, compact dropdown, and custom hover outline. Trash uses `with_action(..., style: :danger)`.
 - FAB has no hover-only visibility or tap-to-activate API. Desktop hides the control with group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active` so tint and FAB appear only on the tapped region.
 
 ## [0.25.1] - 2026-10-09
