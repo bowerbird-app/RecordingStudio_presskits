@@ -51,8 +51,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
       @root.revise(kit) { |press_kit| press_kit.cover_color = "#FFFFFF" }
     end
 
-    @root.revise(kit) { |press_kit| press_kit.cover_color = "#7c3aed" }
-    assert_equal "#7C3AED", kit.reload.recordable.cover_color
+    @root.revise(kit) { |press_kit| press_kit.cover_color = "#bfdbfe" }
+    assert_equal "#BFDBFE", kit.reload.recordable.cover_color
+    assert_equal "#111827", kit.recordable.resolved_cover_text_color
 
     assert_raises(ActiveRecord::RecordInvalid) do
       @root.revise(kit) { |press_kit| press_kit.cover_style = "media" }
@@ -291,7 +292,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     @root.revise(kit) do |press_kit|
       press_kit.description = "Doors at noon."
       press_kit.cover_style = "color"
-      press_kit.cover_color = "#7C3AED"
+      press_kit.cover_color = "#BFDBFE"
       press_kit.cover_text_color = "#111827"
     end
 
@@ -300,7 +301,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
         title: "Spring launch",
         description: "Doors at noon.",
         cover_style: "color",
-        cover_color: "#7C3AED",
+        cover_color: "#BFDBFE",
         cover_text_color: "#111827"
       },
       RecordingStudioPresskits::Api::PressKitPayload.for(kit.reload.recordable)
@@ -310,7 +311,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   test "grid cards keep a shared 9 by 16 height" do
     first = record_kit("Spring launch")
     second = record_kit("Autumn recap")
-    @root.revise(first) { |press_kit| press_kit.cover_color = "#7C3AED" }
+    @root.revise(first) { |press_kit| press_kit.cover_color = "#BFDBFE" }
     @root.revise(second) do |press_kit|
       press_kit.description = "A longer line that should clamp on the card."
       press_kit.cover_color = "#D97706"
@@ -320,12 +321,12 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-color='#7C3AED']", count: 1
+    assert_select "[data-cover-color='#BFDBFE']", count: 1
     assert_select "[data-cover-color='#D97706']", count: 1
     assert_select "[data-cover-text-color='#F8FAFC']", count: 1
     assert_select "[data-cover-text-color='#111827']", count: 1
     assert_select "[data-cover-ratio='9 / 16']", count: 2
-    assert_includes css_select("[data-cover-color='#7C3AED']").first.to_html, "--page-title-h1-size"
+    assert_includes css_select("[data-cover-color='#BFDBFE']").first.to_html, "--page-title-h1-size"
   end
 
   private

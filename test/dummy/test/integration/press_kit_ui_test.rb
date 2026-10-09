@@ -792,7 +792,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
         title: "Spring launch, take two",
         description: "Doors at noon.",
         cover_style: "color",
-        cover_color: "#7C3AED",
+        cover_color: "#BFDBFE",
         cover_text_color: "#111827",
         decoy: "nope"
       }
@@ -809,7 +809,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_equal "Spring launch, take two", kit.recordable.title
     assert_equal "Doors at noon.", kit.recordable.description
     assert_equal "color", kit.recordable.cover_style
-    assert_equal "#7C3AED", kit.recordable.cover_color
+    assert_equal "#BFDBFE", kit.recordable.cover_color
     assert_equal "#111827", kit.recordable.cover_text_color
     refute_includes kit.recordable.attributes.values, "nope"
     original = RecordingStudioPresskits::PressKit.find(original_id)

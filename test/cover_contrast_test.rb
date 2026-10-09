@@ -12,6 +12,13 @@ class CoverContrastTest < Minitest::Test
     )
   end
 
+  def test_picks_dark_text_on_sky
+    assert_equal(
+      RecordingStudioPresskits::Cover::Contrast::DARK,
+      RecordingStudioPresskits::Cover::Contrast.text_on("#BFDBFE")
+    )
+  end
+
   def test_picks_dark_text_on_honey
     assert_equal(
       RecordingStudioPresskits::Cover::Contrast::DARK,

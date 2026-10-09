@@ -2,7 +2,7 @@ development:
   parent_root_type: "Workspace"
   cover_colors:
     - "#1F2937"
-    - "#7C3AED"
+    - "#BFDBFE"
     - "#DB2777"
     - "#059669"
     - "#D97706"
@@ -18,7 +18,7 @@ production:
   parent_root_type: "Workspace"
   cover_colors:
     - "#1F2937"
-    - "#7C3AED"
+    - "#BFDBFE"
     - "#DB2777"
     - "#059669"
     - "#D97706"

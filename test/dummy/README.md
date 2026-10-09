@@ -6,7 +6,7 @@ This Rails app exists to prove Recording Studio Press Kits in a real host. It is
 
 - Devise authentication with a seeded admin user
 - `Current.actor` wiring for Recording Studio events
-- Root workspace plus a seeded published press kit and an unpublished kit. No seeded fake sections
+- Root workspace plus a seeded published press kit (**Spring launch**, sky cover `#BFDBFE`, Auto dark text) and an unpublished kit. No seeded fake sections
 - Orderable, Trashable, Duplicatable, and Publishable install, migrations, and mounts
 - Recording Studio Admin 2.0 mounted under an admin root, with Accessible grants for the seeded admin
 - Authenticated `/` redirects to the press kit index on Recording Studio's default layout

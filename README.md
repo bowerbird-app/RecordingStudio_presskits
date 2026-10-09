@@ -92,7 +92,7 @@ RecordingStudioPresskits.configure do |config|
   config.parent_root_type = "Workspace"
   config.authentication_method = :authenticate_user!
   config.current_actor_method = :current_user
-  config.cover_colors = %w[#1F2937 #7C3AED #DB2777 #059669 #D97706]
+  config.cover_colors = %w[#1F2937 #BFDBFE #DB2777 #059669 #D97706]
   config.default_cover_color = "#1F2937"
   config.cover_text_colors = %w[#F8FAFC #111827 #E5E7EB #6B7280]
   config.cover_text_auto = true
@@ -141,7 +141,7 @@ root.revise(kit_recording) do |kit|
   kit.title = "Spring launch, take two"
   kit.description = "Doors at noon."
   kit.cover_style = "color"
-  kit.cover_color = "#7C3AED"
+  kit.cover_color = "#BFDBFE"
 end
 
 kit_recording.log_event!(action: "noted")
@@ -328,7 +328,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one published kit titled **Spring launch**, with a short description, credits, company statistics as cards, and project specifications as a list, and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` stays test-only. Its parent is a kit section. It enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. Its `prepare` hook sets the block title from the create heading, or to Block when that heading is blank. The seeded admin user gets Accessible owner access on the workspace and the admin root.
+Seeds one published kit titled **Spring launch**, with a short description, a sky cover (`#BFDBFE`, Auto dark text), credits, company statistics as cards, and project specifications as a list, and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` stays test-only. Its parent is a kit section. It enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. Its `prepare` hook sets the block title from the create heading, or to Block when that heading is blank. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
 ## Cloud Agent boot
 

@@ -21,12 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The kit header FAB is the same pattern: **Edit heading** and **Cover colours**, both opening the shared header screen. **Cover colours** lands on `#presskits-header-colours`.
 - The toolbar **Section** button still adds at the end or into an empty kit.
 - FlatPack is `>= 0.1.222` (dummy tag `v0.1.222`).
+- The default cover palette swaps violet (`#7C3AED`) for sky (`#BFDBFE`). Dummy **Spring launch** uses sky with Auto text (dark). Stored violet still renders; hosts that want it as a swatch add it back.
 - Version `0.26.0`
 
 ### Upgrade notes
 - Bump FlatPack to at least `0.1.222` and rebuild Tailwind so FAB `size: :sm` and action `style: :danger` generate. Reload Flatpack CSS after the bump.
 - Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`, `size: :sm`, `icon: :plus`, `offset: "1rem"`) on a `position: relative` region. Sections own `p-8 md:p-10 lg:p-12` and `pr-20`, with `rounded-none` so the tint is flush to the card sides. The header region has no pad: the `:hero` cover bleeds to the card, and hover is an inset overlay rather than a surrounding muted tint. Hero copy sits at the top (`justify-start`) in a wrapping `max-w-2xl` / `max-w-[20ch]` block. Use `--text-4xl` then `sm:` `--hero-headline-size`, `fp-text-balance` on the title, and `fp-text-pretty` on the description. The band stays 21/9 with `min-h-64`. Drop the in-flow ghost buttons, compact dropdown, custom hover outline, negative margins, and any kit-level section pad or gap. The kit card is `padding: :none`; the preview clips with `overflow-hidden`. The public kit uses the same unpadded card and section pad. Trash uses `with_action(..., style: :danger)`.
 - FAB has no hover-only visibility or tap-to-activate API. Desktop hides the control with group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active` so tint and FAB appear only on the tapped region.
+- The default `cover_colors` list is now `#1F2937`, `#BFDBFE`, `#DB2777`, `#059669`, `#D97706`. A stored `#7C3AED` still paints. Add it back to the host palette if you still want that swatch.
 
 ## [0.25.1] - 2026-10-09
 

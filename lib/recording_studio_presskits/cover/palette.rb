@@ -5,10 +5,11 @@ module RecordingStudioPresskits
     class Palette
       AUTO_VALUE = "auto"
       DEFAULT_COLOR = "#1F2937"
-      DEFAULT_COLORS = %w[#1F2937 #7C3AED #DB2777 #059669 #D97706].freeze
+      DEFAULT_COLORS = %w[#1F2937 #BFDBFE #DB2777 #059669 #D97706].freeze
       DEFAULT_TEXT_COLORS = %w[#F8FAFC #111827 #E5E7EB #6B7280].freeze
       NAMES = {
         "#1F2937" => "Ink",
+        "#BFDBFE" => "Sky",
         "#7C3AED" => "Violet",
         "#DB2777" => "Rose",
         "#059669" => "Forest",
