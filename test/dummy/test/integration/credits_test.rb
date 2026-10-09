@@ -184,12 +184,29 @@ class CreditsTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.credits_path}']", text: "Credits"
+    assert_select "a[data-flat-pack-sidebar-item='true'][href='#{recording_studio_presskits.credits_path}'] span.fp-sidebar-label",
+                  text: "Credits"
+    assert_select "a.fp-button[href='#{recording_studio_presskits.credits_path}']", count: 0
 
     get recording_studio_presskits.credits_path
     assert_response :success
     assert_select "h1", text: "Credits"
+    assert_includes response.body, "People, companies and organisations that you credit in Press kits"
+    credit_button = css_select("a.fp-button[href='#{recording_studio_presskits.new_credit_path}']").first
+    assert_includes credit_button["class"], "w-fit"
+    refute_includes credit_button["class"], "w-full"
+    assert_equal "Credit", credit_button.at_css("span").text
     assert_rounded_default_layout
+
+    get recording_studio_presskits.new_credit_path
+    assert_response :success
+    assert_select "form#credit-form input[name='credit[name]']"
+    create_button = css_select("button[type=submit][form='credit-form']").first
+    assert_operator response.body.index('id="credit-form"'), :<, response.body.index("Create")
+    assert_equal "Create", create_button.text.squish
+    assert_includes create_button["class"], "w-fit"
+    assert_select "[role=separator]", count: 0
+    assert_select "button", text: "Trash", count: 0
 
     empty_kit = record_kit("Empty credits")
     post recording_studio_presskits.press_kit_sections_path(empty_kit),
@@ -244,6 +261,24 @@ class CreditsTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "input[name='credit[name]'][value='Tom Ross']"
     assert_select "input[name='credit[usual_role]'][value='Photography']"
+    edit_form = css_select("form#credit-form").first
+    assert edit_form.inner_html.include?('name="credit[url]"')
+    save_button = css_select("button[type=submit][form='credit-form']").first
+    assert_equal "Save", save_button.text.squish
+    assert_includes save_button["class"], "w-fit"
+    refute_includes save_button["class"], "w-full"
+    assert_select "[role=separator]", count: 0
+    actions = css_select("div.justify-between").first
+    assert_operator actions.inner_html.index("Save"), :<, actions.inner_html.index("Trash")
+    trash_button = css_select("div.justify-between button[data-fp-style='danger']").first
+    assert_equal "Trash", trash_button.text.squish
+
+    get recording_studio_presskits.credits_path
+    assert_select "th", text: "Name"
+    assert_select "thead th", count: 1
+    assert_select "a", text: "Tom Ross"
+    refute_includes response.body, "Usual role"
+    refute_includes response.body, "https://example.com/tom"
 
     patch recording_studio_presskits.credit_path(tom), params: {
       credit: { name: "Tom Ross", usual_role: "Photographer", url: "https://example.com/tom" }

@@ -52,6 +52,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Spring launch"
     assert_select "a[href='#{edit_href}']"
     assert_presskit_create_button
+    assert_library_sidebar
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-flat-pack--icon-name-value='photo']", count: 1
     assert_includes response.body, "bg-(--card-background-muted-color)"
@@ -70,6 +71,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{edit_href}']", text: "Spring launch"
     assert_includes response.body, "<table"
     assert_presskit_create_button
+    assert_library_sidebar
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-flat-pack--icon-name-value='photo']", count: 0
     refute_includes response.body, ">Cards<"
@@ -100,6 +102,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Nothing here yet"
     assert_includes response.body, "Make a press kit"
+    assert_library_sidebar
   end
 
   test "kit show redirects to the editor" do
@@ -1617,6 +1620,15 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     raise result.error if result.failure?
 
     result.value
+  end
+
+  def assert_library_sidebar
+    assert_select "[data-controller='flat-pack--sidebar-layout']"
+    assert_select "button[aria-expanded='true'] span.fp-sidebar-label", text: "Library"
+    assert_select "a[data-flat-pack-sidebar-item='true'][href='#{recording_studio_presskits.credits_path}'] span.fp-sidebar-label",
+                  text: "Credits"
+    assert_select "a.fp-button[href='#{recording_studio_presskits.credits_path}']", count: 0
+    assert_select "button[aria-label='Open sidebar'][data-action='click->flat-pack--sidebar-layout#toggleMobile']"
   end
 
   def assert_presskit_create_button

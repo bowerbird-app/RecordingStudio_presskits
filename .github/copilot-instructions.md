@@ -9,7 +9,7 @@
 
 ## UI Conventions
 
-- FlatPack is the default UI system. Compose Card, Table, Grid, ButtonGroup, EmptyState, Picker, PageTitle, PageNav, Button, and List. Cards vs table on the index is icon-only ButtonGroup. Do not invent a custom view-mode widget.
+- FlatPack is the default UI system. Compose Card, Table, Grid, ButtonGroup, EmptyState, Picker, PageTitle, PageNav, Button, and List. The press kit index uses SidebarLayout. Library is a collapsible sidebar group, and Credits is the link under it. Cards vs table on the index is icon-only ButtonGroup. Do not invent a custom view-mode widget.
 - Authenticated screens keep `UsesDefaultLayout` and put Flatpack's built-in rounded theme on `<html data-theme="rounded">`. The dummy layout draws one back control and passes `anchor_href` so the close X renders. Do not invent a custom theme.
 - The public kit view uses `recording_studio_presskits/blank` via Publishable `.to` `public_layout`. That layout has no page nav. Do not use Publishable's empty TopNav. Do not insert Sign in into that layout. Owner preview stays on `recording_studio/default_layout`.
 - The approved UI reference is the live FlatPack demo app at https://flatpack.bowerbird.io/ when you need to inspect current shared components and patterns.

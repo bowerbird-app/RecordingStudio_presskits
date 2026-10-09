@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-10-09
+
+### Changed
+- The press kit index uses a sidebar. **Library** is a collapsible group. **Credits** is the link under Library. The Credits button is gone from the kit list.
+- The credits list subtitle is "People, companies and organisations that you credit in Press kits". **+ Credit** is only as wide as its label. The table shows the name.
+- On a credit, **Save** sits under the fields and is only as wide as its label. **Trash** shares that line, sits on the right, and uses the danger style.
+- Version `0.23.0`
+
+### Upgrade notes
+- Hosts that linked people to a Credits button beside Presskit should use the Library group in the sidebar instead. The credits table no longer shows usual role or URL. Those fields stay on the credit form.
+
 ## [0.22.1] - 2026-10-08
 
 ### Fixed

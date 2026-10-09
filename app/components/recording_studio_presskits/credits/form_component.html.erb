@@ -1,9 +1,7 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(title: @heading, variant: :h1) %>
 
-  <%= form_with url: @url, method: @method, local: true, class: "flex max-w-xl flex-col gap-4" do %>
-    <%= render FlatPack::Button::Component.new(text: button_text, style: :primary, type: "submit") %>
-
+  <%= form_with url: @url, method: @method, id: "credit-form", local: true, class: "flex max-w-xl flex-col gap-4" do %>
     <%= render FlatPack::TextInput::Component.new(
       name: "credit[name]",
       label: "Name",
@@ -26,9 +24,19 @@
     ) %>
   <% end %>
 
-  <% if @trash_path %>
-    <%= form_with url: @trash_path, method: :delete, local: true, class: "inline-flex" do %>
-      <%= render FlatPack::Button::Component.new(text: "Trash", icon: "trash", style: :ghost, type: "submit") %>
+  <div class="flex w-full max-w-xl items-center justify-between gap-3">
+    <%= render FlatPack::Button::Component.new(
+      text: button_text,
+      style: :primary,
+      type: "submit",
+      form: "credit-form",
+      class: "w-fit"
+    ) %>
+
+    <% if @trash_path %>
+      <%= form_with url: @trash_path, method: :delete, local: true, class: "inline-flex" do %>
+        <%= render FlatPack::Button::Component.new(text: "Trash", icon: "trash", style: :danger, type: "submit") %>
+      <% end %>
     <% end %>
-  <% end %>
+  </div>
 </div>
