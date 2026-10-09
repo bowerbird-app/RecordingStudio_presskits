@@ -22,13 +22,17 @@ export default class extends Controller {
     this.surfaceTarget.style.color = textColor
 
     const heading = this.surfaceTarget.querySelector("h1, h2, h3, p")
-    if (heading) heading.textContent = title
+    if (heading) {
+      heading.textContent = title
+      heading.style.color = textColor
+    }
 
     const subtitle = this.subtitleElement(heading)
     if (description) {
       if (subtitle) {
         subtitle.textContent = description
         subtitle.hidden = false
+        subtitle.style.color = textColor
       }
     } else if (subtitle) {
       subtitle.textContent = ""
