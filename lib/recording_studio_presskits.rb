@@ -11,10 +11,14 @@ require "recording_studio_admin"
 require "flat_pack"
 require "recording_studio_presskits/version"
 require "recording_studio_presskits/engine"
+require "recording_studio_presskits/cover/hex"
+require "recording_studio_presskits/cover/contrast"
+require "recording_studio_presskits/cover/palette"
 require "recording_studio_presskits/configuration"
 require "recording_studio_presskits/kit_query"
 require "recording_studio_presskits/section_composer"
 require "recording_studio_presskits/legacy_section_tree"
+require "recording_studio_presskits/api/press_kit_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/admin"
 require "recording_studio_presskits/api"
@@ -37,6 +41,18 @@ module RecordingStudioPresskits
 
     def parent_root_type
       configuration.parent_root_type.presence || "Workspace"
+    end
+
+    def cover_palette
+      configuration.cover_palette
+    end
+
+    def any_cover_color?
+      configuration.any_cover_color?
+    end
+
+    def default_cover_color
+      cover_palette.default_color
     end
 
     def press_kit_type_name

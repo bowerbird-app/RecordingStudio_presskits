@@ -1,0 +1,37 @@
+<%= render FlatPack::Card::Component.new(
+  style: card_style,
+  clickable: href.present?,
+  href: href,
+  padding: :none,
+  theme: { background: cover_color, text: text_color },
+  id: wrapper_id,
+  class: "h-full w-full overflow-hidden",
+  data: {
+    cover_color: cover_color,
+    cover_text_color: text_color,
+    cover_style: cover_style
+  }
+) do |card| %>
+  <% card.body do %>
+    <div
+      class="<%= surface_classes %>"
+      style="background-color: <%= cover_color %>; color: <%= text_color %>;"
+      data-recording-studio-presskits--cover-preview-target="surface"
+    >
+      <% if card? %>
+        <p class="text-lg font-semibold tracking-tight text-balance"><%= title %></p>
+        <% if description.present? %>
+          <p class="mt-2 line-clamp-2 text-sm text-pretty"><%= description %></p>
+        <% end %>
+      <% else %>
+        <%= render FlatPack::PageTitle::Component.new(
+          title: title,
+          subtitle: description,
+          variant: heading_variant,
+          title_color: text_color,
+          subtitle_color: text_color
+        ) %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

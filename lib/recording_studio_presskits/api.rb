@@ -43,10 +43,10 @@ module RecordingStudioPresskits
       def register_press_kit
         register_type(
           "RecordingStudioPresskits::PressKit",
-          operations: %i[show],
-          serializer: ->(recordable, **) { { title: recordable.title, description: recordable.description } },
-          output_keys: %i[title description],
-          writable_attributes: [],
+          operations: %i[show update],
+          serializer: ->(recordable, **) { PressKitPayload.for(recordable) },
+          output_keys: %i[title description cover_style cover_color],
+          writable_attributes: %i[cover_style cover_color],
           capability_actions: %i[create_section reorder_sections]
         )
       end

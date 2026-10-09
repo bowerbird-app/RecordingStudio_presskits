@@ -113,8 +113,9 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_blank_public_layout
-    assert_select "h1", text: "Spring launch"
-    assert_select "p.mt-2.text-lg", text: "Doors at noon."
+    assert_select "#presskits-cover-hero h1", text: "Spring launch"
+    assert_select "#presskits-cover-hero [data-cover-color='#1F2937']"
+    assert_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
     assert_operator response.body.index("Spring launch"), :<, response.body.index("Doors at noon.")
     assert_operator response.body.index("Doors at noon."), :<, response.body.index("Hero")
 
@@ -123,7 +124,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.preview_press_kit_path(kit)
     assert_response :success
     assert_rounded_default_layout
-    assert_select "h1", text: "Spring launch"
+    assert_select "#presskits-cover-hero h1", text: "Spring launch"
     assert_includes response.body, "Doors at noon."
     assert_includes response.body, "Hero"
   end
@@ -134,9 +135,8 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "h1", text: "Spring launch"
-    assert_select "p.mt-2.text-lg", count: 0
-    refute_includes response.body, "Doors at noon."
+    assert_select "#presskits-cover-hero h1", text: "Spring launch"
+    refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
   end
 
   test "logged-out visitors cannot read an unpublished kit" do

@@ -29,35 +29,30 @@ module RecordingStudioPresskits
     end
 
     def press_kit_params
-      params.fetch(:press_kit, {}).permit(:title, :description)
+      params.fetch(:press_kit, {}).permit(
+        :title, :description, :cover_style, :cover_color, :cover_text_color, :cover_text_swatch
+      )
     end
 
     def save_header
-      title, description = header_fields
-      return render_missing_title(title, description) if title.blank?
+      fields = header_fields
+      return render_missing_title(fields) if fields[:title].blank?
 
-      revise_header(title, description)
+      revise_header(fields)
       respond_to_header_save
-    rescue ActiveRecord::RecordInvalid
-      render_invalid_header(title, description)
+    rescue ActiveRecord::RecordInvalid => e
+      render_invalid_header(fields, e)
     end
 
-    def respond_to_header_save # rubocop:disable Metrics/MethodLength
+    def respond_to_header_save
       notice = "Saved. That's what people see first."
+      path = edit_press_kit_header_path(@press_kit_recording)
       respond_to do |format|
         format.turbo_stream do
-          if from_kit_editor?
-            render :update
-          else
-            redirect_to after_header_save_path, notice: notice
-          end
+          from_kit_editor? ? render(:update) : redirect_to(path, notice: notice)
         end
-        format.html { redirect_to after_header_save_path, notice: notice }
+        format.html { redirect_to path, notice: notice }
       end
-    end
-
-    def after_header_save_path
-      edit_press_kit_header_path(@press_kit_recording)
     end
 
     def from_kit_editor?
@@ -66,31 +61,66 @@ module RecordingStudioPresskits
 
     def header_fields
       submitted = press_kit_params
-      [submitted[:title].to_s.strip, submitted[:description].to_s.strip.presence]
+      {
+        title: submitted[:title].to_s.strip,
+        description: submitted[:description].to_s.strip.presence
+      }.merge(cover_fields(submitted))
     end
 
-    def revise_header(title, description)
+    def cover_fields(submitted)
+      {
+        cover_style: submitted[:cover_style].to_s.strip.presence,
+        cover_color: submitted[:cover_color].to_s.strip.presence,
+        cover_text_color: submitted_text_color(submitted)
+      }
+    end
+
+    def submitted_text_color(submitted)
+      choice = submitted[:cover_text_color].to_s.strip
+      return nil if choice == PressKit::AUTO_COVER_TEXT
+      return submitted[:cover_text_swatch].to_s.strip.presence if choice.blank?
+
+      choice.presence
+    end
+
+    def revise_header(fields)
       current_presskits_root.revise(@press_kit_recording) do |press_kit|
-        press_kit.assign_attributes(title: title, description: description)
+        press_kit.assign_attributes(fields)
       end
     end
 
-    def assign_header_fields(title: :saved, description: :saved)
+    def assign_header_fields(overrides = {})
       recordable = @press_kit_recording.recordable
-      @header_title = title == :saved ? recordable.title : title
-      @header_description = description == :saved ? recordable.description : description
+      @header_title = field_or_saved(overrides, :title, recordable.title)
+      @header_description = field_or_saved(overrides, :description, recordable.description)
+      @header_cover_style = field_or_saved(overrides, :cover_style, recordable.cover_style)
+      @header_cover_color = field_or_saved(overrides, :cover_color, recordable.cover_color)
+      @header_cover_text_color = field_or_saved(overrides, :cover_text_color, recordable.cover_text_color)
     end
 
-    def render_missing_title(title, description)
-      assign_header_fields(title: title, description: description)
+    def field_or_saved(overrides, key, saved)
+      overrides.key?(key) ? overrides[key] : saved
+    end
+
+    def render_missing_title(fields)
+      assign_header_fields(fields)
       flash.now[:alert] = "Give it a name so you can find it later."
       render :edit, status: :unprocessable_entity
     end
 
-    def render_invalid_header(title, description)
-      assign_header_fields(title: title, description: description)
-      flash.now[:alert] = "Keep that description short. 280 characters is the limit."
+    def render_invalid_header(fields, error)
+      assign_header_fields(fields)
+      flash.now[:alert] = invalid_header_alert(error)
       render :edit, status: :unprocessable_entity
+    end
+
+    def invalid_header_alert(error)
+      messages = error.record.errors
+      return "Pick a colour we can actually paint." if messages[:cover_color].any?
+      return "Pick a text colour we can actually paint." if messages[:cover_text_color].any?
+      return "That cover style is not ready yet." if messages[:cover_style].any?
+
+      "Keep that description short. 280 characters is the limit."
     end
   end
 end

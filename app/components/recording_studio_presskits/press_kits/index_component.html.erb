@@ -78,30 +78,13 @@
           <% table.column(title: "Added", html: ->(recording) { recording.created_at&.to_fs(:long) }) %>
         <% end %>
       <% else %>
-        <%= render FlatPack::Grid::Component.new(cols: 3, gap: :md) do %>
+        <%= render FlatPack::Grid::Component.new(cols: 3, gap: :md, class: "items-stretch") do %>
           <% @press_kit_recordings.each do |recording| %>
-            <%= render FlatPack::Card::Component.new(
-              style: :interactive,
-              clickable: true,
+            <%= render RecordingStudioPresskits::Cover::Component.new(
+              recording: recording,
+              size: :card,
               href: @show_path.call(recording)
-            ) do |card| %>
-              <% card.media(aspect_ratio: "16/9", padding: :none, class: "relative bg-(--card-background-muted-color)") do %>
-                <% cover_url = helpers.presskits_cover_url_for(recording) %>
-                <% if cover_url.present? %>
-                  <%= image_tag cover_url, alt: "", class: "absolute inset-0 h-full w-full object-cover" %>
-                <% else %>
-                  <div class="absolute inset-0 flex items-center justify-center text-(--surface-muted-content-color)" aria-hidden="true">
-                    <%= render FlatPack::Shared::IconComponent.new(name: "photo", size: :xl) %>
-                  </div>
-                <% end %>
-              <% end %>
-
-              <% card.body do %>
-                <p class="text-base font-semibold text-(--surface-content-color)">
-                  <%= helpers.presskits_title_for(recording) %>
-                </p>
-              <% end %>
-            <% end %>
+            ) %>
           <% end %>
         <% end %>
       <% end %>

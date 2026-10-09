@@ -1,29 +1,122 @@
-<%= form_with url: helpers.press_kit_header_path(@press_kit_recording), method: :patch,
-      id: "presskits-header-form",
-      class: "flex flex-col gap-6",
-      data: helpers.presskits_editor_save_data.merge(controller: "flat-pack--unsaved-changes") do %>
-  <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
-  <%= render FlatPack::TextInput::Component.new(
-    name: "press_kit[title]",
-    label: "Title",
-    value: header_title,
-    required: true
-  ) %>
-  <%= render FlatPack::TextArea::Component.new(
-    name: "press_kit[description]",
-    label: "Short description",
-    value: header_description,
-    placeholder: "One or two lines for the people who open this.",
-    character_count: true,
-    max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT,
-    class: "w-full"
-  ) %>
-  <div id="presskits-header-actions" class="flex flex-wrap items-center gap-3">
-    <%= render FlatPack::Button::Component.new(
-      text: "Update",
-      style: :default,
-      type: "submit",
-      data: { "flat-pack--unsaved-changes-target": "submit" }
+<div
+  class="flex flex-col gap-6"
+  data-controller="recording-studio-presskits--cover-preview"
+  data-action="input->recording-studio-presskits--cover-preview#sync change->recording-studio-presskits--cover-preview#sync"
+>
+  <%= form_with url: helpers.press_kit_header_path(@press_kit_recording), method: :patch,
+        id: "presskits-header-form",
+        class: "flex flex-col gap-6",
+        data: helpers.presskits_editor_save_data.merge(controller: "flat-pack--unsaved-changes") do %>
+    <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
+    <%= hidden_field_tag "press_kit[cover_style]", header_cover_style %>
+
+    <%= render FlatPack::TextInput::Component.new(
+      name: "press_kit[title]",
+      label: "Title",
+      value: header_title,
+      required: true
     ) %>
-  </div>
-<% end %>
+    <%= render FlatPack::TextArea::Component.new(
+      name: "press_kit[description]",
+      label: "Short description",
+      value: header_description,
+      placeholder: "One or two lines for the people who open this.",
+      character_count: true,
+      max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT,
+      class: "w-full"
+    ) %>
+
+    <% if any_cover_color? %>
+      <%= render FlatPack::FormField::Component.new(
+        field_id: "press_kit_cover_color",
+        label: "Colour"
+      ) do |field| %>
+        <% field.with_control do %>
+          <%= render FlatPack::ColorSwatch::Component.new(
+            color: header_cover_color,
+            name: "press_kit[cover_color]",
+            value: header_cover_color,
+            text: "Colour",
+            selected: true,
+            size: :lg,
+            id: "press_kit_cover_color"
+          ) %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <%= render FlatPack::RadioGroup::Component.new(
+        name: "press_kit[cover_color]",
+        label: "Colour",
+        options: cover_options,
+        value: header_cover_color,
+        variant: :inline
+      ) %>
+    <% end %>
+
+    <% if any_cover_text_color? %>
+      <%= render FlatPack::FormField::Component.new(
+        field_id: "press_kit_cover_text_color",
+        label: "Text colour"
+      ) do |field| %>
+        <% field.with_control do %>
+          <div class="flex flex-wrap items-center gap-3">
+            <% if cover_text_auto? %>
+              <%= render FlatPack::RadioGroup::Component.new(
+                name: "press_kit[cover_text_color]",
+                options: [
+                  { label: "Auto", value: auto_text_value },
+                  { label: "Custom", value: header_text_swatch_color }
+                ],
+                value: header_cover_text_value,
+                variant: :inline
+              ) %>
+            <% end %>
+            <%= render FlatPack::ColorSwatch::Component.new(
+              color: header_text_swatch_color,
+              name: "press_kit[cover_text_swatch]",
+              value: header_text_swatch_color,
+              text: "Text colour",
+              selected: !auto_text_color?,
+              size: :lg,
+              id: "press_kit_cover_text_color"
+            ) %>
+          </div>
+        <% end %>
+      <% end %>
+    <% else %>
+      <%= render FlatPack::RadioGroup::Component.new(
+        name: "press_kit[cover_text_color]",
+        label: "Text colour",
+        options: cover_text_options,
+        value: header_cover_text_value,
+        variant: :inline
+      ) %>
+    <% end %>
+
+    <div data-recording-studio-presskits--cover-preview-target="contrastHint" <% unless low_contrast_text? %>hidden<% end %>>
+      <%= render FlatPack::Alert::Component.new(
+        description: "That text may be hard to read on this colour.",
+        style: :warning
+      ) %>
+    </div>
+
+    <%= render RecordingStudioPresskits::Cover::Component.new(
+      title: header_title,
+      description: header_description,
+      cover_style: header_cover_style,
+      cover_color: header_cover_color,
+      cover_text_color: header_cover_text_color,
+      size: :preview,
+      id: "presskits-header-edit-preview"
+    ) %>
+
+    <div id="presskits-header-actions" class="flex flex-wrap items-center gap-3">
+      <%= render FlatPack::Button::Component.new(
+        text: "Update",
+        style: :default,
+        type: "submit",
+        data: { "flat-pack--unsaved-changes-target": "submit" }
+      ) %>
+    </div>
+  <% end %>
+</div>

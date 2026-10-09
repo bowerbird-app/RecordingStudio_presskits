@@ -1,5 +1,23 @@
 # Upgrade notes
 
+## 0.23.1
+
+A press kit can store a colour cover. `cover_style` is `color` for now (`nil` means colour with the host default). `cover_color` is a hex string.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds nullable `cover_style` and `cover_color` on `recording_studio_press_kits`. Existing kits keep their title and render the default colour.
+
+Hosts set `config.cover_colors` to a palette or `:any`, and `config.default_cover_color`. The default palette is `#1F2937`, `#7C3AED`, `#DB2777`, `#059669`, and `#D97706`. The default colour is `#1F2937`. Writes must be a valid hex. In palette mode they must be one of those colours. A stored colour that later leaves the palette still renders.
+
+Overlay text is light or dark from WCAG contrast. People do not pick a text colour.
+
+`RecordingStudioPresskits::Cover::Component` paints `:card` (16/9 grid tile), `:preview` (header editor), and `:hero` (public kit). Title sits on the colour. A card description clamps to two lines. Press Centers and hosts can render the same card.
+
+The header screen adds **Colour**. A palette uses `FlatPack::RadioGroup` `variant: :inline`. `:any` uses `FlatPack::ColorSwatch`. Column two previews the cover live.
+
+When Recording Studio API is loaded, a press kit show and update include `cover_style` and `cover_color`. Those two keys are writable. Title and description stay on the header screen. MCP uses the same payload. Duplicating a kit copies both fields.
+
+Bump FlatPack to at least `0.1.214` and reload its CSS and JavaScript. Importmap hosts that already pin Flatpack controllers load `flat-pack--color-swatch` with no new register call. Reload the press kits JavaScript so the header preview follows Colour.
+
 ## 0.23.0
 
 The press kit index draws a sidebar. Library is a collapsible group, and Credits is the link under it. The Credits button next to Presskit is gone.

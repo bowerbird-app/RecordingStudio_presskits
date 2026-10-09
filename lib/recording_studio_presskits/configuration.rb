@@ -3,7 +3,8 @@
 module RecordingStudioPresskits
   class Configuration
     attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
-                  :section_components, :section_editors, :section_prepares, :excluded_picker_types
+                  :section_components, :section_editors, :section_prepares, :excluded_picker_types,
+                  :cover_colors, :default_cover_color
     attr_reader :hooks
 
     def initialize
@@ -15,7 +16,17 @@ module RecordingStudioPresskits
       @section_editors = {}
       @section_prepares = {}
       @excluded_picker_types = []
+      @cover_colors = Cover::Palette::DEFAULT_COLORS.dup
+      @default_cover_color = Cover::Palette::DEFAULT_COLOR
       @hooks = RecordingStudio::Hooks.new
+    end
+
+    def cover_palette
+      Cover::Palette.new(colors: cover_colors, default_color: default_cover_color)
+    end
+
+    def any_cover_color?
+      cover_palette.any?
     end
 
     def to_h
@@ -27,6 +38,8 @@ module RecordingStudioPresskits
         section_components: section_components.dup,
         section_editors: section_editors.dup,
         excluded_picker_types: Array(excluded_picker_types).map(&:to_s),
+        cover_colors: any_cover_color? ? :any : cover_palette.colors,
+        default_cover_color: cover_palette.default_color,
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
     end

@@ -74,6 +74,13 @@ begin
     root_recording,
     description: "Doors at noon. The one-sheet is inside."
   )
+  if press_kit_recording.recordable.cover_color.blank?
+    root_recording.revise(press_kit_recording) do |press_kit|
+      press_kit.cover_style = "color"
+      press_kit.cover_color = "#7C3AED"
+    end
+    press_kit_recording.reload
+  end
 
   unpublished_kit_recording = RecordingStudio::Recording.recording_studio_trashable_active
                                                         .where(root_recording: root_recording,
@@ -84,7 +91,15 @@ begin
     unpublished_kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
       press_kit.title = "Autumn recap"
       press_kit.description = "What we shipped, on one page."
+      press_kit.cover_style = "color"
+      press_kit.cover_color = "#D97706"
     end
+  else
+    root_recording.revise(unpublished_kit_recording) do |press_kit|
+      press_kit.cover_style = "color" if press_kit.cover_color.blank?
+      press_kit.cover_color = "#D97706" if press_kit.cover_color.blank?
+    end
+    unpublished_kit_recording.reload
   end
 
   trash_named_child = lambda do |parent_recording, type, title|

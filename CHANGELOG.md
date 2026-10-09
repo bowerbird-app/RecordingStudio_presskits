@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-10-09
+
+Kit covers on the live kit editor from `0.24.0`.
+
+### Added
+- A press kit can store `cover_style`, `cover_color`, and `cover_text_color`. The only style is `color`. `nil` style means colour with the host default. `nil` text colour means Auto (WCAG contrast).
+- Hosts set `cover_colors` to a palette (`%w[#1F2937 #7C3AED #DB2777 #059669 #D97706]` by default) or `:any`. `default_cover_color` is `#1F2937`. `cover_text_colors` defaults to `%w[#F8FAFC #111827 #E5E7EB #6B7280]` or `:any`. `cover_text_auto` (default true) adds an Auto choice.
+- Writes must be a valid hex. In palette mode they must be one of those colours. A stored colour that later leaves the palette still renders.
+- Overlay text uses `cover_text_color` when set. Auto picks light or dark from WCAG contrast. A low-contrast pair is allowed; the editor may hint.
+- `RecordingStudioPresskits::Cover::Component` paints `:card` and `:preview` as 9/16 story tiles, and `:hero` as a wide 21/9 band. Title sits on the colour at the page-title size. A card description clamps to two lines.
+- The shared kit header screen in `pk-editor` has **Colour** and **Text colour**. Each is a `FlatPack::RadioGroup` `variant: :inline` for a palette, or a `FlatPack::ColorSwatch` when the host allows any colour. Text colour includes **Auto**. FlatPack has no swatch-radio yet, so a palette stays named radios. A preview tile follows the colours as you edit.
+- The kit index cards, the kit header on the live editor, and the public kit use that component. Saving the header refreshes the editor hero through the existing Turbo Stream replace. Press Centers and hosts can render it too.
+- When Recording Studio API is loaded, a press kit show and update include `cover_style`, `cover_color`, and `cover_text_color`. MCP uses the same payload. Duplicating a kit copies those fields.
+
+### Changed
+- Version `0.25.0`
+
+### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. `recording_studio_press_kits` gains nullable `cover_style`, `cover_color`, and `cover_text_color`. Existing kits keep their title and start on the default colour with Auto text.
+- Reload the press kits JavaScript so the header preview follows Colour and Text colour. Importmap hosts that already pin Flatpack controllers load `flat-pack--color-swatch` with no new register call.
+- Set `config.cover_colors`, `config.default_cover_color`, `config.cover_text_colors`, and `config.cover_text_auto` if the defaults are not your palette. Use `:any` to allow any hex.
+- A host that replaced the kit index, the kit header, or the public page should render `RecordingStudioPresskits::Cover::Component`. A host that replaced the shared header screen in `pk-editor` adds Colour and Text colour.
+- API clients that read a press kit now see `cover_style`, `cover_color`, and `cover_text_color`. Those keys are writable. Title and description stay on the header screen.
+
 ## [0.24.0] - 2026-10-09
 
 ### Changed
@@ -537,7 +561,10 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...HEAD
+[0.25.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.0...v0.25.0
+[0.24.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.23.0...v0.24.0
+[0.23.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.20.0...v0.21.0

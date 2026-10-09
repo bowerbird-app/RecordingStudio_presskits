@@ -1,5 +1,19 @@
 development:
   parent_root_type: "Workspace"
+  cover_colors:
+    - "#1F2937"
+    - "#7C3AED"
+    - "#DB2777"
+    - "#059669"
+    - "#D97706"
+  default_cover_color: "#1F2937"
 
 production:
   parent_root_type: "Workspace"
+  cover_colors:
+    - "#1F2937"
+    - "#7C3AED"
+    - "#DB2777"
+    - "#059669"
+    - "#D97706"
+  default_cover_color: "#1F2937"
