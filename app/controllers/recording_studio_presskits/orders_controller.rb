@@ -9,10 +9,7 @@ module RecordingStudioPresskits
       authorize_recording!(@press_kit_recording, role: :edit)
       return if performed?
 
-      apply_reorder
-      return if performed?
-
-      redirect_to edit_press_kit_path(@press_kit_recording), notice: "Order saved."
+      respond_to_reorder(persist_order)
     end
 
     private
@@ -24,32 +21,69 @@ module RecordingStudioPresskits
       head :not_found
     end
 
-    def apply_reorder
-      return reorder_by_ids if ordered_recording_ids.present?
-      return reorder_by_move if move_child.present?
-
-      redirect_to edit_press_kit_path(@press_kit_recording), alert: "Nothing to reorder."
+    def persist_order
+      if ordered_recording_ids.present?
+        reorder_by_ids
+        :saved
+      elsif (child = move_child)
+        reorder_by_move(child)
+        :saved
+      end
     end
 
     def reorder_by_ids
-      save_section_order(ordered_recording_ids)
-    end
-
-    def reorder_by_move
-      save_section_order(moved_section_ids(move_child))
-    end
-
-    def save_section_order(section_ids)
       @press_kit_recording.recording_studio_orderable_reorder!(
-        ordered_recording_ids: section_ids,
+        ordered_recording_ids: ordered_recording_ids,
         actor: presskits_actor
       )
     end
 
-    def moved_section_ids(child)
+    def reorder_by_move(child)
+      @press_kit_recording.recording_studio_orderable_move!(
+        child,
+        to_index: move_to_index(child),
+        actor: presskits_actor
+      )
+    end
+
+    def respond_to_reorder(result)
+      saved = result == :saved
+      if json_request?
+        return render json: { ok: saved }, status: (saved ? :ok : :unprocessable_entity)
+      end
+
+      redirect_to edit_press_kit_path(@press_kit_recording),
+                  **(saved ? { notice: "Order saved." } : { alert: "Nothing to reorder." })
+    end
+
+    def json_request?
+      request.format.json? || request.headers["Accept"].to_s.include?("application/json")
+    end
+
+    def move_child
+      child_id = params[:recording_id].presence || params[:moving_recording_id].presence || params[:id].presence
+      return if child_id.blank?
+
+      KitQuery.section_for(@press_kit_recording, child_id)
+    end
+
+    def move_to_index(child)
+      return target_position_index if params[:target_position].present?
+      return neighbor_index(child) if neighbor_move?
+
+      move_index
+    end
+
+    def neighbor_move?
+      params[:after_recording_id].present? || params[:before_recording_id].present?
+    end
+
+    def neighbor_index(child)
       ids = section_sibling_ids
       ids.delete(child.id.to_s)
-      ids.insert(insertion_index(ids), child.id.to_s)
+      return index_after(ids, params[:after_recording_id]) if params[:after_recording_id].present?
+
+      index_before(ids, params[:before_recording_id])
     end
 
     def section_sibling_ids
@@ -62,23 +96,16 @@ module RecordingStudioPresskits
       Array(params[:ordered_recording_ids]).presence
     end
 
-    def move_child
-      child_id = params[:recording_id].presence || params[:id].presence
-      return if child_id.blank?
+    def target_position_index
+      position = Integer(params[:target_position], exception: false)
+      return 0 if position.nil?
 
-      KitQuery.section_for(@press_kit_recording, child_id)
+      [position - 1, 0].max
     end
 
     def move_index
       value = params[:to_index].presence || params[:position].presence
       Integer(value, exception: false) || 0
-    end
-
-    def insertion_index(sibling_ids)
-      return index_after(sibling_ids, params[:after_recording_id]) if params[:after_recording_id].present?
-      return index_before(sibling_ids, params[:before_recording_id]) if params[:before_recording_id].present?
-
-      move_index
     end
 
     def index_after(sibling_ids, recording_id)

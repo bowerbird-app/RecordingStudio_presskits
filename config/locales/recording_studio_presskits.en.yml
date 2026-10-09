@@ -1,0 +1,33 @@
+en:
+  recording_studio_presskits:
+    editor:
+      add_section: "Section"
+      picker_title: "Add a section"
+      order: "Order"
+      reorder: "Reorder"
+      header: "Header"
+      edit_heading: "Edit heading"
+      edit_content: "Edit content"
+      add_content: "Add…"
+      undo: "Undo"
+      added: "%{title} is in the kit."
+      heading_title: "Section heading"
+      content_title: "Content"
+      empty_kit: "Nothing to show yet"
+      empty_kit_hint: "Add a section when you are ready."
+      placeholder:
+        text: "Add some copy"
+        images: "Add photos"
+        quotes: "Add a quote"
+        facts: "Add a figure"
+        credits: "Add a credit"
+        video: "Add a video"
+        generic: "Add something here"
+      picker_descriptions:
+        text: "The story, in your own words."
+        images: "Photos they can drop into a piece."
+        quote_section: "A line someone else already said for you."
+        facts_section: "The numbers that make the story land."
+        credits_section: "Who did the work, and what they did."
+        video_section: "A clip they can watch without a hunt."
+        generic: "Another block for the kit."

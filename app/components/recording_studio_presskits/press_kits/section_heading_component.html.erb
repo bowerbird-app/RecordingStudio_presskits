@@ -1,0 +1,18 @@
+<% if @title.to_s.strip.present? %>
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: @title,
+    subtitle: @subtitle,
+    anchor_link: @anchor_link,
+    size: @size,
+    spacing: @spacing,
+    level: @level
+  ) %>
+<% elsif @subtitle.to_s.strip.present? %>
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: @subtitle,
+    anchor_link: @anchor_link,
+    size: :md,
+    spacing: @spacing,
+    level: @level
+  ) %>
+<% end %>

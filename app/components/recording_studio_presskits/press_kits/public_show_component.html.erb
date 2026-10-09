@@ -8,14 +8,14 @@
     ) %>
   <% end %>
 
-  <% if section_recordings.empty? %>
+  <% if visible_section_recordings.empty? %>
     <%= render FlatPack::EmptyState::Component.new(
       title: "Nothing to show yet",
       description: "Sections will land here once they add some.",
       icon: :inbox
     ) %>
   <% else %>
-    <% section_recordings.each do |recording| %>
+    <% visible_section_recordings.each do |recording| %>
       <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: recording) %>
     <% end %>
   <% end %>

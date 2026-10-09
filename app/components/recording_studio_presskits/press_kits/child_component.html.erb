@@ -5,7 +5,7 @@
     </div>
 
     <% if can_remove? %>
-      <%= form_with url: @remove_path, method: :delete, local: true, html: { draggable: "false" } do %>
+      <%= form_with url: @remove_path, method: :delete, html: { draggable: "false" }, data: { turbo_stream: true } do %>
         <%= render FlatPack::Button::Component.new(
           icon: "trash",
           icon_only: true,

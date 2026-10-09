@@ -2,10 +2,11 @@
   <%= form_with url: update_path, method: :patch, local: true,
         id: "presskits-facts-display-form",
         class: "flex flex-col gap-6",
-        data: {
+        data: helpers.presskits_editor_save_data.merge(
           controller: "recording-studio-presskits--facts-display flat-pack--unsaved-changes",
           action: "change->recording-studio-presskits--facts-display#toggle"
-        } do %>
+        ) do %>
+    <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
     <%= render FlatPack::Select::Component.new(
       name: "facts_section[display_style]",
       value: section.display_style,
@@ -51,7 +52,7 @@
             <%= render FlatPack::List::Item.new(id: fact_recording.id, icon: "arrows-up-down", hover: true) do %>
               <div class="flex w-full items-center justify-between gap-3">
                 <div class="min-w-0 flex-1">
-                  <%= link_to edit_path(fact_recording), draggable: "false", class: "block min-w-0" do %>
+                  <%= link_to edit_path(fact_recording), draggable: "false", class: "block min-w-0", data: helpers.presskits_editor_nav(:push) do %>
                     <span class="block truncate text-sm font-medium text-(--surface-content-color)">
                       <%= fact_label(fact_recording) %>
                     </span>

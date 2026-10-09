@@ -9,6 +9,8 @@ module RecordingStudioPresskits
         @content_recording = KitQuery.section_content(section_recording)
       end
 
+      attr_reader :content_recording
+
       def title
         RecordingStudioPresskits.section_heading(@section_recording)
       end
@@ -27,15 +29,34 @@ module RecordingStudioPresskits
         RecordingStudioPresskits.section_component_for(@content_recording)
       end
 
+      def heading_component
+        SectionHeadingComponent.new(
+          title: title,
+          subtitle: subtitle,
+          size: :lg,
+          spacing: :md,
+          level: :h2,
+          anchor_link: true
+        )
+      end
+
+      def content_view
+        component = content_component
+        return if component.blank?
+
+        component.new(recording: @content_recording)
+      end
+
       def render?
-        saved_title.present? || subtitle.present? || content_visible?
+        content_visible?
       end
 
       def content_visible?
-        component = content_component
-        return false if component.blank?
+        view = content_view
+        return false if view.blank?
+        return true unless view.respond_to?(:render?)
 
-        component.new(recording: @content_recording).render?
+        view.render?
       end
     end
   end

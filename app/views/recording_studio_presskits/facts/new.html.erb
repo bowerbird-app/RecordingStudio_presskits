@@ -1,11 +1,20 @@
-<% presskits_page_nav(
-  title: "Fact",
-  back_url: edit_press_kit_section_path(@press_kit_recording, @section_recording),
-  back_label: "Back to facts",
-  close_url: edit_press_kit_path(@press_kit_recording)
-) %>
+<% if presskits_editor_dialog? %>
+  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: "Fact") do %>
+    <%= render RecordingStudioPresskits::Fact::EditComponent.new(
+      fact: @fact,
+      section_recording: @section_recording
+    ) %>
+  <% end %>
+<% else %>
+  <% presskits_page_nav(
+    title: "Fact",
+    back_url: edit_press_kit_section_path(@press_kit_recording, @section_recording),
+    back_label: "Back to facts",
+    close_url: edit_press_kit_path(@press_kit_recording)
+  ) %>
 
-<%= render RecordingStudioPresskits::Fact::EditComponent.new(
-  fact: @fact,
-  section_recording: @section_recording
-) %>
+  <%= render RecordingStudioPresskits::Fact::EditComponent.new(
+    fact: @fact,
+    section_recording: @section_recording
+  ) %>
+<% end %>

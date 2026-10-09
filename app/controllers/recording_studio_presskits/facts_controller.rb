@@ -38,7 +38,7 @@ module RecordingStudioPresskits
       return head :not_found unless fact_recording
 
       revise_fact
-      redirect_to fact_edit_path(fact_recording), notice: "Saved."
+      respond_with_preview_or_redirect(html_redirect: fact_edit_path(fact_recording), notice: "Saved.")
     rescue ActiveRecord::RecordInvalid => e
       @fact = invalid_fact(e)
       render :edit, status: :unprocessable_entity

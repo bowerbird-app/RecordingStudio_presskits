@@ -2,6 +2,8 @@
 
 module RecordingStudioPresskits
   module ApplicationHelper
+    include KitEditorHelper
+
     def presskits_page_nav(title:, back_url: nil, back_label: "Go back", close_url: nil, access: false)
       recording_studio_page_nav(
         title: title,

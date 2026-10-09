@@ -3,8 +3,8 @@
 module RecordingStudioPresskits
   module PressKits
     class KitEditorComponent < ViewComponent::Base
-      def initialize(press_kit_recording:, section_recordings:, picker_types:, add_path:, remove_path:, # rubocop:disable Metrics/ParameterLists
-                     reorder_path:, edit_path:, header_edit_path:)
+      def initialize(press_kit_recording:, section_recordings:, picker_types:, add_path:, remove_path:, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
+                     reorder_path:, edit_path:, heading_path:, header_edit_path:, highlight_id: nil)
         super()
         @press_kit_recording = press_kit_recording
         @section_recordings = section_recordings
@@ -13,25 +13,9 @@ module RecordingStudioPresskits
         @remove_path = remove_path
         @reorder_path = reorder_path
         @edit_path = edit_path
+        @heading_path = heading_path
         @header_edit_path = header_edit_path
-      end
-
-      def header_description
-        @press_kit_recording.recordable.try(:description).to_s
-      end
-
-      def show_header_preview?
-        header_description.present?
-      end
-
-      def show_preview?
-        show_header_preview? || @section_recordings.any? { |recording| section_visible?(recording) }
-      end
-
-      def header_rule_class
-        return if @section_recordings.empty?
-
-        "divide-y divide-[var(--surface-border-color)]"
+        @highlight_id = highlight_id
       end
 
       def picker_items
@@ -39,9 +23,14 @@ module RecordingStudioPresskits
           {
             id: type_name,
             label: RecordingStudio.recordable_type_label(type_name),
-            icon: section_menu_icon_for(type_name)
+            icon: section_menu_icon_for(type_name),
+            description: picker_description_for(type_name)
           }
         end
+      end
+
+      def highlight?(recording)
+        recording.id.to_s == @highlight_id.to_s
       end
 
       private
@@ -50,8 +39,12 @@ module RecordingStudioPresskits
         type_name.to_s.safe_constantize.try(:section_menu_icon).presence
       end
 
-      def section_visible?(recording)
-        SectionFrameComponent.new(section_recording: recording).render?
+      def picker_description_for(type_name)
+        key = type_name.to_s.demodulize.underscore
+        I18n.t(
+          "recording_studio_presskits.editor.picker_descriptions.#{key}",
+          default: I18n.t("recording_studio_presskits.editor.picker_descriptions.generic")
+        )
       end
     end
   end

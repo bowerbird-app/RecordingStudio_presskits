@@ -11,7 +11,7 @@ module RecordingStudioPresskits
       return if performed?
 
       save_lines
-      redirect_to section_edit_path, notice: "Saved."
+      respond_with_preview_or_redirect(html_redirect: section_edit_path, notice: "Saved.")
     rescue ArgumentError
       redirect_to section_edit_path, alert: "That credit is not in this workspace."
     end

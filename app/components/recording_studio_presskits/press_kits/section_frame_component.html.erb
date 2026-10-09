@@ -1,13 +1,5 @@
-<% if title.present? %>
-  <%= render FlatPack::SectionTitle::Component.new(
-    title: title,
-    subtitle: subtitle,
-    anchor_link: true
-  ) %>
-<% elsif subtitle.present? %>
-  <p class="text-base text-[var(--surface-muted-content-color)]"><%= subtitle %></p>
-<% end %>
+<%= render heading_component %>
 
-<% if (component = content_component) %>
-  <%= render component.new(recording: @content_recording) %>
+<% if (view = content_view) %>
+  <%= render view %>
 <% end %>

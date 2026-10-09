@@ -1,0 +1,27 @@
+<div id="presskits-section-picker-list">
+  <% if @items.any? %>
+    <%= render FlatPack::List::Component.new(divider: true, class: "w-full") do %>
+      <% @items.each do |item| %>
+        <%= render FlatPack::List::Item.new(
+          icon: item[:icon],
+          href: add_path_for(item[:id]),
+          hover: true,
+          link_arguments: { data: { turbo_method: :post, turbo_stream: true } }
+        ) do %>
+          <span class="block text-sm font-medium text-(--surface-content-color)">
+            <%= item[:label] %>
+          </span>
+          <span class="block text-sm text-(--surface-muted-content-color)">
+            <%= item[:description] %>
+          </span>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: I18n.t("recording_studio_presskits.editor.empty_kit"),
+      description: I18n.t("recording_studio_presskits.editor.empty_kit_hint"),
+      icon: :inbox
+    ) %>
+  <% end %>
+</div>

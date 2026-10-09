@@ -39,7 +39,7 @@ module RecordingStudioPresskits
         root_recording: current_presskits_root,
         role: params.require(:credit_line).permit(:role)[:role]
       )
-      redirect_to edit_line_path(@line_recording), notice: "Saved."
+      respond_with_preview_or_redirect(html_redirect: edit_line_path(@line_recording), notice: "Saved.")
     end
 
     def destroy

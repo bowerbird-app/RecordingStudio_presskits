@@ -14,11 +14,23 @@ module RecordingStudioPresskits
     helper ::RecordingStudio::LayoutHelper if defined?(::RecordingStudio::LayoutHelper)
     helper ::RecordingStudioAccessible::AvatarsHelper if defined?(::RecordingStudioAccessible::AvatarsHelper)
     helper ::RecordingStudioPublishable::Engine.helpers if defined?(::RecordingStudioPublishable::Engine)
+    helper FlatPack::ModalHelper if defined?(FlatPack::ModalHelper)
+    include KitEditorHelper
 
     before_action :authenticate_presskits_actor!
     before_action :set_presskits_current_actor
 
     helper_method :current_presskits_root
+    helper_method :presskits_editor_dialog?
+    helper_method :presskits_editor_modal_id
+    helper_method :presskits_editor_screen_id
+    helper_method :presskits_editor_open_data
+    helper_method :presskits_editor_nav
+    helper_method :presskits_editor_save_data
+    helper_method :from_kit_editor?
+    helper_method :editor_picker_items
+    helper_method :editable_section_for
+    helper_method :sections_order_for
 
     private
 
@@ -68,6 +80,19 @@ module RecordingStudioPresskits
 
     def load_press_kit(id)
       KitQuery.for_root(current_presskits_root).find_by(id: id)
+    end
+
+    def respond_with_preview_or_redirect(html_redirect:, notice:)
+      respond_to do |format|
+        format.turbo_stream do
+          if from_kit_editor?
+            render template: "recording_studio_presskits/editor/preview_section"
+          else
+            redirect_to html_redirect, notice: notice
+          end
+        end
+        format.html { redirect_to html_redirect, notice: notice }
+      end
     end
   end
 end

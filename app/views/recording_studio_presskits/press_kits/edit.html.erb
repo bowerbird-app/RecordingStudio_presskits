@@ -14,5 +14,7 @@
   remove_path: ->(recording) { press_kit_section_path(@press_kit_recording, recording) },
   reorder_path: press_kit_order_path(@press_kit_recording),
   edit_path: ->(recording) { edit_press_kit_section_path(@press_kit_recording, recording) },
-  header_edit_path: edit_press_kit_header_path(@press_kit_recording)
+  heading_path: ->(recording) { heading_press_kit_section_path(@press_kit_recording, recording) },
+  header_edit_path: edit_press_kit_header_path(@press_kit_recording),
+  highlight_id: @highlight_id
 ) %>

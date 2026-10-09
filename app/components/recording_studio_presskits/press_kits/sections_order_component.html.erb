@@ -1,0 +1,31 @@
+<div id="presskits-section-list">
+  <% if @section_recordings.any? %>
+    <div
+      data-controller="recording-studio-presskits--kit-preview-reload"
+      data-action="list:saved->recording-studio-presskits--kit-preview-reload#reload"
+    >
+      <%= render FlatPack::List::Component.new(
+        orderable: true,
+        divider: true,
+        class: "w-full",
+        orderable_url: @reorder_path,
+        param_uuid_name: "moving_recording_id",
+        param_target_position_name: "target_position"
+      ) do %>
+        <% @section_recordings.each do |recording| %>
+          <%= render RecordingStudioPresskits::PressKits::ChildComponent.new(
+            recording: recording,
+            remove_path: @remove_path.call(recording),
+            edit_path: @edit_path.call(recording)
+          ) %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: I18n.t("recording_studio_presskits.editor.empty_kit"),
+      description: I18n.t("recording_studio_presskits.editor.empty_kit_hint"),
+      icon: :inbox
+    ) %>
+  <% end %>
+</div>

@@ -1,13 +1,24 @@
-<% presskits_page_nav(
-  title: "Add credit",
-  back_url: edit_press_kit_section_path(@press_kit_recording, @section_recording),
-  back_label: "Back to credits",
-  close_url: edit_press_kit_path(@press_kit_recording)
-) %>
+<% if presskits_editor_dialog? %>
+  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: "Add credit") do %>
+    <%= render RecordingStudioPresskits::CreditsSection::AddComponent.new(
+      credit: @credit,
+      root_recording: current_presskits_root,
+      url: press_kit_section_credits_path(@press_kit_recording, @section_recording),
+      kit_role: params[:role]
+    ) %>
+  <% end %>
+<% else %>
+  <% presskits_page_nav(
+    title: "Add credit",
+    back_url: edit_press_kit_section_path(@press_kit_recording, @section_recording),
+    back_label: "Back to credits",
+    close_url: edit_press_kit_path(@press_kit_recording)
+  ) %>
 
-<%= render RecordingStudioPresskits::CreditsSection::AddComponent.new(
-  credit: @credit,
-  root_recording: current_presskits_root,
-  url: press_kit_section_credits_path(@press_kit_recording, @section_recording),
-  kit_role: params[:role]
-) %>
+  <%= render RecordingStudioPresskits::CreditsSection::AddComponent.new(
+    credit: @credit,
+    root_recording: current_presskits_root,
+    url: press_kit_section_credits_path(@press_kit_recording, @section_recording),
+    kit_role: params[:role]
+  ) %>
+<% end %>
