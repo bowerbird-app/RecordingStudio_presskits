@@ -176,6 +176,25 @@ class EngineTest < Minitest::Test
     assert_equal [true], registered
   end
 
+  def test_metrics_initializer_registers_press_kit_metrics
+    to_prepare_blocks = []
+    config_stub = Object.new
+    config_stub.define_singleton_method(:to_prepare) do |&block|
+      to_prepare_blocks << block
+    end
+
+    RecordingStudioPresskits::Engine.stub(:config, config_stub) do
+      find_initializer("recording_studio_presskits.metrics").block.call
+    end
+
+    registered = []
+    RecordingStudioPresskits::Metrics.stub(:register!, -> { registered << true }) do
+      to_prepare_blocks.first.call
+    end
+
+    assert_equal [true], registered
+  end
+
   def test_publishable_views_initializer_appends_engine_views
     appended = []
     controller = Class.new do

@@ -20,6 +20,7 @@ gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publi
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"
+gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.216"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
@@ -36,6 +37,7 @@ gem "recording_studio_publishable", "~> 0.6"
 gem "recording_studio_attachable", "~> 0.13"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
+gem "recording_studio_metrics", "~> 0.2"
 gem "flat_pack", ">= 0.1.216"
 ```
 
@@ -317,6 +319,7 @@ Dummy kit pins:
 | Publishable | `v0.6.0` |
 | External Embed | `v0.1.3` |
 | Video | `v0.1.0` |
+| Metrics | `v0.2.0` |
 
 Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.4 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, and this gem so that layout is not an unstyled box.
 
