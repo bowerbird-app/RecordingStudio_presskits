@@ -9,10 +9,7 @@ module RecordingStudioPresskits
       authorize_recording!(@press_kit_recording, role: :edit)
       return if performed?
 
-      saved = apply_reorder
-      return if performed?
-
-      respond_to_reorder(saved)
+      respond_to_reorder(persist_order)
     end
 
     private
@@ -24,11 +21,14 @@ module RecordingStudioPresskits
       head :not_found
     end
 
-    def apply_reorder
-      return reorder_by_ids if ordered_recording_ids.present?
-      return reorder_by_move if move_child.present?
-
-      false
+    def persist_order
+      if ordered_recording_ids.present?
+        reorder_by_ids
+        :saved
+      elsif (child = move_child)
+        reorder_by_move(child)
+        :saved
+      end
     end
 
     def reorder_by_ids
@@ -36,20 +36,18 @@ module RecordingStudioPresskits
         ordered_recording_ids: ordered_recording_ids,
         actor: presskits_actor
       )
-      true
     end
 
-    def reorder_by_move
-      child = move_child
+    def reorder_by_move(child)
       @press_kit_recording.recording_studio_orderable_move!(
         child,
         to_index: move_to_index(child),
         actor: presskits_actor
       )
-      true
     end
 
-    def respond_to_reorder(saved)
+    def respond_to_reorder(result)
+      saved = result == :saved
       if json_request?
         return render json: { ok: saved }, status: (saved ? :ok : :unprocessable_entity)
       end
@@ -70,13 +68,22 @@ module RecordingStudioPresskits
     end
 
     def move_to_index(child)
+      return target_position_index if params[:target_position].present?
+      return neighbor_index(child) if neighbor_move?
+
+      move_index
+    end
+
+    def neighbor_move?
+      params[:after_recording_id].present? || params[:before_recording_id].present?
+    end
+
+    def neighbor_index(child)
       ids = section_sibling_ids
       ids.delete(child.id.to_s)
       return index_after(ids, params[:after_recording_id]) if params[:after_recording_id].present?
-      return index_before(ids, params[:before_recording_id]) if params[:before_recording_id].present?
-      return target_position_index if params[:target_position].present?
 
-      move_index
+      index_before(ids, params[:before_recording_id])
     end
 
     def section_sibling_ids

@@ -169,8 +169,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_select "button#presskits-section-picker[disabled]"
     assert_select "#presskits-editor-toolbar", text: /Order/
     assert_select "#presskits-sections-modal", text: /Reorder/
-    assert_select "a[href*='type=RecordingStudioPresskits%3A%3AText']", text: "Text"
-    assert_select "#presskits-section-picker-list", text: /The story, in your own words/
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span", text: "Text"
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span",
+                  text: "The story, in your own words."
     assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
     assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
     assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")

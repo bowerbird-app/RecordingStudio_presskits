@@ -510,8 +510,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
                          "app/components/recording_studio_presskits/press_kits/section_picker_component.html.erb"
                        ))
     order = File.read(presskits_path(
-                       "app/components/recording_studio_presskits/press_kits/sections_order_component.html.erb"
-                     ))
+                        "app/components/recording_studio_presskits/press_kits/sections_order_component.html.erb"
+                      ))
     orders = File.read(presskits_path("app/controllers/recording_studio_presskits/orders_controller.rb"))
 
     assert_includes dropdown, "icon: item[:icon]"
