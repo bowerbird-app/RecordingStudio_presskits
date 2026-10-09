@@ -27,6 +27,14 @@ module RecordingStudioPresskits
       def edit_heading_label
         I18n.t("recording_studio_presskits.editor.edit_heading")
       end
+
+      def chrome_class
+        EditableChrome::BLOCK_CLASS
+      end
+
+      def controls_class
+        EditableChrome::CONTROLS_CLASS
+      end
     end
   end
 end

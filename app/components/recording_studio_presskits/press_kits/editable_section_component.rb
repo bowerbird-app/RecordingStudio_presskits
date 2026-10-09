@@ -40,6 +40,14 @@ module RecordingStudioPresskits
       def edit_content_label
         I18n.t("recording_studio_presskits.editor.edit_content")
       end
+
+      def chrome_class
+        highlight? ? "#{EditableChrome::BLOCK_CLASS} ring-2 ring-[var(--color-primary)]" : EditableChrome::BLOCK_CLASS
+      end
+
+      def controls_class
+        EditableChrome::CONTROLS_CLASS
+      end
     end
   end
 end

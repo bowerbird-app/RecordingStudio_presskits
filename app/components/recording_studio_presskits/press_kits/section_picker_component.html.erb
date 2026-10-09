@@ -6,6 +6,7 @@
           icon: item[:icon],
           href: add_path_for(item[:id]),
           hover: true,
+          class: "[&:hover]:bg-[var(--list-item-hover-background-color)]",
           link_arguments: { data: { turbo_method: :post, turbo_stream: true } }
         ) do %>
           <span class="block text-sm font-medium text-(--surface-content-color)">

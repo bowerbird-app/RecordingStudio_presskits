@@ -172,6 +172,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span", text: "Text"
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span",
                   text: "The story, in your own words."
+    picker_item = css_select("#presskits-section-picker-list li").first
+    assert_includes picker_item["class"], "hover:bg-[var(--list-item-hover-background-color)]"
+    assert_includes picker_item["class"], "[&:hover]:bg-[var(--list-item-hover-background-color)]"
     assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
     assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
     assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")

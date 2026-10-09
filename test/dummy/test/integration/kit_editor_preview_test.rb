@@ -45,6 +45,11 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-editor-toolbar a", text: "Header"
     refute_select "#presskits-editor-toolbar a", text: "View"
     assert_select "#presskits-kit-header a", text: "Edit heading"
+    header = css_select("#presskits-kit-header").first
+    assert_includes header["class"], "presskits-editable"
+    assert_includes header["class"], "[&:hover]:outline-[var(--color-primary)]"
+    assert_includes css_select("#presskits-kit-header .presskits-section-edits").first["class"],
+                    "[.presskits-editable:hover_&]:opacity-100"
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"
@@ -66,6 +71,11 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     content = recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_select "a[href='#{heading}']", text: "Edit heading"
     assert_select "a[href='#{content}']", text: "Edit content"
+    section = css_select("[id^='presskits-section-'][id$='-body']").first
+    assert_includes section["class"], "presskits-editable"
+    assert_includes section["class"], "[&:hover]:outline-[var(--color-primary)]"
+    assert_includes css_select(".presskits-section-edits").first["class"],
+                    "[.presskits-editable:hover_&]:opacity-100"
     assert_select "a[href='#{heading}'][data-turbo-frame='pk-editor-screen'][data-modal-id='pk-editor']"
     assert_select "a[href='#{content}'][data-turbo-frame='pk-editor-screen'][data-modal-id='pk-editor']"
     assert_select ".fp-section-title h2"
