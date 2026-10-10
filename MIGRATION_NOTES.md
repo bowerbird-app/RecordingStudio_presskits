@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.28.0
+## 0.29.0
 
 Company and Location sit on the kit hero. Company is a host opt-in on the root: `include RecordingStudio::Capabilities::Companies.to(allow: :one)`. One company per root. The hero calls `RecordingStudioCompany.company(root)` and paints `recording_studio_company_logo` plus the name. Skip the capability, or leave the place empty, and the row stays off.
 
@@ -18,7 +18,7 @@ bin/rails db:migrate
 
 Register `"RecordingStudioCompany::Company"` and `"RecordingStudio::Location::Location"`. Mount those engines. Pin Location's Stimulus controllers. Rebuild Tailwind so Location search-field classes generate. Flatpack `PageTitle` has no byline slot for a logo-plus-name row. Location's `recording_studio_location_display` is a Card — too heavy for the hero — so the hero uses Avatar + Icon + text.
 
-## 0.27.0
+## 0.28.0
 
 The `:hero` cover is still a flush colour surface to the kit card's top and side edges. Height now comes from padding plus content: `p-12` on a phone, `md:p-24` (~96px) on a desktop. There is no 21/9 ratio and no `min-h-64`. Grid `:card` and the header-editor `:preview` stay 9/16.
 
