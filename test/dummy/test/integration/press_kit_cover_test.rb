@@ -258,8 +258,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     public_title = css_select("#presskits-cover-hero h1").first
     refute_includes public_title["class"], "fp-display"
     assert_includes public_title["class"], "fp-text-balance"
-    assert_includes public_title["style"].to_s, "--page-title-h1-size"
+    assert_includes public_title["style"].to_s, "--hero-headline-size"
     refute_includes public_title["style"].to_s, "--display-size"
+    refute_includes public_title["style"].to_s, "--page-title-h1-size"
     assert_includes css_select("#presskits-cover-hero > div").first["class"], "max-w-3xl"
     eyebrow = css_select("#presskits-cover-hero [data-cover-eyebrow]").first
     assert_includes eyebrow["class"], "md:text-4xl"

@@ -13,11 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `:hero` cover no longer uses a fixed 21/9 band. Height comes from padding plus content: `p-12` on a phone and `md:p-24` (~96px) on a desktop. Grid `:card` and header-editor `:preview` stay 9/16.
 - A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). Hosts override that i18n key. Size is `text-3xl` / `md:text-4xl` (~36px desktop). Colour is `color-mix` at 70% of the cover text colour. Flatpack `PageTitle` has no eyebrow slot, so this is a semantic `<p>` with those tokens.
 - The hero no longer shows the kit short description. The field, column, header editor, API payload, and 9/16 cards keep it.
-- Hero title is `FlatPack::PageTitle::Component` at the default page-title size (`--page-title-h1-size`, 48px), top-left, wrapping in `max-w-3xl`. It switches to `size: :display` once Flatpack PR #262 is released. Flatpack stays `>= 0.1.223`.
+- Hero title is a wrapping `h1` at `--hero-headline-size` (48px / `--text-5xl`), top-left, in `max-w-3xl`. Flatpack `PageTitle` default is 36px (`--page-title-h1-size`) and `:display` is a 48–72px clamp, so the hero uses the 48px headline token. It switches to `PageTitle` `size: :display` once Flatpack PR #262 is released. Flatpack stays `>= 0.1.223`.
 - Version `0.27.0`
 
 ### Upgrade notes
-- Rebuild Tailwind so `p-24`, `text-3xl`, and `text-4xl` generate. Hosts that replaced `Cover::Component` at `:hero` should drop `aspect-[21/9]` / `min-h-64`, use `p-12 md:p-24`, render the i18n eyebrow above `PageTitle` (no subtitle, default size, not `:display`), and keep the short description on the header form and on cards.
+- Rebuild Tailwind so `p-24`, `text-3xl`, and `text-4xl` generate. Hosts that replaced `Cover::Component` at `:hero` should drop `aspect-[21/9]` / `min-h-64`, use `p-12 md:p-24`, render the i18n eyebrow above an `h1` at `--hero-headline-size` (not `PageTitle` default or `:display`), and keep the short description on the header form and on cards.
 
 ## [0.26.0] - 2026-10-09
 

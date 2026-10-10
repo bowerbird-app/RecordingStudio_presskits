@@ -6,7 +6,7 @@ The `:hero` cover is still a flush colour surface to the kit card's top and side
 
 A muted **Press kit** eyebrow sits above the title. The copy is `I18n.t("recording_studio_presskits.cover.eyebrow")` so a host can override it. Size is `text-3xl` / `md:text-4xl`. Colour is `color-mix(in oklab, <text colour> 70%, transparent)`. Flatpack `PageTitle` has no eyebrow or kicker slot, so the hero renders a semantic `<p>` with those tokens rather than a custom component.
 
-The hero does not show the kit short description. Keep the field on the header screen, in the table, on the API payload, and on 9/16 cards. Title stays top-left and wraps. It uses `FlatPack::PageTitle::Component` at the default page-title size (`--page-title-h1-size`, 48px) in a `max-w-3xl` block. Switch that title to `size: :display` once Flatpack PR #262 is released. Do not bump Flatpack past `0.1.223` for this.
+The hero does not show the kit short description. Keep the field on the header screen, in the table, on the API payload, and on 9/16 cards. Title stays top-left and wraps at `--hero-headline-size` (48px / `--text-5xl`) in a `max-w-3xl` block. Flatpack `PageTitle` default is 36px; `:display` is a 48–72px clamp. Switch the title to `PageTitle` `size: :display` once Flatpack PR #262 is released. Do not bump Flatpack past `0.1.223` for this.
 
 Rebuild Tailwind so `p-24`, `text-3xl`, and `text-4xl` generate. Hosts that replaced `Cover::Component` should match this hero: no fixed ratio, eyebrow above default-size `PageTitle`, no subtitle on the band.
 

@@ -11,12 +11,9 @@
   >
     <div class="<%= hero_copy_classes %>">
       <p class="<%= eyebrow_classes %>" style="<%= eyebrow_style %>" data-cover-eyebrow><%= eyebrow %></p>
-      <%= render FlatPack::PageTitle::Component.new(
-        title: title,
-        variant: heading_variant,
-        title_color: text_color,
-        class: "mb-0"
-      ) %>
+      <h1 class="font-bold leading-tight fp-text-balance" style="font-size: var(--hero-headline-size); color: <%= text_color %>;">
+        <%= title %>
+      </h1>
     </div>
   </div>
 <% else %>

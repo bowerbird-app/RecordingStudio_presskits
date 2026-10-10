@@ -444,13 +444,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover, "recording_studio_presskits.cover.eyebrow"
     assert_includes cover_html, "<% if hero? %>"
     refute_includes cover_html.split("<% else %>").first, "FlatPack::Card::Component"
-    assert_includes cover_html.split("<% else %>").first, "FlatPack::PageTitle::Component"
+    refute_includes cover_html.split("<% else %>").first, "FlatPack::PageTitle::Component"
     refute_includes cover_html.split("<% else %>").first, "size: :display"
     refute_includes cover_html.split("<% else %>").first, "subtitle: description"
     assert_includes cover_html.split("<% else %>").first, "data-cover-eyebrow"
+    assert_includes cover_html.split("<% else %>").first, "--hero-headline-size"
     assert_includes cover_html, "hero_copy_classes"
     assert_includes cover_html, "--page-title-h1-size"
-    assert_includes cover_html, "variant: heading_variant"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
     assert_includes locales, "cover:"
     assert_includes locales, 'eyebrow: "Press kit"'
