@@ -23,6 +23,17 @@ class KitDownloadTest < Minitest::Test
     assert_equal :edit, defaults[:manage_role]
   end
 
+  def test_audience_defaults_include_registered_custom_audiences
+    registry = Object.new
+    registry.define_singleton_method(:names) { [:public, :signed_in, :granted, :"presskits.test_custom"] }
+
+    RecordingStudioAccessible.stub(:audience_registry, registry) do
+      defaults = RecordingStudioPresskits::KitDownload.audience_defaults
+
+      assert_includes defaults[:allowed], :"presskits.test_custom"
+    end
+  end
+
   def test_filenames_sanitize_and_uniquify
     names = RecordingStudioPresskits::KitDownload::Filenames.new
 
@@ -99,7 +110,7 @@ class KitDownloadTest < Minitest::Test
     assert_equal "globe-alt", icons.audience_icon_for(:public)
     assert_equal "user", icons.audience_icon_for(:signed_in)
     assert_equal "lock-closed", icons.audience_icon_for(:granted)
-    assert_equal "user-group", icons.audience_icon_for(:"presskits.verified_journalist")
+    assert_equal "user-group", icons.audience_icon_for(:"presskits.test_custom")
 
     I18n.backend.store_translations(
       :en,

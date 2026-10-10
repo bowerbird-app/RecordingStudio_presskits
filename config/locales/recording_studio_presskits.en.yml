@@ -16,8 +16,6 @@ en:
         credit: "Credit"
         alt: "Alt"
         fact: "Fact"
-    audiences:
-      verified_journalist: "Verified journalists"
     downloads:
       title: "Downloads"
       subtitle: "Who can download this press kit"

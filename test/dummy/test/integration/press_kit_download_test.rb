@@ -38,7 +38,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_includes defaults[:allowed], :public
     assert_includes defaults[:allowed], :signed_in
     assert_includes defaults[:allowed], :granted
-    assert_includes defaults[:allowed], :"presskits.verified_journalist"
+    refute_includes defaults[:allowed], :"presskits.verified_journalist"
     assert_equal %i[download edit admin], defaults[:granted_roles]
     assert_equal :edit, defaults[:manage_role]
   end
@@ -275,12 +275,26 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_select "input[type='radio'][name='downloads[audience]'][value='public'][checked]"
     assert_select "input[type='radio'][name='downloads[audience]'][value='signed_in']"
     assert_select "input[type='radio'][name='downloads[audience]'][value='granted']"
-    assert_select "input[type='radio'][name='downloads[audience]'][value='presskits.verified_journalist']"
+    refute_select "input[type='radio'][name='downloads[audience]'][value='presskits.verified_journalist']"
+    refute_select "input[type='radio'][name='downloads[audience]'][value='presskits.test_custom']"
     assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='globe-alt']"
     assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='user']"
     assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='lock-closed']"
-    assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='user-group']"
+    refute_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='user-group']"
     refute_includes response.body, "Your workspace only allows some of these choices"
+  end
+
+  test "downloads editor lists a test-only custom audience when the host registers one" do
+    kit = record_kit("Spring launch")
+    with_test_custom_download_audience do
+      sign_in @user
+      switch_to_root(@root)
+      get recording_studio_presskits.edit_press_kit_downloads_path(kit),
+          headers: { "Turbo-Frame" => "pk-editor-screen" }
+      assert_response :success
+      assert_select "input[type='radio'][name='downloads[audience]'][value='presskits.test_custom']"
+      assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='user-group']"
+    end
   end
 
   test "kit editors can save who may download" do
@@ -377,6 +391,26 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  TEST_CUSTOM_AUDIENCE = :"presskits.test_custom"
+
+  def with_test_custom_download_audience
+    previous = nil
+    unless RecordingStudioAccessible.registered_audience?(TEST_CUSTOM_AUDIENCE)
+      RecordingStudioAccessible.register_audience(TEST_CUSTOM_AUDIENCE) { |**_kwargs| false }
+    end
+
+    audiences = RecordingStudioAccessible.configuration.action_audiences
+    previous = audiences[:"presskits.kit_download"]
+    audiences[:"presskits.kit_download"] = previous.merge(
+      allowed: Array(previous[:allowed]) | [TEST_CUSTOM_AUDIENCE]
+    )
+    yield
+  ensure
+    if previous
+      RecordingStudioAccessible.configuration.action_audiences[:"presskits.kit_download"] = previous
+    end
+  end
 
   def record_kit(title)
     @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = title }
