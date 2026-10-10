@@ -5,7 +5,7 @@ require "recording_studio_presskits/kit_download/manifest"
 require "recording_studio_presskits/kit_download/text_file"
 
 module RecordingStudioPresskits
-  class KitDownload
+  class KitDownload # rubocop:disable Metrics/ClassLength
     ACTION = :"presskits.kit_download"
     EXPORT_SCOPE = :public
     TEXT_FILENAME = "kit.txt"

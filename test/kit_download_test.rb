@@ -87,19 +87,13 @@ class KitDownloadTest < Minitest::Test
   end
 
   def test_downloads_editor_uses_accessible_select
-    component = File.read(
-      File.expand_path("../app/components/recording_studio_presskits/press_kits/downloads_editor_component.html.erb", __dir__)
-    )
-    ruby = File.read(
-      File.expand_path("../app/components/recording_studio_presskits/press_kits/downloads_editor_component.rb", __dir__)
-    )
-    controller = File.read(
-      File.expand_path("../app/controllers/recording_studio_presskits/kit_downloads_controller.rb", __dir__)
-    )
-    routes = File.read(File.expand_path("../config/routes.rb", __dir__))
-    screen = File.read(
-      File.expand_path("../app/views/recording_studio_presskits/kit_downloads/edit.html.erb", __dir__)
-    )
+    root = File.expand_path("..", __dir__)
+    editors = "#{root}/app/components/recording_studio_presskits/press_kits"
+    component = File.read("#{editors}/downloads_editor_component.html.erb")
+    ruby = File.read("#{editors}/downloads_editor_component.rb")
+    controller = File.read("#{root}/app/controllers/recording_studio_presskits/kit_downloads_controller.rb")
+    screen = File.read("#{root}/app/views/recording_studio_presskits/kit_downloads/edit.html.erb")
+    routes = File.read("#{root}/config/routes.rb")
 
     assert_includes routes, 'resource :downloads, only: %i[edit update], controller: "kit_downloads"'
     assert_includes controller, "KitDownload.set_audience!"
@@ -109,7 +103,7 @@ class KitDownloadTest < Minitest::Test
     assert_includes component, "max-w-xl"
     assert_includes component, "downloads.constrained"
     assert_includes screen, "flat_pack_modal_screen"
-    assert_includes screen, "pk-editor"
+    assert_includes screen, "presskits_editor_modal_id"
     assert_includes screen, "downloads.title"
     assert_includes screen, "downloads.subtitle"
   end
