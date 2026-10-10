@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.26.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.27.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -434,19 +434,26 @@ class RecordingStudioPresskitsTest < Minitest::Test
     cover = File.read(File.expand_path("cover/component.rb", components))
     cover_html = File.read(File.expand_path("cover/component.html.erb", components))
     assert_includes cover, "9 / 16"
-    assert_includes cover, "21 / 9"
+    refute_includes cover, "21 / 9"
     assert_includes cover, "aspect-[9/16]"
-    assert_includes cover, "justify-start rounded-none p-8 md:p-12"
+    refute_includes cover, "aspect-[21/9]"
+    assert_includes cover, "justify-start rounded-none p-12 md:p-24"
     refute_includes cover, "justify-end rounded-none"
     assert_includes cover, "hero_copy_classes"
-    assert_includes cover, "max-w-2xl"
+    assert_includes cover, "max-w-3xl"
+    assert_includes cover, "recording_studio_presskits.cover.eyebrow"
     assert_includes cover_html, "<% if hero? %>"
     refute_includes cover_html.split("<% else %>").first, "FlatPack::Card::Component"
     assert_includes cover_html.split("<% else %>").first, "FlatPack::PageTitle::Component"
-    assert_includes cover_html.split("<% else %>").first, "size: :display"
+    refute_includes cover_html.split("<% else %>").first, "size: :display"
+    refute_includes cover_html.split("<% else %>").first, "subtitle: description"
+    assert_includes cover_html.split("<% else %>").first, "data-cover-eyebrow"
     assert_includes cover_html, "hero_copy_classes"
     assert_includes cover_html, "--page-title-h1-size"
     assert_includes cover_html, "variant: heading_variant"
+    locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
+    assert_includes locales, "cover:"
+    assert_includes locales, 'eyebrow: "Press kit"'
     refute_includes index, "card.media"
     refute_includes index, 'name: "photo"'
     refute_includes index, "presskits_cover_url_for"

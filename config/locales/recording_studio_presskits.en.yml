@@ -1,5 +1,7 @@
 en:
   recording_studio_presskits:
+    cover:
+      eyebrow: "Press kit"
     editor:
       add_section: "Section"
       picker_title: "Add a section"

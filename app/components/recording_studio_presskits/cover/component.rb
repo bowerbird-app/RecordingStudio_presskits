@@ -70,13 +70,26 @@ module RecordingStudioPresskits
       end
 
       def cover_ratio
-        hero? ? "21 / 9" : "9 / 16"
+        hero? ? "auto" : "9 / 16"
+      end
+
+      def eyebrow
+        I18n.t("recording_studio_presskits.cover.eyebrow")
+      end
+
+      def eyebrow_classes
+        # Tailwind scans these literals: "text-3xl" "text-4xl"
+        "font-normal leading-tight text-3xl md:text-4xl"
+      end
+
+      def eyebrow_style
+        "color: color-mix(in oklab, #{text_color} 70%, transparent);"
       end
 
       def surface_classes
-        # Tailwind scans these literals: "aspect-[9/16]" "aspect-[21/9]" "max-w-xs" "justify-start" "max-w-2xl"
+        # Tailwind scans these literals: "aspect-[9/16]" "max-w-xs" "justify-start" "max-w-3xl" "p-12" "md:p-24"
         if hero?
-          "flex aspect-[21/9] min-h-64 w-full flex-col justify-start rounded-none p-8 md:p-12"
+          "flex w-full flex-col justify-start rounded-none p-12 md:p-24"
         elsif preview?
           "flex aspect-[9/16] w-full flex-col justify-end p-6"
         else
@@ -85,7 +98,7 @@ module RecordingStudioPresskits
       end
 
       def hero_copy_classes
-        "max-w-2xl"
+        "flex max-w-3xl flex-col gap-3"
       end
 
       def wrapper_classes
@@ -93,7 +106,9 @@ module RecordingStudioPresskits
       end
 
       def surface_style
-        "background-color: #{cover_color}; color: #{text_color}; aspect-ratio: #{cover_ratio};"
+        rules = ["background-color: #{cover_color}", "color: #{text_color}"]
+        rules << "aspect-ratio: #{cover_ratio}" unless hero?
+        "#{rules.join("; ")};"
       end
 
       def wrapper_id

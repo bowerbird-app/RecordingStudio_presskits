@@ -103,7 +103,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "See it live"
   end
 
-  test "public page and owner preview show a short description under the title" do
+  test "public page and owner preview show the eyebrow above the title" do
     kit = record_kit("Spring launch")
     @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
     kit.reload
@@ -115,9 +115,10 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_blank_public_layout
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
     assert_select "#presskits-cover-hero[data-cover-color='#1F2937']"
-    assert_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
-    assert_operator response.body.index("Spring launch"), :<, response.body.index("Doors at noon.")
-    assert_operator response.body.index("Doors at noon."), :<, response.body.index("Hero")
+    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
+    refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
+    assert_operator response.body.index("Press kit"), :<, response.body.index("Spring launch")
+    assert_operator response.body.index("Spring launch"), :<, response.body.index("Hero")
 
     sign_in @user
     switch_to_root(@root)
@@ -125,7 +126,8 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_rounded_default_layout
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    assert_includes response.body, "Doors at noon."
+    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
+    refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
     assert_includes response.body, "Hero"
   end
 
