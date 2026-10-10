@@ -19,6 +19,7 @@ module RecordingStudioPresskits
       public_action: :show,
       public_layout: "recording_studio_presskits/blank"
     )
+    include RecordingStudio::Capabilities::Location.to
     include CoverAttributes
 
     # The header is the kit itself. Title is required. The short description

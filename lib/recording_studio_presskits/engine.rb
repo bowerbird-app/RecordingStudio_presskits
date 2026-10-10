@@ -205,6 +205,15 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.location_trash" do
+      config.to_prepare do
+        next unless defined?(RecordingStudio::Location::Location)
+        next if RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudio::Location::Location")
+
+        RecordingStudio::Location::Location.include RecordingStudio::Capabilities::Trashable.to
+      end
+    end
+
     initializer "recording_studio_presskits.video_trash" do
       config.to_prepare do
         next unless defined?(RecordingStudioVideo)

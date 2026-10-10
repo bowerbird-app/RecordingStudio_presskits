@@ -36,6 +36,19 @@ GIT
       recording_studio (~> 4.2)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_company.git
+  revision: 10337c178e1e7ca0b2d0883296398b1e529a54fc
+  tag: v0.3.0
+  specs:
+    recording_studio_company (0.3.0)
+      flat_pack (>= 0.1.200)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+      recording_studio_accessible (~> 0.13)
+      recording_studio_attachable (~> 0.13)
+      recording_studio_trashable (~> 0.6)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_duplicatable.git
   revision: ca6477378462b0bd8659b86551cba52b561abf54
   tag: v0.4.5
@@ -51,6 +64,16 @@ GIT
   tag: v0.1.4
   specs:
     recording_studio_external_embed (0.1.1)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+
+GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_location.git
+  revision: f06c621cfc2c1f90e7cd9e8367a9282c8794011b
+  tag: v0.5.1
+  specs:
+    recording_studio_location (0.5.1)
+      flat_pack (>= 0.1.212)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
 
@@ -118,15 +141,17 @@ GIT
 PATH
   remote: .
   specs:
-    recording_studio_presskits (0.28.0)
+    recording_studio_presskits (0.29.0)
       flat_pack (>= 0.1.224)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
       recording_studio_accessible (~> 0.13)
       recording_studio_admin (~> 2.0)
       recording_studio_attachable (~> 0.13)
+      recording_studio_company (~> 0.3)
       recording_studio_duplicatable (~> 0.4)
       recording_studio_external_embed (~> 0.1.1)
+      recording_studio_location (~> 0.4)
       recording_studio_metrics (~> 0.2)
       recording_studio_orderable (~> 0.2)
       recording_studio_publishable (~> 0.6)
@@ -434,8 +459,10 @@ DEPENDENCIES
   recording_studio_accessible (~> 0.13)!
   recording_studio_admin (~> 2.0)!
   recording_studio_attachable (~> 0.13)!
+  recording_studio_company (~> 0.3)!
   recording_studio_duplicatable (~> 0.4)!
   recording_studio_external_embed (~> 0.1.1)!
+  recording_studio_location (~> 0.4)!
   recording_studio_metrics (~> 0.2)!
   recording_studio_orderable (~> 0.2)!
   recording_studio_presskits!
@@ -527,11 +554,13 @@ CHECKSUMS
   recording_studio_accessible (0.13.0)
   recording_studio_admin (2.1.0)
   recording_studio_attachable (0.13.0)
+  recording_studio_company (0.3.0)
   recording_studio_duplicatable (0.4.1)
   recording_studio_external_embed (0.1.1)
+  recording_studio_location (0.5.1)
   recording_studio_metrics (0.2.0)
   recording_studio_orderable (0.2.3)
-  recording_studio_presskits (0.28.0)
+  recording_studio_presskits (0.29.0)
   recording_studio_publishable (0.6.0)
   recording_studio_trashable (0.6.0)
   recording_studio_video (0.1.0)

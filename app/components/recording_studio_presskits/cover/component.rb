@@ -3,6 +3,10 @@
 module RecordingStudioPresskits
   module Cover
     class Component < ViewComponent::Base
+      include RecordingStudioCompany::DisplayHelper if defined?(RecordingStudioCompany::DisplayHelper)
+      include RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
+      include Byline
+
       SIZES = %i[card preview hero].freeze
 
       def initialize(recording: nil, title: nil, description: nil, cover_color: nil, # rubocop:disable Metrics/ParameterLists

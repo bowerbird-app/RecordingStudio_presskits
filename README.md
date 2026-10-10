@@ -6,7 +6,7 @@ Kits sit under your workspace. You can have many. You publish the kit, not each 
 
 ## Install
 
-Add the gem next to Recording Studio 4.4, Accessible 0.13, Admin 2.0, Publishable 0.6, and the three mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.4, Accessible 0.13, Admin 2.0, Publishable 0.6, Company 0.3, Location 0.4, and the mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
@@ -18,6 +18,8 @@ gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashab
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"
 gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.6.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"
+gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"
+gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
 gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
@@ -35,6 +37,8 @@ gem "recording_studio_trashable", "~> 0.6"
 gem "recording_studio_duplicatable", "~> 0.4"
 gem "recording_studio_publishable", "~> 0.6"
 gem "recording_studio_attachable", "~> 0.13"
+gem "recording_studio_company", "~> 0.3"
+gem "recording_studio_location", "~> 0.4"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
 gem "recording_studio_metrics", "~> 0.2"
@@ -56,6 +60,10 @@ bin/rails generate recording_studio_publishable:install
 bin/rails generate recording_studio_publishable:migrations
 bin/rails generate recording_studio_attachable:install
 bin/rails generate recording_studio_attachable:migrations
+bin/rails generate recording_studio_company:install
+bin/rails generate recording_studio_company:migrations
+bin/rails generate recording_studio_location:install
+bin/rails generate recording_studio_location:migrations
 bin/rails generate recording_studio_video:install
 bin/rails generate recording_studio_video:migrations
 bin/rails active_storage:install
@@ -85,7 +93,9 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::Fact",
     "RecordingStudioPresskits::VideoSection",
     "RecordingStudioVideo::Video",
-    "RecordingStudioPublishable::Publishable"
+    "RecordingStudioPublishable::Publishable",
+    "RecordingStudioCompany::Company",
+    "RecordingStudio::Location::Location"
   ]
   config.require_recordable_declarations = true
 end
@@ -101,7 +111,7 @@ RecordingStudioPresskits.configure do |config|
 end
 ```
 
-The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, Duplicatable, and Publishable with the current `.to` API only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path for these mixins. Do not enable Publishable on section children.
+The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, Duplicatable, Publishable, and Location with the current `.to` API only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path for these mixins. Do not enable Publishable on section children. Company is a host opt-in on the root, not on the kit.
 
 ```ruby
 recording_studio_recordable label: "Press kit",
@@ -119,6 +129,13 @@ include RecordingStudio::Capabilities::Publishable.to(
   public_action: :show,
   public_layout: "recording_studio_presskits/blank"
 )
+include RecordingStudio::Capabilities::Location.to
+```
+
+On the host root, turn companies on when you want the hero company row. Dummy Workspace uses one company per root:
+
+```ruby
+include RecordingStudio::Capabilities::Companies.to(allow: :one)
 ```
 
 Orderable on the kit allows only `RecordingStudioPresskits::KitSection`. Position is a column on the kit section recording. Reorder history is an event on the kit. A quote section orders its own quotes. Content recordings are not ordered as kit children.
@@ -149,7 +166,9 @@ end
 kit_recording.log_event!(action: "noted")
 ```
 
-The header is the press kit. `title` is required. `description` is an optional short line, 280 characters at most, and a blank one is stored as nothing. The cover is also on the kit: `cover_style` is `color` for now (`nil` means colour with the default), `cover_color` is a hex string, and `cover_text_color` is an optional hex for the title and description. A blank colour uses `default_cover_color` (`#1F2937`). A blank text colour uses Auto: light or dark, whichever has the better WCAG contrast on that background. Hosts set `cover_colors` and `cover_text_colors` to a palette, or `:any` for any hex. `cover_text_auto` (default true) adds an Auto choice on the header screen. Writes must be a valid hex, and in palette mode they must be one of those colours. A stored colour that later leaves the palette still renders. A low-contrast pair is allowed; the editor may hint. The cover is not a child, so it cannot be trashed or reordered. The kit editor lists Header and links to the header screen, which saves title, description, and cover with `revise`. Creating a kit still sets the title only.
+The header is the press kit. `title` is required. `description` is an optional short line, 280 characters at most, and a blank one is stored as nothing. The cover is also on the kit: `cover_style` is `color` for now (`nil` means colour with the default), `cover_color` is a hex string, and `cover_text_color` is an optional hex for the title and description. A blank colour uses `default_cover_color` (`#1F2937`). A blank text colour uses Auto: light or dark, whichever has the better WCAG contrast on that background. Hosts set `cover_colors` and `cover_text_colors` to a palette, or `:any` for any hex. `cover_text_auto` (default true) adds an Auto choice on the header screen. Writes must be a valid hex, and in palette mode they must be one of those colours. A stored colour that later leaves the palette still renders. A low-contrast pair is allowed; the editor may hint. The cover is not a child, so it cannot be trashed or reordered. The kit editor lists Header and links to the header screen, which saves title, description, cover, and the optional kit location with `revise`. Creating a kit still sets the title only.
+
+When the host root enables companies (`allow: :one`), `Cover::Company` looks up `RecordingStudioCompany.company(root)` and the hero shows `recording_studio_company_logo` plus the name. No capability, or no company, hides that row. One optional Location child on the kit (not a section) shows its icon and `display_name` under the company. `KitLocation` looks that child up and writes it. The header screen edits that place with `recording_studio_location_search_fields`. Blank fields clear it. Flatpack `PageTitle` has no byline slot, and Location's display helper is a Card, so the hero uses Avatar + Icon + text.
 
 `RecordingStudioPresskits::Cover::Component` is the reusable card. Pass a kit recording or the title, description, colour, and text colour. Sizes are `:card` (9/16 story tile, title overlaid, description clamped to two lines), `:preview` (same story shape in the header editor), and `:hero` (full-width colour header at the top of the public kit and the live editor). Hero height comes from padding plus content (`p-12` on a phone, `md:p-24` on a desktop), not a fixed ratio. A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). The title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. The hero does not show the short description; cards and the header editor still do. Grid cards stay 9/16. Text colour is the chosen hex, or Auto.
 
@@ -313,6 +332,8 @@ Dummy kit pins:
 | Root Switchable | `v0.6.0` |
 | FlatPack | `v0.1.224` |
 | Attachable | `v0.13.0` |
+| Company | `v0.3.0` |
+| Location | `v0.5.1` |
 | Orderable | `v0.2.7` |
 | Trashable | `v0.6.0` |
 | Duplicatable | `v0.4.5` |
@@ -321,9 +342,9 @@ Dummy kit pins:
 | Video | `v0.1.1` |
 | Metrics | `v0.2.0` |
 
-Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.4 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, and this gem so that layout is not an unstyled box.
+Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.4 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, Company, Location, and this gem so that layout is not an unstyled box.
 
-The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav. Core owns back and close on the default layout. **+ Access** is in the slot on the kit editor only. Cards, table, the kit editor, the header screen, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-edit-mobile.png`, `workspace-heading-edit.png`, `workspace-content-edit.png`, `workspace-fact-drilldown.png`, `workspace-header-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` and `public-press-kit-show-mobile.png` (logged-out Spring launch), `hero-restyle-editor-desktop.png` / `hero-restyle-public-desktop.png` plus mobile and crop companions, `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
+The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav. Core owns back and close on the default layout. **+ Access** is in the slot on the kit editor only. Cards, table, the kit editor, the header screen, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-edit-mobile.png`, `workspace-heading-edit.png`, `workspace-content-edit.png`, `workspace-fact-drilldown.png`, `workspace-header-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` and `public-press-kit-show-mobile.png` (logged-out Spring launch), `hero-restyle-editor-desktop.png` / `hero-restyle-public-desktop.png` plus mobile and crop companions, `hero-company-editor-desktop.png` / `hero-company-public-desktop.png` plus mobile and crop companions (company + kit location on the colour header), `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 
 ```bash
 cd test/dummy
@@ -331,7 +352,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one published kit titled **Spring launch**, with a short description, a sky cover (`#BFDBFE`, Auto dark text), credits, company statistics as cards, and project specifications as a list, and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. Dummy `FakeBlock` stays test-only. Its parent is a kit section. It enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. Its `prepare` hook sets the block title from the create heading, or to Block when that heading is blank. The seeded admin user gets Accessible owner access on the workspace and the admin root.
+Seeds one published kit titled **Spring launch**, with a short description, a sky cover (`#BFDBFE`, Auto dark text), **Harbour Studio** as the workspace company, **Harbour Gallery** as the kit location, credits, company statistics as cards, and project specifications as a list, and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. It also enables `Companies.to(allow: :one)`. Dummy `FakeBlock` stays test-only. Its parent is a kit section. It enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. Its `prepare` hook sets the block title from the create heading, or to Block when that heading is blank. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
 ## Cloud Agent boot
 

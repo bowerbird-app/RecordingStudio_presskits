@@ -17,6 +17,20 @@
         size: :display,
         title_color: text_color
       ) %>
+      <% if company_recording %>
+        <div class="mt-4 flex items-center gap-2" data-cover-company>
+          <%= recording_studio_company_logo(company_recording, size: :sm, shape: :circle) %>
+          <span class="text-base font-medium"><%= company_name %></span>
+        </div>
+      <% end %>
+      <% if location_recordable %>
+        <div class="flex items-center gap-2" data-cover-location>
+          <% if location_recordable.resolved_icon.present? %>
+            <%= render FlatPack::Shared::IconComponent.new(name: location_recordable.resolved_icon, size: :sm) %>
+          <% end %>
+          <span class="text-base"><%= location_recordable.display_name %></span>
+        </div>
+      <% end %>
     </div>
   </div>
 <% else %>

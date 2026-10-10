@@ -1,5 +1,23 @@
 # Upgrade notes
 
+## 0.29.0
+
+Company and Location sit on the kit hero. Company is a host opt-in on the root: `include RecordingStudio::Capabilities::Companies.to(allow: :one)`. One company per root. The hero calls `RecordingStudioCompany.company(root)` and paints `recording_studio_company_logo` plus the name. Skip the capability, or leave the place empty, and the row stays off.
+
+Location is on the kit itself: PressKit includes `RecordingStudio::Capabilities::Location.to`. That is not a section and not a later Location section type. One optional child. `KitLocation` looks it up and writes it. The hero shows `resolved_icon` and `display_name`. The shared header screen in `pk-editor` edits it with `recording_studio_location_search_fields` (title, type, icon). Saving blank fields trashes the place. Saving the header without a `location` param leaves the place alone. Presskits enables Trashable on `RecordingStudio::Location::Location` so that clear works. Cover company lookup lives on `Cover::Company`. Header form parsing lives on `HeaderAttributes`.
+
+Add the gems. Dummy pins Company `v0.3.0` and Location `v0.5.1`. Accessible moves to `~> 0.13` (`v0.13.0`), Attachable to `~> 0.13` (`v0.13.0`), Trashable to `~> 0.6` (`v0.6.0`). Flatpack is `>= 0.1.224` (dummy tag `v0.1.224`).
+
+```bash
+bin/rails generate recording_studio_company:install
+bin/rails generate recording_studio_company:migrations
+bin/rails generate recording_studio_location:install
+bin/rails generate recording_studio_location:migrations
+bin/rails db:migrate
+```
+
+Register `"RecordingStudioCompany::Company"` and `"RecordingStudio::Location::Location"`. Mount those engines. Pin Location's Stimulus controllers. Rebuild Tailwind so Location search-field classes generate. Flatpack `PageTitle` has no byline slot for a logo-plus-name row. Location's `recording_studio_location_display` is a Card — too heavy for the hero — so the hero uses Avatar + Icon + text.
+
 ## 0.28.0
 
 The `:hero` cover is still a flush colour surface to the kit card's top and side edges. Height now comes from padding plus content: `p-12` on a phone, `md:p-24` (~96px) on a desktop. There is no 21/9 ratio and no `min-h-64`. Grid `:card` and the header-editor `:preview` stay 9/16.

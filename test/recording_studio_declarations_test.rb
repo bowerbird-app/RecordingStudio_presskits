@@ -7,12 +7,40 @@ require_relative "dummy/config/environment"
 require "rails/test_help"
 
 class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
+  PICKER_TYPES_INCLUDED = %w[
+    RecordingStudioPresskits::Text
+    RecordingStudioPresskits::Images
+    RecordingStudioPresskits::QuoteSection
+    RecordingStudioPresskits::FactsSection
+    RecordingStudioPresskits::CreditsSection
+    RecordingStudioPresskits::VideoSection
+  ].freeze
+
+  PICKER_TYPES_EXCLUDED = %w[
+    FakeBlock
+    RecordingStudioPresskits::Quote
+    RecordingStudioPresskits::Fact
+    RecordingStudioPresskits::Credit
+    RecordingStudioPresskits::CreditLine
+    RecordingStudioVideo::Video
+    Workspace
+    Folder
+    Page
+    RecordingStudioPresskits::PressKit
+    RecordingStudioPresskits::KitSection
+    RecordingStudioPublishable::Publishable
+    RecordingStudioAttachable::Attachment
+    RecordingStudioCompany::Company
+    RecordingStudio::Location::Location
+  ].freeze
   test "dummy recordable declarations validate and expose parent/root introspection" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_equal %w[AdminRoot Workspace], RecordingStudio.root_recordable_types.sort
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for("Folder")
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for(Page)
     assert_equal ["Workspace"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
+    assert_equal ["RecordingStudioPresskits::PressKit"], RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location")
+    assert_includes RecordingStudio.allowed_parent_types_for("RecordingStudioCompany::Company"), "Workspace"
     assert_equal ["RecordingStudioPresskits::PressKit"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::KitSection")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("FakeBlock")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
@@ -314,26 +342,9 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "picker types skip dummy placeholders and types that do not allow press kit" do
     types = RecordingStudioPresskits.picker_types
+    PICKER_TYPES_INCLUDED.each { |type| assert_includes types, type }
+    PICKER_TYPES_EXCLUDED.each { |type| refute_includes types, type }
 
-    refute_includes types, "FakeBlock"
-    assert_includes types, "RecordingStudioPresskits::Text"
-    assert_includes types, "RecordingStudioPresskits::Images"
-    assert_includes types, "RecordingStudioPresskits::QuoteSection"
-    assert_includes types, "RecordingStudioPresskits::FactsSection"
-    assert_includes types, "RecordingStudioPresskits::CreditsSection"
-    assert_includes types, "RecordingStudioPresskits::VideoSection"
-    refute_includes types, "RecordingStudioPresskits::Quote"
-    refute_includes types, "RecordingStudioPresskits::Fact"
-    refute_includes types, "RecordingStudioPresskits::Credit"
-    refute_includes types, "RecordingStudioPresskits::CreditLine"
-    refute_includes types, "RecordingStudioVideo::Video"
-    refute_includes types, "Workspace"
-    refute_includes types, "Folder"
-    refute_includes types, "Page"
-    refute_includes types, "RecordingStudioPresskits::PressKit"
-    refute_includes types, "RecordingStudioPresskits::KitSection"
-    refute_includes types, "RecordingStudioPublishable::Publishable"
-    refute_includes types, "RecordingStudioAttachable::Attachment"
     assert_includes RecordingStudioPresskits.section_types, "FakeBlock"
     assert_includes RecordingStudioPresskits.section_types, "RecordingStudioPresskits::Text"
     refute RecordingStudioPresskits.section?("RecordingStudioPublishable::Publishable")
@@ -382,6 +393,10 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "accessible is enabled on workspace and admin root" do
     assert RecordingStudio.capability_enabled?(:accessible, for: "Workspace")
+    assert RecordingStudio.capability_enabled?(:companies, for: "Workspace")
+    refute RecordingStudio.capability_enabled?(:companies, for: "RecordingStudioPresskits::PressKit")
+    assert RecordingStudio.capability_enabled?(:location, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.capability_enabled?(:location, for: "Workspace")
     assert RecordingStudio.capability_enabled?(:accessible, for: "AdminRoot")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Folder")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Page")
@@ -429,6 +444,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Fact")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::VideoSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudio::Location::Location")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Page")
