@@ -86,31 +86,33 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Secret notes"
   end
 
-  test "custom journalist audience with preview uses the access message" do
-    kit = restrict_kit(
-      "Spring launch",
-      audience: :"presskits.verified_journalist",
-      fallback: :preview,
-      slug: "spring-journalist"
-    )
-    record_block(kit, "Embargo copy")
+  test "custom audience with preview uses the access message" do
+    with_test_custom_audience do
+      kit = restrict_kit(
+        "Spring launch",
+        audience: TEST_CUSTOM_AUDIENCE,
+        fallback: :preview,
+        slug: "spring-custom"
+      )
+      record_block(kit, "Embargo copy")
 
-    get kit.publishable_public_path
-    assert_response :success
-    assert_includes response.body, "You need access to view this press kit."
-    refute_includes response.body, "Embargo copy"
+      get kit.publishable_public_path
+      assert_response :success
+      assert_includes response.body, "You need access to view this press kit."
+      refute_includes response.body, "Embargo copy"
 
-    journalist = User.create!(
-      email: "desk-#{SecureRandom.hex(4)}@journalists.example",
-      password: "Password123!",
-      password_confirmation: "Password123!"
-    )
-    sign_in journalist
+      member = User.create!(
+        email: "desk-#{SecureRandom.hex(4)}@presskits.test",
+        password: "Password123!",
+        password_confirmation: "Password123!"
+      )
+      sign_in member
 
-    get kit.publishable_public_path
-    assert_response :success
-    assert_select "[data-presskits-presentation='full']"
-    assert_includes response.body, "Embargo copy"
+      get kit.publishable_public_path
+      assert_response :success
+      assert_select "[data-presskits-presentation='full']"
+      assert_includes response.body, "Embargo copy"
+    end
   end
 
   test "hidden fallback 404s without confirming the kit" do
@@ -211,7 +213,8 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_select "select[name='visibility[audience]'] option[value='public']"
     assert_select "select[name='visibility[audience]'] option[value='signed_in']"
     assert_select "select[name='visibility[audience]'] option[value='granted']"
-    assert_select "select[name='visibility[audience]'] option[value='presskits.verified_journalist']"
+    refute_select "select[name='visibility[audience]'] option[value='presskits.verified_journalist']"
+    refute_select "select[name='visibility[audience]'] option[value='#{TEST_CUSTOM_AUDIENCE}']"
     assert_select "[data-recording-studio-presskits--visibility-fallback-target='fallback'][hidden]"
     assert_select "input[name='visibility[visibility_fallback]'][value='preview']"
     assert_select "[data-flat-pack--icon-name-value='eye']"
@@ -333,6 +336,25 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  TEST_CUSTOM_AUDIENCE = :"presskits.test_custom"
+
+  def with_test_custom_audience
+    audiences = RecordingStudioAccessible.configuration.action_audiences
+    previous = audiences[:"presskits.kit_view_full"]
+    unless RecordingStudioAccessible.registered_audience?(TEST_CUSTOM_AUDIENCE)
+      RecordingStudioAccessible.register_audience(TEST_CUSTOM_AUDIENCE) do |actor:, **|
+        actor.respond_to?(:email) && actor.email.to_s.end_with?("@presskits.test")
+      end
+    end
+
+    audiences[:"presskits.kit_view_full"] = previous.merge(
+      allowed: Array(previous[:allowed]) | [TEST_CUSTOM_AUDIENCE]
+    )
+    yield
+  ensure
+    audiences[:"presskits.kit_view_full"] = previous if previous
+  end
 
   def switch_to_root(root)
     patch "/recording_studio_root_switchable/v1/root_switch", params: {

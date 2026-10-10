@@ -1040,6 +1040,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     routes = File.read(File.join(root, "config/routes.rb"))
     locales = File.read(File.join(root, "config/locales/recording_studio_presskits.en.yml"))
     accessible = File.read(File.join(root, "test/dummy/config/initializers/recording_studio_accessible.rb"))
+    dummy_user = File.read(File.join(root, "test/dummy/app/models/user.rb"))
 
     assert_includes visibility, 'ACTION = :"presskits.kit_view_full"'
     assert_includes visibility, "def presentation_for"
@@ -1050,8 +1051,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, "resource :visibility, only: %i[edit update]"
     assert_includes locales, "Who can view the full press kit?"
     assert_includes locales, "What should other visitors see?"
-    assert_includes accessible, "presskits.verified_journalist"
-    assert_includes accessible, "presskits.kit_view_full"
+    refute_includes locales, "verified_journalist"
+    refute_includes accessible, "verified_journalist"
+    refute_includes accessible, "register_audience"
+    refute_includes accessible, "kit_view_full"
+    refute_includes dummy_user, "verified_journalist"
   end
 
   def test_visibility_editor_and_preview_use_inline_radios_and_copy

@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RecordingStudioPresskits::Visibility.presentation_for` is the only resolver (`:full`, `:preview`, `:hidden`, `:unavailable`). Public show, listings, cards, and meta tags go through it.
 - Preview renders an allowlist only: title, cover colour and image, company, and kit location. The short description stays off the limited preview. A **See full press kit** heading introduces the access message. Signed-in audiences get Sign in (`config.sign_in_path`) and Create account (`config.registration_path`, hidden when blank). Site name in that copy is `config.site_name`, then i18n, then the Rails application name. Granted and custom audiences get a need-access message and no auth buttons. Hidden is a plain 404 with no metadata leak.
 - `visibility_fallback` lives on sidecar `KitSetting` rows, not the revisioned PressKit.
-- Dummy Workspace enables `:action_audiences` and registers `presskits.verified_journalist` for tests.
+- Dummy Workspace enables `:action_audiences`. Custom audiences stay a host `register_audience` concern; dummy does not register a journalist audience.
 - Version `0.32.0`
 
 ### Changed
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Upgrade notes
 - Install Accessible `0.14.0` and Publishable `0.7.0`. Run `bin/rails generate recording_studio_accessible:migrations`, `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`.
 - Enable `:action_audiences` on the host root if the workspace should narrow who can see kits. PressKit already enables it.
-- Hosts that want extra audiences (for example verified journalists) `register_audience` and add them to `config.action_audiences[:"presskits.kit_view_full"][:allowed]`.
+- Hosts that want extra audiences `register_audience` and add them to `config.action_audiences[:"presskits.kit_view_full"][:allowed]`.
 - Set `config.sign_in_path` when sign-in is not `/users/sign_in`. Set `config.registration_path` to show Create account on signed-in previews; leave it blank to hide that button. Set `config.site_name` when the signed-in message should not use the Rails application name.
 - Use `KitQuery.discoverable_for(actor:)` for public lists. `PressKit.indexable` is still publish state only.
 - Future JSON serializers must call `Visibility.presentation_for`. Do not cache non-full responses on a shared cache. Fragment keys must include the presentation.
