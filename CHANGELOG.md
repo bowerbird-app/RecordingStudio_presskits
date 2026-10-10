@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-10-10
+
+### Changed
+- Images sections hold Attachable `Placement` children only. `LibraryPlacement.to` and Orderable `allows: Placement` replace direct `Attachable.to` on `RecordingStudioPresskits::Images`. Caption, credit, and alt stay on the library photo.
+- **Add from library** is a `pk-editor` screen that reuses Attachable's picker Stimulus and JSON gallery (multi-select, `place_library_image`). **Upload** calls `upload_to_library_and_place`. A section refuses a second placement of the same photo. The same photo can sit in another section or kit.
+- The section editor reuses Attachable's placements collection editor (list, slides, grid) for reorder and **Remove from here**. Public and preview resolve through `LibraryImages` (`Placements.resolve`), shared with the kit cover. Trashed or missing photos are skipped.
+- Dummy Library sidebar adds **Images**, which opens the workspace library via `library_path_for`. Seeds place Harbour Gallery on a **Press photos** section as well as the cover.
+- Hosts can set `config.section_library_keys` when upload should land in a named library. Default is `:default`.
+- Version `0.31.0`
+
+### Upgrade notes
+- Rebuild seeds. Enable `LibraryPlacement.to` and Orderable for `Placement` on Images. Leave `Attachable.to` off the section. Quote still attaches one image directly. A host that already attached files under an Images section should move those photos into the workspace library and place them. Flatpack is unchanged (`>= 0.1.224`). Attachable's picker still wraps itself in a Modal and hardcodes single-select on its own placements screen — Presskits does not change Attachable. The kit editor picker is a screen in `pk-editor` instead.
+
 ## [0.30.0] - 2026-10-10
 
 ### Added

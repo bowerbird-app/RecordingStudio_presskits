@@ -3,7 +3,7 @@
 module RecordingStudioPresskits
   module PressKits
     class IndexComponent < ViewComponent::Base
-      def initialize(press_kit_recordings:, view:, cards_path:, table_path:, new_path:, show_path:, credits_path:) # rubocop:disable Metrics/ParameterLists
+      def initialize(press_kit_recordings:, view:, cards_path:, table_path:, new_path:, show_path:, credits_path:, images_path: nil) # rubocop:disable Metrics/ParameterLists,Layout/LineLength
         super()
         @press_kit_recordings = press_kit_recordings
         @view = view.to_s
@@ -12,6 +12,7 @@ module RecordingStudioPresskits
         @new_path = new_path
         @show_path = show_path
         @credits_path = credits_path
+        @images_path = images_path
       end
 
       def table_view?

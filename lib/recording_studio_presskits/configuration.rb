@@ -4,7 +4,8 @@ module RecordingStudioPresskits
   class Configuration
     attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
                   :section_components, :section_editors, :section_prepares, :excluded_picker_types,
-                  :cover_colors, :default_cover_color, :cover_text_colors, :cover_text_auto
+                  :cover_colors, :default_cover_color, :cover_text_colors, :cover_text_auto,
+                  :section_library_keys
     attr_reader :hooks
 
     def initialize
@@ -18,6 +19,16 @@ module RecordingStudioPresskits
       @excluded_picker_types = []
       assign_cover_defaults
       @hooks = RecordingStudio::Hooks.new
+    end
+
+    def library_key_for(type_name)
+      keys = (section_library_keys || {}).to_h
+      name = type_name.to_s
+      short = name.demodulize
+      matched = keys.find do |key, _|
+        [name, short].include?(key.to_s) || key.to_s.demodulize == short
+      end
+      (matched&.last || :default).to_sym
     end
 
     def cover_palette
@@ -60,6 +71,7 @@ module RecordingStudioPresskits
     private
 
     def assign_cover_defaults
+      @section_library_keys = {}
       @cover_colors = Cover::Palette::DEFAULT_COLORS.dup
       @default_cover_color = Cover::Palette::DEFAULT_COLOR
       @cover_text_colors = Cover::Palette::DEFAULT_TEXT_COLORS.dup
@@ -74,7 +86,8 @@ module RecordingStudioPresskits
         section_types: Array(section_types).map(&:to_s),
         section_components: section_components.dup,
         section_editors: section_editors.dup,
-        excluded_picker_types: Array(excluded_picker_types).map(&:to_s)
+        excluded_picker_types: Array(excluded_picker_types).map(&:to_s),
+        section_library_keys: (section_library_keys || {}).to_h
       }
     end
 

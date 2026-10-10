@@ -1,5 +1,17 @@
 # Upgrade notes
 
+## 0.31.0
+
+Images sections no longer attach files under the section. They hold Attachable `Placement` children that point at workspace library photos.
+
+Rebuild seeds. A host that already attached files under an Images section should move those photos into the workspace library and place them.
+
+Enable `include RecordingStudio::Capabilities::LibraryPlacement.to` and `Orderable.to(allows: ["RecordingStudioAttachable::Placement"])` on `RecordingStudioPresskits::Images`. Do not enable `Attachable.to` on that type. Quote still uses `Attachable.to` for one image.
+
+**Add from library** and **Upload** live on the Images content screen in `pk-editor`. The picker is a pushed screen, not a nested modal. Upload writes the file into the library first (`upload_to_library_and_place`). `config.section_library_keys` can point a section type at a named library. Default is `:default`.
+
+Public and preview resolve with `RecordingStudioPresskits::LibraryImages` (`Placements.resolve`). The kit cover uses the same helper. A trashed or missing photo is skipped. Dummy mounts the workspace library from Library → Images with `library_path_for`. Trash-in-use warnings and delete-removes-placements stay Attachable's job.
+
 ## 0.30.0
 
 An optional cover image sits above the colour hero. Enable `include RecordingStudio::Capabilities::ImageLibrary.to` on the host root and `include RecordingStudio::Capabilities::LibraryPlacement.to` on PressKit. The first `place_library_image` result is the cover. Pick it with Attachable's placements screen and image picker. Do not add a second upload form or a cover-image model.

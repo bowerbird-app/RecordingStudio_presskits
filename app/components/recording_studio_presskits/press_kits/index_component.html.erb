@@ -4,6 +4,13 @@
       <% sidebar.items do %>
         <%= render FlatPack::Sidebar::Group::Component.new(title: "Library", icon: "folder", open: true) do |group| %>
           <% group.items do %>
+            <% if @images_path.present? %>
+              <%= render FlatPack::Sidebar::Item::Component.new(
+                text: "Images",
+                href: @images_path,
+                icon: "photo"
+              ) %>
+            <% end %>
             <%= render FlatPack::Sidebar::Item::Component.new(
               text: "Credits",
               href: @credits_path,
