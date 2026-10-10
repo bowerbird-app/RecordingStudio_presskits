@@ -49,6 +49,18 @@ GIT
       recording_studio_trashable (~> 0.6)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_downloadable.git
+  revision: 0c7693dedb6cc18b82d7b6301ca2c481dc93f9b4
+  tag: v0.3.0
+  specs:
+    recording_studio_downloadable (0.3.0)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+      recording_studio_accessible
+      recording_studio_attachable
+      rubyzip (>= 2.3)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_duplicatable.git
   revision: ca6477378462b0bd8659b86551cba52b561abf54
   tag: v0.4.5
@@ -160,6 +172,7 @@ PATH
       recording_studio_admin (~> 2.0)
       recording_studio_attachable (~> 0.13)
       recording_studio_company (~> 0.3)
+      recording_studio_downloadable (~> 0.3)
       recording_studio_duplicatable (~> 0.4)
       recording_studio_external_embed (~> 0.1.1)
       recording_studio_location (~> 0.4)
@@ -489,6 +502,7 @@ GEM
     ruby-vips (2.2.5)
       ffi (~> 1.12)
       logger
+    rubyzip (3.7.0)
     securerandom (0.4.1)
     sin_lru_redux (2.5.3)
     solid_cable (3.0.12)
@@ -594,6 +608,7 @@ DEPENDENCIES
   recording_studio_admin!
   recording_studio_attachable!
   recording_studio_company!
+  recording_studio_downloadable!
   recording_studio_duplicatable!
   recording_studio_external_embed!
   recording_studio_location!
@@ -733,6 +748,7 @@ CHECKSUMS
   recording_studio_admin (2.1.0)
   recording_studio_attachable (0.13.0)
   recording_studio_company (0.3.0)
+  recording_studio_downloadable (0.3.0)
   recording_studio_duplicatable (0.4.1)
   recording_studio_external_embed (0.1.1)
   recording_studio_location (0.5.1)
@@ -753,6 +769,7 @@ CHECKSUMS
   rubocop-rails-omakase (1.1.0) sha256=2af73ac8ee5852de2919abbd2618af9c15c19b512c4cfc1f9a5d3b6ef009109d
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   ruby-vips (2.2.5) sha256=f3c547a172c36ba26b8614c809f5823bc6199623ec6204ec7c3bce29037f7758
+  rubyzip (3.7.0) sha256=65c19294da75297a939006f3516deacc33185fbd721ff1954f7a231db6d3e121
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   sin_lru_redux (2.5.3) sha256=d9bcc184537cb0781cccfb283a18d36c5b820cf811b2637b398b55e98f4cecbd
   solid_cable (3.0.12) sha256=a168a54731a455d5627af48d8441ea3b554b8c1f6e6cd6074109de493e6b0460

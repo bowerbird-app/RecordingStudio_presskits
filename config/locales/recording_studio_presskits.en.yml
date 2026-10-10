@@ -2,11 +2,40 @@ en:
   recording_studio_presskits:
     cover:
       eyebrow: "Press kit"
+    download:
+      button: "Download kit"
+      preparing: "Getting it ready…"
+      retry: "Try again"
+      text:
+        company: "Company"
+        location: "Location"
+        date: "Date"
+        cover: "Cover"
+        photo: "Photo"
+        caption: "Caption"
+        credit: "Credit"
+        alt: "Alt"
+        fact: "Fact"
+    downloads:
+      title: "Downloads"
+      subtitle: "Who can download this press kit"
+      back: "Back to kit"
+      audience_label: "Who can download this press kit"
+      audience_icons:
+        public: "globe-alt"
+        signed_in: "user"
+        granted: "lock-closed"
+        default: "user-group"
+      constrained: "Your workspace only allows some of these choices. The one in force is selected."
+      saved: "Saved. That's who can take the kit."
+      invalid: "That choice is not available for this kit."
+      save: "Update"
     editor:
       add_section: "Section"
       picker_title: "Add a section"
       order: "Order"
       visibility: "Visibility"
+      downloads: "Downloads"
       reorder: "Reorder"
       header: "Header"
       edit_heading: "Edit heading"

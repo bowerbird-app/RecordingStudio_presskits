@@ -49,6 +49,18 @@ GIT
       recording_studio_trashable (~> 0.6)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_downloadable.git
+  revision: 0c7693dedb6cc18b82d7b6301ca2c481dc93f9b4
+  tag: v0.3.0
+  specs:
+    recording_studio_downloadable (0.3.0)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+      recording_studio_accessible
+      recording_studio_attachable
+      rubyzip (>= 2.3)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_duplicatable.git
   revision: ca6477378462b0bd8659b86551cba52b561abf54
   tag: v0.4.5
@@ -149,6 +161,7 @@ PATH
       recording_studio_admin (~> 2.0)
       recording_studio_attachable (~> 0.13)
       recording_studio_company (~> 0.3)
+      recording_studio_downloadable (~> 0.3)
       recording_studio_duplicatable (~> 0.4)
       recording_studio_external_embed (~> 0.1.1)
       recording_studio_location (~> 0.4)
@@ -400,6 +413,7 @@ GEM
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.44.0, < 2.0)
     ruby-progressbar (1.13.0)
+    rubyzip (3.7.0)
     securerandom (0.4.1)
     simplecov (0.22.0)
       docile (~> 1.1)
@@ -460,6 +474,7 @@ DEPENDENCIES
   recording_studio_admin (~> 2.0)!
   recording_studio_attachable (~> 0.13)!
   recording_studio_company (~> 0.3)!
+  recording_studio_downloadable (~> 0.3)!
   recording_studio_duplicatable (~> 0.4)!
   recording_studio_external_embed (~> 0.1.1)!
   recording_studio_location (~> 0.4)!
@@ -555,6 +570,7 @@ CHECKSUMS
   recording_studio_admin (2.1.0)
   recording_studio_attachable (0.13.0)
   recording_studio_company (0.3.0)
+  recording_studio_downloadable (0.3.0)
   recording_studio_duplicatable (0.4.1)
   recording_studio_external_embed (0.1.1)
   recording_studio_location (0.5.1)
@@ -571,6 +587,7 @@ CHECKSUMS
   rubocop-ast (1.48.0) sha256=22df9bbf3f7a6eccde0fad54e68547ae1e2a704bf8719e7c83813a99c05d2e76
   rubocop-rails (2.34.2) sha256=10ff246ee48b25ffeabddc5fee86d159d690bb3c7b9105755a9c7508a11d6e22
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
+  rubyzip (3.7.0) sha256=65c19294da75297a939006f3516deacc33185fbd721ff1954f7a231db6d3e121
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   simplecov (0.22.0) sha256=fe2622c7834ff23b98066bb0a854284b2729a569ac659f82621fc22ef36213a5
   simplecov-html (0.13.2) sha256=bd0b8e54e7c2d7685927e8d6286466359b6f16b18cb0df47b508e8d73c777246

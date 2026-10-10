@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.32.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.33.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -19,6 +19,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261008180000_create_recording_studio_facts.rb",
       "db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
+      "test/dummy/db/migrate/20261010000013_create_recording_studio_access_constraints.rb",
+      "test/dummy/db/migrate/20261010000014_create_recording_studio_access_rules.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
@@ -28,8 +30,6 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261008180000_create_recording_studio_facts.rb",
       "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
-      "test/dummy/db/migrate/20261010140013_create_recording_studio_access_constraints.rb",
-      "test/dummy/db/migrate/20261010140014_create_recording_studio_access_rules.rb",
       "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
@@ -47,6 +47,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes engine, "RecordingStudio::Location::Location.include RecordingStudio::Capabilities::Trashable.to"
     assert_includes engine, "recording_studio_presskits.action_audiences"
     assert_includes engine, "RecordingStudioPresskits::Visibility.register_action!"
+    assert_includes engine, "recording_studio_presskits.kit_download"
   end
 
   def test_gemspec_pins_recording_studio_and_accessible
@@ -59,6 +60,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.224"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.13"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.3"'
@@ -80,6 +82,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.7.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"'
@@ -117,6 +120,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "include RecordingStudio::Capabilities::Trashable.to"
     assert_includes source, "RecordingStudio::Capabilities::Duplicatable.to"
     assert_includes source, "RecordingStudio::Capabilities::Publishable.to"
+    assert_includes source, "RecordingStudio::Capabilities::Downloadable.to"
     assert_includes source, "include RecordingStudio::Capabilities::Location.to"
     assert_includes source, "include RecordingStudio::Capabilities::LibraryPlacement.to"
     assert_includes source, "RecordingStudio.enable_capability(:action_audiences, on: self)"
@@ -205,6 +209,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, 'mount RecordingStudioDuplicatable::Engine, at: "/recording_studio_duplicatable"'
     assert_includes routes, 'mount RecordingStudioPresskits::Engine, at: "/recording_studio_presskits"'
     assert_includes routes, 'mount RecordingStudioPublishable::Engine, at: "/"'
+    assert_includes routes, 'mount RecordingStudioDownloadable::Engine, at: "/recording_studio_downloadable"'
     assert_includes routes, 'mount RecordingStudioCompany::Engine, at: "/recording_studio_company"'
     assert_includes routes, 'mount RecordingStudioLocation::Engine, at: "/recording_studio_location"'
     assert_includes routes, 'recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits'
@@ -240,6 +245,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes tailwind_source, "flatpack_fieldset"
     assert_includes sources_task, '"recording_studio_publishable"'
     assert_includes sources_task, '"recording_studio_attachable"'
+    assert_includes sources_task, '"recording_studio_downloadable"'
     assert_includes sources_task, '"recording_studio_company"'
     assert_includes sources_task, '"recording_studio_location"'
     refute_includes tailwind_source, "@theme"
@@ -265,6 +271,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes presskits_initializer, '"FakeBlock"'
     assert_includes initializer_source, '"AdminRoot"'
     assert_includes initializer_source, '"RecordingStudioPublishable::Publishable"'
+    assert_includes initializer_source, '"RecordingStudio::AccessConstraint"'
+    assert_includes initializer_source, '"RecordingStudio::AccessRule"'
     assert_includes initializer_source, '"RecordingStudioAttachable::Library"'
     assert_includes initializer_source, '"RecordingStudioAttachable::Placement"'
     assert_includes initializer_source, '"RecordingStudioCompany::Company"'
@@ -281,6 +289,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme_source, "This Rails app exists to prove Recording Studio Press Kits"
     assert_includes readme_source, "/recording_studio"
     assert_includes readme_source, "redirects to the press kit index"
+    assert_includes readme_source, "Visibility (eye icon"
+    assert_includes readme_source, "Downloads (Heroicons `arrow-down-tray`"
+    assert_includes readme_source, "/visibility/edit"
+    assert_includes readme_source, "/downloads/edit"
     refute_includes readme_source, "flat_pack_sidebar"
     refute_includes readme_source, "/docs/"
   end
@@ -291,7 +303,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.4.0"
     assert_includes readme, "v0.14.0"
+    assert_includes readme, "v0.13.0"
     assert_includes readme, "v0.3.0"
+    assert_includes readme, "v0.7.0"
+    assert_includes readme, "recording_studio_downloadable"
+    assert_includes readme, "presskits.kit_download"
+    assert_includes readme, "Download kit"
+    assert_includes readme, "Who can download this press kit"
+    assert_includes readme, "RadioGroup"
+    assert_includes readme, "download_audience_icons"
+    assert_includes readme, "set_audience!"
+    assert_includes readme, "manage_role: :edit"
     assert_includes readme, "v0.5.1"
     assert_includes readme, "tag: \"v2.1.0\""
     assert_includes readme, "tag: \"v0.2.7\""
@@ -390,6 +412,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes public_controller, "before_action :set_public_actor"
     assert_includes public_controller, "Current.actor = respond_to?(:current_user, true) ? current_user : nil"
     refute_includes public_controller, "return Current.actor if current_actor_present?"
+    assert_equal 1, public_controller.scan("def set_public_actor").size
     assert_includes public_show, "content_for :title"
     refute_includes public_show, "recording_studio_page_nav"
     refute_includes public_show, "page_nav"
@@ -541,6 +564,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "SectionsOrderComponent"
     assert_includes show, "FlatPack::Card::Component"
     assert_includes show, 'id="presskits-editor-toolbar"'
+    assert_includes show, 'id: "presskits-visibility"'
+    assert_includes show, 'id: "presskits-downloads"'
+    assert_includes show, 'icon: "arrow-down-tray"'
+    assert_includes show, "download_edit_path"
+    assert_operator show.index('id: "presskits-visibility"'), :<, show.index('id: "presskits-downloads"')
     assert_includes show, 'id="presskits-editor-preview"'
     assert_includes show, "KitHeaderComponent"
     assert_includes show, "EditableSectionComponent"

@@ -24,4 +24,13 @@ RecordingStudioPresskits.configure do |config|
   # config.registration_path = "/users/sign_up"
   # Site name in "You must be signed in to {site name}…". Falls back to i18n, then the Rails app name.
   # config.site_name = "Harbour Studio"
+
+  # Icons on the Downloads audience RadioGroup. Keys are audience names.
+  # Missing keys fall back to i18n `recording_studio_presskits.downloads.audience_icons`,
+  # then globe-alt / user / lock-closed, then user-group for custom audiences.
+  # config.download_audience_icons = {
+  #   public: "globe-alt",
+  #   signed_in: "user",
+  #   granted: "lock-closed"
+  # }
 end

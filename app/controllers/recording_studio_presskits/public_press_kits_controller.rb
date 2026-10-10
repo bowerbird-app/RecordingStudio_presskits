@@ -3,9 +3,10 @@
 module RecordingStudioPresskits
   class PublicPressKitsController < ActionController::Base
     include Devise::Controllers::Helpers if defined?(Devise::Controllers::Helpers)
-
+    helper ApplicationHelper
     helper RecordingStudioCompany::DisplayHelper if defined?(RecordingStudioCompany::DisplayHelper)
     helper RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
+    helper ::RecordingStudioDownloadable::Engine.helpers if defined?(::RecordingStudioDownloadable::Engine)
 
     before_action :set_public_actor
 

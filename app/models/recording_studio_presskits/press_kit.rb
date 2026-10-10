@@ -25,10 +25,27 @@ module RecordingStudioPresskits
       public_action: :show,
       public_layout: "recording_studio_presskits/blank"
     )
+    include RecordingStudio::Capabilities::Downloadable.to(
+      source: :manifest,
+      format: :zip,
+      action: KitDownload::ACTION,
+      export_scope: KitDownload::EXPORT_SCOPE
+    )
     include RecordingStudio::Capabilities::Location.to
     include CoverAttributes
 
-    RecordingStudio.enable_capability(:action_audiences, on: self)
+    RecordingStudio.enable_capability(:action_audiences, on: self) if defined?(RecordingStudio)
+
+    def downloadable_manifest
+      KitDownload.manifest_for(RecordingStudio::Recording.find_by(recordable: self))
+    end
+
+    def downloadable_available_for?(actor:, action:) # rubocop:disable Lint/UnusedMethodArgument
+      return false if action.present? && action.to_sym != KitDownload::ACTION
+
+      recording = RecordingStudio::Recording.find_by(recordable: self)
+      recording.respond_to?(:currently_published?) && recording.currently_published?
+    end
 
     # The header is the kit itself. Title is required. The short description
     # can be blank. It is not a child, so it cannot be trashed or reordered.

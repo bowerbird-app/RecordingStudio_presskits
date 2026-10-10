@@ -4,7 +4,8 @@ module RecordingStudioPresskits
   module PressKits
     class KitEditorComponent < ViewComponent::Base
       def initialize(press_kit_recording:, section_recordings:, picker_types:, add_path:, remove_path:, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
-                     reorder_path:, edit_path:, heading_path:, header_edit_path:, highlight_id: nil)
+                     reorder_path:, edit_path:, heading_path:, header_edit_path:, download_edit_path: nil,
+                     highlight_id: nil)
         super()
         @press_kit_recording = press_kit_recording
         @section_recordings = section_recordings
@@ -15,6 +16,7 @@ module RecordingStudioPresskits
         @edit_path = edit_path
         @heading_path = heading_path
         @header_edit_path = header_edit_path
+        @download_edit_path = download_edit_path
         @highlight_id = highlight_id
       end
 

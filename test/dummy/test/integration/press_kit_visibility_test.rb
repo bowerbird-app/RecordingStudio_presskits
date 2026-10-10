@@ -245,10 +245,15 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     visibility_path = recording_studio_presskits.edit_press_kit_visibility_path(kit)
+    downloads_path = recording_studio_presskits.edit_press_kit_downloads_path(kit)
     assert_select "#presskits-visibility[href='#{visibility_path}']", text: "Visibility"
     assert_select "#presskits-visibility[data-modal-id='pk-editor']"
     assert_select "#presskits-visibility[data-turbo-frame='pk-editor-screen']"
     assert_select "#presskits-editor-toolbar [data-flat-pack--icon-name-value='eye']"
+    assert_select "#presskits-downloads[href='#{downloads_path}']", text: "Downloads"
+    assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
+    toolbar_html = css_select("#presskits-editor-toolbar").to_html
+    assert_operator toolbar_html.index("presskits-visibility"), :<, toolbar_html.index("presskits-downloads")
     refute_select "#presskits-kit-header [role='menuitem'][href='#{visibility_path}']"
 
     get visibility_path, headers: { "Turbo-Frame" => "pk-editor-screen" }

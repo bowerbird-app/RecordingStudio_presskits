@@ -45,6 +45,7 @@ class ConfigurationTest < Minitest::Test
     assert_equal({}, configuration.to_h.fetch(:section_editors))
     assert_equal [], configuration.excluded_picker_types
     assert_equal({}, configuration.section_library_keys)
+    assert_equal({}, configuration.download_audience_icons)
     assert_equal :default, configuration.library_key_for("RecordingStudioPresskits::Images")
     assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_COLORS, configuration.cover_palette.colors
     assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_COLOR, configuration.cover_palette.default_color
@@ -83,6 +84,13 @@ class ConfigurationTest < Minitest::Test
     @configuration.merge!("parent_root_type" => "Organisation")
 
     assert_equal "Organisation", @configuration.parent_root_type
+  end
+
+  def test_merge_sets_download_audience_icons
+    @configuration.merge!(download_audience_icons: { granted: "key" })
+
+    assert_equal({ granted: "key" }, @configuration.download_audience_icons)
+    assert_equal({ granted: "key" }, @configuration.to_h.fetch(:download_audience_icons))
   end
 
   def test_to_h_reports_registered_hook_counts

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_10_140014) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_10_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -163,6 +163,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_140014) do
 
   create_table "recording_studio_credits_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+  end
+
+  create_table "recording_studio_downloadable_packages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "recording_id", null: false
+    t.string "format", default: "zip", null: false
+    t.string "state", default: "pending", null: false
+    t.string "source_fingerprint"
+    t.text "failure_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "action", null: false
+    t.string "export_scope", default: "public", null: false
+    t.index ["recording_id", "action", "export_scope", "format"], name: "idx_rs_downloadable_packages_identity", unique: true
+    t.index ["state"], name: "index_recording_studio_downloadable_packages_on_state"
   end
 
   create_table "recording_studio_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
