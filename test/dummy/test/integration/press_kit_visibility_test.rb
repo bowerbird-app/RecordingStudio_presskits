@@ -393,10 +393,8 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
   def with_test_custom_audience
     audiences = RecordingStudioAccessible.configuration.action_audiences
     previous = audiences[:"presskits.kit_view_full"]
-    unless RecordingStudioAccessible.registered_audience?(TEST_CUSTOM_AUDIENCE)
-      RecordingStudioAccessible.register_audience(TEST_CUSTOM_AUDIENCE) do |actor:, **|
-        actor.respond_to?(:email) && actor.email.to_s.end_with?("@presskits.test")
-      end
+    RecordingStudioAccessible.register_audience(TEST_CUSTOM_AUDIENCE) do |actor:, **|
+      actor.respond_to?(:email) && actor.email.to_s.end_with?("@presskits.test")
     end
 
     audiences[:"presskits.kit_view_full"] = previous.merge(

@@ -73,18 +73,14 @@ module RecordingStudioPresskits
       @section_editors = {}
       @section_prepares = {}
       @excluded_picker_types = []
-      assign_visibility_defaults
-    end
-
-    def assign_visibility_defaults
-      @sign_in_path = "/users/sign_in"
-      @registration_path = nil
-      @site_name = nil
     end
 
     def assign_cover_defaults
       @section_library_keys = {}
       @download_audience_icons = {}
+      @sign_in_path = "/users/sign_in"
+      @registration_path = nil
+      @site_name = nil
       @cover_colors = Cover::Palette::DEFAULT_COLORS.dup
       @default_cover_color = Cover::Palette::DEFAULT_COLOR
       @cover_text_colors = Cover::Palette::DEFAULT_TEXT_COLORS.dup
@@ -104,12 +100,7 @@ module RecordingStudioPresskits
         section_types: Array(section_types).map(&:to_s),
         section_components: section_components.dup,
         section_editors: section_editors.dup,
-        excluded_picker_types: Array(excluded_picker_types).map(&:to_s)
-      }.merge(hash_settings)
-    end
-
-    def hash_settings
-      {
+        excluded_picker_types: Array(excluded_picker_types).map(&:to_s),
         section_library_keys: (section_library_keys || {}).to_h,
         download_audience_icons: (download_audience_icons || {}).to_h
       }

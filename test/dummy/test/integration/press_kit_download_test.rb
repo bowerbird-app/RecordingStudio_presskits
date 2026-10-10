@@ -401,9 +401,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
   def with_test_custom_download_audience
     previous = nil
-    unless RecordingStudioAccessible.registered_audience?(TEST_CUSTOM_AUDIENCE)
-      RecordingStudioAccessible.register_audience(TEST_CUSTOM_AUDIENCE) { |**_kwargs| false }
-    end
+    RecordingStudioAccessible.register_audience(TEST_CUSTOM_AUDIENCE) { |**_kwargs| false }
 
     audiences = RecordingStudioAccessible.configuration.action_audiences
     previous = audiences[:"presskits.kit_download"]
