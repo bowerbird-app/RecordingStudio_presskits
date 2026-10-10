@@ -24,11 +24,13 @@
       ) %>
 
       <% if signed_in_reason? %>
-        <%= render FlatPack::Button::Component.new(
-          text: sign_in_label,
-          href: sign_in_path,
-          style: :primary
-        ) %>
+        <div class="flex">
+          <%= render FlatPack::Button::Component.new(
+            text: sign_in_label,
+            href: sign_in_path,
+            style: :primary
+          ) %>
+        </div>
       <% end %>
     </div>
   </div>
