@@ -8,7 +8,8 @@ class CreateRecordingStudioPresskitsKitSettings < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :recording_studio_presskits_kit_settings, :recording_id, unique: true,
+    add_index :recording_studio_presskits_kit_settings, :recording_id,
+              unique: true,
               name: "index_presskits_kit_settings_on_recording_id"
   end
 end

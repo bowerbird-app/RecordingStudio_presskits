@@ -27,6 +27,7 @@ module RecordingStudioPresskits
     )
     include RecordingStudio::Capabilities::Location.to
     include CoverAttributes
+
     RecordingStudio.enable_capability(:action_audiences, on: self)
 
     # The header is the kit itself. Title is required. The short description
