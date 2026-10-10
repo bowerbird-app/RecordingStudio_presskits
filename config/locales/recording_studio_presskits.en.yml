@@ -46,8 +46,8 @@ en:
         video_section: "A clip they can watch without a hunt."
         generic: "Another block for the kit."
     visibility:
-      title: "Who can see this"
-      subtitle: "Pick who gets the whole kit."
+      title: "Visibility"
+      subtitle: "Who can view this press kit"
       back: "Back to kit"
       audience_label: "Who can view the full press kit?"
       fallback_label: "What should other visitors see?"
@@ -55,12 +55,13 @@ en:
       saved: "Saved. That's who can see the full kit."
       invalid: "That choice is not available for this kit."
       save: "Update"
+      site_fallback: "this site"
       fallback:
         preview: "Preview"
-        preview_hint: "Show the title and a little public context."
         hidden: "Hidden"
-        hidden_hint: "Don't show this kit at all."
       preview:
-        sign_in: "Sign in to view the full kit"
+        heading: "See full press kit"
+        sign_in: "You must be signed in to %{site_name} to view this press kit."
         sign_in_action: "Sign in"
-        need_access: "You need access to view the full kit"
+        register_action: "Create account"
+        need_access: "You need access to view this press kit."

@@ -14,22 +14,24 @@
         <p class="text-lg text-pretty" data-presskits-preview-description><%= description %></p>
       <% end %>
 
-      <% if formatted_date.present? %>
-        <p class="text-base" data-presskits-preview-date><%= formatted_date %></p>
-      <% end %>
+      <%= render heading_component %>
 
-      <%= render FlatPack::Alert::Component.new(
-        description: explanation,
-        style: :info
-      ) %>
+      <p data-presskits-preview-explanation><%= explanation %></p>
 
-      <% if signed_in_reason? %>
-        <div class="flex">
+      <% if show_auth_actions? %>
+        <div class="flex flex-wrap items-center gap-3">
           <%= render FlatPack::Button::Component.new(
             text: sign_in_label,
             href: sign_in_path,
             style: :primary
           ) %>
+          <% if registration_path.present? %>
+            <%= render FlatPack::Button::Component.new(
+              text: register_label,
+              href: registration_path,
+              style: :secondary
+            ) %>
+          <% end %>
         </div>
       <% end %>
     </div>

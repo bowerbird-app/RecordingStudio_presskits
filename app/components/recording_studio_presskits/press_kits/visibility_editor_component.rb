@@ -42,8 +42,12 @@ module RecordingStudioPresskits
         {
           label: I18n.t("recording_studio_presskits.visibility.fallback.#{name}"),
           value: name.to_s,
-          description: I18n.t("recording_studio_presskits.visibility.fallback.#{name}_hint")
+          icon: fallback_icon(name)
         }
+      end
+
+      def fallback_icon(name)
+        name.to_sym == :hidden ? "eye-slash" : "eye"
       end
     end
   end

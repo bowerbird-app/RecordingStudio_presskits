@@ -1,5 +1,10 @@
 <% if presskits_editor_dialog? %>
   <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: I18n.t("recording_studio_presskits.visibility.title")) do %>
+    <%= render FlatPack::PageTitle::Component.new(
+      title: I18n.t("recording_studio_presskits.visibility.title"),
+      subtitle: I18n.t("recording_studio_presskits.visibility.subtitle"),
+      variant: :h1
+    ) %>
     <%= render RecordingStudioPresskits::PressKits::VisibilityEditorComponent.new(
       press_kit_recording: @press_kit_recording,
       audience: @visibility_audience,

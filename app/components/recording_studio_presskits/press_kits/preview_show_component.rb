@@ -17,18 +17,6 @@ module RecordingStudioPresskits
         recordable&.try(:description).to_s.strip.presence
       end
 
-      def kit_date
-        publishable = @press_kit_recording.try(:current_publishable)
-        time = publishable&.try(:publish_at).presence || @press_kit_recording.try(:created_at)
-        time&.to_date
-      end
-
-      def formatted_date
-        return if kit_date.blank?
-
-        I18n.l(kit_date, format: :long)
-      end
-
       def reason
         @reason.presence || Visibility.preview_reason_for(@press_kit_recording)
       end
@@ -39,18 +27,47 @@ module RecordingStudioPresskits
 
       def explanation
         if signed_in_reason?
-          I18n.t("recording_studio_presskits.visibility.preview.sign_in")
+          I18n.t(
+            "recording_studio_presskits.visibility.preview.sign_in",
+            site_name: Visibility.site_name
+          )
         else
           I18n.t("recording_studio_presskits.visibility.preview.need_access")
         end
+      end
+
+      def heading
+        I18n.t("recording_studio_presskits.visibility.preview.heading")
+      end
+
+      def heading_component
+        SectionHeadingComponent.new(
+          title: heading,
+          size: :lg,
+          spacing: :md,
+          level: :h2,
+          anchor_link: false
+        )
+      end
+
+      def show_auth_actions?
+        signed_in_reason?
       end
 
       def sign_in_path
         Visibility.sign_in_path
       end
 
+      def registration_path
+        Visibility.registration_path
+      end
+
       def sign_in_label
         I18n.t("recording_studio_presskits.visibility.preview.sign_in_action")
+      end
+
+      def register_label
+        I18n.t("recording_studio_presskits.visibility.preview.register_action")
       end
 
       private

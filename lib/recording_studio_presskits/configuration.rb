@@ -5,7 +5,7 @@ module RecordingStudioPresskits
     attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
                   :section_components, :section_editors, :section_prepares, :excluded_picker_types,
                   :cover_colors, :default_cover_color, :cover_text_colors, :cover_text_auto,
-                  :section_library_keys, :sign_in_path
+                  :section_library_keys, :sign_in_path, :registration_path, :site_name
     attr_reader :hooks
 
     def initialize
@@ -48,7 +48,7 @@ module RecordingStudioPresskits
     end
 
     def to_h
-      base_settings.merge(cover_settings).merge(hooks_registered: hook_counts)
+      identity_settings.merge(editor_settings).merge(cover_settings).merge(hooks_registered: hook_counts)
     end
 
     def merge!(hash)
@@ -72,7 +72,13 @@ module RecordingStudioPresskits
       @section_editors = {}
       @section_prepares = {}
       @excluded_picker_types = []
+      assign_visibility_defaults
+    end
+
+    def assign_visibility_defaults
       @sign_in_path = "/users/sign_in"
+      @registration_path = nil
+      @site_name = nil
     end
 
     def assign_cover_defaults
@@ -83,16 +89,11 @@ module RecordingStudioPresskits
       @cover_text_auto = true
     end
 
-    def base_settings
-      identity_settings.merge(editor_settings)
-    end
-
     def identity_settings
       {
-        parent_root_type: parent_root_type,
-        authentication_method: authentication_method,
-        current_actor_method: current_actor_method,
-        sign_in_path: sign_in_path
+        parent_root_type: parent_root_type, authentication_method: authentication_method,
+        current_actor_method: current_actor_method, sign_in_path: sign_in_path,
+        registration_path: registration_path, site_name: site_name
       }
     end
 

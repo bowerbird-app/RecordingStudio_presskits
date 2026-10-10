@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "recording_studio_presskits/visibility/host"
+
 module RecordingStudioPresskits
   # One resolver for who sees a kit. Controllers, views, listings, cards, and
   # meta tags call this. Do not scatter audience or fallback checks.
@@ -13,11 +15,8 @@ module RecordingStudioPresskits
     FALLBACKS = %i[preview hidden].freeze
     PRESENTATIONS = %i[full preview hidden unavailable].freeze
     DEFAULT_ACTION_AUDIENCES = {
-      allowed: %i[public signed_in granted],
-      default: :public,
-      granted_roles: %i[view edit admin],
-      granted_override: false,
-      manage_role: :edit
+      allowed: %i[public signed_in granted], default: :public,
+      granted_roles: %i[view edit admin], granted_override: false, manage_role: :edit
     }.freeze
     PRIVATE_CACHE = "private, no-store"
 
@@ -98,7 +97,15 @@ module RecordingStudioPresskits
       end
 
       def sign_in_path
-        RecordingStudioPresskits.configuration.sign_in_path.presence || "/users/sign_in"
+        Host.sign_in_path
+      end
+
+      def registration_path
+        Host.registration_path
+      end
+
+      def site_name
+        Host.site_name
       end
 
       def preview_reason_for(recording)
@@ -109,9 +116,7 @@ module RecordingStudioPresskits
       private
 
       def policy_for(recording)
-        {
-          fallback: KitSettings.fallback_for(recording)
-        }
+        { fallback: KitSettings.fallback_for(recording) }
       end
 
       def published?(recording)

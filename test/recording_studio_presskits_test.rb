@@ -1054,6 +1054,24 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes accessible, "presskits.kit_view_full"
   end
 
+  def test_visibility_editor_and_preview_use_inline_radios_and_copy
+    root = File.expand_path("..", __dir__)
+    locales = File.read(File.join(root, "config/locales/recording_studio_presskits.en.yml"))
+    components = File.join(root, "app/components/recording_studio_presskits/press_kits")
+    editor = File.read(File.join(components, "visibility_editor_component.html.erb"))
+    preview = File.read(File.join(components, "preview_show_component.html.erb"))
+
+    assert_includes locales, "title: \"Visibility\""
+    assert_includes locales, "Who can view this press kit"
+    assert_includes locales, "See full press kit"
+    assert_includes locales, "You must be signed in to"
+    assert_includes editor, "max-w-xl"
+    assert_includes editor, "variant: :inline"
+    refute_includes editor, "variant: :cards"
+    refute_includes preview, "FlatPack::Alert"
+    refute_includes preview, "formatted_date"
+  end
+
   def test_presskits_source_does_not_register_embed_providers
     root = File.expand_path("..", __dir__)
     Dir.glob(File.join(root, "{app,lib,config}/**/*.{rb,erb}")).each do |path|

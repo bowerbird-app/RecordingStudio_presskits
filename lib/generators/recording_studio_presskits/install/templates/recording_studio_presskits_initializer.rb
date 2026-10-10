@@ -20,4 +20,8 @@ RecordingStudioPresskits.configure do |config|
 
   # Sign-in path on limited previews when the audience is signed_in.
   # config.sign_in_path = "/users/sign_in"
+  # Registration path for the preview Create account button. Leave blank to hide it.
+  # config.registration_path = "/users/sign_up"
+  # Site name in "You must be signed in to {site name}…". Falls back to i18n, then the Rails app name.
+  # config.site_name = "Harbour Studio"
 end

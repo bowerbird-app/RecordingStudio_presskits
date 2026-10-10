@@ -133,4 +133,33 @@ class VisibilityTest < Minitest::Test
   def test_kit_settings_blank_fallback_is_preview
     assert_equal :preview, RecordingStudioPresskits::KitSettings.fallback_for(nil)
   end
+
+  def test_site_name_prefers_configuration_then_i18n_then_rails
+    original = RecordingStudioPresskits.configuration.site_name
+    RecordingStudioPresskits.configuration.site_name = "Harbour Studio"
+
+    assert_equal "Harbour Studio", RecordingStudioPresskits::Visibility.site_name
+  ensure
+    RecordingStudioPresskits.configuration.site_name = original
+  end
+
+  def test_site_name_falls_back_when_unconfigured
+    original = RecordingStudioPresskits.configuration.site_name
+    RecordingStudioPresskits.configuration.site_name = nil
+
+    name = RecordingStudioPresskits::Visibility.site_name
+    refute_empty name
+    refute_equal "Harbour Studio", name
+  ensure
+    RecordingStudioPresskits.configuration.site_name = original
+  end
+
+  def test_registration_path_is_blank_by_default
+    original = RecordingStudioPresskits.configuration.registration_path
+    RecordingStudioPresskits.configuration.registration_path = "  "
+
+    assert_nil RecordingStudioPresskits::Visibility.registration_path
+  ensure
+    RecordingStudioPresskits.configuration.registration_path = original
+  end
 end

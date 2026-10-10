@@ -5,6 +5,9 @@ RecordingStudioPresskits.configure do |config|
   config.authentication_method = :authenticate_user!
   config.current_actor_method = :current_user
   config.excluded_picker_types = ["FakeBlock"]
+  config.sign_in_path = "/users/sign_in"
+  config.registration_path = "/users/sign_up"
+  config.site_name = "Harbour Studio"
 end
 
 RecordingStudioPresskits.register_section(

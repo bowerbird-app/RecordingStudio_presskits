@@ -38,7 +38,8 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_blank_public_layout
     assert_select "[data-presskits-presentation='full']"
     assert_includes response.body, "Hero"
-    refute_includes response.body, "Sign in to view the full kit"
+    refute_includes response.body, "You must be signed in to Harbour Studio to view this press kit."
+    refute_includes response.body, "See full press kit"
     refute_equal "private, no-store", response.headers["Cache-Control"]
   end
 
@@ -51,8 +52,13 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_select "[data-presskits-presentation='preview']"
     assert_includes response.body, "Spring launch"
     assert_includes response.body, "Doors at noon."
-    assert_includes response.body, "Sign in to view the full kit"
+    assert_includes response.body, "See full press kit"
+    assert_includes response.body, "You must be signed in to Harbour Studio to view this press kit."
     assert_select "a[href='/users/sign_in']", text: "Sign in"
+    assert_select "a[href='/users/sign_up']", text: "Create account"
+    refute_includes response.body, "Sign in to view the full kit"
+    refute_includes response.body, "data-presskits-preview-date"
+    refute_select "[role='alert']"
     refute_includes response.body, "Secret notes"
     assert_select "#presskits-public-sections", count: 0
     assert_equal "private, no-store", response.headers["Cache-Control"]
@@ -68,9 +74,11 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_select "[data-presskits-presentation='preview']"
-    assert_includes response.body, "You need access to view the full kit"
-    refute_includes response.body, "Sign in to view the full kit"
+    assert_includes response.body, "See full press kit"
+    assert_includes response.body, "You need access to view this press kit."
+    refute_includes response.body, "You must be signed in to Harbour Studio to view this press kit."
     refute_select "a[href='/users/sign_in']"
+    refute_select "a[href='/users/sign_up']"
     refute_includes response.body, "Secret notes"
   end
 
@@ -85,7 +93,7 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_includes response.body, "You need access to view the full kit"
+    assert_includes response.body, "You need access to view this press kit."
     refute_includes response.body, "Embargo copy"
 
     journalist = User.create!(
@@ -189,12 +197,18 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
 
     get visibility_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
     assert_response :success
+    assert_includes response.body, "Visibility"
+    assert_includes response.body, "Who can view this press kit"
+    assert_select "#presskits-visibility-form.max-w-xl"
     assert_select "select[name='visibility[audience]'] option[value='public']"
     assert_select "select[name='visibility[audience]'] option[value='signed_in']"
     assert_select "select[name='visibility[audience]'] option[value='granted']"
     assert_select "select[name='visibility[audience]'] option[value='presskits.verified_journalist']"
     assert_select "[data-recording-studio-presskits--visibility-fallback-target='fallback'][hidden]"
     assert_select "input[name='visibility[visibility_fallback]'][value='preview']"
+    assert_select "[data-flat-pack--icon-name-value='eye']"
+    assert_select "[data-flat-pack--icon-name-value='eye-slash']"
+    refute_includes response.body, "min-h-[7rem]"
   end
 
   test "restricting then returning to public keeps the stored fallback" do
@@ -212,6 +226,8 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_visibility_path(kit)
     assert_response :success
+    assert_select "h1", text: "Visibility"
+    assert_includes response.body, "Who can view this press kit"
     refute_select "[data-recording-studio-presskits--visibility-fallback-target='fallback'][hidden]"
     assert_select "input[name='visibility[visibility_fallback]'][value='hidden']"
 
@@ -293,6 +309,19 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_equal recordable_id, kit.recordable_id
     assert_equal :hidden, RecordingStudioPresskits::KitSettings.fallback_for(kit)
     assert_equal 1, kit.events.where(action: "visibility_fallback_changed").count
+  end
+
+  test "preview hides create account when the host has no registration path" do
+    previous = RecordingStudioPresskits.configuration.registration_path
+    RecordingStudioPresskits.configuration.registration_path = nil
+    kit = restrict_kit("Spring launch", audience: :signed_in, fallback: :preview, slug: "spring-no-register")
+
+    get kit.publishable_public_path
+    assert_response :success
+    assert_select "a[href='/users/sign_in']", text: "Sign in"
+    refute_select "a", text: "Create account"
+  ensure
+    RecordingStudioPresskits.configuration.registration_path = previous
   end
 
   private
