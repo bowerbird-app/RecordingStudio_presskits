@@ -65,10 +65,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes hero["class"], "p-12"
     assert_includes hero["class"], "md:p-24"
     hero_title = css_select("#presskits-cover-hero h1").first
-    refute_includes hero_title["class"], "fp-display"
+    assert_includes hero_title["class"], "fp-display"
     assert_includes hero_title["class"], "fp-text-balance"
-    assert_includes hero_title["style"].to_s, "--hero-headline-size"
-    refute_includes hero_title["style"].to_s, "--display-size"
+    assert_includes hero_title["style"].to_s, "--display-size"
+    refute_includes hero_title["style"].to_s, "--hero-headline-size"
     assert_includes css_select("#presskits-cover-hero > div").first["class"], "max-w-3xl"
     assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
     sections = css_select("#presskits-editor-sections").first

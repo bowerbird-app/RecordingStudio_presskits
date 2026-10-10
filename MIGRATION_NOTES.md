@@ -6,7 +6,7 @@ Company and Location sit on the kit hero. Company is a host opt-in on the root: 
 
 Location is on the kit itself: PressKit includes `RecordingStudio::Capabilities::Location.to`. That is not a section and not a later Location section type. One optional child. `KitLocation` looks it up and writes it. The hero shows `resolved_icon` and `display_name`. The shared header screen in `pk-editor` edits it with `recording_studio_location_search_fields` (title, type, icon). Saving blank fields trashes the place. Saving the header without a `location` param leaves the place alone. Presskits enables Trashable on `RecordingStudio::Location::Location` so that clear works. Cover company lookup lives on `Cover::Company`. Header form parsing lives on `HeaderAttributes`.
 
-Add the gems. Dummy pins Company `v0.3.0` and Location `v0.5.1`. Accessible moves to `~> 0.13` (`v0.13.0`), Attachable to `~> 0.13` (`v0.13.0`), Trashable to `~> 0.6` (`v0.6.0`). Flatpack stays `>= 0.1.223`. Do not bump Flatpack.
+Add the gems. Dummy pins Company `v0.3.0` and Location `v0.5.1`. Accessible moves to `~> 0.13` (`v0.13.0`), Attachable to `~> 0.13` (`v0.13.0`), Trashable to `~> 0.6` (`v0.6.0`). Flatpack is `>= 0.1.224` (dummy tag `v0.1.224`).
 
 ```bash
 bin/rails generate recording_studio_company:install
@@ -24,9 +24,9 @@ The `:hero` cover is still a flush colour surface to the kit card's top and side
 
 A muted **Press kit** eyebrow sits above the title. The copy is `I18n.t("recording_studio_presskits.cover.eyebrow")` so a host can override it. Size is `text-3xl` / `md:text-4xl`. Colour is `color-mix(in oklab, <text colour> 70%, transparent)`. Flatpack `PageTitle` has no eyebrow or kicker slot, so the hero renders a semantic `<p>` with those tokens rather than a custom component.
 
-The hero does not show the kit short description. Keep the field on the header screen, in the table, on the API payload, and on 9/16 cards. Title stays top-left and wraps at `--hero-headline-size` (48px / `--text-5xl`) in a `max-w-3xl` block. Flatpack `PageTitle` default is 36px; `:display` is a 48–72px clamp. Switch the title to `PageTitle` `size: :display` once Flatpack PR #262 is released. Do not bump Flatpack past `0.1.223` for this.
+The hero does not show the kit short description. Keep the field on the header screen, in the table, on the API payload, and on 9/16 cards. Title stays top-left and wraps as `FlatPack::PageTitle::Component` with `size: :display` in a `max-w-3xl` block. Display uses `--display-size` (`clamp` 48px to 88px), `--display-leading` `1.05`, `--display-tracking` `-0.03em`, and `--display-weight` `600`.
 
-Rebuild Tailwind so `p-24`, `text-3xl`, and `text-4xl` generate. Hosts that replaced `Cover::Component` should match this hero: no fixed ratio, eyebrow above default-size `PageTitle`, no subtitle on the band.
+Bump Flatpack to `>= 0.1.224` (dummy tag `v0.1.224`) and rebuild Tailwind so `p-24`, `text-3xl`, `text-4xl`, and `text-8xl` generate. Reload Flatpack CSS for the 88px display clamp. Hosts that replaced `Cover::Component` should match this hero: no fixed ratio, eyebrow above `PageTitle` `size: :display`, no subtitle on the band.
 
 ## 0.26.0
 

@@ -22,7 +22,7 @@ gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company",
 gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
-gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.223"
+gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.224"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
 
@@ -40,7 +40,7 @@ gem "recording_studio_company", "~> 0.3"
 gem "recording_studio_location", "~> 0.4"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
-gem "flat_pack", ">= 0.1.223"
+gem "flat_pack", ">= 0.1.224"
 ```
 
 Then:
@@ -168,7 +168,7 @@ The header is the press kit. `title` is required. `description` is an optional s
 
 When the host root enables companies (`allow: :one`), `Cover::Company` looks up `RecordingStudioCompany.company(root)` and the hero shows `recording_studio_company_logo` plus the name. No capability, or no company, hides that row. One optional Location child on the kit (not a section) shows its icon and `display_name` under the company. `KitLocation` looks that child up and writes it. The header screen edits that place with `recording_studio_location_search_fields`. Blank fields clear it. Flatpack `PageTitle` has no byline slot, and Location's display helper is a Card, so the hero uses Avatar + Icon + text.
 
-`RecordingStudioPresskits::Cover::Component` is the reusable card. Pass a kit recording or the title, description, colour, and text colour. Sizes are `:card` (9/16 story tile, title overlaid, description clamped to two lines), `:preview` (same story shape in the header editor), and `:hero` (full-width colour header at the top of the public kit and the live editor). Hero height comes from padding plus content (`p-12` on a phone, `md:p-24` on a desktop), not a fixed ratio. A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). The title is a wrapping `h1` at `--hero-headline-size` (48px), top-left, in `max-w-3xl`. The hero does not show the short description; cards and the header editor still do. Grid cards stay 9/16. Text colour is the chosen hex, or Auto.
+`RecordingStudioPresskits::Cover::Component` is the reusable card. Pass a kit recording or the title, description, colour, and text colour. Sizes are `:card` (9/16 story tile, title overlaid, description clamped to two lines), `:preview` (same story shape in the header editor), and `:hero` (full-width colour header at the top of the public kit and the live editor). Hero height comes from padding plus content (`p-12` on a phone, `md:p-24` on a desktop), not a fixed ratio. A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). The title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. The hero does not show the short description; cards and the header editor still do. Grid cards stay 9/16. Text colour is the chosen hex, or Auto.
 
 Create a section with `RecordingStudioPresskits.create_section!`. That call records a kit section under the kit, then records the chosen content type under the kit section, in one transaction. A failed content write leaves no kit section behind. Title and subtitle belong to the kit section. A content default belongs to the registered `prepare` hook.
 
@@ -279,7 +279,7 @@ Primary buttons: **Presskit** (Heroicons plus) on the index, **Create** on the n
 
 ## Public
 
-A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). `.to` sets `public_layout: "recording_studio_presskits/blank"`. That layout is a document and the kit: no back, no close, and no TopNav. The page title is the kit name. The kit opens inside the same Flatpack Card as the editor. `Cover::Component` at `:hero` is a flush colour header to the card's top and side edges. Height comes from `p-12 md:p-24` plus the eyebrow and title. The title is `--hero-headline-size` (48px) in a wrapping `max-w-3xl` block. The short description stays off that band. View and the publish menu Preview both use it. Owner preview stays on `recording_studio/default_layout`.
+A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). `.to` sets `public_layout: "recording_studio_presskits/blank"`. That layout is a document and the kit: no back, no close, and no TopNav. The page title is the kit name. The kit opens inside the same Flatpack Card as the editor. `Cover::Component` at `:hero` is a flush colour header to the card's top and side edges. Height comes from `p-12 md:p-24` plus the eyebrow and title. The title is `PageTitle` `size: :display` in a wrapping `max-w-3xl` block. The short description stays off that band. View and the publish menu Preview both use it. Owner preview stays on `recording_studio/default_layout`.
 
 Logged-out visitors get a 404 for a kit that is not currently published. An authenticated owner can still open the owner preview on the default layout.
 
@@ -328,7 +328,7 @@ Dummy kit pins:
 | Accessible | `v0.13.0` |
 | Admin | `v2.0.7` |
 | Root Switchable | `v0.5.6` |
-| FlatPack | `v0.1.223` |
+| FlatPack | `v0.1.224` |
 | Attachable | `v0.13.0` |
 | Company | `v0.3.0` |
 | Location | `v0.5.1` |

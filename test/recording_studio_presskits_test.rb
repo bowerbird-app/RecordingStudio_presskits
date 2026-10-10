@@ -52,7 +52,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.223"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.224"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.13"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.3"'
@@ -69,7 +69,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.6"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.223"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.224"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
@@ -286,7 +286,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.7\""
     assert_includes readme, "tag: \"v0.5.0\""
     assert_includes readme, "tag: \"v0.4.5\""
-    assert_includes readme, "tag: \"v0.1.223\""
+    assert_includes readme, "tag: \"v0.1.224\""
     assert_includes readme, "tag: \"v0.3.0\""
     assert_includes readme, "tag: \"v0.5.1\""
     assert_includes readme, "Companies.to(allow: :one)"
@@ -295,7 +295,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "recording_studio_location_search_fields"
     assert_includes readme, "Cover::Company"
     assert_includes readme, "KitLocation"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.223"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.224"'
+    assert_includes readme, "size: :display"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
     assert_includes readme, "flat_pack_modal_screen"
@@ -470,11 +471,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover, "recording_studio_presskits.cover.eyebrow"
     assert_includes cover_html, "<% if hero? %>"
     refute_includes cover_html.split("<% else %>").first, "FlatPack::Card::Component"
-    refute_includes cover_html.split("<% else %>").first, "FlatPack::PageTitle::Component"
-    refute_includes cover_html.split("<% else %>").first, "size: :display"
+    assert_includes cover_html.split("<% else %>").first, "FlatPack::PageTitle::Component"
+    assert_includes cover_html.split("<% else %>").first, "size: :display"
     refute_includes cover_html.split("<% else %>").first, "subtitle: description"
     assert_includes cover_html.split("<% else %>").first, "data-cover-eyebrow"
-    assert_includes cover_html.split("<% else %>").first, "--hero-headline-size"
+    refute_includes cover_html.split("<% else %>").first, "--hero-headline-size"
     assert_includes cover_html.split("<% else %>").first, "data-cover-company"
     assert_includes cover_html.split("<% else %>").first, "recording_studio_company_logo"
     assert_includes cover_html.split("<% else %>").first, "data-cover-location"
