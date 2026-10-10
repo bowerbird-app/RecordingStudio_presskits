@@ -1,5 +1,7 @@
 en:
   recording_studio_presskits:
+    audiences:
+      verified_journalist: "Verified journalists"
     cover:
       eyebrow: "Press kit"
     editor:
@@ -14,6 +16,7 @@ en:
       section_actions: "Section actions"
       header_actions: "Header actions"
       cover_colours: "Cover colours"
+      visibility: "Who can see this"
       cover_image: "Cover image"
       choose_cover_image: "Choose from the library"
       trash: "Trash"
@@ -42,3 +45,22 @@ en:
         credits_section: "Who did the work, and what they did."
         video_section: "A clip they can watch without a hunt."
         generic: "Another block for the kit."
+    visibility:
+      title: "Who can see this"
+      subtitle: "Pick who gets the whole kit."
+      back: "Back to kit"
+      audience_label: "Who can view the full press kit?"
+      fallback_label: "What should other visitors see?"
+      constrained: "Your workspace only allows some of these choices. The one in force is selected."
+      saved: "Saved. That's who can see the full kit."
+      invalid: "That choice is not available for this kit."
+      save: "Update"
+      fallback:
+        preview: "Preview"
+        preview_hint: "Show the title and a little public context."
+        hidden: "Hidden"
+        hidden_hint: "Don't show this kit at all."
+      preview:
+        sign_in: "Sign in to view the full kit"
+        sign_in_action: "Sign in"
+        need_access: "You need access to view the full kit"

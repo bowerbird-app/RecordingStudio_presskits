@@ -5,18 +5,11 @@ module RecordingStudioPresskits
     attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
                   :section_components, :section_editors, :section_prepares, :excluded_picker_types,
                   :cover_colors, :default_cover_color, :cover_text_colors, :cover_text_auto,
-                  :section_library_keys
+                  :section_library_keys, :sign_in_path
     attr_reader :hooks
 
     def initialize
-      @parent_root_type = "Workspace"
-      @authentication_method = :authenticate_user!
-      @current_actor_method = :current_user
-      @section_types = []
-      @section_components = {}
-      @section_editors = {}
-      @section_prepares = {}
-      @excluded_picker_types = []
+      assign_base_defaults
       assign_cover_defaults
       @hooks = RecordingStudio::Hooks.new
     end
@@ -70,6 +63,18 @@ module RecordingStudioPresskits
 
     private
 
+    def assign_base_defaults
+      @parent_root_type = "Workspace"
+      @authentication_method = :authenticate_user!
+      @current_actor_method = :current_user
+      @section_types = []
+      @section_components = {}
+      @section_editors = {}
+      @section_prepares = {}
+      @excluded_picker_types = []
+      @sign_in_path = "/users/sign_in"
+    end
+
     def assign_cover_defaults
       @section_library_keys = {}
       @cover_colors = Cover::Palette::DEFAULT_COLORS.dup
@@ -79,10 +84,20 @@ module RecordingStudioPresskits
     end
 
     def base_settings
+      identity_settings.merge(editor_settings)
+    end
+
+    def identity_settings
       {
         parent_root_type: parent_root_type,
         authentication_method: authentication_method,
         current_actor_method: current_actor_method,
+        sign_in_path: sign_in_path
+      }
+    end
+
+    def editor_settings
+      {
         section_types: Array(section_types).map(&:to_s),
         section_components: section_components.dup,
         section_editors: section_editors.dup,

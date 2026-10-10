@@ -254,5 +254,11 @@ module RecordingStudioPresskits
         append_view_path RecordingStudioPresskits::Engine.root.join("app/views")
       end
     end
+
+    initializer "recording_studio_presskits.action_audiences" do
+      config.to_prepare do
+        RecordingStudioPresskits::Visibility.register_action!
+      end
+    end
   end
 end

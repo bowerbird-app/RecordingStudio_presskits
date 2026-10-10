@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-10
+
+### Added
+- Configurable kit visibility through Accessible action `presskits.kit_view_full` (default Public). The owner picks who can view the full kit on **Who can see this** in `pk-editor`. When that is not Public, **What should other visitors see?** is Preview or Hidden (default Preview).
+- `RecordingStudioPresskits::Visibility.presentation_for` is the only resolver (`:full`, `:preview`, `:hidden`, `:unavailable`). Public show, listings, cards, and meta tags go through it.
+- Preview renders an allowlist only: title, short description, cover colour and image, company, kit location, and date. Signed-in audiences get a sign-in link (`config.sign_in_path`). Granted and custom audiences get a need-access message. Hidden is a plain 404 with no metadata leak.
+- `visibility_fallback` lives on sidecar `KitSetting` rows, not the revisioned PressKit.
+- Dummy Workspace enables `:action_audiences` and registers `presskits.verified_journalist` for tests.
+- Version `0.32.0`
+
+### Changed
+- Depend on Accessible `~> 0.14` (dummy tag `v0.14.0`) and Publishable `~> 0.7` (dummy tag `v0.7.0`).
+- PressKit enables `:action_audiences` so kits can hold Accessible `AccessRule` children.
+
+### Upgrade notes
+- Install Accessible `0.14.0` and Publishable `0.7.0`. Run `bin/rails generate recording_studio_accessible:migrations`, `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`.
+- Enable `:action_audiences` on the host root if the workspace should narrow who can see kits. PressKit already enables it.
+- Hosts that want extra audiences (for example verified journalists) `register_audience` and add them to `config.action_audiences[:"presskits.kit_view_full"][:allowed]`.
+- Set `config.sign_in_path` when sign-in is not `/users/sign_in`.
+- Use `KitQuery.discoverable_for(actor:)` for public lists. `PressKit.indexable` is still publish state only.
+- Future JSON serializers must call `Visibility.presentation_for`. Do not cache non-full responses on a shared cache. Fragment keys must include the presentation.
+- Kit downloads (a parallel change) should also require `presskits.kit_view_full` once both land.
+- Flatpack has no “show this field when the select is not Public” control, so a small Stimulus controller (`recording-studio-presskits--visibility-fallback`) toggles the fallback RadioGroup. Accessible has no audience picker; Presskits renders Select + RadioGroup.
+
 ## [0.31.0] - 2026-10-10
 
 ### Changed

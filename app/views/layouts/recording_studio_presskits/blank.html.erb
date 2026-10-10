@@ -1,4 +1,9 @@
-<%# Public kit page for now: a document and the kit, with no page nav and no TopNav. %>
+<%# Public kit page: a document and the kit, with no page nav and no TopNav. %>
+<% presentation = RecordingStudioPresskits::Visibility.apply_public_response!(
+     presentation: @presskits_presentation,
+     response: response
+   ) %>
+<% if %i[full preview].include?(presentation) %>
 <!DOCTYPE html>
 <html data-theme="rounded">
   <head>
@@ -11,8 +16,19 @@
     <%= stylesheet_link_tag "flat_pack/application", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "flat_pack/rich_text", "data-turbo-track": "reload" %>
     <%= yield :head %>
-    <% if respond_to?(:publishable_head_tags) %>
-      <%= publishable_head_tags %>
+    <% if presentation == :preview %>
+      <meta name="robots" content="noindex, nofollow">
+      <% if content_for?(:seo_description) %>
+        <meta name="description" content="<%= content_for(:seo_description) %>">
+        <meta property="og:description" content="<%= content_for(:seo_description) %>">
+      <% end %>
+      <meta property="og:title" content="<%= content_for(:title).presence || "Press kit" %>">
+      <meta property="og:type" content="website">
+      <meta property="og:url" content="<%= request.original_url %>">
+    <% elsif presentation == :full %>
+      <% if respond_to?(:publishable_head_tags) %>
+        <%= publishable_head_tags %>
+      <% end %>
     <% end %>
     <%= javascript_importmap_tags if respond_to?(:javascript_importmap_tags) %>
   </head>
@@ -23,3 +39,4 @@
     </main>
   </body>
 </html>
+<% end %>

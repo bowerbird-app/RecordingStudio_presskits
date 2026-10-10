@@ -36,6 +36,7 @@ class ConfigurationTest < Minitest::Test
     assert_equal "Workspace", configuration.parent_root_type
     assert_equal :authenticate_user!, configuration.authentication_method
     assert_equal :current_user, configuration.current_actor_method
+    assert_equal "/users/sign_in", configuration.sign_in_path
     assert_equal [], configuration.section_types
     assert_equal({}, configuration.section_components)
     assert_equal({}, configuration.section_editors)
