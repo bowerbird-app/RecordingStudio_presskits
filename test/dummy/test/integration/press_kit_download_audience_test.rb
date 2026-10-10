@@ -75,6 +75,23 @@ class PressKitDownloadAudienceTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "public kit uses the signed-in visitor even if Current.actor still holds an editor" do
+    kit = publish_downloadable_kit!("audience-leftover-actor")
+    save_download_audience!(kit, :granted)
+    sign_in @stranger
+    Current.actor = @user
+
+    get kit.publishable_public_path
+    assert_response :success
+    assert_select "#presskits-kit-download", count: 0
+    refute_includes response.body, "Download kit"
+
+    assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
+      get recording_studio_downloadable.recording_package_path(kit)
+    end
+    assert_includes [401, 403], response.status
+  end
+
   test "switching from Anyone to Signed in immediately blocks an anonymous request to a built package path" do
     kit = publish_downloadable_kit!("audience-switch-signed-in")
     save_download_audience!(kit, :public)

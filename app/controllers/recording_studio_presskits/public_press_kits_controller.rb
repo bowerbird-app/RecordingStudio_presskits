@@ -20,10 +20,8 @@ module RecordingStudioPresskits
 
     def set_public_actor
       return unless defined?(Current) && Current.respond_to?(:actor=)
-      return if Current.respond_to?(:actor) && Current.actor.present?
-      return unless respond_to?(:current_user, true)
 
-      Current.actor = current_user
+      Current.actor = respond_to?(:current_user, true) ? current_user : nil
     end
   end
 end

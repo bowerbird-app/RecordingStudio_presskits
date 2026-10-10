@@ -76,6 +76,12 @@ class KitDownloadTest < Minitest::Test
     assert_includes html, "show_download?"
     assert_includes component, "return false if preview?"
     assert_includes component, "KitDownload.allowed?"
+    assert_includes component, "helpers.current_user"
+    controller = File.read(
+      File.expand_path("../app/controllers/recording_studio_presskits/public_press_kits_controller.rb", __dir__)
+    )
+    assert_includes controller, "Current.actor = respond_to?(:current_user, true) ? current_user : nil"
+    refute_includes controller, "return if Current.respond_to?(:actor) && Current.actor.present?"
     editor = File.read(
       File.expand_path("../app/components/recording_studio_presskits/press_kits/kit_editor_component.html.erb", __dir__)
     )
