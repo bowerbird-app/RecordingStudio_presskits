@@ -25,7 +25,7 @@ class KitDownloadTest < Minitest::Test
 
   def test_audience_defaults_include_registered_custom_audiences
     registry = Object.new
-    registry.define_singleton_method(:names) { [:public, :signed_in, :granted, :"presskits.test_custom"] }
+    registry.define_singleton_method(:names) { %i[public signed_in granted] + [:"presskits.test_custom"] }
 
     RecordingStudioAccessible.stub(:audience_registry, registry) do
       defaults = RecordingStudioPresskits::KitDownload.audience_defaults
