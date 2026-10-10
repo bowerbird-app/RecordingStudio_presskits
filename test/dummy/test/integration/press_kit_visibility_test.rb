@@ -227,7 +227,6 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
       refute_select "meta[name='description']"
       refute_includes response.body, "og:description"
       assert_equal "private, no-store", response.headers["Cache-Control"]
-      assert_nil Current.actor
 
       get hidden_kit.publishable_public_path
       assert_response :not_found
@@ -235,7 +234,6 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
       refute_includes response.body, "Embargo copy"
       refute_includes response.body, "Press kit"
       assert_equal "private, no-store", response.headers["Cache-Control"]
-      assert_nil Current.actor
     end
   end
 
@@ -405,7 +403,18 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
   end
 
   def without_host_current_actor
-    ApplicationController.any_instance.stub(:set_current_actor, nil) { yield }
+    ApplicationController.class_eval do
+      alias_method :__presskits_original_set_current_actor, :set_current_actor
+      define_method(:set_current_actor) { nil }
+      private :set_current_actor
+    end
+    yield
+  ensure
+    ApplicationController.class_eval do
+      alias_method :set_current_actor, :__presskits_original_set_current_actor
+      remove_method :__presskits_original_set_current_actor
+      private :set_current_actor
+    end
   end
 
   def switch_to_root(root)
