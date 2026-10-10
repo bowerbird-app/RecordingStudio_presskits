@@ -74,8 +74,7 @@ module RecordingStudioPresskits
       end
 
       def surface_classes
-        # Tailwind scans these literals: "aspect-[9/16]" "aspect-[21/9]" "max-w-xs" "justify-start"
-        # "text-[length:var(--text-4xl)]" "sm:text-[length:var(--hero-headline-size)]" "max-w-2xl" "max-w-[20ch]"
+        # Tailwind scans these literals: "aspect-[9/16]" "aspect-[21/9]" "max-w-xs" "justify-start" "max-w-2xl"
         if hero?
           "flex aspect-[21/9] min-h-64 w-full flex-col justify-start rounded-none p-8 md:p-12"
         elsif preview?
@@ -87,14 +86,6 @@ module RecordingStudioPresskits
 
       def hero_copy_classes
         "max-w-2xl"
-      end
-
-      def hero_title_classes
-        "max-w-[20ch] font-bold leading-tight tracking-tight fp-text-balance text-[length:var(--text-4xl)] sm:text-[length:var(--hero-headline-size)]"
-      end
-
-      def hero_description_classes
-        "mt-2 text-lg fp-text-pretty"
       end
 
       def wrapper_classes

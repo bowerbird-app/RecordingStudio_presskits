@@ -254,10 +254,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes public_hero["class"], "p-8"
     assert_includes public_hero["class"], "md:p-12"
     public_title = css_select("#presskits-cover-hero h1").first
-    assert_includes public_title["class"], "max-w-[20ch]"
+    assert_includes public_title["class"], "fp-display"
     assert_includes public_title["class"], "fp-text-balance"
-    assert_includes public_title["class"], "text-[length:var(--text-4xl)]"
-    assert_includes public_title["class"], "sm:text-[length:var(--hero-headline-size)]"
+    assert_includes public_title["style"].to_s, "--display-size"
     assert_includes css_select("#presskits-cover-hero > div").first["class"], "max-w-2xl"
     assert_includes css_select("#presskits-cover-hero p").first["class"], "fp-text-pretty"
     public_sections = css_select("#presskits-public-sections").first
