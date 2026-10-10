@@ -17,7 +17,6 @@ module RecordingStudioPresskits
       @section_editors = {}
       @section_prepares = {}
       @excluded_picker_types = []
-      @download_audience_icons = {}
       assign_cover_defaults
       @hooks = RecordingStudio::Hooks.new
     end
@@ -73,6 +72,7 @@ module RecordingStudioPresskits
 
     def assign_cover_defaults
       @section_library_keys = {}
+      @download_audience_icons = {}
       @cover_colors = Cover::Palette::DEFAULT_COLORS.dup
       @default_cover_color = Cover::Palette::DEFAULT_COLOR
       @cover_text_colors = Cover::Palette::DEFAULT_TEXT_COLORS.dup
@@ -87,7 +87,12 @@ module RecordingStudioPresskits
         section_types: Array(section_types).map(&:to_s),
         section_components: section_components.dup,
         section_editors: section_editors.dup,
-        excluded_picker_types: Array(excluded_picker_types).map(&:to_s),
+        excluded_picker_types: Array(excluded_picker_types).map(&:to_s)
+      }.merge(hash_settings)
+    end
+
+    def hash_settings
+      {
         section_library_keys: (section_library_keys || {}).to_h,
         download_audience_icons: (download_audience_icons || {}).to_h
       }
