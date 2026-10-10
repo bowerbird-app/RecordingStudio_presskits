@@ -549,13 +549,12 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     )
   end
 
-  test "location section sits under a kit section and places sit under the location section" do
+  test "location section sits under a kit section" do
     root, kit = spring_kit
     section = RecordingStudioPresskits.create_section!(
       press_kit_recording: kit,
       content_type: "RecordingStudioPresskits::LocationSection"
     )
-    content = RecordingStudioPresskits::KitQuery.section_content(section)
 
     assert_equal "Location", RecordingStudio.recordable_type_label("RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::LocationSection")
@@ -568,6 +567,16 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.parent_allowed?(
       child_type: "RecordingStudioPresskits::LocationSection", parent_recording: root
     )
+  end
+
+  test "places sit under the location section and the kit header" do
+    root, kit = spring_kit
+    section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::LocationSection"
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+
     assert RecordingStudio.parent_allowed?(
       child_type: "RecordingStudio::Location::Location", parent_recording: content
     )
