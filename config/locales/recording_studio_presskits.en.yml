@@ -23,6 +23,11 @@ en:
       subtitle: "Who can download this press kit"
       back: "Back to kit"
       audience_label: "Who can download this press kit"
+      audience_icons:
+        public: "globe-alt"
+        signed_in: "user"
+        granted: "lock-closed"
+        default: "user-group"
       constrained: "Your workspace only allows some of these choices. The one in force is selected."
       saved: "Saved. That's who can take the kit."
       invalid: "That choice is not available for this kit."

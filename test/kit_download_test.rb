@@ -85,13 +85,56 @@ class KitDownloadTest < Minitest::Test
     assert_includes locale, "Who can download this press kit"
     assert_includes locale, 'downloads: "Downloads"'
     assert_includes locale, "Your workspace only allows some of these choices"
+    assert_includes locale, 'public: "globe-alt"'
+    assert_includes locale, 'signed_in: "user"'
+    assert_includes locale, 'granted: "lock-closed"'
+    assert_includes locale, 'default: "user-group"'
   end
 
-  def test_downloads_editor_uses_accessible_select
+  def test_audience_icons_use_defaults_config_and_i18n
+    icons = RecordingStudioPresskits::KitDownload
+    previous = RecordingStudioPresskits.configuration.download_audience_icons
+    RecordingStudioPresskits.configuration.download_audience_icons = {}
+
+    assert_equal "globe-alt", icons.audience_icon_for(:public)
+    assert_equal "user", icons.audience_icon_for(:signed_in)
+    assert_equal "lock-closed", icons.audience_icon_for(:granted)
+    assert_equal "user-group", icons.audience_icon_for(:"presskits.verified_journalist")
+
+    I18n.backend.store_translations(
+      :en,
+      recording_studio_presskits: { downloads: { audience_icons: { granted: "key" } } }
+    )
+
+    assert_equal "key", icons.audience_icon_for(:granted)
+
+    RecordingStudioPresskits.configuration.download_audience_icons = { granted: "sparkles" }
+
+    assert_equal "sparkles", icons.audience_icon_for(:granted)
+    assert_equal "globe-alt", icons.audience_icon_for(:public)
+  ensure
+    RecordingStudioPresskits.configuration.download_audience_icons = previous
+    I18n.backend.store_translations(
+      :en,
+      recording_studio_presskits: {
+        downloads: {
+          audience_icons: {
+            public: "globe-alt",
+            signed_in: "user",
+            granted: "lock-closed",
+            default: "user-group"
+          }
+        }
+      }
+    )
+  end
+
+  def test_downloads_editor_uses_inline_radio_group
     root = File.expand_path("..", __dir__)
     editors = "#{root}/app/components/recording_studio_presskits/press_kits"
     component = File.read("#{editors}/downloads_editor_component.html.erb")
     ruby = File.read("#{editors}/downloads_editor_component.rb")
+    helper = File.read("#{root}/app/helpers/recording_studio_presskits/kit_editor_helper.rb")
     controller = File.read("#{root}/app/controllers/recording_studio_presskits/kit_downloads_controller.rb")
     screen = File.read("#{root}/app/views/recording_studio_presskits/kit_downloads/edit.html.erb")
     routes = File.read("#{root}/config/routes.rb")
@@ -99,13 +142,20 @@ class KitDownloadTest < Minitest::Test
     assert_includes routes, 'resource :downloads, only: %i[edit update], controller: "kit_downloads"'
     assert_includes controller, "KitDownload.set_audience!"
     assert_includes controller, "authorize_recording!(@press_kit_recording, role: :edit)"
-    assert_includes ruby, "{ label: option[:label], value: option[:audience].to_s }"
+    assert_includes ruby, "KitDownload.audience_icon_for(audience)"
     assert_includes component, 'name: "downloads[audience]"'
+    assert_includes component, "variant: :inline"
+    assert_includes component, "RadioGroup::Component"
+    refute_includes component, "Select::Component"
     assert_includes component, "max-w-xl"
     assert_includes component, "downloads.constrained"
+    assert_includes component, "downloads.audience_label"
+    assert_includes helper, "presskits_editor_blank_chrome_title"
     assert_includes screen, "flat_pack_modal_screen"
     assert_includes screen, "presskits_editor_modal_id"
+    assert_includes screen, "presskits_editor_blank_chrome_title"
     assert_includes screen, "downloads.title"
     assert_includes screen, "downloads.subtitle"
+    refute_includes screen, "flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: I18n.t"
   end
 end

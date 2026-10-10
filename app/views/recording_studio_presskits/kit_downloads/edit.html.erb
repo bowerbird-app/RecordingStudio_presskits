@@ -1,5 +1,5 @@
 <% if presskits_editor_dialog? %>
-  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: I18n.t("recording_studio_presskits.downloads.title")) do %>
+  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: presskits_editor_blank_chrome_title) do %>
     <%= render FlatPack::PageTitle::Component.new(
       title: I18n.t("recording_studio_presskits.downloads.title"),
       subtitle: I18n.t("recording_studio_presskits.downloads.subtitle"),

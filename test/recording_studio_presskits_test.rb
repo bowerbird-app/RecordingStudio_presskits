@@ -298,6 +298,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "presskits.kit_download"
     assert_includes readme, "Download kit"
     assert_includes readme, "Who can download this press kit"
+    assert_includes readme, "RadioGroup"
+    assert_includes readme, "download_audience_icons"
     assert_includes readme, "set_audience!"
     assert_includes readme, "manage_role: :edit"
     assert_includes readme, "v0.5.1"

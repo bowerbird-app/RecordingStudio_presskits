@@ -9,6 +9,12 @@ module RecordingStudioPresskits
     ACTION = :"presskits.kit_download"
     EXPORT_SCOPE = :public
     TEXT_FILENAME = "kit.txt"
+    DEFAULT_AUDIENCE_ICONS = {
+      public: "globe-alt",
+      signed_in: "user",
+      granted: "lock-closed"
+    }.freeze
+    DEFAULT_CUSTOM_AUDIENCE_ICON = "user-group"
 
     class << self
       def audience_defaults
@@ -54,6 +60,19 @@ module RecordingStudioPresskits
 
       def constrained?(recording)
         audience_options_for(recording).none? { |option| option[:audience] == :public }
+      end
+
+      def audience_icon_for(audience)
+        key = audience.to_s
+        from_config = icon_from_config(key)
+        return from_config if from_config.present?
+
+        from_i18n = icon_from_i18n(key)
+        return from_i18n if from_i18n.present?
+
+        DEFAULT_AUDIENCE_ICONS.fetch(key.to_sym) do
+          icon_from_i18n("default") || DEFAULT_CUSTOM_AUDIENCE_ICON
+        end
       end
 
       def subscribe!
@@ -126,6 +145,24 @@ module RecordingStudioPresskits
         return if id.blank?
 
         RecordingStudio::Recording.find_by(id: id)
+      end
+
+      def icon_from_config(key)
+        icons = RecordingStudioPresskits.configuration.download_audience_icons
+        return if icons.blank?
+
+        hash = icons.to_h
+        value = hash[key] || hash[key.to_sym] || hash[key.to_s]
+        value.to_s.strip.presence
+      end
+
+      def icon_from_i18n(key)
+        return unless defined?(I18n)
+
+        full = "recording_studio_presskits.downloads.audience_icons.#{key}"
+        return unless I18n.exists?(full)
+
+        I18n.t(full).to_s.strip.presence
       end
 
       def default_allowed_audiences

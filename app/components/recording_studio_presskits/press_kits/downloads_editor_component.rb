@@ -19,8 +19,15 @@ module RecordingStudioPresskits
         @constrained
       end
 
-      def select_options
-        @options.map { |option| { label: option[:label], value: option[:audience].to_s } }
+      def radio_options
+        @options.map do |option|
+          audience = option[:audience]
+          {
+            label: option[:label],
+            value: audience.to_s,
+            icon: KitDownload.audience_icon_for(audience)
+          }
+        end
       end
     end
   end

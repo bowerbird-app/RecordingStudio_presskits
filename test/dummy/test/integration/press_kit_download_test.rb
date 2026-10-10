@@ -265,12 +265,21 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
     get downloads_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
     assert_response :success
-    assert_includes response.body, "Downloads"
-    assert_includes response.body, "Who can download this press kit"
-    assert_select "select[name='downloads[audience]'] option[value='public'][selected]"
-    assert_select "select[name='downloads[audience]'] option[value='signed_in']"
-    assert_select "select[name='downloads[audience]'] option[value='granted']"
-    assert_select "select[name='downloads[audience]'] option[value='presskits.verified_journalist']"
+    assert_select "h1", text: "Downloads"
+    assert_select "[data-fp-screen][data-title='\u200B']"
+    assert_select "p", text: "Who can download this press kit"
+    assert_select "#presskits-downloads-audience[aria-label='Who can download this press kit']"
+    refute_select "legend", text: "Who can download this press kit"
+    refute_select "label", text: "Who can download this press kit"
+    refute_select "select[name='downloads[audience]']"
+    assert_select "input[type='radio'][name='downloads[audience]'][value='public'][checked]"
+    assert_select "input[type='radio'][name='downloads[audience]'][value='signed_in']"
+    assert_select "input[type='radio'][name='downloads[audience]'][value='granted']"
+    assert_select "input[type='radio'][name='downloads[audience]'][value='presskits.verified_journalist']"
+    assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='globe-alt']"
+    assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='user']"
+    assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='lock-closed']"
+    assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='user-group']"
     refute_includes response.body, "Your workspace only allows some of these choices"
   end
 
@@ -334,9 +343,9 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.edit_press_kit_downloads_path(kit)
     assert_response :success
-    assert_select "select[name='downloads[audience]'] option[selected][value='granted']"
-    refute_select "select[name='downloads[audience]'] option[value='public']"
-    refute_select "select[name='downloads[audience]'] option[value='signed_in']"
+    assert_select "input[type='radio'][name='downloads[audience]'][value='granted'][checked]"
+    refute_select "input[type='radio'][name='downloads[audience]'][value='public']"
+    refute_select "input[type='radio'][name='downloads[audience]'][value='signed_in']"
     assert_includes response.body, "Your workspace only allows some of these choices"
   ensure
     RecordingStudioAccessible.configuration.action_audiences[:"presskits.kit_download"] = previous if previous
@@ -361,9 +370,9 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.edit_press_kit_downloads_path(kit)
     assert_response :success
-    assert_select "select[name='downloads[audience]'] option[selected][value='granted']"
-    refute_select "select[name='downloads[audience]'] option[value='public']"
-    refute_select "select[name='downloads[audience]'] option[value='signed_in']"
+    assert_select "input[type='radio'][name='downloads[audience]'][value='granted'][checked]"
+    refute_select "input[type='radio'][name='downloads[audience]'][value='public']"
+    refute_select "input[type='radio'][name='downloads[audience]'][value='signed_in']"
     assert_includes response.body, "Your workspace only allows some of these choices"
   end
 

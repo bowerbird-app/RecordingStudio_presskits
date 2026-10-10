@@ -12,13 +12,19 @@
       ) %>
     <% end %>
 
-    <%= render FlatPack::Select::Component.new(
-      name: "downloads[audience]",
-      label: I18n.t("recording_studio_presskits.downloads.audience_label"),
-      value: audience_value,
-      options: select_options,
-      required: true
-    ) %>
+    <div
+      id="presskits-downloads-audience"
+      role="group"
+      aria-label="<%= I18n.t("recording_studio_presskits.downloads.audience_label") %>"
+    >
+      <%= render FlatPack::RadioGroup::Component.new(
+        name: "downloads[audience]",
+        value: audience_value,
+        options: radio_options,
+        variant: :inline,
+        required: true
+      ) %>
+    </div>
 
     <div id="presskits-downloads-actions" class="flex flex-wrap items-center gap-3">
       <%= render FlatPack::Button::Component.new(
