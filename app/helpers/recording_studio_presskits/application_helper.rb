@@ -89,5 +89,11 @@ module RecordingStudioPresskits
 
       nil
     end
+
+    def recording_studio_downloadable
+      return RecordingStudioDownloadable::Engine.routes.url_helpers if defined?(RecordingStudioDownloadable::Engine)
+
+      nil
+    end
   end
 end

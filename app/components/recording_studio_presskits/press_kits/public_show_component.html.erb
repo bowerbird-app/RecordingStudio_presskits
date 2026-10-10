@@ -9,6 +9,12 @@
       size: :hero
     ) %>
 
+    <% if show_download? %>
+      <div id="presskits-kit-download" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
+        <%= helpers.recording_studio_downloadable_button(@press_kit_recording, **download_button_options) %>
+      </div>
+    <% end %>
+
     <div id="presskits-public-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
       <% if preview? && !live? %>
         <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">

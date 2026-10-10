@@ -17,4 +17,13 @@ RecordingStudioPresskits.configure do |config|
   # Default library key when an Images section uploads. Hosts with extra
   # libraries can point a section type at another key.
   # config.section_library_keys = { "RecordingStudioPresskits::Images" => :default }
+
+  # Icons on the Downloads audience RadioGroup. Keys are audience names.
+  # Missing keys fall back to i18n `recording_studio_presskits.downloads.audience_icons`,
+  # then globe-alt / user / lock-closed, then user-group for custom audiences.
+  # config.download_audience_icons = {
+  #   public: "globe-alt",
+  #   signed_in: "user",
+  #   granted: "lock-closed"
+  # }
 end

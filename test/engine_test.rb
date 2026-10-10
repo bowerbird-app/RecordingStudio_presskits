@@ -195,6 +195,26 @@ class EngineTest < Minitest::Test
     assert_equal [true], registered
   end
 
+  def test_kit_download_initializer_configures_audience_and_subscribes
+    configured = []
+    subscribed = []
+    config_stub = Object.new
+    config_stub.define_singleton_method(:after_initialize) do |&block|
+      block.call
+    end
+
+    RecordingStudioPresskits::Engine.stub(:config, config_stub) do
+      RecordingStudioPresskits::KitDownload.stub(:configure_audience!, -> { configured << true }) do
+        RecordingStudioPresskits::KitDownload.stub(:subscribe!, -> { subscribed << true }) do
+          find_initializer("recording_studio_presskits.kit_download").block.call
+        end
+      end
+    end
+
+    assert_equal [true], configured
+    assert_equal [true], subscribed
+  end
+
   def test_publishable_views_initializer_appends_engine_views
     appended = []
     controller = Class.new do
