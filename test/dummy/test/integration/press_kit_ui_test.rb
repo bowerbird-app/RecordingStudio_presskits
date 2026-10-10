@@ -170,6 +170,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_select "button#presskits-section-picker[disabled]"
     assert_select "#presskits-editor-toolbar", text: /Order/
     assert_select "#presskits-downloads", text: "Downloads"
+    assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
     assert_select "#presskits-sections-modal", text: /Reorder/
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span", text: "Text"
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span",

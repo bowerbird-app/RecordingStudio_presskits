@@ -539,6 +539,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "FlatPack::Card::Component"
     assert_includes show, 'id="presskits-editor-toolbar"'
     assert_includes show, 'id: "presskits-downloads"'
+    assert_includes show, 'icon: "arrow-down-tray"'
     assert_includes show, "download_edit_path"
     assert_includes show, 'id="presskits-editor-preview"'
     assert_includes show, "KitHeaderComponent"

@@ -23,6 +23,7 @@
     <% if @download_edit_path.present? %>
       <%= render FlatPack::Button::Component.new(
         text: I18n.t("recording_studio_presskits.editor.downloads"),
+        icon: "arrow-down-tray",
         style: :default,
         href: @download_edit_path,
         id: "presskits-downloads",

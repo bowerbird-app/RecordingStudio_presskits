@@ -43,6 +43,7 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-picker", text: "Section"
     assert_select "#presskits-editor-toolbar", text: /Order/
     assert_select "#presskits-downloads", text: "Downloads"
+    assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
     refute_select "#presskits-editor-toolbar a", text: "Header"
     refute_select "#presskits-editor-toolbar a", text: "View"
     header = css_select("#presskits-kit-header").first

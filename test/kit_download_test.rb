@@ -70,6 +70,7 @@ class KitDownloadTest < Minitest::Test
     )
     refute_includes editor, "presskits-kit-download"
     assert_includes editor, 'id: "presskits-downloads"'
+    assert_includes editor, 'icon: "arrow-down-tray"'
     assert_includes editor, "download_edit_path"
   end
 

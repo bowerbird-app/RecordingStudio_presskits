@@ -168,6 +168,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_response :success
     refute_includes css_select("#presskits-editor-preview").to_html, "presskits-kit-download"
     assert_select "#presskits-downloads", text: "Downloads"
+    assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
   end
 
   test "signed_in audience blocks anonymous download" do
@@ -260,6 +261,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_response :success
     downloads_path = recording_studio_presskits.edit_press_kit_downloads_path(kit)
     assert_select "#presskits-downloads[href='#{downloads_path}']", text: "Downloads"
+    assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
 
     get downloads_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
     assert_response :success
