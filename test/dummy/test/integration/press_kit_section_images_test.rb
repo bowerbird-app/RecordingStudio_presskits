@@ -64,9 +64,14 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     sign_in @user
     switch_to_root(@root)
 
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: File.open(cover_fixture_path),
+      filename: "upload.jpg",
+      content_type: "image/jpeg"
+    )
     assert_difference -> { library_image_count }, 1 do
       post recording_studio_presskits.press_kit_section_library_images_path(kit, section), params: {
-        file: fixture_upload
+        signed_blob_id: blob.signed_id
       }
     end
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
@@ -239,10 +244,6 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
 
   def library_image_count
     @root.image_library(actor: @user).images(per_page: 50).size
-  end
-
-  def fixture_upload
-    Rack::Test::UploadedFile.new(cover_fixture_path, "image/jpeg")
   end
 
   def cover_fixture_path

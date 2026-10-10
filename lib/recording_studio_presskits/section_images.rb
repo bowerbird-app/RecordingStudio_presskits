@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  class SectionImages
+  class SectionImages # rubocop:disable Metrics/ClassLength
     Result = Struct.new(:ok, :error, :placed, :skipped, keyword_init: true) do
       def success?
         ok
@@ -28,6 +28,15 @@ module RecordingStudioPresskits
       new(images_recording, actor).remove(placement_recording)
     end
 
+    def self.write(images_recording:, actor:, library_recording: nil, file: nil, signed_blob_id: nil, attachment_recordings: []) # rubocop:disable Metrics/ParameterLists,Layout/LineLength
+      new(images_recording, actor).write(
+        library_recording: library_recording,
+        file: file,
+        signed_blob_id: signed_blob_id,
+        attachment_recordings: attachment_recordings
+      )
+    end
+
     def initialize(images_recording, actor)
       @images_recording = images_recording
       @actor = actor
@@ -46,18 +55,21 @@ module RecordingStudioPresskits
       placed = []
       skipped = 0
       Array(attachment_recordings).compact.each do |attachment|
-        if LibraryImages.already_placed?(@images_recording, attachment)
-          skipped += 1
-          next
-        end
+        outcome = place_or_skip(attachment)
+        return outcome if outcome.is_a?(Result) && outcome.failure?
 
-        result = call_place(attachment)
-        return result if result.failure?
-
-        placed << result.placed
+        outcome == :skipped ? skipped += 1 : placed << outcome
       end
 
       Result.new(ok: true, placed: placed, skipped: skipped)
+    end
+
+    def write(library_recording: nil, file: nil, signed_blob_id: nil, attachment_recordings: [])
+      upload = upload_kwargs(file, signed_blob_id)
+      return upload_and_place(library_recording: library_recording, **upload) if upload.any?
+      return Result.new(ok: false, error: "Pick at least one photo.") if Array(attachment_recordings).empty?
+
+      place_many(attachment_recordings)
     end
 
     def upload_and_place(library_recording: nil, **upload)
@@ -84,6 +96,24 @@ module RecordingStudioPresskits
     end
 
     private
+
+    def place_or_skip(attachment)
+      return :skipped if LibraryImages.already_placed?(@images_recording, attachment)
+
+      result = call_place(attachment)
+      result.failure? ? result : result.placed
+    end
+
+    def upload_kwargs(file, signed_blob_id)
+      attrs = {}
+      if file.present?
+        attrs[:io] = file
+        attrs[:filename] = file.try(:original_filename).presence || "upload.jpg"
+        attrs[:content_type] = file.try(:content_type).presence || "image/jpeg"
+      end
+      attrs[:signed_blob_id] = signed_blob_id if signed_blob_id.present?
+      attrs
+    end
 
     def call_place(attachment_recording)
       result = RecordingStudioAttachable::Services::PlaceLibraryImage.call(

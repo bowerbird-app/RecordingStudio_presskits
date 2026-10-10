@@ -793,9 +793,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes component, "def self.preview?"
     refute_includes component, "preview_card_title"
     assert_includes component, "def self.below?"
+    assert_includes editor, 'text: "Add from library"'
     assert_includes editor, 'text: "Upload"'
     assert_operator editor.index("flex flex-wrap items-center gap-3"), :<, editor.index('text: "Upload"')
-    assert_includes editor, "upload_form_data(helpers)"
+    assert_includes editor, "recording-studio-presskits--library-upload"
+    assert_includes editor, "presskits_editor_nav(:push)"
     refute_includes section_editor, "upload_form_data"
   end
 
@@ -987,7 +989,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes routes, "resources :videos"
     assert_includes routes, "resources :library_images"
-    refute_includes routes, 'resources :images, only: :destroy'
+    refute_includes routes, "resources :images, only: :destroy"
     refute_includes routes, "video_order"
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'

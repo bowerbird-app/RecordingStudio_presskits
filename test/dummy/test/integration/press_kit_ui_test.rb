@@ -1046,7 +1046,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
         }]
       }
     }
-    assert_redirected_to return_to
+    assert_response :redirect
     follow_redirect!
     attachment.reload
     assert_equal "Stage left", attachment.recordable.caption

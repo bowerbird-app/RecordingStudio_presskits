@@ -17,14 +17,18 @@ module RecordingStudioPresskits
       @section_editors = {}
       @section_prepares = {}
       @excluded_picker_types = []
-      @section_library_keys = {}
       assign_cover_defaults
       @hooks = RecordingStudio::Hooks.new
     end
 
     def library_key_for(type_name)
-      keys = section_library_keys || {}
-      (keys[type_name.to_s] || keys[type_name.to_s.demodulize] || :default).to_sym
+      keys = (section_library_keys || {}).to_h
+      name = type_name.to_s
+      short = name.demodulize
+      matched = keys.find do |key, _|
+        [name, short].include?(key.to_s) || key.to_s.demodulize == short
+      end
+      (matched&.last || :default).to_sym
     end
 
     def cover_palette
@@ -67,6 +71,7 @@ module RecordingStudioPresskits
     private
 
     def assign_cover_defaults
+      @section_library_keys = {}
       @cover_colors = Cover::Palette::DEFAULT_COLORS.dup
       @default_cover_color = Cover::Palette::DEFAULT_COLOR
       @cover_text_colors = Cover::Palette::DEFAULT_TEXT_COLORS.dup

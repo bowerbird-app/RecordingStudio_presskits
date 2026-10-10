@@ -18,8 +18,7 @@ module RecordingStudioPresskits
       authorize_recording!(@press_kit_recording, role: :edit)
       return if performed?
 
-      result = create_placements
-      redirect_after_write(result)
+      redirect_after_write(write_placements)
     end
 
     def destroy
@@ -36,24 +35,14 @@ module RecordingStudioPresskits
 
     private
 
-    def create_placements
-      if uploaded_file.present? || params[:signed_blob_id].present?
-        return SectionImages.upload_and_place(
-          images_recording: images_recording,
-          actor: presskits_actor,
-          library_recording: selected_library,
-          io: uploaded_file,
-          signed_blob_id: params[:signed_blob_id]
-        )
-      end
-
-      attachments = selected_attachments
-      return SectionImages::Result.new(ok: false, error: "Pick at least one photo.") if attachments.empty?
-
-      SectionImages.place_many(
+    def write_placements
+      SectionImages.write(
         images_recording: images_recording,
-        attachment_recordings: attachments,
-        actor: presskits_actor
+        actor: presskits_actor,
+        library_recording: selected_library,
+        file: params[:file],
+        signed_blob_id: params[:signed_blob_id],
+        attachment_recordings: selected_attachments
       )
     end
 
@@ -99,7 +88,7 @@ module RecordingStudioPresskits
     end
 
     def uploaded_file
-      params[:file].presence
+      params[:file]
     end
 
     def placement_recording

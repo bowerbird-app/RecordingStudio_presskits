@@ -54,6 +54,17 @@ class SectionImagesTest < Minitest::Test
     assert_equal "An images section is required.", result.error
   end
 
+  def test_write_requires_a_photo_or_file
+    result = RecordingStudioPresskits::SectionImages.write(
+      images_recording: Object.new,
+      actor: Object.new,
+      attachment_recordings: []
+    )
+
+    assert result.failure?
+    assert_equal "Pick at least one photo.", result.error
+  end
+
   def test_upload_requires_an_images_section
     result = RecordingStudioPresskits::SectionImages.upload_and_place(
       images_recording: nil,
