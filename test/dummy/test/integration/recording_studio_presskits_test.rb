@@ -179,7 +179,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     spring_sections = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
     autumn_sections = RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
     assert_equal(
-      ["Project credits", "Press photos", "Company statistics", "Project specifications"],
+      ["Project credits", "Press photos", "Company statistics", "Project specifications", "Where to find us"],
       spring_sections.map { |section| section.recordable.title }
     )
     assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
