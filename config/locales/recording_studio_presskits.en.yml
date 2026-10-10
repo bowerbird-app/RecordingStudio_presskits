@@ -2,6 +2,20 @@ en:
   recording_studio_presskits:
     cover:
       eyebrow: "Press kit"
+    download:
+      button: "Download kit"
+      preparing: "Getting it ready…"
+      retry: "Try again"
+      text:
+        company: "Company"
+        location: "Location"
+        date: "Date"
+        cover: "Cover"
+        photo: "Photo"
+        caption: "Caption"
+        credit: "Credit"
+        alt: "Alt"
+        fact: "Fact"
     editor:
       add_section: "Section"
       picker_title: "Add a section"

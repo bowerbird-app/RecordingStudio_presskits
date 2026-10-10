@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.31.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.32.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -47,13 +47,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_presskits.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.13"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.14"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.224"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.6"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.3"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.13"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_location", "~> 0.4"'
@@ -67,14 +68,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.4.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.14.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.224"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.6.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.7.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"'
@@ -111,6 +113,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "include RecordingStudio::Capabilities::Trashable.to"
     assert_includes source, "RecordingStudio::Capabilities::Duplicatable.to"
     assert_includes source, "RecordingStudio::Capabilities::Publishable.to"
+    assert_includes source, "RecordingStudio::Capabilities::Downloadable.to"
     assert_includes source, "include RecordingStudio::Capabilities::Location.to"
     assert_includes source, "include RecordingStudio::Capabilities::LibraryPlacement.to"
     assert_includes source, '"RecordingStudioAttachable::Placement"'
@@ -198,6 +201,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, 'mount RecordingStudioDuplicatable::Engine, at: "/recording_studio_duplicatable"'
     assert_includes routes, 'mount RecordingStudioPresskits::Engine, at: "/recording_studio_presskits"'
     assert_includes routes, 'mount RecordingStudioPublishable::Engine, at: "/"'
+    assert_includes routes, 'mount RecordingStudioDownloadable::Engine, at: "/recording_studio_downloadable"'
     assert_includes routes, 'mount RecordingStudioCompany::Engine, at: "/recording_studio_company"'
     assert_includes routes, 'mount RecordingStudioLocation::Engine, at: "/recording_studio_location"'
     assert_includes routes, 'recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits'
@@ -233,6 +237,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes tailwind_source, "flatpack_fieldset"
     assert_includes sources_task, '"recording_studio_publishable"'
     assert_includes sources_task, '"recording_studio_attachable"'
+    assert_includes sources_task, '"recording_studio_downloadable"'
     assert_includes sources_task, '"recording_studio_company"'
     assert_includes sources_task, '"recording_studio_location"'
     refute_includes tailwind_source, "@theme"
@@ -258,6 +263,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes presskits_initializer, '"FakeBlock"'
     assert_includes initializer_source, '"AdminRoot"'
     assert_includes initializer_source, '"RecordingStudioPublishable::Publishable"'
+    assert_includes initializer_source, '"RecordingStudio::AccessConstraint"'
+    assert_includes initializer_source, '"RecordingStudio::AccessRule"'
     assert_includes initializer_source, '"RecordingStudioAttachable::Library"'
     assert_includes initializer_source, '"RecordingStudioAttachable::Placement"'
     assert_includes initializer_source, '"RecordingStudioCompany::Company"'
@@ -283,8 +290,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.4.0"
+    assert_includes readme, "v0.14.0"
     assert_includes readme, "v0.13.0"
     assert_includes readme, "v0.3.0"
+    assert_includes readme, "v0.7.0"
+    assert_includes readme, "recording_studio_downloadable"
+    assert_includes readme, "presskits.kit_download"
+    assert_includes readme, "Download kit"
     assert_includes readme, "v0.5.1"
     assert_includes readme, "tag: \"v2.1.0\""
     assert_includes readme, "tag: \"v0.2.7\""
@@ -411,6 +423,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     source = File.read(File.expand_path("dummy/app/models/workspace.rb", __dir__))
 
     assert_includes source, "RecordingStudio.enable_capability(:accessible, on: self)"
+    assert_includes source, "enable_capability(:action_audiences, on: self)"
     assert_includes source, "Capabilities::Orderable.to(allows:"
     assert_includes source, '"RecordingStudioPresskits::PressKit"'
     assert_includes source, "Capabilities::Companies.to(allow: :one)"

@@ -14,6 +14,7 @@ module RecordingStudioPresskits
     helper ::RecordingStudio::LayoutHelper if defined?(::RecordingStudio::LayoutHelper)
     helper ::RecordingStudioAccessible::AvatarsHelper if defined?(::RecordingStudioAccessible::AvatarsHelper)
     helper ::RecordingStudioPublishable::Engine.helpers if defined?(::RecordingStudioPublishable::Engine)
+    helper ::RecordingStudioDownloadable::Engine.helpers if defined?(::RecordingStudioDownloadable::Engine)
     helper RecordingStudioCompany::DisplayHelper if defined?(RecordingStudioCompany::DisplayHelper)
     helper RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
     helper RecordingStudioLocation::LocationsHelper if defined?(RecordingStudioLocation::LocationsHelper)

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-10
+
+### Added
+- Live kits can be downloaded as a zip. PressKit opts into Downloadable `source: :manifest`, `format: :zip`, action `:"presskits.kit_download"`, export scope `:public`. The zip holds every placed photo (cover plus Images-section placements, original files, unique filenames) and a `kit.txt` of public kit copy only: title, short description, company, location, date, section titles/subtitles and public text, quotes with attribution, story/credits, and image caption/credit/alt. Drafts, unpublished revisions, trashed items, and private notes stay out.
+- Presskits is the glue. On publish it calls `downloadable_generate!`. On unpublish it calls `downloadable_invalidate!(immediate: true)`. A revision to a live kit rebuilds. Downloadable's own debounce still covers ordinary content writes. Do not change Downloadable or Publishable for this.
+- Default Accessible `action_audiences` for `:"presskits.kit_download"`: allowed `public` / `signed_in` / `granted`, default `granted`, granted roles `download` / `edit` / `admin` (not `view` alone). Hosts overwrite `config.action_audiences[:"presskits.kit_download"]`. `downloadable_available_for?` is true only while the kit is currently published.
+- **Download kit** on the public kit page uses Downloadable's existing button helper (preparing / ready / retry). It is never on owner preview or the editor preview. A visitor who cannot see the full kit, or who lacks the download audience, does not see it.
+- Depend on Downloadable `~> 0.3` (dummy tag `v0.3.0`), Accessible `~> 0.14` (dummy tag `v0.14.0`), and Publishable `~> 0.7` (dummy tag `v0.7.0`).
+- Version `0.32.0`
+
+### Upgrade notes
+- Add Downloadable, bump Accessible to `~> 0.14` and Publishable to `~> 0.7`. Run Downloadable and Accessible install plus migrations (package identity columns, AccessConstraint / AccessRule). Mount Downloadable. Pin its Stimulus controllers. Rebuild Tailwind so Downloadable's button classes generate.
+- PressKit already opts into Downloadable. Hosts overwrite the kit-download audience; they do not enable the mixin a second time. Accessible has `set_audience!` and `audience_options_for` but no kit-level audience picker — skip that UI until Accessible ships one.
+- Flatpack has no download-control component at this pin. The public page uses Downloadable's `recording_studio_downloadable_button`. Do not invent a second preparing / ready / retry control.
+
 ## [0.31.0] - 2026-10-10
 
 ### Changed

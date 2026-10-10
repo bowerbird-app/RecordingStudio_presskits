@@ -6,17 +6,18 @@ Kits sit under your workspace. You can have many. You publish the kit, not each 
 
 ## Install
 
-Add the gem next to Recording Studio 4.4, Accessible 0.13, Admin 2.0, Publishable 0.6, Company 0.3, Location 0.4, and the mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.4, Accessible 0.14, Admin 2.0, Publishable 0.7, Downloadable 0.3, Company 0.3, Location 0.4, and the mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
 gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.4.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.14.0"
 gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"
-gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.6.0"
+gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.7.0"
+gem "recording_studio_downloadable", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"
 gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"
 gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"
@@ -30,12 +31,13 @@ gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presski
 ```ruby
 # gemspec / host Gemfile constraints
 gem "recording_studio", "~> 4.2"
-gem "recording_studio_accessible", "~> 0.13"
+gem "recording_studio_accessible", "~> 0.14"
 gem "recording_studio_admin", "~> 2.0"
 gem "recording_studio_orderable", "~> 0.2"
 gem "recording_studio_trashable", "~> 0.6"
 gem "recording_studio_duplicatable", "~> 0.4"
-gem "recording_studio_publishable", "~> 0.6"
+gem "recording_studio_publishable", "~> 0.7"
+gem "recording_studio_downloadable", "~> 0.3"
 gem "recording_studio_attachable", "~> 0.13"
 gem "recording_studio_company", "~> 0.3"
 gem "recording_studio_location", "~> 0.4"
@@ -58,6 +60,9 @@ bin/rails generate recording_studio_trashable:migrations
 bin/rails generate recording_studio_duplicatable:install
 bin/rails generate recording_studio_publishable:install
 bin/rails generate recording_studio_publishable:migrations
+bin/rails generate recording_studio_downloadable:install
+bin/rails generate recording_studio_downloadable:migrations
+bin/rails generate recording_studio_accessible:migrations
 bin/rails generate recording_studio_attachable:install
 bin/rails generate recording_studio_attachable:migrations
 bin/rails generate recording_studio_company:install
@@ -94,6 +99,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::VideoSection",
     "RecordingStudioVideo::Video",
     "RecordingStudioPublishable::Publishable",
+    "RecordingStudio::AccessConstraint",
+    "RecordingStudio::AccessRule",
     "RecordingStudioCompany::Company",
     "RecordingStudio::Location::Location"
   ]
@@ -111,7 +118,7 @@ RecordingStudioPresskits.configure do |config|
 end
 ```
 
-The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, Duplicatable, Publishable, Location, and LibraryPlacement with the current `.to` API only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path for these mixins. Do not enable Publishable on section children. Company and the image library are host opt-ins on the root, not on the kit.
+The kit declares itself as a nested type under that root, then opts into Orderable, Trashable, Duplicatable, Publishable, Downloadable, Location, and LibraryPlacement with the current `.to` API only. Do not use `.with`, a bare mixin include, or a second `enable_capability` path for these mixins. Do not enable Publishable or Downloadable on section children. Company and the image library are host opt-ins on the root, not on the kit.
 
 ```ruby
 recording_studio_recordable label: "Press kit",
@@ -128,6 +135,12 @@ include RecordingStudio::Capabilities::Publishable.to(
   public_controller: "recording_studio_presskits/public_press_kits",
   public_action: :show,
   public_layout: "recording_studio_presskits/blank"
+)
+include RecordingStudio::Capabilities::Downloadable.to(
+  source: :manifest,
+  format: :zip,
+  action: :"presskits.kit_download",
+  export_scope: :public
 )
 include RecordingStudio::Capabilities::Location.to
 include RecordingStudio::Capabilities::LibraryPlacement.to
@@ -218,6 +231,39 @@ kit_recording.publishable_public_path
 RecordingStudioPresskits::PressKit.indexable
 ```
 
+A live kit can be downloaded as a zip. Downloadable owns the package, the button, and who may fetch it. Presskits owns the public manifest and the publish glue. Do not write package rows by hand.
+
+The zip holds every placed photo — cover first, then Images-section placements, original files, unique filenames such as `cover-harbour-gallery.jpg` — plus `kit.txt`. That text file is the public kit only: title, short description, company, location, date, section titles and subtitles, public text, quotes with attribution, credits, and image caption, credit, and alt. Drafts, unpublished revisions, trashed photos, and private notes stay out. `LibraryImages` (`Placements.resolve`) is the same helper the public page uses.
+
+Presskits subscribes to Publishable's after-commit events in an engine initializer (`RecordingStudioPublishable.subscribe`). Publish calls `downloadable_generate!`. Unpublish calls `downloadable_invalidate!(immediate: true)`. A revision to a live kit rebuilds. Downloadable's own debounce still covers ordinary content writes. Unpublished kits do not generate.
+
+```ruby
+kit_recording.downloadable_generate!(
+  action: kit_recording.downloadable_action,
+  export_scope: kit_recording.downloadable_export_scope
+)
+kit_recording.downloadable_invalidate!(immediate: true)
+kit_recording.recordable.downloadable_available_for?(actor: current_user, action: :"presskits.kit_download")
+```
+
+`downloadable_available_for?` is true only while the kit is currently published. Anyone who may take the action can trigger a build when the zip is missing or stale (Downloadable rate-limits and dedupes that). Authorization is Accessible `authorized_action?` plus that availability gate.
+
+Default audience for `:"presskits.kit_download"` is granted, with granted roles `download`, `edit`, and `admin` — not `view` alone. `public` and `signed_in` stay in `allowed` so a host can open the zip later. Hosts overwrite the default:
+
+```ruby
+RecordingStudioAccessible.configure do |config|
+  config.action_audiences[:"presskits.kit_download"] = {
+    allowed: %i[public signed_in granted],
+    default: :granted,
+    granted_roles: %i[download edit admin],
+    granted_override: true,
+    manage_role: :admin
+  }
+end
+```
+
+Accessible already has `set_audience!` and `audience_options_for`. It does not ship a kit-level audience picker. Skip that setting until Accessible does. Dummy Workspace enables `action_audiences` so the host can store per-root overrides when that UI arrives.
+
 Prefer `RecordingStudio::Recording.recording_studio_trashable_active` over a host `default_scope`, unless the host already needs one for queries.
 
 A section is always a kit section. `section?` is true only for `RecordingStudioPresskits::KitSection`. `register_section` puts a content type on the + Section menu and stores its component, its editor, and an optional `prepare` hook. Registering the type does not make that type a section.
@@ -285,7 +331,7 @@ Primary buttons: **Presskit** (Heroicons plus) on the index, **Create** on the n
 
 ## Public
 
-A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). `.to` sets `public_layout: "recording_studio_presskits/blank"`. That layout is a document and the kit: no back, no close, and no TopNav. The page title is the kit name. The kit opens inside the same Flatpack Card as the editor. `Cover::Component` at `:hero` is an optional full-width cover image (`aspect-[1440/640]`) above a flush colour header. Height of the colour band comes from `p-12 md:p-24` plus the eyebrow and title. The title is `PageTitle` `size: :display` in a wrapping `max-w-3xl` block. The short description stays off that band. View and the publish menu Preview both use it. Owner preview stays on `recording_studio/default_layout`.
+A live kit is readable without signing in. Publishable serves `/published/:uuid/:slug` (override the path only if it still includes `:uuid`). `.to` sets `public_layout: "recording_studio_presskits/blank"`. That layout is a document and the kit: no back, no close, and no TopNav. The page title is the kit name. The kit opens inside the same Flatpack Card as the editor. `Cover::Component` at `:hero` is an optional full-width cover image (`aspect-[1440/640]`) above a flush colour header. Height of the colour band comes from `p-12 md:p-24` plus the eyebrow and title. The title is `PageTitle` `size: :display` in a wrapping `max-w-3xl` block. The short description stays off that band. When the visitor may download the kit, **Download kit** sits under the hero through Downloadable's `recording_studio_downloadable_button` (preparing / ready / retry). Flatpack has no download-control component at this pin, so Presskits does not invent one. The button is never on owner preview or the editor preview. A visitor who cannot see the full kit, or who lacks the download audience, does not see it. View and the publish menu Preview both use the same public page without that button. Owner preview stays on `recording_studio/default_layout`.
 
 Logged-out visitors get a 404 for a kit that is not currently published. An authenticated owner can still open the owner preview on the default layout.
 
@@ -331,7 +377,7 @@ Dummy kit pins:
 | Gem | Pin |
 |-----|-----|
 | Recording Studio | `v4.4.0` |
-| Accessible | `v0.13.0` |
+| Accessible | `v0.14.0` |
 | Admin | `v2.1.0` |
 | Root Switchable | `v0.6.0` |
 | FlatPack | `v0.1.224` |
@@ -341,12 +387,13 @@ Dummy kit pins:
 | Orderable | `v0.2.7` |
 | Trashable | `v0.6.0` |
 | Duplicatable | `v0.4.5` |
-| Publishable | `v0.6.0` |
+| Publishable | `v0.7.0` |
+| Downloadable | `v0.3.0` |
 | External Embed | `v0.1.4` |
 | Video | `v0.1.1` |
 | Metrics | `v0.2.0` |
 
-Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.4 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, Company, Location, and this gem so that layout is not an unstyled box.
+Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.4 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Downloadable, Attachable, Company, Location, and this gem so that layout is not an unstyled box.
 
 The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav. Core owns back and close on the default layout. **+ Access** is in the slot on the kit editor only. Cards, table, the kit editor, the header screen, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-edit-mobile.png`, `workspace-heading-edit.png`, `workspace-content-edit.png`, `workspace-fact-drilldown.png`, `workspace-header-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` and `public-press-kit-show-mobile.png` (logged-out Spring launch), `hero-restyle-editor-desktop.png` / `hero-restyle-public-desktop.png` plus mobile and crop companions, `hero-company-editor-desktop.png` / `hero-company-public-desktop.png` plus mobile and crop companions (company + kit location on the colour header), `hero-cover-image-editor-desktop.png` / `hero-cover-image-public-desktop.png` plus mobile and crop companions, `hero-cover-colour-editor-desktop.png` / `hero-cover-colour-public-desktop.png` plus mobile and crop companions, `hero-cover-grid-desktop.png` / `hero-cover-grid-mobile.png`, `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 

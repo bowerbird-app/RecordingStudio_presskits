@@ -1,5 +1,20 @@
 # Upgrade notes
 
+## 0.32.0
+
+A live kit can be downloaded as a zip of its public photos and a `kit.txt` of the public copy. PressKit opts into Downloadable (`source: :manifest`, action `:"presskits.kit_download"`, export scope `:public`). Presskits subscribes to Publishable's after-commit events: publish generates, unpublish invalidates immediately, a revision to a live kit rebuilds. Downloadable's debounce still covers ordinary content writes. The zip never includes drafts, unpublished revisions, trashed items, or private notes.
+
+Default audience for `:"presskits.kit_download"` is granted, with granted roles `download`, `edit`, and `admin` — not `view` alone. Hosts overwrite `RecordingStudioAccessible.configuration.action_audiences[:"presskits.kit_download"]`. `downloadable_available_for?` is true only while the kit is currently published. **Download kit** sits on the public page through Downloadable's button helper. It stays off preview and the editor. Accessible has `set_audience!` and `audience_options_for` but no audience picker UI; a kit-level who-can-download control is follow-up.
+
+```bash
+bin/rails generate recording_studio_downloadable:install
+bin/rails generate recording_studio_downloadable:migrations
+bin/rails generate recording_studio_accessible:migrations
+bin/rails db:migrate
+```
+
+Bump Accessible to `~> 0.14` (dummy tag `v0.14.0`) and Publishable to `~> 0.7` (dummy tag `v0.7.0`). Pin Downloadable `~> 0.3` (dummy tag `v0.3.0`). Mount Downloadable, pin its Stimulus controllers, and rebuild Tailwind so the download button classes generate. Flatpack has no download-control component at this pin — do not invent one.
+
 ## 0.31.0
 
 Images sections no longer attach files under the section. They hold Attachable `Placement` children that point at workspace library photos.

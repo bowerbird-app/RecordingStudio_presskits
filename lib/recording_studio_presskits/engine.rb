@@ -254,5 +254,12 @@ module RecordingStudioPresskits
         append_view_path RecordingStudioPresskits::Engine.root.join("app/views")
       end
     end
+
+    initializer "recording_studio_presskits.kit_download" do
+      config.after_initialize do
+        RecordingStudioPresskits::KitDownload.configure_audience!
+        RecordingStudioPresskits::KitDownload.subscribe!
+      end
+    end
   end
 end
