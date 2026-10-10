@@ -287,6 +287,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   end
 
   test "hosts can override the hero eyebrow" do
+    I18n.t("recording_studio_presskits.cover.eyebrow")
     I18n.backend.store_translations(:en, recording_studio_presskits: { cover: { eyebrow: "Media kit" } })
     kit = record_kit("Spring launch")
     publish_kit!(kit)

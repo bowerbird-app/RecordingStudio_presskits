@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.29.0] - 2026-10-10
+## [0.30.0] - 2026-10-10
 
 ### Added
 - Optional kit cover image from the root Attachable image library. Dummy Workspace enables `RecordingStudio::Capabilities::ImageLibrary.to`. PressKit enables `LibraryPlacement.to`. The first `place_library_image` result sits above the colour hero at `aspect-[1440/640]` with `object-cover`. Grid cards with a photo show the image and the title below it. Colour-only cards stay 9/16.
@@ -15,37 +15,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Kit Orderable allows `RecordingStudioAttachable::Placement` as well as kit sections so `Placements.resolve` can see the cover. KitQuery and Reorder still list only sections. Section reorder keeps the placement on the kit.
 - Dummy seeds a Harbour Gallery photo on Spring launch.
 - `Cover::Image` owns hero and card photo helpers so Cover stays lean.
-- Version `0.29.0`
+- Version `0.30.0`
 
 ### Upgrade notes
 - Enable `ImageLibrary.to` on the host root and `LibraryPlacement.to` on PressKit. Keep Attachable library and placement types registered. Flatpack is `>= 0.1.224`. Flatpack has no full-bleed crop image, so the hero uses `aspect-[1440/640]` and a plain `image_tag`. Rebuild Tailwind so that aspect class generates.
 
-## [0.28.0] - 2026-10-10
+## [0.29.0] - 2026-10-10
 
 ### Added
 - Dummy Workspace opts into `RecordingStudio::Capabilities::Companies.to(allow: :one)`. The hero shows `RecordingStudioCompany.company(root)` with `recording_studio_company_logo` and the company name when that capability is on and a company exists. Hosts that skip the capability, or have no company, see no company row.
 - PressKit opts into `RecordingStudio::Capabilities::Location.to`. One optional Location child on the kit (not a section, and not the Location section from later work) shows its icon and `display_name` under the company. Edit it on the existing header screen with `recording_studio_location_search_fields` (title, type, icon). Blank fields trash the place. Presskits enables Trashable on `RecordingStudio::Location::Location` so that clear works.
-- Depend on `recording_studio_company` `~> 0.3` (dummy tag `v0.3.0`) and `recording_studio_location` `~> 0.4` (dummy tag `v0.5.1`). Accessible is `~> 0.13`, Attachable is `~> 0.13`, Trashable is `~> 0.6`. Flatpack is `>= 0.1.224`.
+- Depend on `recording_studio_company` `~> 0.3` (dummy tag `v0.3.0`) and `recording_studio_location` `~> 0.4` (dummy tag `v0.5.1`).
 - Dummy seeds **Harbour Studio** on Studio Workspace and **Harbour Gallery** on Spring launch.
 - `KitLocation`, `Cover::Company`, and `HeaderAttributes` own lookup, write, and form parsing so Cover and the header controller stay lean.
-- Version `0.28.0`
+- Version `0.29.0`
 
 ### Upgrade notes
 - Add Company and Location, then run their install and migrations generators. Register `RecordingStudioCompany::Company` and `RecordingStudio::Location::Location`. Mount Company and Location. Enable `Companies.to(allow: :one)` on the host root if you want the company row. Rebuild Tailwind so Location search-field classes generate. Pin Location's Stimulus controllers. Flatpack `PageTitle` still has no byline slot for a logo-plus-name row, and `recording_studio_location_display` is a Card — the hero uses Avatar + Icon + text instead.
 
-## [0.27.0] - 2026-10-10
+## [0.28.0] - 2026-10-10
 
 ### Changed
 - The `:hero` cover no longer uses a fixed 21/9 band. Height comes from padding plus content: `p-12` on a phone and `md:p-24` (~96px) on a desktop. Grid `:card` and header-editor `:preview` stay 9/16.
 - A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). Hosts override that i18n key. Size is `text-3xl` / `md:text-4xl` (~36px desktop). Colour is `color-mix` at 70% of the cover text colour. Flatpack `PageTitle` has no eyebrow slot, so this is a semantic `<p>` with those tokens.
 - The hero no longer shows the kit short description. The field, column, header editor, API payload, and 9/16 cards keep it.
 - Hero title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. Display uses `--display-size` (`clamp` 48px to 88px), `--display-leading` `1.05`, `--display-tracking` `-0.03em`, and `--display-weight` `600`. Flatpack is `>= 0.1.224` (dummy tag `v0.1.224`).
-- Version `0.27.0`
+- Version `0.28.0`
 
 ### Upgrade notes
 - Bump Flatpack to `>= 0.1.224` and rebuild Tailwind so `text-8xl` generates. Reload Flatpack CSS for the 88px `--display-size` clamp. Hosts that replaced `Cover::Component` at `:hero` should drop `aspect-[21/9]` / `min-h-64`, use `p-12 md:p-24`, render the i18n eyebrow above `PageTitle` `size: :display` (no subtitle on the band), and keep the short description on the header form and on cards.
 
-## [0.26.0] - 2026-10-09
+## [0.27.0] - 2026-10-10
 
 ### Changed
 - Kit editor sections and the kit header no longer put Edit heading, Edit content, or Add section in the page flow. The live preview matches the public kit: heading, then content.
@@ -58,29 +58,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Each section has a contained Flatpack FAB (`size: :sm`, `icon: :plus`, `position: :top_right`, `backdrop: false`, `offset: "1rem"`, label **Section actions**). The region is `position: relative` so the FAB pins to that section; top corners open downward. Speed-dial: **Edit title** (shared heading screen in `pk-editor`), **Edit content**, **Reorder** (existing Reorder modal, fragment on this section), **Trash** (`style: :danger`, Trashable delete plus confirm), and **Add new section** (section picker, placed below this one).
 - The kit header FAB is the same pattern: **Edit heading** and **Cover colours**, both opening the shared header screen. **Cover colours** lands on `#presskits-header-colours`.
 - The toolbar **Section** button still adds at the end or into an empty kit.
+- Palette **Colour** and **Text colour** on the kit header screen use `FlatPack::RadioGroup` `variant: :swatches` (`size: :md`). The option label is the accessible name and the tooltip. `:any` still uses `FlatPack::ColorSwatch`. Text colour **Auto** stays a separate inline radio with the same field name. Swatches need a CSS colour, and `auto` is not one.
 - FlatPack is `>= 0.1.223` (dummy tag `v0.1.223`).
 - The default cover palette swaps violet (`#7C3AED`) for sky (`#BFDBFE`). Dummy **Spring launch** uses sky with Auto text (dark). Stored violet still renders; hosts that want it as a swatch add it back.
+- Dummy and gemspec pins take the newer tag from main and this branch: Recording Studio `v4.4.0`, Accessible `v0.13.0`, Admin `v2.1.0`, Attachable `v0.13.0`, Orderable `v0.2.7`, Trashable `v0.6.0`, Duplicatable `v0.4.5`, Publishable `v0.6.0`, External Embed `v0.1.4`, Video `v0.1.1`, Root Switchable `v0.6.0`, Metrics `v0.2.0`.
+- Version `0.27.0`
+
+### Upgrade notes
+- Bump FlatPack to at least `0.1.223` and rebuild Tailwind so `text-6xl` / `text-7xl` and the swatch utilities generate. Reload Flatpack CSS for `--display-*` and `.fp-display`.
+- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`, `size: :sm`, `icon: :plus`, `offset: "1rem"`) on a `position: relative` region. Sections own `p-8 md:p-10 lg:p-12` and `pr-20`, with `rounded-none` so the tint is flush to the card sides. The header region has no pad: the `:hero` cover bleeds to the card, and hover is an inset overlay rather than a surrounding muted tint. Hero copy sits at the top (`justify-start`) as `FlatPack::PageTitle::Component` with `size: :display` in a `max-w-2xl` block. The band stays 21/9 with `min-h-64`. Drop the in-flow ghost buttons, compact dropdown, custom hover outline, negative margins, and any kit-level section pad or gap. The kit card is `padding: :none`; the preview clips with `overflow-hidden`. The public kit uses the same unpadded card and section pad. Trash uses `with_action(..., style: :danger)`.
+- FAB has no hover-only visibility or tap-to-activate API. Desktop hides the control with group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active` so tint and FAB appear only on the tapped region.
+- A host that replaced the shared header screen in `pk-editor` should render palette Colour and Text colour as `variant: :swatches`. Keep Auto as its own control. Keep ColorSwatch for `:any`.
+- The default `cover_colors` list is now `#1F2937`, `#BFDBFE`, `#DB2777`, `#059669`, `#D97706`. A stored `#7C3AED` still paints. Add it back to the host palette if you still want that swatch.
+- Bump Accessible to `~> 0.13`, Attachable to `~> 0.13`, Publishable to `~> 0.6`, and Trashable to `~> 0.6`. Run `bin/rails generate recording_studio_attachable:migrations` and `db:migrate` for the new library and placement tables. Add `RecordingStudioAttachable::Library` and `RecordingStudioAttachable::Placement` to `config.recordable_types`. Press kit Images still attach files under the section; moving to placements is a later host change.
+
+## [0.26.1] - 2026-10-09
+
+### Fixed
+- Press kit metrics authorization resolves the admin root with
+  `site_admin_recording_resolver`, then `access_recording_resolver`.
+  If that resolver raises, `can_view?` denies access. The `:view` decision
+  still goes through Accessible.
+
+### Changed
+- Version `0.26.1`
+
+### Upgrade notes
+- Bump to `0.26.1`. No migration.
+- Site-wide metrics prefer `config.site_admin_recording_resolver`. A host that
+  only sets `access_recording_resolver` still uses that fallback. If the
+  fallback needs a controller, set the site resolver to the admin root so
+  metrics discovery does not depend on one.
+- A resolver error is treated as no access.
+
+## [0.26.0] - 2026-10-09
+
+Site-wide press kit metrics register with Recording Studio Metrics for the operations API.
+
+### Added
+- `RecordingStudioPresskits::Metrics.register!` registers a `:press_kits` resource
+  (`blast_radius: :site`) with RecordingStudioMetrics. Metrics:
+  `press_kits.total` (Live press kits), `press_kits.created_over_time` (Press kits
+  created over time), and `press_kits.by_section_type` (sections across live kits
+  by content type). Each is exposed on `:operations` only. Counts use
+  `RecordingStudio::Recording` with `recordable_type` and `trashed_at: nil`.
+  `api_authorize` uses `RecordingStudioPresskits::Api::Access.can_view?`
+  (AdminRoot `:view`).
+- Runtime dependency `recording_studio_metrics` `~> 0.2` (GitHub tag `v0.2.0`).
+- `by_publish_status` is omitted. Publish state is not a column on PressKit or
+  Recording; it lives on Publishable child records and needs `indexable` /
+  `published` joins.
+
+### Changed
 - Version `0.26.0`
 
 ### Upgrade notes
-- Bump FlatPack to at least `0.1.223` and rebuild Tailwind so `text-6xl` / `text-7xl` generate. Reload Flatpack CSS for `--display-*` and `.fp-display`.
-- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`, `size: :sm`, `icon: :plus`, `offset: "1rem"`) on a `position: relative` region. Sections own `p-8 md:p-10 lg:p-12` and `pr-20`, with `rounded-none` so the tint is flush to the card sides. The header region has no pad: the `:hero` cover bleeds to the card, and hover is an inset overlay rather than a surrounding muted tint. Hero copy sits at the top (`justify-start`) as `FlatPack::PageTitle::Component` with `size: :display` in a `max-w-2xl` block. The band stays 21/9 with `min-h-64`. Drop the in-flow ghost buttons, compact dropdown, custom hover outline, negative margins, and any kit-level section pad or gap. The kit card is `padding: :none`; the preview clips with `overflow-hidden`. The public kit uses the same unpadded card and section pad. Trash uses `with_action(..., style: :danger)`.
-- FAB has no hover-only visibility or tap-to-activate API. Desktop hides the control with group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active` so tint and FAB appear only on the tapped region.
-- The default `cover_colors` list is now `#1F2937`, `#BFDBFE`, `#DB2777`, `#059669`, `#D97706`. A stored `#7C3AED` still paints. Add it back to the host palette if you still want that swatch.
+- Bump to `0.26.0`. No migration.
+- Add `recording_studio_metrics` at tag `v0.2.0`.
+- This gem does not call `RecordingStudioMetrics::Api.register!`. The host
+  registers Metrics endpoints once:
 
-## [0.25.1] - 2026-10-09
-
-### Changed
-- Palette **Colour** and **Text colour** on the kit header screen use `FlatPack::RadioGroup` `variant: :swatches` (`size: :md`). The option label is the accessible name and the tooltip. `:any` still uses `FlatPack::ColorSwatch`.
-- Text colour **Auto** stays a separate inline radio with the same field name. Swatches need a CSS colour, and `auto` is not one.
-- FlatPack is `>= 0.1.221` (dummy tag `v0.1.221`).
-- Dummy and gemspec pins move to the latest GitHub releases: Accessible `0.12.1`, Attachable `0.12.0`, Orderable `0.2.7`, Trashable `0.5.0`, Duplicatable `0.4.5`, Publishable `0.5.0`, External Embed `0.1.4`, Video `0.1.1`, Root Switchable `v0.5.6`. Recording Studio stays `v4.3.0`. Admin stays `v2.0.7`.
-- Version `0.25.1`
-
-### Upgrade notes
-- Bump FlatPack to at least `0.1.221` and rebuild Tailwind so the swatch utilities generate. Reload Flatpack CSS after the bump.
-- A host that replaced the shared header screen in `pk-editor` should render palette Colour and Text colour as `variant: :swatches`. Keep Auto as its own control. Keep ColorSwatch for `:any`.
-- Bump Accessible to `~> 0.12`, Attachable to `~> 0.12`, Publishable to `~> 0.5`, and Trashable to `~> 0.5`. Run `bin/rails generate recording_studio_attachable:migrations` and `db:migrate` for the new library and placement tables. Add `RecordingStudioAttachable::Library` and `RecordingStudioAttachable::Placement` to `config.recordable_types`. Press kit Images still attach files under the section; moving to placements is a later host change.
+```ruby
+RecordingStudioMetrics::Api.register!(api: :operations)
+```
 
 ## [0.25.0] - 2026-10-09
 
@@ -92,7 +132,7 @@ Kit covers on the live kit editor from `0.24.0`.
 - Writes must be a valid hex. In palette mode they must be one of those colours. A stored colour that later leaves the palette still renders.
 - Overlay text uses `cover_text_color` when set. Auto picks light or dark from WCAG contrast. A low-contrast pair is allowed; the editor may hint.
 - `RecordingStudioPresskits::Cover::Component` paints `:card` and `:preview` as 9/16 story tiles, and `:hero` as a wide 21/9 band. Title sits on the colour at the page-title size. A card description clamps to two lines.
-- The shared kit header screen in `pk-editor` has **Colour** and **Text colour**. Each is a `FlatPack::RadioGroup` for a palette, or a `FlatPack::ColorSwatch` when the host allows any colour. Text colour includes **Auto**. A preview tile follows the colours as you edit. `0.25.1` paints those palette radios as swatches.
+- The shared kit header screen in `pk-editor` has **Colour** and **Text colour**. Each is a `FlatPack::RadioGroup` for a palette, or a `FlatPack::ColorSwatch` when the host allows any colour. Text colour includes **Auto**. A preview tile follows the colours as you edit. `0.27.0` paints those palette radios as swatches.
 - The kit index cards, the kit header on the live editor, and the public kit use that component. Saving the header refreshes the editor hero through the existing Turbo Stream replace. Press Centers and hosts can render it too.
 - When Recording Studio API is loaded, a press kit show and update include `cover_style`, `cover_color`, and `cover_text_color`. MCP uses the same payload. Duplicating a kit copies those fields.
 
@@ -636,11 +676,12 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.28.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.29.0...HEAD
+[0.29.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.27.0...v0.28.0
-[0.27.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...v0.27.0
-[0.26.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.1...v0.26.0
-[0.25.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.25.1
+[0.27.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.1...v0.27.0
+[0.26.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...v0.26.1
+[0.26.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...v0.23.0
