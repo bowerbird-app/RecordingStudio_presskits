@@ -116,6 +116,11 @@ module RecordingStudioPresskits
       require "recording_studio_attachable"
     end
 
+    initializer "recording_studio_presskits.require_downloadable",
+                after: "recording_studio_presskits.require_attachable" do
+      require "recording_studio_downloadable"
+    end
+
     initializer "recording_studio_presskits.before_initialize",
                 before: "recording_studio_presskits.load_config" do |_app|
       RecordingStudioPresskits.configuration.hooks.run(:before_initialize, self)

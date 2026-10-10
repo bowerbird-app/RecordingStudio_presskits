@@ -2,7 +2,7 @@
 
 module RecordingStudioPresskits
   class KitDownload
-    class TextFile
+    class TextFile # rubocop:disable Metrics/ClassLength
       def self.call(recording)
         new(recording).to_s
       end
@@ -15,7 +15,7 @@ module RecordingStudioPresskits
       def to_s
         return "" if @kit.blank?
 
-        [header.join("\n"), *section_blocks].compact_blank.join("\n\n").strip + "\n"
+        "#{[header.join("\n"), *section_blocks].compact_blank.join("\n\n").strip}\n"
       end
 
       private
@@ -61,22 +61,27 @@ module RecordingStudioPresskits
 
       def content_lines(content)
         recordable = content&.recordable
-        case recordable
-        when Text
-          [plain_text(recordable.body)].compact_blank
-        when Images
-          LibraryImages.resolve(content).flat_map { |item| image_lines(item) }
-        when QuoteSection
-          quote_lines(content)
-        when FactsSection
-          fact_lines(content)
-        when CreditsSection
-          credit_lines(content)
-        when VideoSection
-          video_lines(content)
-        else
-          []
-        end
+        handler = content_handler_for(recordable)
+        handler ? send(handler, content, recordable) : []
+      end
+
+      def content_handler_for(recordable)
+        {
+          Text => :text_lines,
+          Images => :image_section_lines,
+          QuoteSection => :quote_lines,
+          FactsSection => :fact_lines,
+          CreditsSection => :credit_lines,
+          VideoSection => :video_lines
+        }[recordable.class]
+      end
+
+      def text_lines(_content, recordable)
+        [plain_text(recordable.body)].compact_blank
+      end
+
+      def image_section_lines(content, _recordable)
+        LibraryImages.resolve(content).flat_map { |item| image_lines(item) }
       end
 
       def image_lines(item)
@@ -91,49 +96,56 @@ module RecordingStudioPresskits
         ].compact
       end
 
-      def quote_lines(content)
+      def quote_lines(content, _recordable)
         QuoteSection::Component.new(recording: content).quotes.filter_map do |child|
-          quote = child.recordable
-          body = quote.body.to_s.strip.presence
-          next if body.blank?
-
-          cite = [quote.name, quote.role, quote.organisation].filter_map { |value| value.to_s.strip.presence }
-          [body, cite.any? ? "— #{cite.join(', ')}" : nil].compact.join("\n")
+          quoted_block(child.recordable)
         end
       end
 
-      def fact_lines(content)
-        FactsSection.active_facts(content).filter_map do |child|
-          fact = child.recordable
-          value = fact.formatted_value.to_s.strip.presence
-          next if fact.label.blank? || value.blank?
+      def quoted_block(quote)
+        body = quote.body.to_s.strip.presence
+        return if body.blank?
 
-          [labeled(:fact, "#{fact.label}: #{value}"), fact.description.to_s.strip.presence].compact.join("\n")
-        end
+        cite = [quote.name, quote.role, quote.organisation].filter_map { |value| value.to_s.strip.presence }
+        [body, cite.any? ? "— #{cite.join(', ')}" : nil].compact.join("\n")
       end
 
-      def credit_lines(content)
-        Credits.visible_lines(content).filter_map do |line|
-          credit = Credits.credit_for(line)&.recordable
-          next if credit.blank?
-
-          role = line.recordable.role.to_s.strip.presence
-          name = credit.name.to_s.strip.presence
-          next if name.blank?
-
-          [role, name].compact.join(" — ")
-        end
+      def fact_lines(content, _recordable)
+        FactsSection.active_facts(content).filter_map { |child| fact_block(child.recordable) }
       end
 
-      def video_lines(content)
-        VideoSection.active_videos(content).filter_map do |child|
-          video = child.recordable
-          title = video.try(:title).to_s.strip.presence
-          url = video.try(:url).to_s.strip.presence
-          next if title.blank? && url.blank?
+      def fact_block(fact)
+        value = fact.formatted_value.to_s.strip.presence
+        return if fact.label.blank? || value.blank?
 
-          [title, url].compact.join("\n")
-        end
+        [labeled(:fact, "#{fact.label}: #{value}"), fact.description.to_s.strip.presence].compact.join("\n")
+      end
+
+      def credit_lines(content, _recordable)
+        Credits.visible_lines(content).filter_map { |line| credit_block(line) }
+      end
+
+      def credit_block(line)
+        credit = Credits.credit_for(line)&.recordable
+        return if credit.blank?
+
+        role = line.recordable.role.to_s.strip.presence
+        name = credit.name.to_s.strip.presence
+        return if name.blank?
+
+        [role, name].compact.join(" — ")
+      end
+
+      def video_lines(content, _recordable)
+        VideoSection.active_videos(content).filter_map { |child| video_block(child.recordable) }
+      end
+
+      def video_block(video)
+        title = video.try(:title).to_s.strip.presence
+        url = video.try(:url).to_s.strip.presence
+        return if title.blank? && url.blank?
+
+        [title, url].compact.join("\n")
       end
 
       def company_name

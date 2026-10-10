@@ -115,7 +115,9 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
   test "download button shows on the public kit for someone who can download" do
     kit = record_kit("Spring launch")
     place_cover!(kit)
-    publish_kit!(kit, slug: "spring-launch-download-button")
+    perform_enqueued_jobs do
+      publish_kit!(kit, slug: "spring-launch-download-button")
+    end
     sign_in @user
     switch_to_root(@root)
 

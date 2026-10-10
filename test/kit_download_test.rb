@@ -46,18 +46,17 @@ class KitDownloadTest < Minitest::Test
   def test_engine_subscribes_after_initialize
     engine = File.read(File.expand_path("../lib/recording_studio_presskits/engine.rb", __dir__))
 
+    assert_includes engine, "recording_studio_presskits.require_downloadable"
     assert_includes engine, "recording_studio_presskits.kit_download"
     assert_includes engine, "KitDownload.configure_audience!"
     assert_includes engine, "KitDownload.subscribe!"
   end
 
   def test_public_kit_renders_downloadable_button_helper
-    html = File.read(
-      File.expand_path("../app/components/recording_studio_presskits/press_kits/public_show_component.html.erb", __dir__)
-    )
-    component = File.read(
-      File.expand_path("../app/components/recording_studio_presskits/press_kits/public_show_component.rb", __dir__)
-    )
+    html_path = "../app/components/recording_studio_presskits/press_kits/public_show_component.html.erb"
+    html = File.read(File.expand_path(html_path, __dir__))
+    component_path = "../app/components/recording_studio_presskits/press_kits/public_show_component.rb"
+    component = File.read(File.expand_path(component_path, __dir__))
 
     assert_includes html, "presskits-kit-download"
     assert_includes html, "recording_studio_downloadable_button"

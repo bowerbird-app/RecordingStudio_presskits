@@ -49,8 +49,8 @@ module RecordingStudioPresskits
           action: recording.downloadable_action,
           export_scope: recording.downloadable_export_scope
         )
-      rescue StandardError => error
-        log_lifecycle_error("generate", recording, error)
+      rescue StandardError => e
+        log_lifecycle_error("generate", recording, e)
         nil
       end
 
@@ -58,8 +58,8 @@ module RecordingStudioPresskits
         return unless downloadable_kit?(recording)
 
         recording.downloadable_invalidate!(immediate: true)
-      rescue StandardError => error
-        log_lifecycle_error("invalidate", recording, error)
+      rescue StandardError => e
+        log_lifecycle_error("invalidate", recording, e)
         nil
       end
 
