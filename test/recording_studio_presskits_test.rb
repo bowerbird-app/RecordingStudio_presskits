@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.31.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.32.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -18,6 +18,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261008120000_create_recording_studio_credits.rb",
       "db/migrate/20261008180000_create_recording_studio_facts.rb",
       "db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
+      "db/migrate/20261010140000_create_recording_studio_location_sections.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261006120000_add_title_to_recording_studio_texts.rb",
       "test/dummy/db/migrate/20261006140000_replace_images_caption_with_title_and_subtitle.rb",
@@ -26,6 +27,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261008180000_create_recording_studio_facts.rb",
       "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261010140000_create_recording_studio_location_sections.rb",
       "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
@@ -41,6 +43,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     engine = File.read(File.expand_path("../lib/recording_studio_presskits/engine.rb", __dir__))
     assert_includes engine, "recording_studio_presskits.location_trash"
     assert_includes engine, "RecordingStudio::Location::Location.include RecordingStudio::Capabilities::Trashable.to"
+    assert_includes engine, "register_location_section"
+    assert_includes engine, "RecordingStudioPresskits::LocationSection"
   end
 
   def test_gemspec_pins_recording_studio_and_accessible
@@ -297,6 +301,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Capabilities::Location.to"
     assert_includes readme, "recording_studio_company_logo"
     assert_includes readme, "recording_studio_location_search_fields"
+    assert_includes readme, "recording_studio_location_display"
+    assert_includes readme, "LocationSection"
     assert_includes readme, "Cover::Company"
     assert_includes readme, "KitLocation"
     assert_includes readme, "Capabilities::ImageLibrary.to"
@@ -711,6 +717,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     images = File.read(presskits_path("app/models/recording_studio_presskits/images.rb"))
     quotes = File.read(presskits_path("app/models/recording_studio_presskits/quote_section.rb"))
     videos = File.read(presskits_path("app/models/recording_studio_presskits/video_section.rb"))
+    locations = File.read(presskits_path("app/models/recording_studio_presskits/location_section.rb"))
 
     picker = File.read(presskits_path(
                          "app/components/recording_studio_presskits/press_kits/section_picker_component.html.erb"
@@ -740,6 +747,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes images, "Capabilities::Attachable"
     assert_includes quotes, '"chat-bubble-bottom-center-text"'
     assert_includes videos, '"video-camera"'
+    assert_includes locations, '"map-pin"'
+    assert_includes locations, "Capabilities::Location.to"
     child_path = "app/components/recording_studio_presskits/press_kits/child_component.html.erb"
     child_ruby = "app/components/recording_studio_presskits/press_kits/child_component.rb"
     child = File.read(presskits_path(child_path))
@@ -991,10 +1000,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.join(root, "Gemfile"))
 
     assert_includes routes, "resources :videos"
+    assert_includes routes, "resources :locations"
     assert_includes routes, "resources :library_images"
     refute_includes routes, "resources :images, only: :destroy"
     refute_includes routes, "video_order"
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.1.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
@@ -1014,6 +1025,21 @@ class RecordingStudioPresskitsTest < Minitest::Test
       refute_includes source, "FlatPack::UrlInput"
       refute_includes source, "FlatPack::TextInput"
       refute_includes source, "FlatPack::TextArea"
+    end
+  end
+
+  def test_location_edit_calls_location_helpers_and_does_not_build_a_picker
+    root = File.expand_path("..", __dir__)
+    component = File.read(File.join(root, "app/components/recording_studio_presskits/locations/edit_component.rb"))
+    template = File.read(File.join(root, "app/components/recording_studio_presskits/locations/edit_component.html.erb"))
+    show = File.read(File.join(root, "app/components/recording_studio_presskits/location_section/component.rb"))
+
+    assert_includes template, "recording_studio_location_search_fields"
+    assert_includes show, "recording_studio_location_display"
+    [component, template].each do |source|
+      refute_includes source, "geocode!"
+      refute_includes source, "PlaceSearch"
+      refute_includes source, "custom picker"
     end
   end
 

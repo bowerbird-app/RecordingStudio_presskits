@@ -26,7 +26,10 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "AdminRoot", "Workspace" ].sort, RecordingStudio.root_recordable_types.sort
     assert_equal [ "Workspace", "Folder" ], RecordingStudio.allowed_parent_types_for("Page")
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
-    assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location")
+    assert_equal(
+      [ "RecordingStudioPresskits::LocationSection", "RecordingStudioPresskits::PressKit" ],
+      RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location").sort
+    )
     assert_includes RecordingStudio.allowed_parent_types_for("RecordingStudioCompany::Company"), "Workspace"
     assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::KitSection")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("FakeBlock")
@@ -40,9 +43,11 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "RecordingStudioPresskits::CreditsSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::CreditLine")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::VideoSection"
+    assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::LocationSection"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::FactsSection"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Fact"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioVideo::Video"
+    refute_includes RecordingStudioPresskits.picker_types, "RecordingStudio::Location::Location"
     assert_equal "Text", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Text)
     assert_equal "Images", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Images)
     assert_equal "Press kit", RecordingStudio.recordable_type_label(RecordingStudioPresskits::PressKit)
@@ -70,6 +75,9 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute connection.column_exists?(:recording_studio_images, :subtitle)
     refute connection.column_exists?(:recording_studio_images, :caption)
     assert connection.table_exists?(:recording_studio_video_sections)
+    assert connection.table_exists?(:recording_studio_location_sections)
+    refute connection.column_exists?(:recording_studio_location_sections, :title)
+    refute connection.column_exists?(:recording_studio_location_sections, :updated_at)
     refute connection.column_exists?(:recording_studio_video_sections, :title)
     refute connection.column_exists?(:recording_studio_video_sections, :url)
     refute connection.column_exists?(:recording_studio_video_sections, :updated_at)
@@ -171,7 +179,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     spring_sections = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
     autumn_sections = RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
     assert_equal(
-      ["Project credits", "Press photos", "Company statistics", "Project specifications"],
+      ["Project credits", "Press photos", "Company statistics", "Project specifications", "Where to find us"],
       spring_sections.map { |section| section.recordable.title }
     )
     assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
@@ -219,6 +227,15 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal "Harbour Gallery", kit_location.recordable.title
     assert_equal "venue", kit_location.recordable.location_type
     assert_equal "Sydney", kit_location.recordable.locality
+    where = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording).find do |section|
+      section.recordable.title == "Where to find us"
+    end
+    pavilion = RecordingStudioPresskits::LocationSection.active_locations(
+      RecordingStudioPresskits::KitQuery.section_content(where)
+    ).first
+    assert_equal "The Pavilion", pavilion.recordable.title
+    assert_equal "Melbourne", pavilion.recordable.locality
+    refute_equal kit_location.id, pavilion.id
     assert press_kit.indexable?
     assert press_kit_recording.currently_published?
     refute unpublished_kit.published?
@@ -257,6 +274,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:publishable, for: RecordingStudioPresskits::PressKit)
     assert RecordingStudio.capability_enabled?(:companies, for: Workspace)
     assert RecordingStudio.capability_enabled?(:location, for: RecordingStudioPresskits::PressKit)
+    assert RecordingStudio.capability_enabled?(:location, for: RecordingStudioPresskits::LocationSection)
+    refute RecordingStudio.capability_enabled?(:location, for: RecordingStudioPresskits::KitSection)
     refute RecordingStudio.capability_enabled?(:companies, for: RecordingStudioPresskits::PressKit)
     refute RecordingStudio.capability_enabled?(:location, for: Workspace)
     refute RecordingStudio.capability_enabled?(:publishable, for: FakeBlock)

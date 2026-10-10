@@ -30,6 +30,7 @@ RecordingStudioPresskits::Engine.routes.draw do
       resource :credit_lines, only: :update, controller: "section_credit_lines"
       resource :credit_order, only: :update, controller: "credit_orders"
       resources :videos, only: %i[new create edit update destroy]
+      resources :locations, only: %i[new create edit update destroy]
     end
     resource :order, only: :update, controller: "orders"
   end
