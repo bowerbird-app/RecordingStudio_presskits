@@ -18,14 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version `0.29.0`
 
 ### Upgrade notes
-- Enable `ImageLibrary.to` on the host root and `LibraryPlacement.to` on PressKit. Keep Attachable library and placement types registered. Flatpack stays `>= 0.1.223`. Flatpack has no full-bleed crop image, so the hero uses `aspect-[1440/640]` and a plain `image_tag`. Rebuild Tailwind so that aspect class generates.
+- Enable `ImageLibrary.to` on the host root and `LibraryPlacement.to` on PressKit. Keep Attachable library and placement types registered. Flatpack is `>= 0.1.224`. Flatpack has no full-bleed crop image, so the hero uses `aspect-[1440/640]` and a plain `image_tag`. Rebuild Tailwind so that aspect class generates.
 
 ## [0.28.0] - 2026-10-10
 
 ### Added
 - Dummy Workspace opts into `RecordingStudio::Capabilities::Companies.to(allow: :one)`. The hero shows `RecordingStudioCompany.company(root)` with `recording_studio_company_logo` and the company name when that capability is on and a company exists. Hosts that skip the capability, or have no company, see no company row.
 - PressKit opts into `RecordingStudio::Capabilities::Location.to`. One optional Location child on the kit (not a section, and not the Location section from later work) shows its icon and `display_name` under the company. Edit it on the existing header screen with `recording_studio_location_search_fields` (title, type, icon). Blank fields trash the place. Presskits enables Trashable on `RecordingStudio::Location::Location` so that clear works.
-- Depend on `recording_studio_company` `~> 0.3` (dummy tag `v0.3.0`) and `recording_studio_location` `~> 0.4` (dummy tag `v0.5.1`). Accessible is `~> 0.13`, Attachable is `~> 0.13`, Trashable is `~> 0.6`. Flatpack stays `>= 0.1.223`.
+- Depend on `recording_studio_company` `~> 0.3` (dummy tag `v0.3.0`) and `recording_studio_location` `~> 0.4` (dummy tag `v0.5.1`). Accessible is `~> 0.13`, Attachable is `~> 0.13`, Trashable is `~> 0.6`. Flatpack is `>= 0.1.224`.
 - Dummy seeds **Harbour Studio** on Studio Workspace and **Harbour Gallery** on Spring launch.
 - `KitLocation`, `Cover::Company`, and `HeaderAttributes` own lookup, write, and form parsing so Cover and the header controller stay lean.
 - Version `0.28.0`
@@ -39,11 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `:hero` cover no longer uses a fixed 21/9 band. Height comes from padding plus content: `p-12` on a phone and `md:p-24` (~96px) on a desktop. Grid `:card` and header-editor `:preview` stay 9/16.
 - A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). Hosts override that i18n key. Size is `text-3xl` / `md:text-4xl` (~36px desktop). Colour is `color-mix` at 70% of the cover text colour. Flatpack `PageTitle` has no eyebrow slot, so this is a semantic `<p>` with those tokens.
 - The hero no longer shows the kit short description. The field, column, header editor, API payload, and 9/16 cards keep it.
-- Hero title is a wrapping `h1` at `--hero-headline-size` (48px / `--text-5xl`), top-left, in `max-w-3xl`. Flatpack `PageTitle` default is 36px (`--page-title-h1-size`) and `:display` is a 48–72px clamp, so the hero uses the 48px headline token. It switches to `PageTitle` `size: :display` once Flatpack PR #262 is released. Flatpack stays `>= 0.1.223`.
+- Hero title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. Display uses `--display-size` (`clamp` 48px to 88px), `--display-leading` `1.05`, `--display-tracking` `-0.03em`, and `--display-weight` `600`. Flatpack is `>= 0.1.224` (dummy tag `v0.1.224`).
 - Version `0.27.0`
 
 ### Upgrade notes
-- Rebuild Tailwind so `p-24`, `text-3xl`, and `text-4xl` generate. Hosts that replaced `Cover::Component` at `:hero` should drop `aspect-[21/9]` / `min-h-64`, use `p-12 md:p-24`, render the i18n eyebrow above an `h1` at `--hero-headline-size` (not `PageTitle` default or `:display`), and keep the short description on the header form and on cards.
+- Bump Flatpack to `>= 0.1.224` and rebuild Tailwind so `text-8xl` generates. Reload Flatpack CSS for the 88px `--display-size` clamp. Hosts that replaced `Cover::Component` at `:hero` should drop `aspect-[21/9]` / `min-h-64`, use `p-12 md:p-24`, render the i18n eyebrow above `PageTitle` `size: :display` (no subtitle on the band), and keep the short description on the header form and on cards.
 
 ## [0.26.0] - 2026-10-09
 
