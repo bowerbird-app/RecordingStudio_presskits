@@ -16,10 +16,22 @@ en:
         credit: "Credit"
         alt: "Alt"
         fact: "Fact"
+    audiences:
+      verified_journalist: "Verified journalists"
+    downloads:
+      title: "Downloads"
+      subtitle: "Who can download this press kit"
+      back: "Back to kit"
+      audience_label: "Who can download this press kit"
+      constrained: "Your workspace only allows some of these choices. The one in force is selected."
+      saved: "Saved. That's who can take the kit."
+      invalid: "That choice is not available for this kit."
+      save: "Update"
     editor:
       add_section: "Section"
       picker_title: "Add a section"
       order: "Order"
+      downloads: "Downloads"
       reorder: "Reorder"
       header: "Header"
       edit_heading: "Edit heading"

@@ -13,18 +13,47 @@ module RecordingStudioPresskits
     class << self
       def audience_defaults
         {
-          allowed: %i[public signed_in granted],
-          default: :granted,
+          allowed: default_allowed_audiences,
+          default: :public,
           granted_roles: %i[download edit admin],
           granted_override: true,
-          manage_role: :admin
+          manage_role: :edit
         }
       end
 
       def configure_audience!
         return unless defined?(RecordingStudioAccessible)
+        return unless RecordingStudioAccessible.configuration.respond_to?(:action_audiences)
 
-        RecordingStudioAccessible.configuration.action_audiences[ACTION] ||= audience_defaults.dup
+        audiences = RecordingStudioAccessible.configuration.action_audiences
+        return if audiences.configured?(ACTION)
+
+        audiences[ACTION] = audience_defaults
+      end
+
+      def audience_options_for(recording)
+        return [] unless defined?(RecordingStudioAccessible)
+
+        RecordingStudioAccessible.audience_options_for(recording: recording, action: ACTION)
+      end
+
+      def effective_audience(recording)
+        return :denied unless defined?(RecordingStudioAccessible)
+
+        RecordingStudioAccessible.effective_audience(recording: recording, action: ACTION)
+      end
+
+      def set_audience!(recording:, audience:, actor:)
+        RecordingStudioAccessible.set_audience!(
+          recording: recording,
+          action: ACTION,
+          audience: audience,
+          actor: actor
+        )
+      end
+
+      def constrained?(recording)
+        audience_options_for(recording).none? { |option| option[:audience] == :public }
       end
 
       def subscribe!
@@ -97,6 +126,13 @@ module RecordingStudioPresskits
         return if id.blank?
 
         RecordingStudio::Recording.find_by(id: id)
+      end
+
+      def default_allowed_audiences
+        names = %i[public signed_in granted]
+        return names unless defined?(RecordingStudioAccessible)
+
+        names | RecordingStudioAccessible.audience_registry.names
       end
 
       def downloadable_kit?(recording)

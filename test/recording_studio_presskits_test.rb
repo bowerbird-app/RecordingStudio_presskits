@@ -297,6 +297,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "recording_studio_downloadable"
     assert_includes readme, "presskits.kit_download"
     assert_includes readme, "Download kit"
+    assert_includes readme, "Who can download this press kit"
+    assert_includes readme, "set_audience!"
+    assert_includes readme, "manage_role: :edit"
     assert_includes readme, "v0.5.1"
     assert_includes readme, "tag: \"v2.1.0\""
     assert_includes readme, "tag: \"v0.2.7\""
@@ -535,6 +538,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "SectionsOrderComponent"
     assert_includes show, "FlatPack::Card::Component"
     assert_includes show, 'id="presskits-editor-toolbar"'
+    assert_includes show, 'id: "presskits-downloads"'
+    assert_includes show, "download_edit_path"
     assert_includes show, 'id="presskits-editor-preview"'
     assert_includes show, "KitHeaderComponent"
     assert_includes show, "EditableSectionComponent"

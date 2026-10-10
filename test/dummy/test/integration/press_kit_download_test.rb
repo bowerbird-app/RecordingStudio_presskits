@@ -34,8 +34,13 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_equal :public, kit.downloadable_export_scope
     assert_equal :manifest, kit.downloadable_source
     defaults = RecordingStudioAccessible.configuration.action_audiences[:"presskits.kit_download"]
-    assert_equal :granted, defaults[:default]
+    assert_equal :public, defaults[:default]
+    assert_includes defaults[:allowed], :public
+    assert_includes defaults[:allowed], :signed_in
+    assert_includes defaults[:allowed], :granted
+    assert_includes defaults[:allowed], :"presskits.verified_journalist"
     assert_equal %i[download edit admin], defaults[:granted_roles]
+    assert_equal :edit, defaults[:manage_role]
   end
 
   test "manifest includes public kit text, cover, and section photos with unique names" do
@@ -128,15 +133,30 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "recording-studio-downloadable--package"
   end
 
-  test "download button stays off previews and off the public kit for visitors" do
+  test "anonymous visitors can download a published public kit" do
     kit = record_kit("Spring launch")
     place_cover!(kit)
-    publish_kit!(kit, slug: "spring-launch-download-hidden")
+    perform_enqueued_jobs do
+      publish_kit!(kit, slug: "spring-launch-download-public")
+    end
+    Current.actor = nil
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 0
-    refute_includes response.body, "Download kit"
+    assert_select "#presskits-kit-download", count: 1
+    assert_includes response.body, "Download kit"
+
+    get recording_studio_downloadable.recording_package_path(kit)
+    assert_response :redirect
+    refute_equal 403, response.status
+  end
+
+  test "download button stays off previews and the editor" do
+    kit = record_kit("Spring launch")
+    place_cover!(kit)
+    perform_enqueued_jobs do
+      publish_kit!(kit, slug: "spring-launch-download-hidden")
+    end
 
     sign_in @user
     switch_to_root(@root)
@@ -147,12 +167,32 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     refute_includes css_select("#presskits-editor-preview").to_html, "presskits-kit-download"
+    assert_select "#presskits-downloads", text: "Downloads"
   end
 
-  test "a view-only person cannot download the kit zip" do
-    kit = record_kit("Spring launch")
-    place_cover!(kit)
-    publish_kit!(kit, slug: "spring-launch-download-denied")
+  test "signed_in audience blocks anonymous download" do
+    kit = restrict_downloads!(
+      record_kit("Spring launch"),
+      audience: :signed_in,
+      slug: "spring-launch-download-signed-in"
+    )
+    Current.actor = nil
+
+    get kit.publishable_public_path
+    assert_response :success
+    assert_select "#presskits-kit-download", count: 0
+    refute_includes response.body, "Download kit"
+
+    get recording_studio_downloadable.recording_package_path(kit)
+    assert_response :forbidden
+  end
+
+  test "granted audience blocks visitors without a download grant" do
+    kit = restrict_downloads!(
+      record_kit("Spring launch"),
+      audience: :granted,
+      slug: "spring-launch-download-denied"
+    )
     viewer = User.create!(
       email: "view-only-#{SecureRandom.hex(4)}@example.com",
       password: "Password123!",
@@ -166,6 +206,11 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     )
     raise result.error if result.failure?
 
+    Current.actor = nil
+    get kit.publishable_public_path
+    assert_response :success
+    assert_select "#presskits-kit-download", count: 0
+
     sign_in viewer
     Current.actor = viewer
     get recording_studio_downloadable.recording_package_path(kit)
@@ -174,6 +219,150 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_select "#presskits-kit-download", count: 0
+  end
+
+  test "a view-only person can download a public kit" do
+    kit = record_kit("Spring launch")
+    place_cover!(kit)
+    perform_enqueued_jobs do
+      publish_kit!(kit, slug: "spring-launch-download-view")
+    end
+    viewer = User.create!(
+      email: "view-public-#{SecureRandom.hex(4)}@example.com",
+      password: "Password123!",
+      password_confirmation: "Password123!"
+    )
+    result = RecordingStudioAccessible.grant_access(
+      recording: @root,
+      actor: viewer,
+      role: :view,
+      manager_actor: @user
+    )
+    raise result.error if result.failure?
+
+    sign_in viewer
+    Current.actor = viewer
+    get kit.publishable_public_path
+    assert_response :success
+    assert_select "#presskits-kit-download", count: 1
+
+    get recording_studio_downloadable.recording_package_path(kit)
+    assert_response :redirect
+  end
+
+  test "downloads editor lists allowed audiences and defaults to public" do
+    kit = record_kit("Spring launch")
+    assert_equal :public, RecordingStudioPresskits::KitDownload.effective_audience(kit)
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    downloads_path = recording_studio_presskits.edit_press_kit_downloads_path(kit)
+    assert_select "#presskits-downloads[href='#{downloads_path}']", text: "Downloads"
+
+    get downloads_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
+    assert_response :success
+    assert_includes response.body, "Downloads"
+    assert_includes response.body, "Who can download this press kit"
+    assert_select "select[name='downloads[audience]'] option[value='public'][selected]"
+    assert_select "select[name='downloads[audience]'] option[value='signed_in']"
+    assert_select "select[name='downloads[audience]'] option[value='granted']"
+    assert_select "select[name='downloads[audience]'] option[value='presskits.verified_journalist']"
+    refute_includes response.body, "Your workspace only allows some of these choices"
+  end
+
+  test "kit editors can save who may download" do
+    kit = record_kit("Spring launch")
+    editor = User.create!(
+      email: "kit-editor-#{SecureRandom.hex(4)}@example.com",
+      password: "Password123!",
+      password_confirmation: "Password123!"
+    )
+    result = RecordingStudioAccessible.grant_access(
+      recording: @root,
+      actor: editor,
+      role: :edit,
+      manager_actor: @user
+    )
+    raise result.error if result.failure?
+
+    sign_in editor
+    Current.actor = editor
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_downloads_path(kit), params: {
+      downloads: { audience: "signed_in" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_downloads_path(kit)
+    assert_equal :signed_in, RecordingStudioPresskits::KitDownload.effective_audience(kit.reload)
+  end
+
+  test "a view-only person cannot open the downloads setting" do
+    kit = record_kit("Spring launch")
+    viewer = User.create!(
+      email: "view-downloads-#{SecureRandom.hex(4)}@example.com",
+      password: "Password123!",
+      password_confirmation: "Password123!"
+    )
+    result = RecordingStudioAccessible.grant_access(
+      recording: @root,
+      actor: viewer,
+      role: :view,
+      manager_actor: @user
+    )
+    raise result.error if result.failure?
+
+    sign_in viewer
+    Current.actor = viewer
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_downloads_path(kit)
+    assert_response :forbidden
+  end
+
+  test "host allowed list falls back to granted and the editor shows that audience" do
+    audiences = RecordingStudioAccessible.configuration.action_audiences
+    previous = audiences[:"presskits.kit_download"]
+    kit = restrict_downloads!(record_kit("Spring launch"), audience: :signed_in, slug: "spring-host-download")
+    audiences[:"presskits.kit_download"] = previous.merge(allowed: %i[granted])
+
+    assert_equal :granted, RecordingStudioPresskits::KitDownload.effective_audience(kit.reload)
+    sign_in @user
+    switch_to_root(@root)
+    get recording_studio_presskits.edit_press_kit_downloads_path(kit)
+    assert_response :success
+    assert_select "select[name='downloads[audience]'] option[selected][value='granted']"
+    refute_select "select[name='downloads[audience]'] option[value='public']"
+    refute_select "select[name='downloads[audience]'] option[value='signed_in']"
+    assert_includes response.body, "Your workspace only allows some of these choices"
+  ensure
+    RecordingStudioAccessible.configuration.action_audiences[:"presskits.kit_download"] = previous if previous
+  end
+
+  test "workspace constraint falls back to granted and the editor shows that audience" do
+    kit = restrict_downloads!(
+      record_kit("Spring launch"),
+      audience: :signed_in,
+      slug: "spring-constrained-download"
+    )
+
+    RecordingStudioAccessible.set_audience_constraint!(
+      root: @root,
+      action: :"presskits.kit_download",
+      allowed_audiences: %i[granted],
+      actor: @user
+    )
+
+    assert_equal :granted, RecordingStudioPresskits::KitDownload.effective_audience(kit.reload)
+    sign_in @user
+    switch_to_root(@root)
+    get recording_studio_presskits.edit_press_kit_downloads_path(kit)
+    assert_response :success
+    assert_select "select[name='downloads[audience]'] option[selected][value='granted']"
+    refute_select "select[name='downloads[audience]'] option[value='public']"
+    refute_select "select[name='downloads[audience]'] option[value='signed_in']"
+    assert_includes response.body, "Your workspace only allows some of these choices"
   end
 
   private
@@ -254,6 +443,19 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
   def cover_fixture_path
     RecordingStudioPresskits::Engine.root.join("test/fixtures/files/cover.jpg")
+  end
+
+  def restrict_downloads!(kit, audience:, slug:)
+    place_cover!(kit)
+    perform_enqueued_jobs do
+      publish_kit!(kit, slug: slug)
+    end
+    RecordingStudioPresskits::KitDownload.set_audience!(
+      recording: kit,
+      audience: audience,
+      actor: @user
+    )
+    kit.reload
   end
 
   def publish_kit!(kit, slug:, status: "published")

@@ -10,15 +10,17 @@ class KitDownloadTest < Minitest::Test
     assert_equal "kit.txt", RecordingStudioPresskits::KitDownload::TEXT_FILENAME
   end
 
-  def test_audience_defaults_grant_download_edit_admin
+  def test_audience_defaults_are_public_and_editable
     defaults = RecordingStudioPresskits::KitDownload.audience_defaults
 
-    assert_equal %i[public signed_in granted], defaults[:allowed]
-    assert_equal :granted, defaults[:default]
+    assert_includes defaults[:allowed], :public
+    assert_includes defaults[:allowed], :signed_in
+    assert_includes defaults[:allowed], :granted
+    assert_equal :public, defaults[:default]
     assert_equal %i[download edit admin], defaults[:granted_roles]
     refute_includes defaults[:granted_roles], :view
     assert_equal true, defaults[:granted_override]
-    assert_equal :admin, defaults[:manage_role]
+    assert_equal :edit, defaults[:manage_role]
   end
 
   def test_filenames_sanitize_and_uniquify
@@ -63,9 +65,12 @@ class KitDownloadTest < Minitest::Test
     assert_includes html, "show_download?"
     assert_includes component, "return false if preview?"
     assert_includes component, "KitDownload.allowed?"
-    refute_includes File.read(
+    editor = File.read(
       File.expand_path("../app/components/recording_studio_presskits/press_kits/kit_editor_component.html.erb", __dir__)
-    ), "presskits-kit-download"
+    )
+    refute_includes editor, "presskits-kit-download"
+    assert_includes editor, 'id: "presskits-downloads"'
+    assert_includes editor, "download_edit_path"
   end
 
   def test_download_copy_is_i18n
@@ -76,5 +81,36 @@ class KitDownloadTest < Minitest::Test
     assert_includes locale, "Try again"
     assert_includes locale, "Company"
     assert_includes locale, "Location"
+    assert_includes locale, "Who can download this press kit"
+    assert_includes locale, 'downloads: "Downloads"'
+    assert_includes locale, "Your workspace only allows some of these choices"
+  end
+
+  def test_downloads_editor_uses_accessible_select
+    component = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/press_kits/downloads_editor_component.html.erb", __dir__)
+    )
+    ruby = File.read(
+      File.expand_path("../app/components/recording_studio_presskits/press_kits/downloads_editor_component.rb", __dir__)
+    )
+    controller = File.read(
+      File.expand_path("../app/controllers/recording_studio_presskits/kit_downloads_controller.rb", __dir__)
+    )
+    routes = File.read(File.expand_path("../config/routes.rb", __dir__))
+    screen = File.read(
+      File.expand_path("../app/views/recording_studio_presskits/kit_downloads/edit.html.erb", __dir__)
+    )
+
+    assert_includes routes, 'resource :downloads, only: %i[edit update], controller: "kit_downloads"'
+    assert_includes controller, "KitDownload.set_audience!"
+    assert_includes controller, "authorize_recording!(@press_kit_recording, role: :edit)"
+    assert_includes ruby, "{ label: option[:label], value: option[:audience].to_s }"
+    assert_includes component, 'name: "downloads[audience]"'
+    assert_includes component, "max-w-xl"
+    assert_includes component, "downloads.constrained"
+    assert_includes screen, "flat_pack_modal_screen"
+    assert_includes screen, "pk-editor"
+    assert_includes screen, "downloads.title"
+    assert_includes screen, "downloads.subtitle"
   end
 end

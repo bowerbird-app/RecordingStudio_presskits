@@ -20,6 +20,16 @@
       data: { modal_id: "presskits-sections-modal" }
     ) %>
 
+    <% if @download_edit_path.present? %>
+      <%= render FlatPack::Button::Component.new(
+        text: I18n.t("recording_studio_presskits.editor.downloads"),
+        style: :default,
+        href: @download_edit_path,
+        id: "presskits-downloads",
+        data: helpers.presskits_editor_open_data
+      ) %>
+    <% end %>
+
     <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
   </div>
 
