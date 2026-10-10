@@ -1,10 +1,10 @@
 # Upgrade notes
 
-## 0.30.0
+## 0.31.0
 
 Images sections no longer attach files under the section. They hold Attachable `Placement` children that point at workspace library photos.
 
-Presskits is unreleased: there is no data migration. Rebuild seeds. A host that already attached files under an Images section should move those photos into the workspace library and place them.
+Rebuild seeds. A host that already attached files under an Images section should move those photos into the workspace library and place them.
 
 Enable `include RecordingStudio::Capabilities::LibraryPlacement.to` and `Orderable.to(allows: ["RecordingStudioAttachable::Placement"])` on `RecordingStudioPresskits::Images`. Do not enable `Attachable.to` on that type. Quote still uses `Attachable.to` for one image.
 
@@ -12,7 +12,7 @@ Enable `include RecordingStudio::Capabilities::LibraryPlacement.to` and `Orderab
 
 Public and preview resolve with `RecordingStudioPresskits::LibraryImages` (`Placements.resolve`). The kit cover uses the same helper. A trashed or missing photo is skipped. Dummy mounts the workspace library from Library → Images with `library_path_for`. Trash-in-use warnings and delete-removes-placements stay Attachable's job.
 
-## 0.29.0
+## 0.30.0
 
 An optional cover image sits above the colour hero. Enable `include RecordingStudio::Capabilities::ImageLibrary.to` on the host root and `include RecordingStudio::Capabilities::LibraryPlacement.to` on PressKit. The first `place_library_image` result is the cover. Pick it with Attachable's placements screen and image picker. Do not add a second upload form or a cover-image model.
 
@@ -22,7 +22,7 @@ The hero crops with `aspect-[1440/640]` and `object-cover`. Flatpack has no full
 
 Dummy seeds Harbour Gallery on Spring launch from `db/seed_images/harbour-gallery.jpg`. Rebuild Tailwind so `aspect-[1440/640]` generates.
 
-## 0.28.0
+## 0.29.0
 
 Company and Location sit on the kit hero. Company is a host opt-in on the root: `include RecordingStudio::Capabilities::Companies.to(allow: :one)`. One company per root. The hero calls `RecordingStudioCompany.company(root)` and paints `recording_studio_company_logo` plus the name. Skip the capability, or leave the place empty, and the row stays off.
 
@@ -40,7 +40,7 @@ bin/rails db:migrate
 
 Register `"RecordingStudioCompany::Company"` and `"RecordingStudio::Location::Location"`. Mount those engines. Pin Location's Stimulus controllers. Rebuild Tailwind so Location search-field classes generate. Flatpack `PageTitle` has no byline slot for a logo-plus-name row. Location's `recording_studio_location_display` is a Card — too heavy for the hero — so the hero uses Avatar + Icon + text.
 
-## 0.27.0
+## 0.28.0
 
 The `:hero` cover is still a flush colour surface to the kit card's top and side edges. Height now comes from padding plus content: `p-12` on a phone, `md:p-24` (~96px) on a desktop. There is no 21/9 ratio and no `min-h-64`. Grid `:card` and the header-editor `:preview` stay 9/16.
 

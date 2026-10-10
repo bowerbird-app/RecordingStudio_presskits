@@ -6,22 +6,23 @@ Kits sit under your workspace. You can have many. You publish the kit, not each 
 
 ## Install
 
-Add the gem next to Recording Studio 4.3, Accessible 0.13, Admin 2.0, Publishable 0.5, Company 0.3, Location 0.4, and the mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.4, Accessible 0.13, Admin 2.0, Publishable 0.6, Company 0.3, Location 0.4, and the mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.3.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.4.0"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"
-gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"
+gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"
-gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.5.0"
+gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.6.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"
 gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"
 gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
+gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.224"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
@@ -34,12 +35,13 @@ gem "recording_studio_admin", "~> 2.0"
 gem "recording_studio_orderable", "~> 0.2"
 gem "recording_studio_trashable", "~> 0.6"
 gem "recording_studio_duplicatable", "~> 0.4"
-gem "recording_studio_publishable", "~> 0.5"
+gem "recording_studio_publishable", "~> 0.6"
 gem "recording_studio_attachable", "~> 0.13"
 gem "recording_studio_company", "~> 0.3"
 gem "recording_studio_location", "~> 0.4"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
+gem "recording_studio_metrics", "~> 0.2"
 gem "flat_pack", ">= 0.1.224"
 ```
 
@@ -328,10 +330,10 @@ Dummy kit pins:
 
 | Gem | Pin |
 |-----|-----|
-| Recording Studio | `v4.3.0` |
+| Recording Studio | `v4.4.0` |
 | Accessible | `v0.13.0` |
-| Admin | `v2.0.7` |
-| Root Switchable | `v0.5.6` |
+| Admin | `v2.1.0` |
+| Root Switchable | `v0.6.0` |
 | FlatPack | `v0.1.224` |
 | Attachable | `v0.13.0` |
 | Company | `v0.3.0` |
@@ -339,11 +341,12 @@ Dummy kit pins:
 | Orderable | `v0.2.7` |
 | Trashable | `v0.6.0` |
 | Duplicatable | `v0.4.5` |
-| Publishable | `v0.5.0` |
+| Publishable | `v0.6.0` |
 | External Embed | `v0.1.4` |
 | Video | `v0.1.1` |
+| Metrics | `v0.2.0` |
 
-Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.3 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, Company, Location, and this gem so that layout is not an unstyled box.
+Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.4 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Attachable, Company, Location, and this gem so that layout is not an unstyled box.
 
 The public kit view uses `recording_studio_presskits/blank` instead. Do not use Publishable's empty TopNav there. Do not insert Sign in, Sign out, or Root Switchable into PageNav. Core owns back and close on the default layout. **+ Access** is in the slot on the kit editor only. Cards, table, the kit editor, the header screen, public show, owner preview, and Admin live in `docs/dummy-screenshots/`. After seed: `press-kit-index-cards.png`, `press-kit-index-table.png`, `workspace-kit-edit.png`, `workspace-kit-edit-mobile.png`, `workspace-heading-edit.png`, `workspace-content-edit.png`, `workspace-fact-drilldown.png`, `workspace-header-edit.png`, `workspace-kit-show.png`, `public-press-kit-show.png` and `public-press-kit-show-mobile.png` (logged-out Spring launch), `hero-restyle-editor-desktop.png` / `hero-restyle-public-desktop.png` plus mobile and crop companions, `hero-company-editor-desktop.png` / `hero-company-public-desktop.png` plus mobile and crop companions (company + kit location on the colour header), `hero-cover-image-editor-desktop.png` / `hero-cover-image-public-desktop.png` plus mobile and crop companions, `hero-cover-colour-editor-desktop.png` / `hero-cover-colour-public-desktop.png` plus mobile and crop companions, `hero-cover-grid-desktop.png` / `hero-cover-grid-mobile.png`, `owner-preview-unpublished.png` (owner preview of Autumn recap), and `admin-press-kits.png` (live vs not-live). Do not recapture dummy home.
 
