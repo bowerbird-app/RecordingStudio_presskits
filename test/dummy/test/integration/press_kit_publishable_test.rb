@@ -117,7 +117,8 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-cover-hero[data-cover-color='#1F2937']"
     assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
     refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
-    assert_operator response.body.index("Press kit"), :<, response.body.index("Spring launch")
+    hero_html = css_select("#presskits-cover-hero").first.to_html
+    assert_operator hero_html.index("Press kit"), :<, hero_html.index("Spring launch")
     assert_operator response.body.index("Spring launch"), :<, response.body.index("Hero")
 
     sign_in @user

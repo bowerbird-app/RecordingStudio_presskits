@@ -108,7 +108,7 @@ module RecordingStudioPresskits
       def surface_style
         rules = ["background-color: #{cover_color}", "color: #{text_color}"]
         rules << "aspect-ratio: #{cover_ratio}" unless hero?
-        "#{rules.join("; ")};"
+        "#{rules.join('; ')};"
       end
 
       def wrapper_id
