@@ -49,9 +49,7 @@ module RecordingStudioPresskits
       private
 
       def download_actor
-        if helpers.respond_to?(:current_user, true)
-          return helpers.current_user
-        end
+        return helpers.current_user if helpers.respond_to?(:current_user, true)
 
         return Current.actor if defined?(Current) && Current.respond_to?(:actor) && Current.actor
 
