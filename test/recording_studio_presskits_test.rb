@@ -797,6 +797,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, 'text: "Upload"'
     assert_operator editor.index("flex flex-wrap items-center gap-3"), :<, editor.index('text: "Upload"')
     assert_includes editor, "recording-studio-presskits--library-upload"
+    assert_includes editor, "multipart: true"
     assert_includes editor, "presskits_editor_nav(:push)"
     refute_includes section_editor, "upload_form_data"
   end

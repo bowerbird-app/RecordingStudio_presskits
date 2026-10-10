@@ -83,6 +83,22 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert_equal "RecordingStudioAttachable::Library", photo.parent_recording.recordable_type
   end
 
+  test "upload accepts a multipart file and lands it in the library" do
+    kit = record_kit("Spring launch")
+    section = add_images_section(kit)
+    sign_in @user
+    switch_to_root(@root)
+
+    file = Rack::Test::UploadedFile.new(cover_fixture_path.to_s, "image/jpeg")
+    assert_difference -> { library_image_count }, 1 do
+      post recording_studio_presskits.press_kit_section_library_images_path(kit, section), params: {
+        file: file
+      }
+    end
+    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_equal 1, section_content(section).library_placements.size
+  end
+
   test "remove from the kit keeps the library photo" do
     kit = record_kit("Spring launch")
     section = add_images_section(kit)

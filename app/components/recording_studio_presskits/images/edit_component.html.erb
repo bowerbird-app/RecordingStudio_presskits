@@ -7,7 +7,7 @@
       href: picker_path,
       data: helpers.presskits_editor_nav(:push).merge(turbo_frame: helpers.presskits_editor_screen_id)
     ) %>
-    <%= form_with url: upload_path, method: :post, class: "inline-flex", html: {
+    <%= form_with url: upload_path, method: :post, multipart: true, class: "inline-flex", html: {
           data: {
             controller: "recording-studio-presskits--library-upload",
             turbo_frame: helpers.presskits_editor_dialog? ? helpers.presskits_editor_screen_id : nil

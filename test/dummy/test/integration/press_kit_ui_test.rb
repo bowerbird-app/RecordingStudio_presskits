@@ -1019,6 +1019,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "img[alt='stage']"
     upload_form = css_select("[data-controller='recording-studio-presskits--library-upload']").first.to_html
+    assert_includes upload_form, 'enctype="multipart/form-data"'
     refute_includes upload_form, "attachment_collection"
     assert_select "form#attachment-collection-#{images.id}"
     assert_select "input[name='attachment_collection[rows][][caption]'][form='attachment-collection-#{images.id}']"
