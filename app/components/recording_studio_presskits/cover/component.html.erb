@@ -1,36 +1,43 @@
 <% if hero? %>
-  <div
-    id="<%= wrapper_id %>"
-    class="<%= surface_classes %>"
-    style="<%= surface_style %>"
-    data-cover-color="<%= cover_color %>"
-    data-cover-text-color="<%= text_color %>"
-    data-cover-style="<%= cover_style %>"
-    data-cover-ratio="<%= cover_ratio %>"
-    data-recording-studio-presskits--cover-preview-target="surface"
-  >
-    <div class="<%= hero_copy_classes %>">
-      <p class="<%= eyebrow_classes %>" style="<%= eyebrow_style %>" data-cover-eyebrow><%= eyebrow %></p>
-      <%= render FlatPack::PageTitle::Component.new(
-        title: title,
-        variant: heading_variant,
-        size: :display,
-        title_color: text_color
-      ) %>
-      <% if company_recording %>
-        <div class="mt-4 flex items-center gap-2" data-cover-company>
-          <%= recording_studio_company_logo(company_recording, size: :sm, shape: :circle) %>
-          <span class="text-base font-medium"><%= company_name %></span>
-        </div>
-      <% end %>
-      <% if location_recordable %>
-        <div class="flex items-center gap-2" data-cover-location>
-          <% if location_recordable.resolved_icon.present? %>
-            <%= render FlatPack::Shared::IconComponent.new(name: location_recordable.resolved_icon, size: :sm) %>
-          <% end %>
-          <span class="text-base"><%= location_recordable.display_name %></span>
-        </div>
-      <% end %>
+  <div class="w-full" data-cover-stack>
+    <% if cover_image? %>
+      <div id="presskits-cover-image" class="<%= image_frame_classes %>" data-cover-image>
+        <%= image_tag cover_image_url, alt: cover_image_alt, class: "h-full w-full object-cover" %>
+      </div>
+    <% end %>
+    <div
+      id="<%= wrapper_id %>"
+      class="<%= surface_classes %>"
+      style="<%= surface_style %>"
+      data-cover-color="<%= cover_color %>"
+      data-cover-text-color="<%= text_color %>"
+      data-cover-style="<%= cover_style %>"
+      data-cover-ratio="<%= cover_ratio %>"
+      data-recording-studio-presskits--cover-preview-target="surface"
+    >
+      <div class="<%= hero_copy_classes %>">
+        <p class="<%= eyebrow_classes %>" style="<%= eyebrow_style %>" data-cover-eyebrow><%= eyebrow %></p>
+        <%= render FlatPack::PageTitle::Component.new(
+          title: title,
+          variant: heading_variant,
+          size: :display,
+          title_color: text_color
+        ) %>
+        <% if company_recording %>
+          <div class="mt-4 flex items-center gap-2" data-cover-company>
+            <%= recording_studio_company_logo(company_recording, size: :sm, shape: :circle) %>
+            <span class="text-base font-medium"><%= company_name %></span>
+          </div>
+        <% end %>
+        <% if location_recordable %>
+          <div class="flex items-center gap-2" data-cover-location>
+            <% if location_recordable.resolved_icon.present? %>
+              <%= render FlatPack::Shared::IconComponent.new(name: location_recordable.resolved_icon, size: :sm) %>
+            <% end %>
+            <span class="text-base"><%= location_recordable.display_name %></span>
+          </div>
+        <% end %>
+      </div>
     </div>
   </div>
 <% else %>
@@ -39,37 +46,53 @@
     clickable: href.present?,
     href: href,
     padding: :none,
-    theme: { background: cover_color, text: text_color },
+    theme: image_card? ? nil : { background: cover_color, text: text_color },
     id: wrapper_id,
     class: wrapper_classes
   ) do |card| %>
     <% card.body do %>
-      <div
-        class="<%= surface_classes %>"
-        style="<%= surface_style %>"
-        data-cover-color="<%= cover_color %>"
-        data-cover-text-color="<%= text_color %>"
-        data-cover-style="<%= cover_style %>"
-        data-cover-ratio="<%= cover_ratio %>"
-        data-recording-studio-presskits--cover-preview-target="surface"
-      >
-        <% if card? %>
-          <h1 class="font-bold leading-tight tracking-tight text-balance" style="font-size: var(--page-title-h1-size); color: <%= text_color %>;">
-            <%= title %>
-          </h1>
-          <% if description.present? %>
-            <p class="mt-2 line-clamp-2 text-base text-pretty" style="color: <%= text_color %>;"><%= description %></p>
+      <% if image_card? %>
+        <div class="flex h-full w-full flex-col" data-cover-color="<%= cover_color %>" data-cover-style="<%= cover_style %>" data-cover-image-card>
+          <div class="<%= image_frame_classes %>" data-cover-image>
+            <%= image_tag cover_image_url, alt: cover_image_alt, class: "h-full w-full object-cover" %>
+          </div>
+          <div class="flex flex-col gap-2 p-5">
+            <h1 class="font-bold leading-tight tracking-tight text-balance" style="font-size: var(--page-title-h1-size);">
+              <%= title %>
+            </h1>
+            <% if description.present? %>
+              <p class="line-clamp-2 text-base text-pretty"><%= description %></p>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div
+          class="<%= surface_classes %>"
+          style="<%= surface_style %>"
+          data-cover-color="<%= cover_color %>"
+          data-cover-text-color="<%= text_color %>"
+          data-cover-style="<%= cover_style %>"
+          data-cover-ratio="<%= cover_ratio %>"
+          data-recording-studio-presskits--cover-preview-target="surface"
+        >
+          <% if card? %>
+            <h1 class="font-bold leading-tight tracking-tight text-balance" style="font-size: var(--page-title-h1-size); color: <%= text_color %>;">
+              <%= title %>
+            </h1>
+            <% if description.present? %>
+              <p class="mt-2 line-clamp-2 text-base text-pretty" style="color: <%= text_color %>;"><%= description %></p>
+            <% end %>
+          <% else %>
+            <%= render FlatPack::PageTitle::Component.new(
+              title: title,
+              subtitle: description,
+              variant: heading_variant,
+              title_color: text_color,
+              subtitle_color: text_color
+            ) %>
           <% end %>
-        <% else %>
-          <%= render FlatPack::PageTitle::Component.new(
-            title: title,
-            subtitle: description,
-            variant: heading_variant,
-            title_color: text_color,
-            subtitle_color: text_color
-          ) %>
-        <% end %>
-      </div>
+        </div>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>

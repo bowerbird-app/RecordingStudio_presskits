@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.30.0
+
+An optional cover image sits above the colour hero. Enable `include RecordingStudio::Capabilities::ImageLibrary.to` on the host root and `include RecordingStudio::Capabilities::LibraryPlacement.to` on PressKit. The first `place_library_image` result is the cover. Pick it with Attachable's placements screen and image picker. Do not add a second upload form or a cover-image model.
+
+PressKit Orderable allows kit sections and `RecordingStudioAttachable::Placement` so resolve can see the photo. KitQuery and the Reorder screen still list only kit sections. Reordering sections keeps the placement on the kit.
+
+The hero crops with `aspect-[1440/640]` and `object-cover`. Flatpack has no full-bleed crop image at this pin (`v0.1.224`). Colour-only grid cards stay 9/16. A kit with a photo shows the image and the title below it. The header-editor preview stays 9/16 and colour-only. The colour band title is `PageTitle` `size: :display`.
+
+Dummy seeds Harbour Gallery on Spring launch from `db/seed_images/harbour-gallery.jpg`. Rebuild Tailwind so `aspect-[1440/640]` generates.
+
 ## 0.29.0
 
 Company and Location sit on the kit hero. Company is a host opt-in on the root: `include RecordingStudio::Capabilities::Companies.to(allow: :one)`. One company per root. The hero calls `RecordingStudioCompany.company(root)` and paints `recording_studio_company_logo` plus the name. Skip the capability, or leave the place empty, and the row stays off.

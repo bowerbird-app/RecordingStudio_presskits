@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.29.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.30.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -112,6 +112,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "RecordingStudio::Capabilities::Duplicatable.to"
     assert_includes source, "RecordingStudio::Capabilities::Publishable.to"
     assert_includes source, "include RecordingStudio::Capabilities::Location.to"
+    assert_includes source, "include RecordingStudio::Capabilities::LibraryPlacement.to"
+    assert_includes source, '"RecordingStudioAttachable::Placement"'
     assert_includes source, 'public_controller: "recording_studio_presskits/public_press_kits"'
     assert_includes source, "public_action: :show"
     assert_includes source, 'public_layout: "recording_studio_presskits/blank"'
@@ -297,6 +299,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "recording_studio_location_search_fields"
     assert_includes readme, "Cover::Company"
     assert_includes readme, "KitLocation"
+    assert_includes readme, "Capabilities::ImageLibrary.to"
+    assert_includes readme, "Capabilities::LibraryPlacement.to"
+    assert_includes readme, "place_library_image"
+    assert_includes readme, "CoverImage"
+    assert_includes readme, "Cover::Image"
+    assert_includes readme, "aspect-[1440/640]"
     assert_includes readme, 'gem "flat_pack", ">= 0.1.224"'
     assert_includes readme, "size: :display"
     assert_includes readme, "FlatPack::Modal::Component"
@@ -400,6 +408,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "Capabilities::Orderable.to(allows:"
     assert_includes source, '"RecordingStudioPresskits::PressKit"'
     assert_includes source, "Capabilities::Companies.to(allow: :one)"
+    assert_includes source, "Capabilities::ImageLibrary.to"
     refute_includes source, "if defined?(RecordingStudioAccessible)"
     refute_includes source, "Capabilities::Trashable"
     refute_includes source, "Capabilities::Duplicatable"
@@ -485,6 +494,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     company = File.read(File.expand_path("../lib/recording_studio_presskits/cover/company.rb", __dir__))
     assert_includes company, "RecordingStudioCompany.company"
     assert_includes company, "RecordingStudioCompany.allowance"
+    image = File.read(File.expand_path("../lib/recording_studio_presskits/cover/image.rb", __dir__))
+    assert_includes image, "aspect-[1440/640]"
+    assert_includes image, "CoverImage.url_for"
     assert_includes cover_html, "hero_copy_classes"
     assert_includes cover_html, "--page-title-h1-size"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
@@ -535,6 +547,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes kit_header, "ellipsis_vertical"
     assert_includes kit_header, "edit_heading_label"
     assert_includes kit_header, "cover_colours_label"
+    assert_includes kit_header, "cover_image_label"
+    assert_includes kit_header, "cover_image_path"
     refute_includes kit_header, "arrows-up-down"
     refute_includes kit_header, "trash"
     section = File.read(File.expand_path("press_kits/editable_section_component.html.erb", components))
@@ -561,6 +575,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, 'name: "press_kit[description]"'
     assert_includes header, "fields_for :location"
     assert_includes header, "recording_studio_location_search_fields"
+    assert_includes header, "cover_image_path"
+    assert_includes header, "cover_image_action"
+    assert_includes header, "cover_image_label"
     assert_includes header, 'name: "press_kit[cover_color]"'
     assert_includes header, 'name: "press_kit[cover_text_color]"'
     assert_includes header, "Text colour"

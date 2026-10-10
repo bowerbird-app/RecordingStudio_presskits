@@ -66,6 +66,29 @@ module RecordingStudioPresskits
         helpers.edit_press_kit_path(@press_kit_recording)
       end
 
+      def cover_image_enabled?
+        CoverImage.enabled?(@press_kit_recording)
+      end
+
+      def cover_image_path
+        return unless cover_image_enabled?
+        return unless helpers.respond_to?(:recording_studio_attachable)
+
+        helpers.recording_studio_attachable.recording_placements_path(
+          @press_kit_recording,
+          redirect_mode: "return_to",
+          return_to: helpers.edit_press_kit_header_path(@press_kit_recording)
+        )
+      end
+
+      def cover_image_label
+        I18n.t("recording_studio_presskits.editor.cover_image")
+      end
+
+      def cover_image_action
+        I18n.t("recording_studio_presskits.editor.choose_cover_image")
+      end
+
       def any_cover_color?
         RecordingStudioPresskits.any_cover_color?
       end

@@ -243,6 +243,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute_includes workspace_source, "if defined?(RecordingStudioAccessible)"
     refute_includes workspace_source, ".with("
     assert_includes workspace_source, "Capabilities::Companies.to(allow: :one)"
+    assert_includes workspace_source, "Capabilities::ImageLibrary.to"
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: RecordingStudioPresskits::PressKit)

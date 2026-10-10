@@ -6,6 +6,7 @@ module RecordingStudioPresskits
       include RecordingStudioCompany::DisplayHelper if defined?(RecordingStudioCompany::DisplayHelper)
       include RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
       include Byline
+      include Image
 
       SIZES = %i[card preview hero].freeze
 

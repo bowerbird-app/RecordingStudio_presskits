@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-10-10
+
+### Added
+- Optional kit cover image from the root Attachable image library. Dummy Workspace enables `RecordingStudio::Capabilities::ImageLibrary.to`. PressKit enables `LibraryPlacement.to`. The first `place_library_image` result sits above the colour hero at `aspect-[1440/640]` with `object-cover`. Grid cards with a photo show the image and the title below it. Colour-only cards stay 9/16.
+- Header **Cover image** and the kit FAB open Attachable's placements picker (`recording_placements_path`). No extra upload UI. Caption, credit, and alt stay on the library photo.
+- Kit Orderable allows `RecordingStudioAttachable::Placement` as well as kit sections so `Placements.resolve` can see the cover. KitQuery and Reorder still list only sections. Section reorder keeps the placement on the kit.
+- Dummy seeds a Harbour Gallery photo on Spring launch.
+- `Cover::Image` owns hero and card photo helpers so Cover stays lean.
+- Version `0.30.0`
+
+### Upgrade notes
+- Enable `ImageLibrary.to` on the host root and `LibraryPlacement.to` on PressKit. Keep Attachable library and placement types registered. Flatpack is `>= 0.1.224`. Flatpack has no full-bleed crop image, so the hero uses `aspect-[1440/640]` and a plain `image_tag`. Rebuild Tailwind so that aspect class generates.
+
 ## [0.29.0] - 2026-10-10
 
 ### Added
