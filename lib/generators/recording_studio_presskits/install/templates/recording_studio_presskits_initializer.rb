@@ -13,4 +13,8 @@ RecordingStudioPresskits.configure do |config|
   # config.cover_text_colors = %w[#F8FAFC #111827 #E5E7EB #6B7280]
   # config.cover_text_colors = :any
   # config.cover_text_auto = true
+
+  # Default library key when an Images section uploads. Hosts with extra
+  # libraries can point a section type at another key.
+  # config.section_library_keys = { "RecordingStudioPresskits::Images" => :default }
 end

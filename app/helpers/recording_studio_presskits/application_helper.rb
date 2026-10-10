@@ -53,6 +53,16 @@ module RecordingStudioPresskits
       view.present? ? press_kits_path(view: view) : press_kits_path
     end
 
+    def presskits_library_path
+      return unless respond_to?(:library_path_for)
+      return unless respond_to?(:current_presskits_root)
+      return if current_presskits_root.blank?
+
+      library_path_for(current_presskits_root)
+    rescue StandardError
+      nil
+    end
+
     def presskits_public_path_for(recording)
       return unless recording.respond_to?(:publishable_public_path)
 

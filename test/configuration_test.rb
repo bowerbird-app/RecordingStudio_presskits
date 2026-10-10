@@ -41,6 +41,8 @@ class ConfigurationTest < Minitest::Test
     assert_equal({}, configuration.section_editors)
     assert_equal({}, configuration.to_h.fetch(:section_editors))
     assert_equal [], configuration.excluded_picker_types
+    assert_equal({}, configuration.section_library_keys)
+    assert_equal :default, configuration.library_key_for("RecordingStudioPresskits::Images")
     assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_COLORS, configuration.cover_palette.colors
     assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_COLOR, configuration.cover_palette.default_color
     refute configuration.any_cover_color?
@@ -64,6 +66,14 @@ class ConfigurationTest < Minitest::Test
     assert @configuration.any_cover_text_color?
     assert_equal :any, @configuration.to_h.fetch(:cover_text_colors)
     refute @configuration.to_h.fetch(:cover_text_auto)
+  end
+
+  def test_library_key_for_reads_section_library_keys
+    @configuration.section_library_keys = { "RecordingStudioPresskits::Images" => "campaign" }
+
+    assert_equal :campaign, @configuration.library_key_for("RecordingStudioPresskits::Images")
+    assert_equal :campaign, @configuration.library_key_for("Images")
+    assert_equal :default, @configuration.library_key_for("RecordingStudioPresskits::QuoteSection")
   end
 
   def test_merge_accepts_string_keys

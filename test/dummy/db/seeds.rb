@@ -100,12 +100,12 @@ begin
       location.country_code = "AU"
     end
   end
-  seed_cover_image = lambda do |kit_recording|
-    next unless kit_recording.respond_to?(:place_library_image)
+  find_or_import_harbour_photo = lambda do
+    return unless root_recording.respond_to?(:image_library)
 
     library = root_recording.image_library(actor: user)
     path = Rails.root.join("db/seed_images/harbour-gallery.jpg")
-    next unless path.file?
+    return unless path.file?
 
     existing = library.images(per_page: 20).find do |recording|
       recording.recordable.original_filename == "harbour-gallery.jpg"
@@ -129,15 +129,18 @@ begin
         )
       end
     end
-    next if photo.blank?
+    return if photo.blank?
 
     photo.revise_attachment_metadata(
       actor: user,
       alt_text: "A white gallery hall with paintings along both walls"
     )
-    kit_recording.place_library_image(attachment_recording: photo, actor: user) unless kit_recording.library_placements.any?
+    photo
   end
-  seed_cover_image.call(press_kit_recording)
+  harbour_photo = find_or_import_harbour_photo.call
+  if harbour_photo && press_kit_recording.respond_to?(:place_library_image) && press_kit_recording.library_placements.none?
+    press_kit_recording.place_library_image(attachment_recording: harbour_photo, actor: user)
+  end
   spring_cover = press_kit_recording.recordable
   if spring_cover.cover_color != "#BFDBFE" || spring_cover.cover_text_color.present?
     root_recording.revise(press_kit_recording) do |press_kit|
@@ -261,6 +264,26 @@ begin
     ]
   )
   ensure_credits_section.call(unpublished_kit_recording, "Credits", [[tom, "Creative Direction"]])
+
+  ensure_images_section = lambda do |kit_recording, title, photo|
+    next if photo.blank? || !defined?(RecordingStudioAttachable)
+
+    existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
+      section.recordable.title == title
+    end
+    section = existing || RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit_recording,
+      content_type: "RecordingStudioPresskits::Images",
+      actor: user,
+      title: title
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    next unless content&.respond_to?(:place_library_image)
+    next if content.library_placements.any?
+
+    content.place_library_image(attachment_recording: photo, actor: user)
+  end
+  ensure_images_section.call(press_kit_recording, "Press photos", harbour_photo)
 
   ensure_facts_section = lambda do |kit_recording, title, display_style, columns, facts|
     existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|

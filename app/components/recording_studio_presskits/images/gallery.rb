@@ -4,16 +4,15 @@ module RecordingStudioPresskits
   class Images
     module Gallery
       def gallery_images_for(recording)
-        return [] unless recording.respond_to?(:images)
-
-        recording.images(per_page: 100)
+        LibraryImages.resolve(recording)
       end
 
-      def gallery_image_url(attachment_recording)
-        file = attachment_recording.recordable&.file
-        return unless file&.attached?
+      def gallery_image_url(item)
+        LibraryImages.url_for(item, helpers: helpers)
+      end
 
-        helpers.main_app.url_for(file)
+      def gallery_image_alt(item)
+        LibraryImages.alt_for(item)
       end
     end
   end

@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.29.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.30.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -300,6 +300,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Capabilities::ImageLibrary.to"
     assert_includes readme, "Capabilities::LibraryPlacement.to"
     assert_includes readme, "place_library_image"
+    assert_includes readme, "upload_to_library_and_place"
+    assert_includes readme, "LibraryImages"
+    assert_includes readme, "section_library_keys"
+    assert_includes readme, "library_path_for"
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[1440/640]"
@@ -379,6 +383,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/application_helper.rb", __dir__))
     assert_includes helper, "recording_studio_accessible_avatars"
+    assert_includes helper, "def presskits_library_path"
+    assert_includes helper, "library_path_for"
     refute_includes helper, "root_switch"
     refute_includes helper, "Sign out"
     refute_includes helper, "presskits_extra_nav"
@@ -659,6 +665,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::Sidebar::Group::Component"
     assert_includes index, 'title: "Library"'
     assert_includes index, "open: true"
+    assert_includes index, 'text: "Images"'
+    assert_includes index, 'icon: "photo"'
+    assert_includes index, "@images_path"
     assert_includes index, 'text: "Credits"'
     assert_includes index, 'icon: "user-group"'
     assert_includes index, "@credits_path"
@@ -724,6 +733,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, "picker_description_for"
     assert_includes text, '"document-text"'
     assert_includes images, '"photo"'
+    assert_includes images, "LibraryPlacement.to"
+    assert_includes images, '"RecordingStudioAttachable::Placement"'
+    refute_includes images, "Capabilities::Attachable"
     assert_includes quotes, '"chat-bubble-bottom-center-text"'
     assert_includes videos, '"video-camera"'
     child_path = "app/components/recording_studio_presskits/press_kits/child_component.html.erb"
@@ -974,6 +986,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.join(root, "Gemfile"))
 
     assert_includes routes, "resources :videos"
+    assert_includes routes, "resources :library_images"
+    refute_includes routes, 'resources :images, only: :destroy'
     refute_includes routes, "video_order"
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'

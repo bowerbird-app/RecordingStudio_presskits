@@ -982,16 +982,16 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-section-preview"
     assert_includes response.body, "No images yet."
     refute_includes response.body, ">Save<"
-    assert_select "[data-controller='recording-studio-attachable--upload']", count: 1
-    refute_select "form[data-controller='recording-studio-attachable--upload']"
-    assert_select "[data-controller='recording-studio-attachable--upload'] button[type='button']", text: "Upload"
-    assert_select "input[type=file][accept='image/*'][data-recording-studio-attachable--upload-target='input']"
+    assert_select "a", text: "Add from library"
+    assert_select "[data-controller='recording-studio-presskits--library-upload']", count: 1
+    assert_select "[data-controller='recording-studio-presskits--library-upload'] button[type='button']", text: "Upload"
+    assert_select "input[type=file][accept='image/*']"
+    refute_select "[data-controller='recording-studio-attachable--upload']"
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
+    assert_includes response.body, "Caption, credit, and alt live on the library photo"
     assert_select "#presskits-section-content-form", count: 0
     refute section_editor_cancel?
-    assert_match(/remove-button-template-value="&lt;button/, response.body)
-    refute_includes response.body, ">Remove\">"
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
       kit_section: { title: "Press photos", subtitle: "Doors at noon", decoy: "nope" }
@@ -1013,11 +1013,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select ".fp-section-title", text: /Doors at noon/
 
     attachment = attach_image(section, "stage.jpg")
+    images = section_content(section)
+    placement = images.library_placements.first.placement_recording
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     assert_select "img[alt='stage']"
-    images = section_content(section)
-    upload_form = css_select("[data-controller='recording-studio-attachable--upload']").first.to_html
+    upload_form = css_select("[data-controller='recording-studio-presskits--library-upload']").first.to_html
     refute_includes upload_form, "attachment_collection"
     assert_select "form#attachment-collection-#{images.id}"
     assert_select "input[name='attachment_collection[rows][][caption]'][form='attachment-collection-#{images.id}']"
@@ -1026,18 +1027,19 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "label", text: "Credit"
     assert_select "label", text: "Alt text"
     assert_select "button", text: "Save"
-    assert_select "button", text: "Trash"
+    assert_select "button", text: "Remove from here"
+    refute_select "button", text: "Trash"
     refute_includes response.body, "No images yet."
 
     signed = css_select("input[name='attachment_collection[signed_editor]']").first["value"]
     return_to = recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    patch recording_studio_attachable.recording_attachment_collection_path(images), params: {
+    patch recording_studio_attachable.recording_placements_path(images), params: {
       redirect_mode: "return_to",
       return_to: return_to,
       attachment_collection: {
         signed_editor: signed,
         rows: [{
-          recording_id: attachment.id,
+          recording_id: placement.id,
           caption: "Stage left",
           credit: "Ada",
           alt_text: "The stage"
@@ -1060,7 +1062,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes images_row.to_html, 'data-flat-pack--icon-name-value="photo"'
     refute_includes images_row.to_html, "arrows-up-down"
     assert_includes images_row["class"], "!items-center"
-    assert_select "#presskits-editor-preview img[alt='stage']"
+    assert_select "#presskits-editor-preview img[alt='The stage']"
     assert_select "#presskits-editor-preview .fp-section-title h2", text: "Press photos"
     assert_select "#presskits-editor-preview .fp-section-title", text: /Doors at noon/
     assert_select "#presskits-editor-preview a[href='#press-photos'][aria-label='Copy link to Press photos']"
@@ -1070,15 +1072,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".fp-section-title#press-photos h2", text: "Press photos"
     assert_select ".fp-section-title", text: /Doors at noon/
-    assert_select "img[alt='stage']"
-    assert response.body.index("Press photos") < response.body.index("alt=\"stage\"")
+    assert_select "img[alt='The stage']"
+    assert response.body.index("Press photos") < response.body.index("alt=\"The stage\"")
 
-    delete recording_studio_presskits.press_kit_section_image_path(kit, section, attachment)
+    delete recording_studio_presskits.press_kit_section_library_image_path(kit, section, placement)
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     follow_redirect!
+    assert_select "img[alt='The stage']", count: 0
     assert_select "img[alt='stage']", count: 0
-    assert attachment.reload.trashed_at.present?
+    assert_nil attachment.reload.trashed_at
     assert_nil section.reload.trashed_at
+    assert_empty images.reload.library_placements
   end
 
   test "adding a quotes section shows quotes and omits a blank body" do
@@ -1595,12 +1599,23 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   end
 
   def attach_image(section, filename)
+    content = section_content(section)
+    library = content.root_recording.image_library(actor: @user)
     blob = ActiveStorage::Blob.create_and_upload!(
-      io: StringIO.new("image-bytes"),
+      io: File.open(RecordingStudioPresskits::Engine.root.join("test/fixtures/files/cover.jpg")),
       filename: filename,
       content_type: "image/jpeg"
     )
-    section_content(section).record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user)
+    photo = library.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user)
+    photo.revise_attachment_metadata(actor: @user, alt_text: File.basename(filename, ".*"))
+    result = RecordingStudioPresskits::SectionImages.place(
+      images_recording: content,
+      attachment_recording: photo,
+      actor: @user
+    )
+    raise result.error if result.failure?
+
+    photo
   end
 
   def publish_images_kit!(kit)
@@ -1619,6 +1634,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "button[aria-expanded='true'] span.fp-sidebar-label", text: "Library"
     assert_select "a[data-flat-pack-sidebar-item='true'][href='#{recording_studio_presskits.credits_path}'] span.fp-sidebar-label",
                   text: "Credits"
+    assert_select "a[data-flat-pack-sidebar-item='true'] span.fp-sidebar-label", text: "Images"
     assert_select "a.fp-button[href='#{recording_studio_presskits.credits_path}']", count: 0
     assert_select "button[aria-label='Open sidebar'][data-action='click->flat-pack--sidebar-layout#toggleMobile']"
   end

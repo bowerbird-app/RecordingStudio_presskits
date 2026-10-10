@@ -171,10 +171,14 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     spring_sections = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
     autumn_sections = RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
     assert_equal(
-      ["Project credits", "Company statistics", "Project specifications"],
+      ["Project credits", "Press photos", "Company statistics", "Project specifications"],
       spring_sections.map { |section| section.recordable.title }
     )
     assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
+    press_photos = spring_sections.find { |section| section.recordable.title == "Press photos" }
+    press_photo_content = RecordingStudioPresskits::KitQuery.section_content(press_photos)
+    assert_equal 1, press_photo_content.library_placements.size
+    assert_equal "harbour-gallery.jpg", press_photo_content.library_placements.first.attachment.original_filename
     spring_lines = RecordingStudioPresskits::Credits.visible_lines(
       RecordingStudioPresskits::KitQuery.section_content(spring_sections.first)
     )

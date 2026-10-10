@@ -1,0 +1,121 @@
+<% picker_title = "Add from library" %>
+<% picker_body = capture do %>
+  <% if @library.present? %>
+    <div
+      class="flex w-full flex-col gap-6"
+      data-controller="recording-studio-attachable--attachment-image-picker recording-studio-presskits--library-picker"
+      data-action="recording-studio-attachable--attachment-image-picker:selected->recording-studio-presskits--library-picker#queue"
+      data-recording-studio-attachable--attachment-image-picker-picker-url-value="<%= library_picker_path_for(@library) %>"
+      data-recording-studio-attachable--attachment-image-picker-upload-url-value="<%= attachable_attachment_imports_path(@library) %>"
+      data-recording-studio-attachable--attachment-image-picker-direct-upload-url-value="<%= main_app.rails_direct_uploads_path %>"
+      data-recording-studio-attachable--attachment-image-picker-max-file-size-value="<%= RecordingStudioAttachable.configuration.max_file_size %>"
+      data-recording-studio-attachable--attachment-image-picker-image-processing-enabled-value="<%= RecordingStudioAttachable.configuration.image_processing_enabled %>"
+      data-recording-studio-attachable--attachment-image-picker-image-processing-max-width-value="<%= RecordingStudioAttachable.configuration.image_processing_max_width %>"
+      data-recording-studio-attachable--attachment-image-picker-image-processing-max-height-value="<%= RecordingStudioAttachable.configuration.image_processing_max_height %>"
+      data-recording-studio-attachable--attachment-image-picker-image-processing-quality-value="<%= RecordingStudioAttachable.configuration.image_processing_quality %>"
+      data-recording-studio-attachable--attachment-image-picker-multiple-selection-value="true">
+
+      <% if @picker_libraries.size > 1 %>
+        <%= form_with url: press_kit_section_library_images_path(@press_kit_recording, @section_recording),
+              method: :get,
+              class: "w-full",
+              html: { data: { turbo_frame: presskits_editor_dialog? ? presskits_editor_screen_id : nil } } do %>
+          <%= hidden_field_tag :from_kit_editor, "1" if presskits_editor_dialog? %>
+          <%= render FlatPack::Select::Component.new(
+            name: "library_id",
+            label: "Library",
+            options: @picker_libraries.map { |library| [library_title_for(library), library.id.to_s] },
+            value: @library.id.to_s,
+            onchange: "this.form.requestSubmit()"
+          ) %>
+        <% end %>
+      <% end %>
+
+      <%= render FlatPack::Search::Component.new(
+        input_id: "presskits-library-picker-search",
+        name: :picker_search,
+        value: nil,
+        placeholder: "Search the library",
+        max_width: :lg,
+        aria: { label: "Search the library" },
+        data: {
+          recording_studio_attachable__attachment_image_picker_target: "searchInput",
+          action: "input->recording-studio-attachable--attachment-image-picker#searchChanged"
+        }
+      ) %>
+
+      <p class="hidden text-sm text-(--surface-muted-content-color)" data-recording-studio-attachable--attachment-image-picker-target="status"></p>
+
+      <div class="hidden rounded-xl border border-(--surface-border-color) bg-(--surface-muted-background-color) px-4 py-3" data-recording-studio-attachable--attachment-image-picker-target="selectionActions">
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm text-(--surface-content-color)" data-recording-studio-attachable--attachment-image-picker-target="selectionCount">Select one or more</p>
+          <div class="flex items-center gap-2">
+            <%= render FlatPack::Button::Component.new(
+              text: "Clear",
+              style: :secondary,
+              size: :sm,
+              type: "button",
+              data: { action: "recording-studio-attachable--attachment-image-picker#clearSelection" }
+            ) %>
+            <%= render FlatPack::Button::Component.new(
+              text: "Add selected",
+              style: :primary,
+              size: :sm,
+              type: "button",
+              data: {
+                action: "recording-studio-attachable--attachment-image-picker#confirmSelection",
+                recording_studio_attachable__attachment_image_picker_target: "confirmButton"
+              }
+            ) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="min-h-0 flex-1 overflow-y-auto p-1" data-recording-studio-attachable--attachment-image-picker-target="scrollContainer">
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4" data-recording-studio-attachable--attachment-image-picker-target="gallery"></div>
+        <div class="hidden rounded-lg border border-dashed border-(--surface-border-color) px-4 py-8 text-center text-sm text-(--surface-muted-content-color)" data-recording-studio-attachable--attachment-image-picker-target="emptyState">
+          Nothing in this library yet.
+        </div>
+      </div>
+
+      <%= form_with url: press_kit_section_library_images_path(@press_kit_recording, @section_recording),
+            method: :post,
+            html: {
+              data: {
+                library_picker_form: true,
+                turbo_frame: presskits_editor_dialog? ? presskits_editor_screen_id : nil
+              }
+            } do %>
+        <%= hidden_field_tag :from_kit_editor, "1" if presskits_editor_dialog? %>
+        <%= hidden_field_tag :library_id, @library.id %>
+        <div data-recording-studio-presskits--library-picker-target="ids"></div>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: "No library here",
+      description: "This workspace has no image library to pick from.",
+      icon: :photo
+    ) %>
+  <% end %>
+<% end %>
+
+<% if presskits_editor_dialog? %>
+  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: picker_title) do %>
+    <%= picker_body %>
+  <% end %>
+<% else %>
+  <% presskits_page_nav(
+    title: picker_title,
+    back_url: edit_press_kit_section_path(@press_kit_recording, @section_recording),
+    back_label: "Back to images",
+    close_url: edit_press_kit_path(@press_kit_recording)
+  ) %>
+
+  <%= render FlatPack::PageTitle::Component.new(
+    title: picker_title,
+    variant: :h1
+  ) %>
+
+  <%= picker_body %>
+<% end %>
