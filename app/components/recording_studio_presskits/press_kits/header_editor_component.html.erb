@@ -26,6 +26,10 @@
       class: "w-full"
     ) %>
 
+    <%= fields_for :location, header_location do |location_form| %>
+      <%= helpers.recording_studio_location_search_fields(location_form) %>
+    <% end %>
+
     <div id="presskits-header-colours" class="flex flex-col gap-6">
     <% if any_cover_color? %>
       <%= render FlatPack::FormField::Component.new(

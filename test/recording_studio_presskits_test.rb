@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.27.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.28.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -26,6 +26,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261008180000_create_recording_studio_facts.rb",
       "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
+      "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
@@ -36,20 +38,25 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
   def test_engine_exists
     assert_kind_of Class, ::RecordingStudioPresskits::Engine
+    engine = File.read(File.expand_path("../lib/recording_studio_presskits/engine.rb", __dir__))
+    assert_includes engine, "recording_studio_presskits.location_trash"
+    assert_includes engine, 'RecordingStudio::Location::Location.include RecordingStudio::Capabilities::Trashable.to'
   end
 
   def test_gemspec_pins_recording_studio_and_accessible
     gemspec = File.read(File.expand_path("../recording_studio_presskits.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.12"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.13"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.5"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.223"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.12"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.13"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.3"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_location", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.1.0"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
@@ -59,19 +66,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.3.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.12.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.6"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.223"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.5.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.5.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.12.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
     refute_includes gemfile, "recording_studio/v3.0.0"
-    refute_includes gemfile, 'tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "v0.1.134"'
     refute_includes gemfile, 'tag: "0.3.1"'
   end
@@ -101,6 +109,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "include RecordingStudio::Capabilities::Trashable.to"
     assert_includes source, "RecordingStudio::Capabilities::Duplicatable.to"
     assert_includes source, "RecordingStudio::Capabilities::Publishable.to"
+    assert_includes source, "include RecordingStudio::Capabilities::Location.to"
     assert_includes source, 'public_controller: "recording_studio_presskits/public_press_kits"'
     assert_includes source, "public_action: :show"
     assert_includes source, 'public_layout: "recording_studio_presskits/blank"'
@@ -185,6 +194,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, 'mount RecordingStudioDuplicatable::Engine, at: "/recording_studio_duplicatable"'
     assert_includes routes, 'mount RecordingStudioPresskits::Engine, at: "/recording_studio_presskits"'
     assert_includes routes, 'mount RecordingStudioPublishable::Engine, at: "/"'
+    assert_includes routes, 'mount RecordingStudioCompany::Engine, at: "/recording_studio_company"'
+    assert_includes routes, 'mount RecordingStudioLocation::Engine, at: "/recording_studio_location"'
     assert_includes routes, 'recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits'
   end
 
@@ -218,6 +229,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes tailwind_source, "flatpack_fieldset"
     assert_includes sources_task, '"recording_studio_publishable"'
     assert_includes sources_task, '"recording_studio_attachable"'
+    assert_includes sources_task, '"recording_studio_company"'
+    assert_includes sources_task, '"recording_studio_location"'
     refute_includes tailwind_source, "@theme"
     refute_includes tailwind_source, ":root {"
     refute_includes tailwind_source, "--color-fp-primary"
@@ -243,6 +256,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer_source, '"RecordingStudioPublishable::Publishable"'
     assert_includes initializer_source, '"RecordingStudioAttachable::Library"'
     assert_includes initializer_source, '"RecordingStudioAttachable::Placement"'
+    assert_includes initializer_source, '"RecordingStudioCompany::Company"'
+    assert_includes initializer_source, '"RecordingStudio::Location::Location"'
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
@@ -264,12 +279,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.3.0"
-    assert_includes readme, "v0.12.1"
+    assert_includes readme, "v0.13.0"
+    assert_includes readme, "v0.3.0"
+    assert_includes readme, "v0.5.1"
     assert_includes readme, "tag: \"v2.0.7\""
     assert_includes readme, "tag: \"v0.2.7\""
     assert_includes readme, "tag: \"v0.5.0\""
     assert_includes readme, "tag: \"v0.4.5\""
     assert_includes readme, "tag: \"v0.1.223\""
+    assert_includes readme, "tag: \"v0.3.0\""
+    assert_includes readme, "tag: \"v0.5.1\""
+    assert_includes readme, "Companies.to(allow: :one)"
+    assert_includes readme, "Capabilities::Location.to"
+    assert_includes readme, "recording_studio_company_logo"
+    assert_includes readme, "recording_studio_location_search_fields"
     assert_includes readme, 'gem "flat_pack", ">= 0.1.223"'
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
@@ -371,6 +394,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "RecordingStudio.enable_capability(:accessible, on: self)"
     assert_includes source, "Capabilities::Orderable.to(allows:"
     assert_includes source, '"RecordingStudioPresskits::PressKit"'
+    assert_includes source, "Capabilities::Companies.to(allow: :one)"
     refute_includes source, "if defined?(RecordingStudioAccessible)"
     refute_includes source, "Capabilities::Trashable"
     refute_includes source, "Capabilities::Duplicatable"
@@ -449,6 +473,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes cover_html.split("<% else %>").first, "subtitle: description"
     assert_includes cover_html.split("<% else %>").first, "data-cover-eyebrow"
     assert_includes cover_html.split("<% else %>").first, "--hero-headline-size"
+    assert_includes cover_html.split("<% else %>").first, "data-cover-company"
+    assert_includes cover_html.split("<% else %>").first, "recording_studio_company_logo"
+    assert_includes cover_html.split("<% else %>").first, "data-cover-location"
+    assert_includes cover_html.split("<% else %>").first, "location_recordable.display_name"
+    assert_includes cover, "RecordingStudioCompany.company"
+    assert_includes cover, "RecordingStudioCompany.allowance"
     assert_includes cover_html, "hero_copy_classes"
     assert_includes cover_html, "--page-title-h1-size"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
@@ -523,6 +553,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes section, "p-4 -mx-4"
     assert_includes header, 'name: "press_kit[title]"'
     assert_includes header, 'name: "press_kit[description]"'
+    assert_includes header, "fields_for :location"
+    assert_includes header, "recording_studio_location_search_fields"
     assert_includes header, 'name: "press_kit[cover_color]"'
     assert_includes header, 'name: "press_kit[cover_text_color]"'
     assert_includes header, "Text colour"

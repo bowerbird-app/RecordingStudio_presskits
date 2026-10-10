@@ -4,7 +4,7 @@ module RecordingStudioPresskits
   module PressKits
     class HeaderEditorComponent < ViewComponent::Base
       def initialize(press_kit_recording:, title:, description:, cover_style: nil, # rubocop:disable Metrics/ParameterLists
-                     cover_color: nil, cover_text_color: nil)
+                     cover_color: nil, cover_text_color: nil, location: nil)
         super()
         @press_kit_recording = press_kit_recording
         @title = title
@@ -12,6 +12,11 @@ module RecordingStudioPresskits
         @cover_style = cover_style
         @cover_color = cover_color
         @cover_text_color = cover_text_color
+        @location = location
+      end
+
+      def header_location
+        @location || RecordingStudio::Location::Location.new
       end
 
       def header_title

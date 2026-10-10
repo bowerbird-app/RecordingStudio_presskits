@@ -78,6 +78,28 @@ begin
     cover_style: "color",
     cover_color: "#BFDBFE"
   )
+  [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
+    bootstrap_owner_access.call(recording, user)
+  end
+  if RecordingStudioCompany.company(root_recording).blank?
+    RecordingStudioCompany.create(
+      root_recording,
+      actor: user,
+      idempotency_key: "seed:harbour-studio",
+      name: "Harbour Studio"
+    )
+  end
+  unless RecordingStudio::Recording.recording_studio_trashable_active.exists?(
+    parent_recording: press_kit_recording,
+    recordable_type: "RecordingStudio::Location::Location"
+  )
+    press_kit_recording.record(RecordingStudio::Location::Location, actor: user, parent_recording: press_kit_recording) do |location|
+      location.title = "Harbour Gallery"
+      location.location_type = "venue"
+      location.locality = "Sydney"
+      location.country_code = "AU"
+    end
+  end
   spring_cover = press_kit_recording.recordable
   if spring_cover.cover_color != "#BFDBFE" || spring_cover.cover_text_color.present?
     root_recording.revise(press_kit_recording) do |press_kit|

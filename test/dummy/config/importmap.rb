@@ -15,3 +15,4 @@ pin_all_from RecordingStudioPresskits::Engine.root.join("app/javascript/recordin
 
 pin "@rails/activestorage", to: "activestorage.esm.js"
 pin_all_from RecordingStudioAttachable::Engine.root.join("app/javascript/controllers/recording_studio_attachable"), under: "controllers/recording_studio_attachable", to: "controllers/recording_studio_attachable"
+pin_all_from RecordingStudioLocation::Engine.root.join("app/javascript/recording_studio_location/controllers"), under: "controllers/recording_studio_location", to: "recording_studio_location/controllers", preload: false

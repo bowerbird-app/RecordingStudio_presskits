@@ -34,11 +34,16 @@ module RecordingStudioPresskits
       )
     end
 
+    def location_params
+      params.fetch(:location, {}).permit(*RecordingStudio::Location.permitted_attributes)
+    end
+
     def save_header
       fields = header_fields
       return render_missing_title(fields) if fields[:title].blank?
 
       revise_header(fields)
+      save_kit_location
       respond_to_header_save
     rescue ActiveRecord::RecordInvalid => e
       render_invalid_header(fields, e)
@@ -89,6 +94,40 @@ module RecordingStudioPresskits
       end
     end
 
+    def save_kit_location
+      return unless params.key?(:location)
+
+      attributes = location_params.to_h.symbolize_keys
+      current = kit_location_recording
+      if location_blank?(attributes)
+        current&.recording_studio_trashable_trash!(actor: presskits_actor)
+        return
+      end
+
+      if current
+        current_presskits_root.revise(current) { |location| location.assign_attributes(attributes) }
+      else
+        @press_kit_recording.record(
+          RecordingStudio::Location::Location,
+          actor: presskits_actor,
+          parent_recording: @press_kit_recording
+        ) do |location|
+          location.assign_attributes(attributes)
+        end
+      end
+    end
+
+    def kit_location_recording
+      RecordingStudio::Recording.recording_studio_trashable_active.find_by(
+        parent_recording: @press_kit_recording,
+        recordable_type: "RecordingStudio::Location::Location"
+      )
+    end
+
+    def location_blank?(attributes)
+      attributes.values.all?(&:blank?)
+    end
+
     def assign_header_fields(overrides = {})
       recordable = @press_kit_recording.recordable
       @header_title = field_or_saved(overrides, :title, recordable.title)
@@ -96,6 +135,7 @@ module RecordingStudioPresskits
       @header_cover_style = field_or_saved(overrides, :cover_style, recordable.cover_style)
       @header_cover_color = field_or_saved(overrides, :cover_color, recordable.cover_color)
       @header_cover_text_color = field_or_saved(overrides, :cover_text_color, recordable.cover_text_color)
+      @header_location = kit_location_recording&.recordable || RecordingStudio::Location::Location.new
     end
 
     def field_or_saved(overrides, key, saved)
@@ -119,6 +159,7 @@ module RecordingStudioPresskits
       return "Pick a colour we can actually paint." if messages[:cover_color].any?
       return "Pick a text colour we can actually paint." if messages[:cover_text_color].any?
       return "That cover style is not ready yet." if messages[:cover_style].any?
+      return "Check the place. Something there is off." if error.record.is_a?(RecordingStudio::Location::Location)
 
       "Keep that description short. 280 characters is the limit."
     end

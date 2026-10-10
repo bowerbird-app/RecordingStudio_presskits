@@ -26,6 +26,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "AdminRoot", "Workspace" ].sort, RecordingStudio.root_recordable_types.sort
     assert_equal [ "Workspace", "Folder" ], RecordingStudio.allowed_parent_types_for("Page")
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
+    assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location")
+    assert_includes RecordingStudio.allowed_parent_types_for("RecordingStudioCompany::Company"), "Workspace"
     assert_equal [ "RecordingStudioPresskits::PressKit" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::KitSection")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("FakeBlock")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
@@ -115,6 +117,13 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.column_exists?(:recording_studio_recordings, :trash_root)
     assert connection.table_exists?(:recording_studio_trashable_retention_settings)
     assert connection.table_exists?(:recording_studio_publishable_publishables)
+    assert connection.table_exists?(:recording_studio_companies)
+    assert connection.column_exists?(:recording_studio_companies, :name)
+    refute connection.column_exists?(:recording_studio_companies, :updated_at)
+    assert connection.table_exists?(:recording_studio_locations)
+    assert connection.column_exists?(:recording_studio_locations, :title)
+    assert connection.column_exists?(:recording_studio_locations, :location_type)
+    assert connection.column_exists?(:recording_studio_locations, :icon)
     refute connection.table_exists?(:recording_studio_access_boundaries)
     refute connection.table_exists?(:recording_studio_device_sessions)
   end
@@ -197,6 +206,15 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
       RecordingStudioPresskits::FactsSection.active_facts(specifications_content).map { |child| child.recordable.label }
     )
     assert press_kit.published?
+    company = RecordingStudioCompany.company(root_recording)
+    assert_equal "Harbour Studio", company.recordable.name
+    kit_location = RecordingStudio::Recording.recording_studio_trashable_active.find_by!(
+      parent_recording: press_kit_recording,
+      recordable_type: "RecordingStudio::Location::Location"
+    )
+    assert_equal "Harbour Gallery", kit_location.recordable.title
+    assert_equal "venue", kit_location.recordable.location_type
+    assert_equal "Sydney", kit_location.recordable.locality
     assert press_kit.indexable?
     assert press_kit_recording.currently_published?
     refute unpublished_kit.published?
@@ -224,6 +242,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute_includes workspace_source, "Capabilities::Example"
     refute_includes workspace_source, "if defined?(RecordingStudioAccessible)"
     refute_includes workspace_source, ".with("
+    assert_includes workspace_source, "Capabilities::Companies.to(allow: :one)"
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: RecordingStudioPresskits::PressKit)
@@ -231,6 +250,10 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: FakeBlock)
     assert RecordingStudio.capability_enabled?(:duplicatable, for: RecordingStudioPresskits::PressKit)
     assert RecordingStudio.capability_enabled?(:publishable, for: RecordingStudioPresskits::PressKit)
+    assert RecordingStudio.capability_enabled?(:companies, for: Workspace)
+    assert RecordingStudio.capability_enabled?(:location, for: RecordingStudioPresskits::PressKit)
+    refute RecordingStudio.capability_enabled?(:companies, for: RecordingStudioPresskits::PressKit)
+    refute RecordingStudio.capability_enabled?(:location, for: Workspace)
     refute RecordingStudio.capability_enabled?(:publishable, for: FakeBlock)
     refute RecordingStudio.capability_enabled?(:accessible, for: Folder)
     refute RecordingStudio.capability_enabled?(:accessible, for: Page)
