@@ -33,6 +33,7 @@ en:
         facts: "Add a figure"
         credits: "Add a credit"
         video: "Add a video"
+        location: "Add a place"
         generic: "Add something here"
       picker_descriptions:
         text: "The story, in your own words."
@@ -41,4 +42,5 @@ en:
         facts_section: "The numbers that make the story land."
         credits_section: "Who did the work, and what they did."
         video_section: "A clip they can watch without a hunt."
+        location_section: "Where they can find you, or the work."
         generic: "Another block for the kit."

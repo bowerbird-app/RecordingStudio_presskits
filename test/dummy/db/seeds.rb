@@ -339,6 +339,44 @@ begin
     ]
   )
 
+  ensure_location_section = lambda do |kit_recording, title, places|
+    existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
+      section.recordable.title == title
+    end
+    section = existing || RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit_recording,
+      content_type: "RecordingStudioPresskits::LocationSection",
+      actor: user,
+      title: title
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    places.each do |attributes|
+      already = RecordingStudioPresskits::LocationSection.active_locations(content).any? do |child|
+        child.recordable.title == attributes[:title]
+      end
+      next if already
+
+      content.record(RecordingStudio::Location::Location, parent_recording: content, actor: user) do |location|
+        location.assign_attributes(attributes)
+      end
+    end
+  end
+
+  ensure_location_section.call(
+    press_kit_recording,
+    "Where to find us",
+    [
+      {
+        title: "The Pavilion",
+        location_type: "venue",
+        name: "The Pavilion",
+        locality: "Melbourne",
+        region: "Victoria",
+        country_code: "AU"
+      }
+    ]
+  )
+
   [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
     bootstrap_owner_access.call(recording, user)
   end

@@ -173,11 +173,16 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span", text: "Text"
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span",
                   text: "The story, in your own words."
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3ALocationSection'] span",
+                  text: "Location"
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3ALocationSection'] span",
+                  text: "Where they can find you, or the work."
     assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
     assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
     assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")
     assert_section_menu_icon("RecordingStudioPresskits::FactsSection", "calculator")
     assert_section_menu_icon("RecordingStudioPresskits::VideoSection", "video-camera")
+    assert_section_menu_icon("RecordingStudioPresskits::LocationSection", "map-pin")
     toolbar_html = css_select("#presskits-editor-toolbar").to_html
     assert_operator toolbar_html.index("presskits-section-picker"), :<, toolbar_html.index("publishable_quick_actions_")
     refute_includes css_select("#presskits-editor-preview").to_html, 'name="press_kit[title]"'

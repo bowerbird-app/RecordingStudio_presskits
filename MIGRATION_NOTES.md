@@ -1,5 +1,22 @@
 # Upgrade notes
 
+## 0.32.0
+
+A Location section is a kit section whose content is `RecordingStudioPresskits::LocationSection`. That type is an empty table: a UUID primary key and `created_at`. Places are `RecordingStudio::Location::Location` children. Enable Location on `LocationSection`. Do not enable Location on `KitSection`. Do not copy `recording_studio_locations` into Press Kits.
+
+This is not the kit-header place. PressKit still includes `Location.to`. `KitLocation` still finds the one optional Location child of the kit. A section place has a different parent.
+
+The editor matches the other collection sections. Title and subtitle stay on the shared heading screen. Edit content is a `pk-editor` screen with + Location and the place list. New and edit use `recording_studio_location_search_fields`. Preview and the public page use `recording_studio_location_display`. Flatpack has no place-search or address card, so those stay Location's helpers. The display helper is a Card — fine in a section, too heavy for the hero byline (0.29.0).
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+Register `"RecordingStudioPresskits::LocationSection"`. Keep `"RecordingStudio::Location::Location"`. Keep Location at `~> 0.4` (dummy tag `v0.5.1`). Rebuild Tailwind. Pin Location Stimulus controllers if they are not already pinned.
+
+When Recording Studio API is loaded, a kit section still returns `title`, `subtitle`, `content_type`, and `content_id`. `:locations` is declared on that output. The array is included only when the content type is `RecordingStudioPresskits::LocationSection`. Each entry is Location's `api_payload`. The Location section type returns `{ locations: ... }`. Do not register Location again from Press Kits.
+
 ## 0.31.0
 
 Images sections no longer attach files under the section. They hold Attachable `Placement` children that point at workspace library photos.

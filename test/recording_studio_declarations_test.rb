@@ -14,6 +14,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     RecordingStudioPresskits::FactsSection
     RecordingStudioPresskits::CreditsSection
     RecordingStudioPresskits::VideoSection
+    RecordingStudioPresskits::LocationSection
   ].freeze
 
   PICKER_TYPES_EXCLUDED = %w[
@@ -39,7 +40,10 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for("Folder")
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for(Page)
     assert_equal ["Workspace"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
-    assert_equal ["RecordingStudioPresskits::PressKit"], RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location")
+    assert_equal(
+      %w[RecordingStudioPresskits::LocationSection RecordingStudioPresskits::PressKit],
+      RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location").sort
+    )
     assert_includes RecordingStudio.allowed_parent_types_for("RecordingStudioCompany::Company"), "Workspace"
     assert_equal ["RecordingStudioPresskits::PressKit"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::KitSection")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("FakeBlock")
@@ -49,6 +53,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::FactsSection")
     assert_equal ["RecordingStudioPresskits::FactsSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Fact")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::KitSection")
     assert_equal "Press kit", RecordingStudio.recordable_type_label("RecordingStudioPresskits::PressKit")
     assert_equal "RecordingStudioPresskits::PressKit", RecordingStudioPresskits.press_kit_type_name
@@ -384,6 +389,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "calculator", RecordingStudioPresskits::FactsSection.section_menu_icon
     assert_equal "user-group", RecordingStudioPresskits::CreditsSection.section_menu_icon
     assert_equal "video-camera", RecordingStudioPresskits::VideoSection.section_menu_icon
+    assert_equal "map-pin", RecordingStudioPresskits::LocationSection.section_menu_icon
     assert_nil FakeBlock.try(:section_menu_icon)
   end
 
@@ -392,6 +398,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:companies, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:companies, for: "RecordingStudioPresskits::PressKit")
     assert RecordingStudio.capability_enabled?(:location, for: "RecordingStudioPresskits::PressKit")
+    assert RecordingStudio.capability_enabled?(:location, for: "RecordingStudioPresskits::LocationSection")
+    refute RecordingStudio.capability_enabled?(:location, for: "RecordingStudioPresskits::KitSection")
     refute RecordingStudio.capability_enabled?(:location, for: "Workspace")
     assert RecordingStudio.capability_enabled?(:image_library, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:image_library, for: "RecordingStudioPresskits::PressKit")
@@ -417,6 +425,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::FactsSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Fact")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
 
@@ -448,6 +457,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::FactsSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Fact")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::VideoSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::LocationSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudio::Location::Location")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
@@ -466,6 +476,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::FactsSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Fact")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Page")
@@ -487,6 +498,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::FactsSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Fact")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Page")
@@ -534,6 +546,39 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     )
     refute RecordingStudio.parent_allowed?(
       child_type: "RecordingStudioVideo::Video", parent_recording: kit
+    )
+  end
+
+  test "location section sits under a kit section and places sit under the location section" do
+    root, kit = spring_kit
+    section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::LocationSection"
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+
+    assert_equal "Location", RecordingStudio.recordable_type_label("RecordingStudioPresskits::LocationSection")
+    refute RecordingStudio.root_allowed?("RecordingStudioPresskits::LocationSection")
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::LocationSection", parent_recording: section
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::LocationSection", parent_recording: kit
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::LocationSection", parent_recording: root
+    )
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudio::Location::Location", parent_recording: content
+    )
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudio::Location::Location", parent_recording: kit
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudio::Location::Location", parent_recording: section
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudio::Location::Location", parent_recording: root
     )
   end
 

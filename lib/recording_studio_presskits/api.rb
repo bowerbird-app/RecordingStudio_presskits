@@ -5,6 +5,7 @@ require "recording_studio_presskits/api/fact_payload"
 require "recording_studio_presskits/api/credit_payload"
 require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
+require "recording_studio_presskits/api/location_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/api/section_action"
 require "recording_studio_presskits/api/create_section"
@@ -35,6 +36,7 @@ module RecordingStudioPresskits
         register_facts!
         register_credits!
         register_video_section
+        register_location_section
         register_section_actions
       end
 
@@ -56,7 +58,7 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
           serializer: ->(recordable, recording: nil, **) { SectionPayload.for(recordable, recording) },
-          output_keys: %i[title subtitle content_type content_id videos display facts],
+          output_keys: %i[title subtitle content_type content_id videos display facts locations],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )
@@ -108,6 +110,17 @@ module RecordingStudioPresskits
             { videos: VideoPayload.for_recording(recording) }
           },
           output_keys: %i[videos]
+        )
+      end
+
+      def register_location_section
+        register_type(
+          "RecordingStudioPresskits::LocationSection",
+          operations: %i[index show],
+          serializer: lambda { |_recordable, recording: nil, **|
+            { locations: LocationPayload.for_recording(recording) }
+          },
+          output_keys: %i[locations]
         )
       end
 

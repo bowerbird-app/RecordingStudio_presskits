@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-10
+
+### Added
+- Location section type. `RecordingStudioPresskits::LocationSection` is an empty recording under the kit section. It includes Trashable and `RecordingStudio::Capabilities::Location.to`. Places are `RecordingStudio::Location::Location` children. A kit can hold zero, one, or many Location sections, and a section can hold one or more places.
+- This is not the kit-header place from 0.29.0. `KitLocation` still looks up the one optional Location child of the press kit. Section places hang off `LocationSection`.
+- + Location opens Location's `recording_studio_location_search_fields` (place search, Add address manually, title, type, and icon when `icon_mode` is `:choose`) in `pk-editor`. Preview and the public page render `recording_studio_location_display`. Heading stays on the shared heading editor. Section FAB, Orderable, and Trashable match the other sections. A new section starts with the i18n type label.
+- When Recording Studio API is loaded, a Location section nests a `locations` array of Location's `api_payload`. Press Kits does not register Location again.
+- Dummy seeds **Where to find us** on Spring launch with The Pavilion in Melbourne, next to the Harbour Gallery kit location.
+- Version `0.32.0`
+
+### Upgrade notes
+- Bump to `0.32.0`. Keep Location at `~> 0.4` (dummy tag `v0.5.1`). Do not downgrade.
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate` for `recording_studio_location_sections`.
+- Add `RecordingStudioPresskits::LocationSection` to `recordable_types`. Location is already registered for the kit header.
+- Rebuild Tailwind so Location search-field classes generate. Pin Location's Stimulus controllers if the host has not already.
+- Flatpack has no place-search or address card of its own. The section uses Location's helpers. `recording_studio_location_display` is a Card — that is the right weight for a section, unlike the kit hero byline.
+
 ## [0.31.0] - 2026-10-10
 
 ### Changed
