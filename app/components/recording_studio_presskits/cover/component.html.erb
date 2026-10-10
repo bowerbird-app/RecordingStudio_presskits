@@ -9,15 +9,15 @@
     data-cover-ratio="<%= cover_ratio %>"
     data-recording-studio-presskits--cover-preview-target="surface"
   >
-    <%= render FlatPack::PageTitle::Component.new(
-      title: title,
-      subtitle: description,
-      variant: heading_variant,
-      size: :display,
-      title_color: text_color,
-      subtitle_color: text_color,
-      class: hero_copy_classes
-    ) %>
+    <div class="<%= hero_copy_classes %>">
+      <p class="<%= eyebrow_classes %>" style="<%= eyebrow_style %>" data-cover-eyebrow><%= eyebrow %></p>
+      <%= render FlatPack::PageTitle::Component.new(
+        title: title,
+        variant: heading_variant,
+        size: :display,
+        title_color: text_color
+      ) %>
+    </div>
   </div>
 <% else %>
   <%= render FlatPack::Card::Component.new(

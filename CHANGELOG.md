@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-10-10
+
+### Changed
+- The `:hero` cover no longer uses a fixed 21/9 band. Height comes from padding plus content: `p-12` on a phone and `md:p-24` (~96px) on a desktop. Grid `:card` and header-editor `:preview` stay 9/16.
+- A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). Hosts override that i18n key. Size is `text-3xl` / `md:text-4xl` (~36px desktop). Colour is `color-mix` at 70% of the cover text colour. Flatpack `PageTitle` has no eyebrow slot, so this is a semantic `<p>` with those tokens.
+- The hero no longer shows the kit short description. The field, column, header editor, API payload, and 9/16 cards keep it.
+- Hero title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. Display uses `--display-size` (`clamp` 48px to 88px), `--display-leading` `1.05`, `--display-tracking` `-0.03em`, and `--display-weight` `600`. Flatpack is `>= 0.1.224` (dummy tag `v0.1.224`).
+- Version `0.28.0`
+
+### Upgrade notes
+- Bump Flatpack to `>= 0.1.224` and rebuild Tailwind so `text-8xl` generates. Reload Flatpack CSS for the 88px `--display-size` clamp. Hosts that replaced `Cover::Component` at `:hero` should drop `aspect-[21/9]` / `min-h-64`, use `p-12 md:p-24`, render the i18n eyebrow above `PageTitle` `size: :display` (no subtitle on the band), and keep the short description on the header form and on cards.
+
 ## [0.27.0] - 2026-10-10
 
 ### Changed
@@ -638,7 +650,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.27.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.28.0...HEAD
+[0.28.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.1...v0.27.0
 [0.26.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...v0.26.1
 [0.26.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.26.0

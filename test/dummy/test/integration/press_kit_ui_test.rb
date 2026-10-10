@@ -819,7 +819,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "h1", text: "Spring launch, take two"
-    assert_select "#presskits-kit-header", text: /Doors at noon/
+    assert_select "#presskits-kit-header [data-cover-eyebrow]", text: "Press kit"
+    refute_includes css_select("#presskits-kit-header").text, "Doors at noon"
     assert_select "#presskits-editor-preview", count: 1
     assert_select "#presskits-kit-header input", count: 0
   end
@@ -905,7 +906,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "a short description previews above the sections" do
+  test "the live header keeps the short description off the colour band" do
     kit = record_kit("Spring launch")
     @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
     record_block(kit, "Hero")
@@ -914,10 +915,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "#presskits-kit-header", text: /Doors at noon/
-    preview = css_select("#presskits-editor-preview").first
-    assert_operator preview.text.index("Doors at noon."), :<, preview.text.index("Hero")
+    assert_equal "Doors at noon.", kit.reload.recordable.description
+    assert_select "#presskits-kit-header [data-cover-eyebrow]", text: "Press kit"
+    refute_includes css_select("#presskits-kit-header").text, "Doors at noon"
     refute_includes css_select("#presskits-section-list").to_html, "Doors at noon."
+    assert_select "#presskits-editor-preview", text: /Hero/
   end
 
   test "unauthenticated visitors are sent to sign in" do

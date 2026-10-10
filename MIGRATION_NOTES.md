@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.28.0
+
+The `:hero` cover is still a flush colour surface to the kit card's top and side edges. Height now comes from padding plus content: `p-12` on a phone, `md:p-24` (~96px) on a desktop. There is no 21/9 ratio and no `min-h-64`. Grid `:card` and the header-editor `:preview` stay 9/16.
+
+A muted **Press kit** eyebrow sits above the title. The copy is `I18n.t("recording_studio_presskits.cover.eyebrow")` so a host can override it. Size is `text-3xl` / `md:text-4xl`. Colour is `color-mix(in oklab, <text colour> 70%, transparent)`. Flatpack `PageTitle` has no eyebrow or kicker slot, so the hero renders a semantic `<p>` with those tokens rather than a custom component.
+
+The hero does not show the kit short description. Keep the field on the header screen, in the table, on the API payload, and on 9/16 cards. Title stays top-left and wraps as `FlatPack::PageTitle::Component` with `size: :display` in a `max-w-3xl` block. Display uses `--display-size` (`clamp` 48px to 88px), `--display-leading` `1.05`, `--display-tracking` `-0.03em`, and `--display-weight` `600`.
+
+Bump Flatpack to `>= 0.1.224` (dummy tag `v0.1.224`) and rebuild Tailwind so `p-24`, `text-3xl`, `text-4xl`, and `text-8xl` generate. Reload Flatpack CSS for the 88px display clamp. Hosts that replaced `Cover::Component` should match this hero: no fixed ratio, eyebrow above `PageTitle` `size: :display`, no subtitle on the band.
+
 ## 0.26.0
 
 The kit editor preview matches the public kit. In-flow **Edit heading**, **Edit content**, and the compact add-section dropdown are gone. On a pointer that can hover, hover or focus-within tints the region with `--surface-muted-background-color` and shows the FAB. Keyboard users get a `:focus-visible` outline and still see the FAB. On touch, the FAB is not always visible. A tap makes that section or the header the active region (tint and FAB). Tapping another region moves the active state. Tapping outside clears it.

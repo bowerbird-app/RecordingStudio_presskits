@@ -242,8 +242,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
     assert_select "#presskits-cover-hero[data-cover-color='#059669']"
     assert_select "#presskits-cover-hero[data-cover-text-color='#111827']"
-    assert_select "#presskits-cover-hero[data-cover-ratio='21 / 9']"
-    assert_includes response.body, "Doors at noon."
+    assert_select "#presskits-cover-hero[data-cover-ratio='auto']"
+    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
+    refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
     public_preview = css_select("#presskits-public-preview").first
     assert_includes public_preview["class"], "overflow-hidden"
     assert_includes public_preview["class"], "rounded-[var(--radius-lg)]"
@@ -251,14 +252,19 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes public_hero["class"], "rounded-none"
     assert_includes public_hero["class"], "justify-start"
     refute_includes public_hero["class"], "justify-end"
-    assert_includes public_hero["class"], "p-8"
-    assert_includes public_hero["class"], "md:p-12"
+    refute_includes public_hero["class"], "aspect-[21/9]"
+    assert_includes public_hero["class"], "p-12"
+    assert_includes public_hero["class"], "md:p-24"
     public_title = css_select("#presskits-cover-hero h1").first
     assert_includes public_title["class"], "fp-display"
     assert_includes public_title["class"], "fp-text-balance"
     assert_includes public_title["style"].to_s, "--display-size"
-    assert_includes css_select("#presskits-cover-hero > div").first["class"], "max-w-2xl"
-    assert_includes css_select("#presskits-cover-hero p").first["class"], "fp-text-pretty"
+    refute_includes public_title["style"].to_s, "--hero-headline-size"
+    refute_includes public_title["style"].to_s, "--page-title-h1-size"
+    assert_includes css_select("#presskits-cover-hero > div").first["class"], "max-w-3xl"
+    eyebrow = css_select("#presskits-cover-hero [data-cover-eyebrow]").first
+    assert_includes eyebrow["class"], "md:text-4xl"
+    assert_includes eyebrow["style"].to_s, "70%"
     public_sections = css_select("#presskits-public-sections").first
     refute_includes public_sections["class"], "gap-6"
     refute_includes public_sections["class"], "p-5"
@@ -274,10 +280,23 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
     assert_select "#presskits-cover-hero[data-cover-color='#059669']"
     assert_select "#presskits-cover-hero[data-cover-text-color='#111827']"
-    assert_select "#presskits-cover-hero[data-cover-ratio='21 / 9']"
+    assert_select "#presskits-cover-hero[data-cover-ratio='auto']"
     preview = css_select("#presskits-public-preview").first
     assert_includes preview["class"], "overflow-hidden"
     assert_includes preview["class"], "rounded-[var(--radius-lg)]"
+  end
+
+  test "hosts can override the hero eyebrow" do
+    I18n.t("recording_studio_presskits.cover.eyebrow")
+    I18n.backend.store_translations(:en, recording_studio_presskits: { cover: { eyebrow: "Media kit" } })
+    kit = record_kit("Spring launch")
+    publish_kit!(kit)
+
+    get kit.publishable_public_path
+    assert_response :success
+    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Media kit"
+  ensure
+    I18n.backend.store_translations(:en, recording_studio_presskits: { cover: { eyebrow: "Press kit" } })
   end
 
   test "press kit payload reads resolved cover fields" do

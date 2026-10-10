@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.27.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.28.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -47,7 +47,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.223"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.224"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.13"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -63,7 +63,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.6.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.223"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.224"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
@@ -270,10 +270,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.7\""
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "tag: \"v0.4.5\""
-    assert_includes readme, "tag: \"v0.1.223\""
+    assert_includes readme, "tag: \"v0.1.224\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.223"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.224"'
+    assert_includes readme, "size: :display"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
     assert_includes readme, "flat_pack_modal_screen"
@@ -437,19 +438,26 @@ class RecordingStudioPresskitsTest < Minitest::Test
     cover = File.read(File.expand_path("cover/component.rb", components))
     cover_html = File.read(File.expand_path("cover/component.html.erb", components))
     assert_includes cover, "9 / 16"
-    assert_includes cover, "21 / 9"
+    refute_includes cover, "21 / 9"
     assert_includes cover, "aspect-[9/16]"
-    assert_includes cover, "justify-start rounded-none p-8 md:p-12"
+    refute_includes cover, "aspect-[21/9]"
+    assert_includes cover, "justify-start rounded-none p-12 md:p-24"
     refute_includes cover, "justify-end rounded-none"
     assert_includes cover, "hero_copy_classes"
-    assert_includes cover, "max-w-2xl"
+    assert_includes cover, "max-w-3xl"
+    assert_includes cover, "recording_studio_presskits.cover.eyebrow"
     assert_includes cover_html, "<% if hero? %>"
     refute_includes cover_html.split("<% else %>").first, "FlatPack::Card::Component"
     assert_includes cover_html.split("<% else %>").first, "FlatPack::PageTitle::Component"
     assert_includes cover_html.split("<% else %>").first, "size: :display"
+    refute_includes cover_html.split("<% else %>").first, "subtitle: description"
+    assert_includes cover_html.split("<% else %>").first, "data-cover-eyebrow"
+    refute_includes cover_html.split("<% else %>").first, "--hero-headline-size"
     assert_includes cover_html, "hero_copy_classes"
     assert_includes cover_html, "--page-title-h1-size"
-    assert_includes cover_html, "variant: heading_variant"
+    locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
+    assert_includes locales, "cover:"
+    assert_includes locales, 'eyebrow: "Press kit"'
     refute_includes index, "card.media"
     refute_includes index, 'name: "photo"'
     refute_includes index, "presskits_cover_url_for"
