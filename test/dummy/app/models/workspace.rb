@@ -4,4 +4,5 @@ class Workspace < ApplicationRecord
 
   include RecordingStudio::Capabilities::Orderable.to(allows: ["RecordingStudioPresskits::PressKit"])
   include RecordingStudio::Capabilities::Companies.to(allow: :one)
+  include RecordingStudio::Capabilities::ImageLibrary.to
 end

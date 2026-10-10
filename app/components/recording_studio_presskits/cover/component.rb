@@ -118,6 +118,29 @@ module RecordingStudioPresskits
         )
       end
 
+      def cover_image?
+        cover_image_url.present?
+      end
+
+      def cover_image_url
+        return if preview?
+
+        CoverImage.url_for(@recording, helpers: helpers)
+      end
+
+      def cover_image_alt
+        CoverImage.alt_for(@recording)
+      end
+
+      def image_frame_classes
+        # Tailwind scans these literals: "aspect-[1440/640]"
+        "w-full overflow-hidden aspect-[1440/640]"
+      end
+
+      def image_card?
+        card? && cover_image?
+      end
+
       def surface_classes
         # Tailwind scans these literals: "aspect-[9/16]" "max-w-xs" "justify-start" "max-w-3xl" "p-12" "md:p-24"
         if hero?

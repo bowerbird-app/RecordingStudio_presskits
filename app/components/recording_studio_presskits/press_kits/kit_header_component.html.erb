@@ -31,5 +31,12 @@
       href: "#{@header_edit_path}#presskits-header-colours",
       data: helpers.presskits_editor_open_data
     ) %>
+    <% if cover_image_path %>
+      <% fab.with_action(
+        icon: :photo,
+        label: cover_image_label,
+        href: cover_image_path
+      ) %>
+    <% end %>
   <% end %>
 </div>

@@ -14,6 +14,8 @@ en:
       section_actions: "Section actions"
       header_actions: "Header actions"
       cover_colours: "Cover colours"
+      cover_image: "Cover image"
+      choose_cover_image: "Choose from the library"
       trash: "Trash"
       trash_confirm: "Trash this section?"
       add_new_section: "Add new section"

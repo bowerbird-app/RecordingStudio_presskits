@@ -100,6 +100,36 @@ begin
       location.country_code = "AU"
     end
   end
+  seed_cover_image = lambda do |kit_recording|
+    next unless kit_recording.respond_to?(:place_library_image)
+    next if kit_recording.library_placements.any?
+
+    library = root_recording.image_library(actor: user)
+    path = Rails.root.join("db/seed_images/harbour-gallery.jpg")
+    next unless path.file?
+
+    existing = library.images(per_page: 20).find do |recording|
+      recording.recordable.original_filename == "harbour-gallery.jpg"
+    end
+    photo = existing || File.open(path, "rb") do |io|
+      library.import_attachment(
+        io: io,
+        filename: "harbour-gallery.jpg",
+        content_type: "image/jpeg",
+        name: "Harbour Gallery",
+        actor: user,
+        source: "press_kit_cover"
+      )
+    end
+    next if photo.blank?
+
+    photo.revise_attachment_metadata(
+      actor: user,
+      alt_text: "A white gallery hall with paintings along both walls"
+    )
+    kit_recording.place_library_image(attachment_recording: photo, actor: user)
+  end
+  seed_cover_image.call(press_kit_recording)
   spring_cover = press_kit_recording.recordable
   if spring_cover.cover_color != "#BFDBFE" || spring_cover.cover_text_color.present?
     root_recording.revise(press_kit_recording) do |press_kit|

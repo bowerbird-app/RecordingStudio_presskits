@@ -390,6 +390,10 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:companies, for: "RecordingStudioPresskits::PressKit")
     assert RecordingStudio.capability_enabled?(:location, for: "RecordingStudioPresskits::PressKit")
     refute RecordingStudio.capability_enabled?(:location, for: "Workspace")
+    assert RecordingStudio.capability_enabled?(:image_library, for: "Workspace")
+    refute RecordingStudio.capability_enabled?(:image_library, for: "RecordingStudioPresskits::PressKit")
+    assert RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.capability_enabled?(:library_placement, for: "Workspace")
     assert RecordingStudio.capability_enabled?(:accessible, for: "AdminRoot")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Folder")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Page")
@@ -413,7 +417,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
 
     press_kit_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::PressKit").to_h
-    assert_equal ["RecordingStudioPresskits::KitSection"], Array(press_kit_options[:allows]).map(&:to_s)
+    assert_equal ["RecordingStudioPresskits::KitSection", "RecordingStudioAttachable::Placement"],
+                 Array(press_kit_options[:allows]).map(&:to_s)
 
     quote_section_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::QuoteSection").to_h
     assert_equal ["RecordingStudioPresskits::Quote"], Array(quote_section_options[:allows]).map(&:to_s)
