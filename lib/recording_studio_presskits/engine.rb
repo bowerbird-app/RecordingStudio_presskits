@@ -226,6 +226,12 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.metrics" do
+      config.to_prepare do
+        RecordingStudioPresskits::Metrics.register!
+      end
+    end
+
     initializer "recording_studio_presskits.i18n" do |app|
       app.config.i18n.load_path += Dir[root.join("config/locales/**/*.{rb,yml}")]
     end

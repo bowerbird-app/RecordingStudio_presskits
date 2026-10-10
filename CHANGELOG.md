@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.26.0] - 2026-10-09
+## [0.27.0] - 2026-10-10
 
 ### Changed
 - Kit editor sections and the kit header no longer put Edit heading, Edit content, or Add section in the page flow. The live preview matches the public kit: heading, then content.
@@ -20,29 +20,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Each section has a contained Flatpack FAB (`size: :sm`, `icon: :plus`, `position: :top_right`, `backdrop: false`, `offset: "1rem"`, label **Section actions**). The region is `position: relative` so the FAB pins to that section; top corners open downward. Speed-dial: **Edit title** (shared heading screen in `pk-editor`), **Edit content**, **Reorder** (existing Reorder modal, fragment on this section), **Trash** (`style: :danger`, Trashable delete plus confirm), and **Add new section** (section picker, placed below this one).
 - The kit header FAB is the same pattern: **Edit heading** and **Cover colours**, both opening the shared header screen. **Cover colours** lands on `#presskits-header-colours`.
 - The toolbar **Section** button still adds at the end or into an empty kit.
+- Palette **Colour** and **Text colour** on the kit header screen use `FlatPack::RadioGroup` `variant: :swatches` (`size: :md`). The option label is the accessible name and the tooltip. `:any` still uses `FlatPack::ColorSwatch`. Text colour **Auto** stays a separate inline radio with the same field name. Swatches need a CSS colour, and `auto` is not one.
 - FlatPack is `>= 0.1.223` (dummy tag `v0.1.223`).
 - The default cover palette swaps violet (`#7C3AED`) for sky (`#BFDBFE`). Dummy **Spring launch** uses sky with Auto text (dark). Stored violet still renders; hosts that want it as a swatch add it back.
+- Dummy and gemspec pins take the newer tag from main and this branch: Recording Studio `v4.4.0`, Accessible `v0.13.0`, Admin `v2.1.0`, Attachable `v0.13.0`, Orderable `v0.2.7`, Trashable `v0.6.0`, Duplicatable `v0.4.5`, Publishable `v0.6.0`, External Embed `v0.1.4`, Video `v0.1.1`, Root Switchable `v0.6.0`, Metrics `v0.2.0`.
+- Version `0.27.0`
+
+### Upgrade notes
+- Bump FlatPack to at least `0.1.223` and rebuild Tailwind so `text-6xl` / `text-7xl` and the swatch utilities generate. Reload Flatpack CSS for `--display-*` and `.fp-display`.
+- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`, `size: :sm`, `icon: :plus`, `offset: "1rem"`) on a `position: relative` region. Sections own `p-8 md:p-10 lg:p-12` and `pr-20`, with `rounded-none` so the tint is flush to the card sides. The header region has no pad: the `:hero` cover bleeds to the card, and hover is an inset overlay rather than a surrounding muted tint. Hero copy sits at the top (`justify-start`) as `FlatPack::PageTitle::Component` with `size: :display` in a `max-w-2xl` block. The band stays 21/9 with `min-h-64`. Drop the in-flow ghost buttons, compact dropdown, custom hover outline, negative margins, and any kit-level section pad or gap. The kit card is `padding: :none`; the preview clips with `overflow-hidden`. The public kit uses the same unpadded card and section pad. Trash uses `with_action(..., style: :danger)`.
+- FAB has no hover-only visibility or tap-to-activate API. Desktop hides the control with group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active` so tint and FAB appear only on the tapped region.
+- A host that replaced the shared header screen in `pk-editor` should render palette Colour and Text colour as `variant: :swatches`. Keep Auto as its own control. Keep ColorSwatch for `:any`.
+- The default `cover_colors` list is now `#1F2937`, `#BFDBFE`, `#DB2777`, `#059669`, `#D97706`. A stored `#7C3AED` still paints. Add it back to the host palette if you still want that swatch.
+- Bump Accessible to `~> 0.13`, Attachable to `~> 0.13`, Publishable to `~> 0.6`, and Trashable to `~> 0.6`. Run `bin/rails generate recording_studio_attachable:migrations` and `db:migrate` for the new library and placement tables. Add `RecordingStudioAttachable::Library` and `RecordingStudioAttachable::Placement` to `config.recordable_types`. Press kit Images still attach files under the section; moving to placements is a later host change.
+
+## [0.26.1] - 2026-10-09
+
+### Fixed
+- Press kit metrics authorization resolves the admin root with
+  `site_admin_recording_resolver`, then `access_recording_resolver`.
+  If that resolver raises, `can_view?` denies access. The `:view` decision
+  still goes through Accessible.
+
+### Changed
+- Version `0.26.1`
+
+### Upgrade notes
+- Bump to `0.26.1`. No migration.
+- Site-wide metrics prefer `config.site_admin_recording_resolver`. A host that
+  only sets `access_recording_resolver` still uses that fallback. If the
+  fallback needs a controller, set the site resolver to the admin root so
+  metrics discovery does not depend on one.
+- A resolver error is treated as no access.
+
+## [0.26.0] - 2026-10-09
+
+Site-wide press kit metrics register with Recording Studio Metrics for the operations API.
+
+### Added
+- `RecordingStudioPresskits::Metrics.register!` registers a `:press_kits` resource
+  (`blast_radius: :site`) with RecordingStudioMetrics. Metrics:
+  `press_kits.total` (Live press kits), `press_kits.created_over_time` (Press kits
+  created over time), and `press_kits.by_section_type` (sections across live kits
+  by content type). Each is exposed on `:operations` only. Counts use
+  `RecordingStudio::Recording` with `recordable_type` and `trashed_at: nil`.
+  `api_authorize` uses `RecordingStudioPresskits::Api::Access.can_view?`
+  (AdminRoot `:view`).
+- Runtime dependency `recording_studio_metrics` `~> 0.2` (GitHub tag `v0.2.0`).
+- `by_publish_status` is omitted. Publish state is not a column on PressKit or
+  Recording; it lives on Publishable child records and needs `indexable` /
+  `published` joins.
+
+### Changed
 - Version `0.26.0`
 
 ### Upgrade notes
-- Bump FlatPack to at least `0.1.223` and rebuild Tailwind so `text-6xl` / `text-7xl` generate. Reload Flatpack CSS for `--display-*` and `.fp-display`.
-- Hosts that replaced `EditableSectionComponent` or `KitHeaderComponent` should render `FlatPack::Fab::Component` (`contained: true`, `position: :top_right`, `backdrop: false`, `size: :sm`, `icon: :plus`, `offset: "1rem"`) on a `position: relative` region. Sections own `p-8 md:p-10 lg:p-12` and `pr-20`, with `rounded-none` so the tint is flush to the card sides. The header region has no pad: the `:hero` cover bleeds to the card, and hover is an inset overlay rather than a surrounding muted tint. Hero copy sits at the top (`justify-start`) as `FlatPack::PageTitle::Component` with `size: :display` in a `max-w-2xl` block. The band stays 21/9 with `min-h-64`. Drop the in-flow ghost buttons, compact dropdown, custom hover outline, negative margins, and any kit-level section pad or gap. The kit card is `padding: :none`; the preview clips with `overflow-hidden`. The public kit uses the same unpadded card and section pad. Trash uses `with_action(..., style: :danger)`.
-- FAB has no hover-only visibility or tap-to-activate API. Desktop hides the control with group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active` so tint and FAB appear only on the tapped region.
-- The default `cover_colors` list is now `#1F2937`, `#BFDBFE`, `#DB2777`, `#059669`, `#D97706`. A stored `#7C3AED` still paints. Add it back to the host palette if you still want that swatch.
+- Bump to `0.26.0`. No migration.
+- Add `recording_studio_metrics` at tag `v0.2.0`.
+- This gem does not call `RecordingStudioMetrics::Api.register!`. The host
+  registers Metrics endpoints once:
 
-## [0.25.1] - 2026-10-09
-
-### Changed
-- Palette **Colour** and **Text colour** on the kit header screen use `FlatPack::RadioGroup` `variant: :swatches` (`size: :md`). The option label is the accessible name and the tooltip. `:any` still uses `FlatPack::ColorSwatch`.
-- Text colour **Auto** stays a separate inline radio with the same field name. Swatches need a CSS colour, and `auto` is not one.
-- FlatPack is `>= 0.1.221` (dummy tag `v0.1.221`).
-- Dummy and gemspec pins move to the latest GitHub releases: Accessible `0.12.1`, Attachable `0.12.0`, Orderable `0.2.7`, Trashable `0.5.0`, Duplicatable `0.4.5`, Publishable `0.5.0`, External Embed `0.1.4`, Video `0.1.1`, Root Switchable `v0.5.6`. Recording Studio stays `v4.3.0`. Admin stays `v2.0.7`.
-- Version `0.25.1`
-
-### Upgrade notes
-- Bump FlatPack to at least `0.1.221` and rebuild Tailwind so the swatch utilities generate. Reload Flatpack CSS after the bump.
-- A host that replaced the shared header screen in `pk-editor` should render palette Colour and Text colour as `variant: :swatches`. Keep Auto as its own control. Keep ColorSwatch for `:any`.
-- Bump Accessible to `~> 0.12`, Attachable to `~> 0.12`, Publishable to `~> 0.5`, and Trashable to `~> 0.5`. Run `bin/rails generate recording_studio_attachable:migrations` and `db:migrate` for the new library and placement tables. Add `RecordingStudioAttachable::Library` and `RecordingStudioAttachable::Placement` to `config.recordable_types`. Press kit Images still attach files under the section; moving to placements is a later host change.
+```ruby
+RecordingStudioMetrics::Api.register!(api: :operations)
+```
 
 ## [0.25.0] - 2026-10-09
 
@@ -54,7 +94,7 @@ Kit covers on the live kit editor from `0.24.0`.
 - Writes must be a valid hex. In palette mode they must be one of those colours. A stored colour that later leaves the palette still renders.
 - Overlay text uses `cover_text_color` when set. Auto picks light or dark from WCAG contrast. A low-contrast pair is allowed; the editor may hint.
 - `RecordingStudioPresskits::Cover::Component` paints `:card` and `:preview` as 9/16 story tiles, and `:hero` as a wide 21/9 band. Title sits on the colour at the page-title size. A card description clamps to two lines.
-- The shared kit header screen in `pk-editor` has **Colour** and **Text colour**. Each is a `FlatPack::RadioGroup` for a palette, or a `FlatPack::ColorSwatch` when the host allows any colour. Text colour includes **Auto**. A preview tile follows the colours as you edit. `0.25.1` paints those palette radios as swatches.
+- The shared kit header screen in `pk-editor` has **Colour** and **Text colour**. Each is a `FlatPack::RadioGroup` for a palette, or a `FlatPack::ColorSwatch` when the host allows any colour. Text colour includes **Auto**. A preview tile follows the colours as you edit. `0.27.0` paints those palette radios as swatches.
 - The kit index cards, the kit header on the live editor, and the public kit use that component. Saving the header refreshes the editor hero through the existing Turbo Stream replace. Press Centers and hosts can render it too.
 - When Recording Studio API is loaded, a press kit show and update include `cover_style`, `cover_color`, and `cover_text_color`. MCP uses the same payload. Duplicating a kit copies those fields.
 
@@ -598,9 +638,10 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...HEAD
-[0.26.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.1...v0.26.0
-[0.25.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.25.1
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.27.0...HEAD
+[0.27.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.1...v0.27.0
+[0.26.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.0...v0.26.1
+[0.26.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.22.1...v0.23.0
