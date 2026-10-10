@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PressKit opts into `RecordingStudio::Capabilities::Location.to`. One optional Location child on the kit (not a section, and not the Location section from later work) shows its icon and `display_name` under the company. Edit it on the existing header screen with `recording_studio_location_search_fields` (title, type, icon). Blank fields trash the place. Presskits enables Trashable on `RecordingStudio::Location::Location` so that clear works.
 - Depend on `recording_studio_company` `~> 0.3` (dummy tag `v0.3.0`) and `recording_studio_location` `~> 0.4` (dummy tag `v0.5.1`). Accessible is `~> 0.13`, Attachable is `~> 0.13`, Trashable is `~> 0.6`. Flatpack stays `>= 0.1.223`.
 - Dummy seeds **Harbour Studio** on Studio Workspace and **Harbour Gallery** on Spring launch.
+- `KitLocation`, `Cover::Company`, and `HeaderAttributes` own lookup, write, and form parsing so Cover and the header controller stay lean.
 - Version `0.28.0`
 
 ### Upgrade notes

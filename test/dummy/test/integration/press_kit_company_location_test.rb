@@ -144,10 +144,7 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
   end
 
   def kit_location(kit)
-    RecordingStudio::Recording.recording_studio_trashable_active.find_by(
-      parent_recording: kit,
-      recordable_type: "RecordingStudio::Location::Location"
-    )
+    RecordingStudioPresskits::KitLocation.recording_for(kit)
   end
 
   def publish_kit!(kit)

@@ -7,6 +7,32 @@ require_relative "dummy/config/environment"
 require "rails/test_help"
 
 class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
+  PICKER_TYPES_INCLUDED = %w[
+    RecordingStudioPresskits::Text
+    RecordingStudioPresskits::Images
+    RecordingStudioPresskits::QuoteSection
+    RecordingStudioPresskits::FactsSection
+    RecordingStudioPresskits::CreditsSection
+    RecordingStudioPresskits::VideoSection
+  ].freeze
+
+  PICKER_TYPES_EXCLUDED = %w[
+    FakeBlock
+    RecordingStudioPresskits::Quote
+    RecordingStudioPresskits::Fact
+    RecordingStudioPresskits::Credit
+    RecordingStudioPresskits::CreditLine
+    RecordingStudioVideo::Video
+    Workspace
+    Folder
+    Page
+    RecordingStudioPresskits::PressKit
+    RecordingStudioPresskits::KitSection
+    RecordingStudioPublishable::Publishable
+    RecordingStudioAttachable::Attachment
+    RecordingStudioCompany::Company
+    RecordingStudio::Location::Location
+  ].freeze
   test "dummy recordable declarations validate and expose parent/root introspection" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_equal %w[AdminRoot Workspace], RecordingStudio.root_recordable_types.sort
@@ -316,28 +342,9 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "picker types skip dummy placeholders and types that do not allow press kit" do
     types = RecordingStudioPresskits.picker_types
+    PICKER_TYPES_INCLUDED.each { |type| assert_includes types, type }
+    PICKER_TYPES_EXCLUDED.each { |type| refute_includes types, type }
 
-    refute_includes types, "FakeBlock"
-    assert_includes types, "RecordingStudioPresskits::Text"
-    assert_includes types, "RecordingStudioPresskits::Images"
-    assert_includes types, "RecordingStudioPresskits::QuoteSection"
-    assert_includes types, "RecordingStudioPresskits::FactsSection"
-    assert_includes types, "RecordingStudioPresskits::CreditsSection"
-    assert_includes types, "RecordingStudioPresskits::VideoSection"
-    refute_includes types, "RecordingStudioPresskits::Quote"
-    refute_includes types, "RecordingStudioPresskits::Fact"
-    refute_includes types, "RecordingStudioPresskits::Credit"
-    refute_includes types, "RecordingStudioPresskits::CreditLine"
-    refute_includes types, "RecordingStudioVideo::Video"
-    refute_includes types, "Workspace"
-    refute_includes types, "Folder"
-    refute_includes types, "Page"
-    refute_includes types, "RecordingStudioPresskits::PressKit"
-    refute_includes types, "RecordingStudioPresskits::KitSection"
-    refute_includes types, "RecordingStudioPublishable::Publishable"
-    refute_includes types, "RecordingStudioAttachable::Attachment"
-    refute_includes types, "RecordingStudioCompany::Company"
-    refute_includes types, "RecordingStudio::Location::Location"
     assert_includes RecordingStudioPresskits.section_types, "FakeBlock"
     assert_includes RecordingStudioPresskits.section_types, "RecordingStudioPresskits::Text"
     refute RecordingStudioPresskits.section?("RecordingStudioPublishable::Publishable")
