@@ -39,7 +39,7 @@ module RecordingStudioPresskits
     end
 
     def save_header
-      fields = header_fields
+      fields = HeaderAttributes.from(press_kit_params)
       return render_missing_title(fields) if fields[:title].blank?
 
       revise_header(fields)
@@ -64,30 +64,6 @@ module RecordingStudioPresskits
       super || request.referer.to_s.include?("/press_kits/#{@press_kit_recording.id}/edit")
     end
 
-    def header_fields
-      submitted = press_kit_params
-      {
-        title: submitted[:title].to_s.strip,
-        description: submitted[:description].to_s.strip.presence
-      }.merge(cover_fields(submitted))
-    end
-
-    def cover_fields(submitted)
-      {
-        cover_style: submitted[:cover_style].to_s.strip.presence,
-        cover_color: submitted[:cover_color].to_s.strip.presence,
-        cover_text_color: submitted_text_color(submitted)
-      }
-    end
-
-    def submitted_text_color(submitted)
-      choice = submitted[:cover_text_color].to_s.strip
-      return nil if choice == PressKit::AUTO_COVER_TEXT
-      return submitted[:cover_text_swatch].to_s.strip.presence if choice.blank?
-
-      choice.presence
-    end
-
     def revise_header(fields)
       current_presskits_root.revise(@press_kit_recording) do |press_kit|
         press_kit.assign_attributes(fields)
@@ -97,35 +73,16 @@ module RecordingStudioPresskits
     def save_kit_location
       return unless params.key?(:location)
 
-      attributes = location_params.to_h.symbolize_keys
-      current = kit_location_recording
-      if location_blank?(attributes)
-        current&.recording_studio_trashable_trash!(actor: presskits_actor)
-        return
-      end
-
-      if current
-        current_presskits_root.revise(current) { |location| location.assign_attributes(attributes) }
-      else
-        @press_kit_recording.record(
-          RecordingStudio::Location::Location,
-          actor: presskits_actor,
-          parent_recording: @press_kit_recording
-        ) do |location|
-          location.assign_attributes(attributes)
-        end
-      end
-    end
-
-    def kit_location_recording
-      RecordingStudio::Recording.recording_studio_trashable_active.find_by(
+      KitLocation.save!(
         parent_recording: @press_kit_recording,
-        recordable_type: "RecordingStudio::Location::Location"
+        attributes: location_params.to_h.symbolize_keys,
+        actor: presskits_actor,
+        reviser: current_presskits_root
       )
     end
 
-    def location_blank?(attributes)
-      attributes.values.all?(&:blank?)
+    def kit_location_recording
+      KitLocation.recording_for(@press_kit_recording)
     end
 
     def assign_header_fields(overrides = {})

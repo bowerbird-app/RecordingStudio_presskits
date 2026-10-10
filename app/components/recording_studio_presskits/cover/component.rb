@@ -5,6 +5,8 @@ module RecordingStudioPresskits
     class Component < ViewComponent::Base
       include RecordingStudioCompany::DisplayHelper if defined?(RecordingStudioCompany::DisplayHelper)
       include RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
+      include Byline
+      include Image
 
       SIZES = %i[card preview hero].freeze
 
@@ -87,58 +89,6 @@ module RecordingStudioPresskits
 
       def eyebrow_style
         "color: color-mix(in oklab, #{text_color} 70%, transparent);"
-      end
-
-      def company_recording
-        return if @recording.blank? || !defined?(RecordingStudioCompany)
-
-        root = @recording.root_recording_or_self
-        return if RecordingStudioCompany.allowance(root).blank?
-
-        RecordingStudioCompany.company(root)
-      rescue RecordingStudioCompany::ParentNotAllowed, RecordingStudioCompany::ManyCompaniesAllowed,
-             RecordingStudioCompany::CompanyIntegrityError
-        nil
-      end
-
-      def company_name
-        company_recording&.recordable&.name
-      end
-
-      def location_recordable
-        location_recording&.recordable
-      end
-
-      def location_recording
-        return unless @recording
-
-        RecordingStudio::Recording.recording_studio_trashable_active.find_by(
-          parent_recording: @recording,
-          recordable_type: "RecordingStudio::Location::Location"
-        )
-      end
-
-      def cover_image?
-        cover_image_url.present?
-      end
-
-      def cover_image_url
-        return if preview?
-
-        CoverImage.url_for(@recording, helpers: helpers)
-      end
-
-      def cover_image_alt
-        CoverImage.alt_for(@recording)
-      end
-
-      def image_frame_classes
-        # Tailwind scans these literals: "aspect-[1440/640]"
-        "w-full overflow-hidden aspect-[1440/640]"
-      end
-
-      def image_card?
-        card? && cover_image?
       end
 
       def surface_classes

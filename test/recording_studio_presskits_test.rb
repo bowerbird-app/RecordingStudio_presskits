@@ -40,7 +40,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_kind_of Class, ::RecordingStudioPresskits::Engine
     engine = File.read(File.expand_path("../lib/recording_studio_presskits/engine.rb", __dir__))
     assert_includes engine, "recording_studio_presskits.location_trash"
-    assert_includes engine, 'RecordingStudio::Location::Location.include RecordingStudio::Capabilities::Trashable.to'
+    assert_includes engine, "RecordingStudio::Location::Location.include RecordingStudio::Capabilities::Trashable.to"
   end
 
   def test_gemspec_pins_recording_studio_and_accessible
@@ -295,9 +295,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Capabilities::Location.to"
     assert_includes readme, "recording_studio_company_logo"
     assert_includes readme, "recording_studio_location_search_fields"
+    assert_includes readme, "Cover::Company"
+    assert_includes readme, "KitLocation"
     assert_includes readme, "Capabilities::ImageLibrary.to"
     assert_includes readme, "Capabilities::LibraryPlacement.to"
     assert_includes readme, "place_library_image"
+    assert_includes readme, "CoverImage"
+    assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[1440/640]"
     assert_includes readme, 'gem "flat_pack", ">= 0.1.223"'
     assert_includes readme, "FlatPack::Modal::Component"
@@ -484,8 +488,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html.split("<% else %>").first, "recording_studio_company_logo"
     assert_includes cover_html.split("<% else %>").first, "data-cover-location"
     assert_includes cover_html.split("<% else %>").first, "location_recordable.display_name"
-    assert_includes cover, "RecordingStudioCompany.company"
-    assert_includes cover, "RecordingStudioCompany.allowance"
+    company = File.read(File.expand_path("../lib/recording_studio_presskits/cover/company.rb", __dir__))
+    assert_includes company, "RecordingStudioCompany.company"
+    assert_includes company, "RecordingStudioCompany.allowance"
+    image = File.read(File.expand_path("../lib/recording_studio_presskits/cover/image.rb", __dir__))
+    assert_includes image, "aspect-[1440/640]"
+    assert_includes image, "CoverImage.url_for"
     assert_includes cover_html, "hero_copy_classes"
     assert_includes cover_html, "--page-title-h1-size"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
