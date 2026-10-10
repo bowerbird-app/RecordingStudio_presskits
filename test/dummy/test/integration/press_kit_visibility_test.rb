@@ -191,6 +191,54 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_select "[data-presskits-presentation='full']"
   end
 
+  test "anonymous visit after an editor request does not inherit leftover Current.actor" do
+    preview_kit = restrict_kit(
+      "Spring launch",
+      audience: :signed_in,
+      fallback: :preview,
+      slug: "leftover-preview"
+    )
+    hidden_kit = restrict_kit(
+      "Quiet launch",
+      audience: :granted,
+      fallback: :hidden,
+      slug: "leftover-hidden"
+    )
+    record_block(preview_kit, "Secret notes")
+    record_block(hidden_kit, "Embargo copy")
+
+    sign_in @user
+    switch_to_root(@root)
+    get recording_studio_presskits.edit_press_kit_path(preview_kit)
+    assert_response :success
+    assert_equal @user, Current.actor
+
+    sign_out :user
+    Current.actor = @user
+
+    without_host_current_actor do
+      get preview_kit.publishable_public_path
+      assert_response :success
+      assert_select "[data-presskits-presentation='preview']"
+      assert_includes response.body, "Spring launch"
+      refute_includes response.body, "Secret notes"
+      refute_includes response.body, "Doors at noon."
+      assert_select "meta[name='robots'][content='noindex, nofollow']"
+      refute_select "meta[name='description']"
+      refute_includes response.body, "og:description"
+      assert_equal "private, no-store", response.headers["Cache-Control"]
+      assert_nil Current.actor
+
+      get hidden_kit.publishable_public_path
+      assert_response :not_found
+      refute_includes response.body, "Quiet launch"
+      refute_includes response.body, "Embargo copy"
+      refute_includes response.body, "Press kit"
+      assert_equal "private, no-store", response.headers["Cache-Control"]
+      assert_nil Current.actor
+    end
+  end
+
   test "visibility editor lists allowed audiences and hides fallback while public" do
     kit = record_kit("Spring launch")
     sign_in @user
@@ -354,6 +402,10 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     yield
   ensure
     audiences[:"presskits.kit_view_full"] = previous if previous
+  end
+
+  def without_host_current_actor
+    ApplicationController.any_instance.stub(:set_current_actor, nil) { yield }
   end
 
   def switch_to_root(root)

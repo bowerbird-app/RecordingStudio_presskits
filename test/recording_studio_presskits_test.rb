@@ -325,6 +325,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "pk-editor"
     assert_includes readme, "presskits.kit_view_full"
     assert_includes readme, "Visibility.presentation_for"
+    assert_includes readme, "Current.actor"
     assert_includes readme, "Who can view this press kit"
     assert_includes readme, "KitQuery.discoverable_for"
     assert_includes readme, 'data-turbo-frame="_top"'
@@ -386,6 +387,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute File.exist?(File.expand_path("../app/controllers/recording_studio_presskits/home_controller.rb", __dir__))
     refute_includes public_controller, "UsesDefaultLayout"
     refute_includes public_controller, "Sign in"
+    assert_includes public_controller, "before_action :set_public_actor"
+    assert_includes public_controller, "Current.actor = respond_to?(:current_user, true) ? current_user : nil"
+    refute_includes public_controller, "return Current.actor if current_actor_present?"
     assert_includes public_show, "content_for :title"
     refute_includes public_show, "recording_studio_page_nav"
     refute_includes public_show, "page_nav"

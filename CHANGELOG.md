@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Configurable kit visibility through Accessible action `presskits.kit_view_full` (default Public). The owner picks who can view the full kit on **Visibility** in the kit editor toolbar (same row as publish). When that is not Public, **What should other visitors see?** is Preview or Hidden (default Preview).
-- `RecordingStudioPresskits::Visibility.presentation_for` is the only resolver (`:full`, `:preview`, `:hidden`, `:unavailable`). Public show, listings, cards, and meta tags go through it.
+- `RecordingStudioPresskits::Visibility.presentation_for` is the only resolver (`:full`, `:preview`, `:hidden`, `:unavailable`). Public show, listings, cards, and meta tags go through it. Public show assigns `Current.actor` from `current_user` (including nil) so an anonymous visit after an editor request in the same process sees preview or hidden, not the full kit.
 - Preview renders an allowlist only: title, cover colour and image, company, and kit location. The short description stays off the limited preview. A **See full press kit** heading introduces the access message. Signed-in audiences get Sign in (`config.sign_in_path`) and Create account (`config.registration_path`, hidden when blank). Site name in that copy is `config.site_name`, then i18n, then the Rails application name. Granted and custom audiences get a need-access message and no auth buttons. Hidden is a plain 404 with no metadata leak.
 - `visibility_fallback` lives on sidecar `KitSetting` rows, not the revisioned PressKit.
 - Dummy Workspace enables `:action_audiences`. Custom audiences stay a host `register_audience` concern; dummy does not register a journalist audience.
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hosts that want extra audiences `register_audience` and add them to `config.action_audiences[:"presskits.kit_view_full"][:allowed]`.
 - Set `config.sign_in_path` when sign-in is not `/users/sign_in`. Set `config.registration_path` to show Create account on signed-in previews; leave it blank to hide that button. Set `config.site_name` when the signed-in message should not use the Rails application name.
 - Use `KitQuery.discoverable_for(actor:)` for public lists. `PressKit.indexable` is still publish state only.
-- Future JSON serializers must call `Visibility.presentation_for`. Do not cache non-full responses on a shared cache. Fragment keys must include the presentation.
+- Future JSON serializers must call `Visibility.presentation_for`. Do not cache non-full responses on a shared cache. Fragment keys must include the presentation. Do not prefer a leftover `Current.actor` on the public page; `PublicPressKitsController` assigns `Current.actor` from `current_user`, including nil.
 - Kit downloads (a parallel change) should also require `presskits.kit_view_full` once both land.
 - Flatpack has no “show this field when the select is not Public” control, so a small Stimulus controller (`recording-studio-presskits--visibility-fallback`) toggles the fallback RadioGroup. Accessible has no audience picker; Presskits renders Select + RadioGroup.
 

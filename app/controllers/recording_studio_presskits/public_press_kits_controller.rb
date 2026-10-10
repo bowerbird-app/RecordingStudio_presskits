@@ -7,7 +7,12 @@ module RecordingStudioPresskits
     helper RecordingStudioCompany::DisplayHelper if defined?(RecordingStudioCompany::DisplayHelper)
     helper RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
 
+    before_action :set_public_actor
+
     def show
+      # Publishable's RendersPublicPage instantiates this controller and calls
+      # show without filters. Assign the request user here too, including nil.
+      set_public_actor
       @press_kit_recording = @parent_recording
       @press_kit = @parent_recordable
       @presskits_presentation = Visibility.presentation_for(
@@ -21,18 +26,22 @@ module RecordingStudioPresskits
 
     private
 
+    def set_public_actor
+      return unless defined?(Current) && Current.respond_to?(:actor=)
+
+      Current.actor = respond_to?(:current_user, true) ? current_user : nil
+    end
+
     def public_actor
-      return Current.actor if current_actor_present?
-      return current_user if respond_to?(:current_user, true) && current_user
+      return current_user if respond_to?(:current_user, true)
+
+      return Current.actor if defined?(Current) && Current.respond_to?(:actor)
+
       return unless defined?(RecordingStudioPublishable)
 
       RecordingStudioPublishable.configuration.actor_for(controller: self)
     rescue StandardError
       nil
-    end
-
-    def current_actor_present?
-      defined?(Current) && Current.respond_to?(:actor) && Current.actor.present?
     end
 
     def sections_for_presentation
