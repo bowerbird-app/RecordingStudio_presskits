@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.27.0
+## 0.28.0
 
 The `:hero` cover is still a flush colour surface to the kit card's top and side edges. Height now comes from padding plus content: `p-12` on a phone, `md:p-24` (~96px) on a desktop. There is no 21/9 ratio and no `min-h-64`. Grid `:card` and the header-editor `:preview` stay 9/16.
 
