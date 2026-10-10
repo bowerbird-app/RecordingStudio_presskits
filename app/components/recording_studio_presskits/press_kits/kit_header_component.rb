@@ -48,14 +48,6 @@ module RecordingStudioPresskits
         I18n.t("recording_studio_presskits.editor.cover_colours")
       end
 
-      def visibility_label
-        I18n.t("recording_studio_presskits.editor.visibility")
-      end
-
-      def visibility_edit_path
-        helpers.edit_press_kit_visibility_path(@press_kit_recording)
-      end
-
       def cover_image_label
         I18n.t("recording_studio_presskits.editor.cover_image")
       end

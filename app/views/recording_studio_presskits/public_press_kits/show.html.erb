@@ -5,7 +5,6 @@
 
 <% if presentation == :preview %>
   <% content_for :title, (@press_kit&.title.presence || "Press kit") %>
-  <% content_for :seo_description, @press_kit&.description.to_s.strip if @press_kit&.description.present? %>
 
   <%= render RecordingStudioPresskits::PressKits::PreviewShowComponent.new(
     press_kit_recording: @parent_recording || @press_kit_recording,

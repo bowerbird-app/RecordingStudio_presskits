@@ -31,12 +31,6 @@
       href: "#{@header_edit_path}#presskits-header-colours",
       data: helpers.presskits_editor_open_data
     ) %>
-    <% fab.with_action(
-      icon: :eye,
-      label: visibility_label,
-      href: visibility_edit_path,
-      data: helpers.presskits_editor_open_data
-    ) %>
     <% if cover_image_path %>
       <% fab.with_action(
         icon: :photo,

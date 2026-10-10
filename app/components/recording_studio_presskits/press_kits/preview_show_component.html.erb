@@ -10,10 +10,6 @@
     ) %>
 
     <div id="presskits-preview-details" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %> flex flex-col gap-6">
-      <% if description.present? %>
-        <p class="text-lg text-pretty" data-presskits-preview-description><%= description %></p>
-      <% end %>
-
       <%= render heading_component %>
 
       <p data-presskits-preview-explanation><%= explanation %></p>

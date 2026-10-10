@@ -51,7 +51,8 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-presskits-presentation='preview']"
     assert_includes response.body, "Spring launch"
-    assert_includes response.body, "Doors at noon."
+    refute_includes response.body, "Doors at noon."
+    refute_select "[data-presskits-preview-description]"
     assert_includes response.body, "See full press kit"
     assert_includes response.body, "You must be signed in to Harbour Studio to view this press kit."
     assert_select "a[href='/users/sign_in']", text: "Sign in"
@@ -63,8 +64,8 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-public-sections", count: 0
     assert_equal "private, no-store", response.headers["Cache-Control"]
     assert_select "meta[name='robots'][content='noindex, nofollow']"
-    assert_select "meta[name='description'][content='Doors at noon.']"
-    refute_includes response.body, "og:description\" content=\"Secret"
+    refute_select "meta[name='description']"
+    refute_includes response.body, "og:description"
   end
 
   test "granted audience with preview asks for access and skips the sign-in button" do
@@ -74,6 +75,9 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_select "[data-presskits-presentation='preview']"
+    assert_includes response.body, "Spring launch"
+    refute_includes response.body, "Doors at noon."
+    refute_select "[data-presskits-preview-description]"
     assert_includes response.body, "See full press kit"
     assert_includes response.body, "You need access to view this press kit."
     refute_includes response.body, "You must be signed in to Harbour Studio to view this press kit."
@@ -193,7 +197,11 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     visibility_path = recording_studio_presskits.edit_press_kit_visibility_path(kit)
-    assert_select "#presskits-kit-header [role='menuitem'][href='#{visibility_path}'][aria-label='Who can see this']"
+    assert_select "#presskits-visibility[href='#{visibility_path}']", text: "Visibility"
+    assert_select "#presskits-visibility[data-modal-id='pk-editor']"
+    assert_select "#presskits-visibility[data-turbo-frame='pk-editor-screen']"
+    assert_select "#presskits-editor-toolbar [data-flat-pack--icon-name-value='eye']"
+    refute_select "#presskits-kit-header [role='menuitem'][href='#{visibility_path}']"
 
     get visibility_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
     assert_response :success

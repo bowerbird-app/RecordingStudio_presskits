@@ -33,7 +33,26 @@ module RecordingStudioPresskits
         recording.id.to_s == @highlight_id.to_s
       end
 
+      def visibility_edit_path
+        return unless helpers.respond_to?(:edit_press_kit_visibility_path)
+        return unless manage_visibility?
+
+        helpers.edit_press_kit_visibility_path(@press_kit_recording)
+      end
+
       private
+
+      def manage_visibility?
+        actor = defined?(Current) && Current.respond_to?(:actor) ? Current.actor : nil
+        return false if actor.blank? || @press_kit_recording.blank?
+        return false unless defined?(RecordingStudioAccessible)
+
+        RecordingStudioAccessible.authorized?(
+          actor: actor,
+          recording: @press_kit_recording,
+          role: :edit
+        )
+      end
 
       def section_menu_icon_for(type_name)
         type_name.to_s.safe_constantize.try(:section_menu_icon).presence

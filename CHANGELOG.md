@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.32.0] - 2026-10-10
 
 ### Added
-- Configurable kit visibility through Accessible action `presskits.kit_view_full` (default Public). The owner picks who can view the full kit on **Who can see this** in `pk-editor`. When that is not Public, **What should other visitors see?** is Preview or Hidden (default Preview).
+- Configurable kit visibility through Accessible action `presskits.kit_view_full` (default Public). The owner picks who can view the full kit on **Visibility** in the kit editor toolbar (same row as publish). When that is not Public, **What should other visitors see?** is Preview or Hidden (default Preview).
 - `RecordingStudioPresskits::Visibility.presentation_for` is the only resolver (`:full`, `:preview`, `:hidden`, `:unavailable`). Public show, listings, cards, and meta tags go through it.
-- Preview renders an allowlist only: title, short description, cover colour and image, company, and kit location. A **See full press kit** heading introduces the access message. Signed-in audiences get Sign in (`config.sign_in_path`) and Create account (`config.registration_path`, hidden when blank). Site name in that copy is `config.site_name`, then i18n, then the Rails application name. Granted and custom audiences get a need-access message and no auth buttons. Hidden is a plain 404 with no metadata leak.
+- Preview renders an allowlist only: title, cover colour and image, company, and kit location. The short description stays off the limited preview. A **See full press kit** heading introduces the access message. Signed-in audiences get Sign in (`config.sign_in_path`) and Create account (`config.registration_path`, hidden when blank). Site name in that copy is `config.site_name`, then i18n, then the Rails application name. Granted and custom audiences get a need-access message and no auth buttons. Hidden is a plain 404 with no metadata leak.
 - `visibility_fallback` lives on sidecar `KitSetting` rows, not the revisioned PressKit.
 - Dummy Workspace enables `:action_audiences` and registers `presskits.verified_journalist` for tests.
 - Version `0.32.0`
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Depend on Accessible `~> 0.14` (dummy tag `v0.14.0`) and Publishable `~> 0.7` (dummy tag `v0.7.0`).
 - PressKit enables `:action_audiences` so kits can hold Accessible `AccessRule` children.
 - The visibility screen title is **Visibility**, subtitle **Who can view this press kit**. The form is `max-w-xl` on desktop. Preview/Hidden use Flatpack RadioGroup `variant: :inline` with `eye` / `eye-slash` icons.
+- **Visibility** on the kit editor toolbar opens that screen in `pk-editor`. It is not on the cover FAB.
 
 ### Upgrade notes
 - Install Accessible `0.14.0` and Publishable `0.7.0`. Run `bin/rails generate recording_studio_accessible:migrations`, `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`.

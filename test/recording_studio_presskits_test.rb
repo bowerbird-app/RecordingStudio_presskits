@@ -325,7 +325,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "pk-editor"
     assert_includes readme, "presskits.kit_view_full"
     assert_includes readme, "Visibility.presentation_for"
-    assert_includes readme, "Who can see this"
+    assert_includes readme, "Who can view this press kit"
     assert_includes readme, "KitQuery.discoverable_for"
     assert_includes readme, 'data-turbo-frame="_top"'
     assert_includes readme, "Edit heading"
@@ -1062,6 +1062,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     preview = File.read(File.join(components, "preview_show_component.html.erb"))
 
     assert_includes locales, "title: \"Visibility\""
+    assert_includes locales, "visibility: \"Visibility\""
     assert_includes locales, "Who can view this press kit"
     assert_includes locales, "See full press kit"
     assert_includes locales, "You must be signed in to"
@@ -1070,6 +1071,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes editor, "variant: :cards"
     refute_includes preview, "FlatPack::Alert"
     refute_includes preview, "formatted_date"
+    refute_includes preview, "data-presskits-preview-description"
+    refute_includes preview, "description.present?"
+    editor_kit = File.read(File.join(components, "kit_editor_component.html.erb"))
+    header = File.read(File.join(components, "kit_header_component.html.erb"))
+    assert_includes editor_kit, 'id: "presskits-visibility"'
+    assert_includes editor_kit, "visibility_edit_path"
+    assert_includes editor_kit, 'icon: "eye"'
+    refute_includes header, "visibility_edit_path"
+    refute_includes header, "visibility_label"
   end
 
   def test_presskits_source_does_not_register_embed_providers

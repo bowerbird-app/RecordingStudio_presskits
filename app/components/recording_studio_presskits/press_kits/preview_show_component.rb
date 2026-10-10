@@ -13,10 +13,6 @@ module RecordingStudioPresskits
         recordable&.try(:title).presence || "Press kit"
       end
 
-      def description
-        recordable&.try(:description).to_s.strip.presence
-      end
-
       def reason
         @reason.presence || Visibility.preview_reason_for(@press_kit_recording)
       end
