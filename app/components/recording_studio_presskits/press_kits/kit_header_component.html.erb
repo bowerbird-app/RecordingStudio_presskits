@@ -1,19 +1,35 @@
 <div
   id="presskits-kit-header"
-  class="group/header relative rounded-[var(--radius-lg)] outline outline-2 outline-transparent transition-[outline-color] duration-[var(--duration-base)] hover:outline-[var(--color-primary)] focus-within:outline-[var(--color-primary)]"
+  class="<%= region_classes %>"
+  data-presskits-editor-region="header"
   tabindex="0"
 >
   <%= render RecordingStudioPresskits::Cover::Component.new(
     recording: @press_kit_recording,
     size: :hero
   ) %>
-  <div class="p-4 opacity-0 transition-opacity duration-[var(--duration-base)] group-hover/header:opacity-100 group-focus-within/header:opacity-100 focus-within:opacity-100">
-    <%= render FlatPack::Button::Component.new(
-      text: edit_heading_label,
-      style: :ghost,
-      size: :sm,
+
+  <%= render FlatPack::Fab::Component.new(
+    contained: true,
+    position: :top_right,
+    backdrop: false,
+    size: :sm,
+    icon: :plus,
+    offset: fab_offset,
+    label: header_actions_label,
+    class: fab_classes
+  ) do |fab| %>
+    <% fab.with_action(
+      icon: :pencil,
+      label: edit_heading_label,
       href: @header_edit_path,
       data: helpers.presskits_editor_open_data
     ) %>
-  </div>
+    <% fab.with_action(
+      icon: :swatch,
+      label: cover_colours_label,
+      href: "#{@header_edit_path}#presskits-header-colours",
+      data: helpers.presskits_editor_open_data
+    ) %>
+  <% end %>
 </div>

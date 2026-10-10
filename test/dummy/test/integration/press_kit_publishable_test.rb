@@ -114,7 +114,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_blank_public_layout
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    assert_select "#presskits-cover-hero [data-cover-color='#1F2937']"
+    assert_select "#presskits-cover-hero[data-cover-color='#1F2937']"
     assert_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
     assert_operator response.body.index("Spring launch"), :<, response.body.index("Doors at noon.")
     assert_operator response.body.index("Doors at noon."), :<, response.body.index("Hero")

@@ -26,6 +26,7 @@
       class: "w-full"
     ) %>
 
+    <div id="presskits-header-colours" class="flex flex-col gap-6">
     <% if any_cover_color? %>
       <%= render FlatPack::FormField::Component.new(
         field_id: "press_kit_cover_color",
@@ -46,10 +47,11 @@
     <% else %>
       <%= render FlatPack::RadioGroup::Component.new(
         name: "press_kit[cover_color]",
+        variant: :swatches,
         label: "Colour",
-        options: cover_options,
         value: header_cover_color,
-        variant: :inline
+        size: :md,
+        options: cover_options
       ) %>
     <% end %>
 
@@ -84,13 +86,31 @@
         <% end %>
       <% end %>
     <% else %>
-      <%= render FlatPack::RadioGroup::Component.new(
-        name: "press_kit[cover_text_color]",
-        label: "Text colour",
-        options: cover_text_options,
-        value: header_cover_text_value,
-        variant: :inline
-      ) %>
+      <%= render FlatPack::FormField::Component.new(
+        field_id: "press_kit_cover_text_color",
+        label: "Text colour"
+      ) do |field| %>
+        <% field.with_control do %>
+          <div class="flex flex-wrap items-center gap-3">
+            <% if cover_text_auto? %>
+              <%= render FlatPack::RadioGroup::Component.new(
+                name: "press_kit[cover_text_color]",
+                options: [{ label: "Auto", value: auto_text_value }],
+                value: header_cover_text_value,
+                variant: :inline,
+                size: :md
+              ) %>
+            <% end %>
+            <%= render FlatPack::RadioGroup::Component.new(
+              name: "press_kit[cover_text_color]",
+              variant: :swatches,
+              value: header_cover_text_value,
+              size: :md,
+              options: cover_text_swatch_options
+            ) %>
+          </div>
+        <% end %>
+      <% end %>
     <% end %>
 
     <div data-recording-studio-presskits--cover-preview-target="contrastHint" <% unless low_contrast_text? %>hidden<% end %>>
@@ -98,6 +118,7 @@
         description: "That text may be hard to read on this colour.",
         style: :warning
       ) %>
+    </div>
     </div>
 
     <%= render RecordingStudioPresskits::Cover::Component.new(

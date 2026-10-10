@@ -44,14 +44,53 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-editor-toolbar", text: /Order/
     refute_select "#presskits-editor-toolbar a", text: "Header"
     refute_select "#presskits-editor-toolbar a", text: "View"
-    assert_select "#presskits-kit-header a", text: "Edit heading"
+    header = css_select("#presskits-kit-header").first
+    assert_includes header["class"], "after:inset-0"
+    assert_includes header["class"], "hover:after:bg-[color-mix(in_oklab,black_16%,transparent)]"
+    refute_includes header["class"], "pt-8"
+    refute_includes header["class"], "hover:bg-[var(--surface-muted-background-color)]"
+    refute_includes header["class"], "-m-4"
+    refute_includes header["class"], "pr-20"
+    preview = css_select("#presskits-editor-preview").first
+    assert_includes preview["class"], "overflow-hidden"
+    assert_includes preview["class"], "rounded-[var(--radius-lg)]"
+    refute_includes preview["class"], "md:p-4"
+    refute_includes preview["class"], "lg:p-6"
+    hero = css_select("#presskits-cover-hero").first
+    assert_includes hero["class"], "w-full"
+    assert_includes hero["class"], "rounded-none"
+    assert_includes hero["class"], "justify-start"
+    refute_includes hero["class"], "justify-end"
+    assert_includes hero["class"], "p-8"
+    assert_includes hero["class"], "md:p-12"
+    hero_title = css_select("#presskits-cover-hero h1").first
+    assert_includes hero_title["class"], "fp-display"
+    assert_includes hero_title["class"], "fp-text-balance"
+    assert_includes hero_title["style"].to_s, "--display-size"
+    assert_includes hero_title["style"].to_s, "--display-tracking"
+    assert_includes hero_title["style"].to_s, "--display-leading"
+    assert_includes css_select("#presskits-cover-hero > div").first["class"], "max-w-2xl"
+    sections = css_select("#presskits-editor-sections").first
+    assert_includes sections["class"], "flex"
+    refute_includes sections["class"], "p-5"
+    refute_includes sections["class"], "gap-6"
+    refute_includes sections["class"], "md:p-8"
+    refute_includes sections["class"], "lg:p-10"
+    assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
+    header_fab = css_select("#presskits-kit-header .fp-fab").first
+    assert_includes header_fab["style"].to_s, "--fp-fab-offset: 1rem"
+    assert_select "#presskits-kit-header button.fp-fab__trigger[aria-label='Header actions']"
+    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Edit heading']"
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"
     assert_select "#presskits-section-picker-modal"
-    preview = css_select("#presskits-editor-preview").first
     assert_includes preview.parent["class"], "rounded-[var(--radius-lg)]"
     assert_includes preview.parent["class"], "bg-[var(--card-background-color)]"
+    editor = css_select("[data-controller='recording-studio-presskits--editor-chrome']").first
+    assert editor
+    assert_includes editor["data-action"], "onPointerDown"
+    assert_select "#presskits-kit-header button.fp-fab__trigger [data-flat-pack--icon-name-value='plus']"
   end
 
   test "each section has heading and content controls" do
@@ -64,11 +103,45 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_response :success
     heading = recording_studio_presskits.heading_press_kit_section_path(kit, section)
     content = recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    assert_select "a[href='#{heading}']", text: "Edit heading"
-    assert_select "a[href='#{content}']", text: "Edit content"
+    remove = recording_studio_presskits.press_kit_section_path(kit, section)
+    body = css_select("#presskits-section-#{section.id}-body").first
+    assert_includes body["class"], "hover:bg-[var(--surface-muted-background-color)]"
+    assert_includes body["class"], "[@media(hover:hover)]"
+    assert_includes body["class"], "data-[pk-edit-active]"
+    refute_includes body["class"], "[@media(hover:none)]:opacity-100"
+    assert_includes body["class"], "focus-visible:outline"
+    assert_includes body["class"], "relative"
+    assert_includes body["class"], "pt-8"
+    assert_includes body["class"], "md:pt-10"
+    assert_includes body["class"], "lg:pt-12"
+    assert_includes body["class"], "pr-20"
+    refute_includes body["class"], "-m-4"
+    assert_includes body["class"], "rounded-none"
+    refute_includes body["class"], "rounded-[var(--radius-lg)]"
+    refute_includes body["class"], "hover:outline-[var(--color-primary)]"
+    assert_select "#presskits-section-#{section.id} .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
+    section_fab = css_select("#presskits-section-#{section.id} .fp-fab").first
+    assert_includes section_fab["style"].to_s, "--fp-fab-offset: 1rem"
+    assert_select "#presskits-section-#{section.id} button.fp-fab__trigger[aria-label='Section actions']"
+    assert_select "#presskits-section-#{section.id} button.fp-fab__trigger [data-flat-pack--icon-name-value='plus']"
+    fab = css_select("#presskits-section-#{section.id} .fp-fab").first
+    assert_includes fab["class"], "group-data-[pk-edit-active]/pk-edit"
+    refute_includes fab["class"], "[@media(hover:none)]:opacity-100"
+    refute_select "#presskits-section-#{section.id} .fp-fab__backdrop"
+    assert_select "a[href='#{heading}'][role='menuitem'][aria-label='Edit title']"
+    assert_select "a[href='#{content}'][role='menuitem'][aria-label='Edit content']"
+    assert_select "a[href='##{section.id}'][role='menuitem'][aria-label='Reorder'][data-modal-id='presskits-sections-modal']"
+    assert_select "a[href='#{remove}'][role='menuitem'][aria-label='Trash'][data-turbo-method='delete'][data-turbo-confirm][data-fp-style='danger']"
+    assert_select "[role='menuitem'][aria-label='Add new section'][data-modal-id='presskits-section-picker-after-#{section.id}']"
     assert_select "a[href='#{heading}'][data-turbo-frame='pk-editor-screen'][data-modal-id='pk-editor']"
     assert_select "a[href='#{content}'][data-turbo-frame='pk-editor-screen'][data-modal-id='pk-editor']"
-    assert_select ".fp-section-title h2"
+    assert_select "#presskits-section-picker-after-#{section.id}"
+    assert_select "#presskits-section-picker-after-#{section.id} a[href*='after_recording_id=#{section.id}']"
+    refute_select "#presskits-section-#{section.id} a", text: "Edit heading"
+    refute_select "#presskits-section-dropdown-after-#{section.id}"
+    heading = css_select("#presskits-section-#{section.id} .fp-section-title h2").first
+    assert heading
+    assert_includes heading["class"], "text-2xl"
   end
 
   test "adding a section saves the type title and returns to the kit" do

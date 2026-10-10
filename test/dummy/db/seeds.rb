@@ -76,12 +76,14 @@ begin
     root_recording,
     description: "Doors at noon. The one-sheet is inside.",
     cover_style: "color",
-    cover_color: "#7C3AED"
+    cover_color: "#BFDBFE"
   )
-  if press_kit_recording.recordable.cover_color.blank?
+  spring_cover = press_kit_recording.recordable
+  if spring_cover.cover_color != "#BFDBFE" || spring_cover.cover_text_color.present?
     root_recording.revise(press_kit_recording) do |press_kit|
       press_kit.cover_style = "color"
-      press_kit.cover_color = "#7C3AED"
+      press_kit.cover_color = "#BFDBFE"
+      press_kit.cover_text_color = nil
     end
     press_kit_recording.reload
   end

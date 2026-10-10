@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.26.1", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.27.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -47,7 +47,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.216"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.223"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.13"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -63,14 +63,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.6.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.216"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.5"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.223"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -267,18 +267,31 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "v4.4.0"
     assert_includes readme, "v0.13.0"
     assert_includes readme, "tag: \"v2.1.0\""
-    assert_includes readme, "tag: \"v0.2.5\""
+    assert_includes readme, "tag: \"v0.2.7\""
     assert_includes readme, "tag: \"v0.6.0\""
-    assert_includes readme, "tag: \"v0.1.216\""
+    assert_includes readme, "tag: \"v0.4.5\""
+    assert_includes readme, "tag: \"v0.1.223\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.216"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.223"'
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
     assert_includes readme, "flat_pack_modal_screen"
     assert_includes readme, "pk-editor"
     assert_includes readme, 'data-turbo-frame="_top"'
     assert_includes readme, "Edit heading"
+    assert_includes readme, "Edit title"
+    assert_includes readme, "Section actions"
+    assert_includes readme, "FlatPack::Fab::Component"
+    assert_includes readme, "recording-studio-presskits--editor-chrome"
+    assert_includes readme, "icon: :plus"
+    assert_includes readme, "p-8 md:p-10 lg:p-12"
+    assert_includes readme, "overflow-hidden"
+    assert_includes readme, "rounded-none"
+    assert_includes readme, 'offset: "1rem"'
+    refute_includes readme, "p-4 -m-4"
+    assert_includes readme, "variant: :swatches"
+    refute_includes readme, "named radios"
     assert_includes readme, "Edit content"
     refute_includes readme, "Section settings"
     refute_includes readme, "FlatPack::Fieldset::Component"
@@ -426,6 +439,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover, "9 / 16"
     assert_includes cover, "21 / 9"
     assert_includes cover, "aspect-[9/16]"
+    assert_includes cover, "justify-start rounded-none p-8 md:p-12"
+    refute_includes cover, "justify-end rounded-none"
+    assert_includes cover, "hero_copy_classes"
+    assert_includes cover, "max-w-2xl"
+    assert_includes cover_html, "<% if hero? %>"
+    refute_includes cover_html.split("<% else %>").first, "FlatPack::Card::Component"
+    assert_includes cover_html.split("<% else %>").first, "FlatPack::PageTitle::Component"
+    assert_includes cover_html.split("<% else %>").first, "size: :display"
+    assert_includes cover_html, "hero_copy_classes"
     assert_includes cover_html, "--page-title-h1-size"
     assert_includes cover_html, "variant: heading_variant"
     refute_includes index, "card.media"
@@ -463,17 +485,101 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'text: "Save"'
     assert_includes kit_header, 'id="presskits-kit-header"'
     assert_includes kit_header, "Cover::Component"
-    assert_includes kit_header, "text: edit_heading_label"
+    assert_includes kit_header, "FlatPack::Fab::Component"
+    assert_includes kit_header, "contained: true"
+    assert_includes kit_header, "position: :top_right"
+    assert_includes kit_header, "backdrop: false"
+    assert_includes kit_header, "size: :sm"
+    assert_includes kit_header, "icon: :plus"
+    assert_includes kit_header, "offset: fab_offset"
+    refute_includes kit_header, "ellipsis_vertical"
+    assert_includes kit_header, "edit_heading_label"
+    assert_includes kit_header, "cover_colours_label"
     refute_includes kit_header, "arrows-up-down"
     refute_includes kit_header, "trash"
+    section = File.read(File.expand_path("press_kits/editable_section_component.html.erb", components))
+    assert_includes section, "FlatPack::Fab::Component"
+    assert_includes section, "contained: true"
+    assert_includes section, "position: :top_right"
+    assert_includes section, "backdrop: false"
+    assert_includes section, "size: :sm"
+    assert_includes section, "icon: :plus"
+    assert_includes section, "offset: fab_offset"
+    refute_includes section, "ellipsis_vertical"
+    assert_includes section, "style: :danger"
+    assert_includes section, "edit_title_label"
+    assert_includes section, "edit_content_label"
+    assert_includes section, "reorder_label"
+    assert_includes section, "trash_label"
+    assert_includes section, "add_new_section_label"
+    assert_includes section, "turbo_confirm"
+    assert_includes section, "SectionPickerComponent"
+    refute_includes section, "SectionDropdownComponent"
+    refute_includes section, "hover:outline-[var(--color-primary)]"
+    refute_includes section, "p-4 -mx-4"
     assert_includes header, 'name: "press_kit[title]"'
     assert_includes header, 'name: "press_kit[description]"'
     assert_includes header, 'name: "press_kit[cover_color]"'
     assert_includes header, 'name: "press_kit[cover_text_color]"'
     assert_includes header, "Text colour"
     assert_includes header, "FlatPack::RadioGroup::Component"
+    assert_includes header, "variant: :swatches"
+    assert_includes header, "size: :md"
+    assert_includes header, "cover_text_swatch_options"
     assert_includes header, "variant: :inline"
     assert_includes header, "FlatPack::ColorSwatch::Component"
+    assert_includes header, 'id="presskits-header-colours"'
+    chrome = File.read(File.expand_path("press_kits/editor_chrome.rb", components))
+    assert_includes chrome, "--surface-muted-background-color"
+    assert_includes chrome, "focus-visible:outline"
+    assert_includes chrome, "[@media(hover:hover)]"
+    assert_includes chrome, "data-[pk-edit-active]"
+    assert_includes chrome, "group-data-[pk-edit-active]/pk-edit"
+    refute_includes chrome, "[@media(hover:none)]:opacity-100"
+    assert_includes chrome, "relative"
+    assert_includes chrome, "pt-8 pb-8 px-8"
+    assert_includes chrome, "md:pt-10 md:pb-10 md:px-10"
+    assert_includes chrome, "lg:pt-12 lg:pb-12 lg:px-12"
+    assert_includes chrome, "pr-20"
+    assert_includes chrome, "HEADER_REGION_CLASSES"
+    assert_includes chrome, "after:inset-0"
+    assert_includes chrome, "hover:after:bg-[color-mix(in_oklab,black_16%,transparent)]"
+    assert_includes chrome, "PREVIEW_CLASSES"
+    assert_includes chrome, "overflow-hidden"
+    assert_includes chrome, "SECTION_PAD_CLASSES"
+    assert_includes chrome, "KIT_SECTIONS_CLASSES = \"flex w-full flex-col\""
+    refute_includes chrome, "p-5 md:p-8 lg:p-10"
+    refute_includes chrome, "md:p-4 lg:p-6"
+    refute_includes chrome, "gap-6"
+    assert_includes chrome, 'FAB_OFFSET = "1rem"'
+    refute_includes chrome, "-m-4"
+    assert_includes chrome, "rounded-none"
+    assert_includes chrome, "rounded-[var(--radius-lg)]"
+    editor = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
+    assert_includes editor, "recording-studio-presskits--editor-chrome"
+    assert_includes editor, "onPointerDown"
+    assert_includes editor, "EditorChrome::PREVIEW_CLASSES"
+    assert_includes editor, "EditorChrome::KIT_CARD_CLASSES"
+    assert_includes editor, "padding: :none"
+    public_kit = File.read(File.expand_path("press_kits/public_show_component.html.erb", components))
+    assert_includes public_kit, "EditorChrome::PREVIEW_CLASSES"
+    assert_includes public_kit, "EditorChrome::KIT_CARD_CLASSES"
+    assert_includes public_kit, "EditorChrome::KIT_SECTIONS_CLASSES"
+    assert_includes public_kit, "EditorChrome::SECTION_PAD_CLASSES"
+    assert_includes public_kit, "padding: :none"
+    frame = File.read(File.expand_path("press_kits/section_frame_component.html.erb", components))
+    assert_includes frame, "EditorChrome::SECTION_PAD_CLASSES"
+    kit_header_rb = File.read(File.expand_path("press_kits/kit_header_component.rb", components))
+    assert_includes kit_header_rb, "header: true"
+    assert_includes chrome, 'CONTROLLER = "recording-studio-presskits--editor-chrome"'
+    chrome_js = File.read(File.expand_path(
+                            "../app/javascript/recording_studio_presskits/controllers/editor_chrome_controller.js",
+                            __dir__
+                          ))
+    assert_includes chrome_js, "(hover: none)"
+    assert_includes chrome_js, "data-pk-edit-active"
+    assert_includes chrome_js, "data-presskits-editor-region"
+    refute_includes chrome_js, "opacity-100"
     assert_includes header, "auto_text_value"
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, "flat-pack--unsaved-changes"
@@ -683,6 +789,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "def default_section_heading"
     assert_operator source.index("def section_heading"), :<, source.index("default_section_heading")
     assert_includes frame, "RecordingStudioPresskits.section_heading"
+    assert_includes frame, "size: :lg"
     assert_includes frame, "def saved_title"
     assert_includes frame, "def content_visible?"
     assert_includes heading, "placeholder: section_title_fallback"
@@ -814,8 +921,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.1.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
   end
 

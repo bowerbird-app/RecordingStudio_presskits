@@ -17,6 +17,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_includes css, "button-focus-ring-color"
     assert_includes css, "surface-subtle-background-color"
     assert_includes css, "radius-lg"
+    assert_includes css, "color-swatch-radius"
+    assert_includes css, "color-swatch-selected-ring-color"
   end
 
   test "dummy app validates recordable declarations" do

@@ -75,18 +75,25 @@ module RecordingStudioPresskits
 
       def cover_options
         with_orphaned_colour(
-          RecordingStudioPresskits.cover_palette.options,
+          swatch_options(RecordingStudioPresskits.cover_palette),
           header_cover_color,
           RecordingStudioPresskits.cover_palette
         )
       end
 
-      def cover_text_options
-        options = RecordingStudioPresskits.cover_text_palette.options(auto: cover_text_auto?)
-        with_orphaned_colour(options, header_cover_text_color, RecordingStudioPresskits.cover_text_palette)
+      def cover_text_swatch_options
+        with_orphaned_colour(
+          swatch_options(RecordingStudioPresskits.cover_text_palette),
+          header_cover_text_color,
+          RecordingStudioPresskits.cover_text_palette
+        )
       end
 
       private
+
+      def swatch_options(palette)
+        palette.colors.map { |hex| { label: palette.label_for(hex), value: hex } }
+      end
 
       def with_orphaned_colour(options, current, palette)
         return options if current.blank?

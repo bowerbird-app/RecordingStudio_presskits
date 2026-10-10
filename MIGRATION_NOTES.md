@@ -1,5 +1,31 @@
 # Upgrade notes
 
+## 0.26.0
+
+The kit editor preview matches the public kit. In-flow **Edit heading**, **Edit content**, and the compact add-section dropdown are gone. On a pointer that can hover, hover or focus-within tints the region with `--surface-muted-background-color` and shows the FAB. Keyboard users get a `:focus-visible` outline and still see the FAB. On touch, the FAB is not always visible. A tap makes that section or the header the active region (tint and FAB). Tapping another region moves the active state. Tapping outside clears it.
+
+Each section has `FlatPack::Fab::Component.new(contained: true, position: :top_right, backdrop: false, size: :sm, icon: :plus, offset: "1rem", label: "Section actions")` on a `position: relative` region so the FAB pins to that section. The region owns `p-8 md:p-10 lg:p-12` and `rounded-none` so the hover/active tint runs flush to the card sides. Phone padding stays `p-8`. Sections add `pr-20` so the heading clears the FAB. The kit card has no inner pad and no gap between sections — vertical section pad is the only space. The `:hero` cover is a flush colour surface (no nested Card) that runs to the kit card's top and side edges. The kit card uses `padding: :none`. The preview clips with `overflow-hidden` and `rounded-[var(--radius-lg)]` so the cover and the last section tint follow the card radius. Title and description sit at the top (`justify-start`) with `p-8 md:p-12` as the inset. Hero copy is `FlatPack::PageTitle::Component` with `size: :display` in a `max-w-2xl` block. The band stays 21/9 with `min-h-64`. `:card` and `:preview` are unchanged. Header hover and tap use an inset overlay instead of a surrounding muted tint. The header FAB sits inside the cover with `offset: "1rem"`. The public kit uses the same unpadded card, flush hero, and section-owned pad. Top corners open downward. Speed-dial actions:
+
+- **Edit title** — shared heading screen in `pk-editor`
+- **Edit content** — that section's content screen
+- **Reorder** — existing Reorder modal, fragment focused on this section when the browser honors it
+- **Trash** — `style: :danger`, `DELETE` through Trashable, with `data-turbo-confirm`
+- **Add new section** — the section picker, with `after_recording_id` so the new block lands below this one
+
+The kit header FAB uses the same chrome: **Edit heading** and **Cover colours**. Both open the shared header screen. Cover colours hashes to `#presskits-header-colours`. The toolbar **Section** button still adds at the end or into an empty kit.
+
+Bump FlatPack to `>= 0.1.223` (dummy tag `v0.1.223`) and rebuild Tailwind so `text-6xl` / `text-7xl` generate. Reload Flatpack CSS for `--display-*` and `.fp-display`. Hosts that replaced those components should render the Flatpack FAB (`icon: :plus`, `offset: "1rem"`) on a `position: relative` region and drop the old ghost buttons, negative margins, and kit-level section pad or gap. Sections own `p-8 md:p-10 lg:p-12`, `pr-20`, and `rounded-none`. The header has no pad: the hero bleeds to the card and hover is an inset overlay. Hero copy sits at the top (`justify-start`) as `FlatPack::PageTitle::Component` with `size: :display` in a `max-w-2xl` block. Keep 21/9 with `min-h-64`. The kit card is `padding: :none`; the preview clips with `overflow-hidden`. The public kit uses the same unpadded card and section pad. FAB has no hover-only visibility or tap-to-activate API. Desktop uses group-hover / focus-within. Touch uses `recording-studio-presskits--editor-chrome` and `data-pk-edit-active`. The default cover palette swaps violet (`#7C3AED`) for sky (`#BFDBFE`) so the example kit can be a light cover with Auto dark text. Stored violet still renders. Add it back to `cover_colors` if you still want that swatch.
+
+## 0.25.1
+
+Bump FlatPack to `>= 0.1.221` (dummy tag `v0.1.221`) and rebuild Tailwind so the swatch utilities generate. Reload Flatpack CSS after the bump.
+
+Palette **Colour** and **Text colour** on the shared kit header screen use `FlatPack::RadioGroup` `variant: :swatches` (`size: :md`). The option label is the accessible name and the tooltip. `:any` still uses `FlatPack::ColorSwatch`. Text colour **Auto** stays a separate inline radio with the same field name — swatches need a CSS colour, and `auto` is not one. A host that replaced that screen should render the same.
+
+Dummy and gemspec pins move to the latest GitHub releases: Accessible `0.12.1`, Attachable `0.12.0`, Orderable `0.2.7`, Trashable `0.5.0`, Duplicatable `0.4.5`, Publishable `0.5.0`, External Embed `0.1.4`, Video `0.1.1`, Root Switchable `v0.5.6`. Recording Studio stays `v4.3.0`. Admin stays `v2.0.7`. Location and Lists are not Presskits dependencies.
+
+Bump Accessible to `~> 0.12`, Attachable to `~> 0.12`, Publishable to `~> 0.5`, and Trashable to `~> 0.5`. Run `bin/rails generate recording_studio_attachable:migrations` and `db:migrate` for the new library and placement tables. Add `RecordingStudioAttachable::Library` and `RecordingStudioAttachable::Placement` to `config.recordable_types`. Press kit Images still attach files under the section.
+
 ## 0.25.0
 
 A press kit can store a colour cover. `cover_style` is `color` for now (`nil` means colour with the host default). `cover_color` is a hex string. `cover_text_color` is an optional hex for the title and description. `nil` text colour is Auto: light or dark from WCAG contrast.
@@ -12,7 +38,7 @@ A low-contrast text colour is allowed. The header editor may hint.
 
 `RecordingStudioPresskits::Cover::Component` paints `:card` and `:preview` as 9/16 story tiles, and `:hero` as a wide 21/9 band on the public kit. A full-width 9/16 hero would bury the kit. Title sits on the colour at the page-title size. A card description clamps to two lines. Press Centers and hosts can render the same card.
 
-The shared kit header screen in `pk-editor` adds **Colour** and **Text colour**. A palette uses `FlatPack::RadioGroup` `variant: :inline` (named radios — FlatPack has no filled swatch-radio yet). `:any` uses `FlatPack::ColorSwatch`. Text colour includes **Auto**. A preview tile follows the cover live. The kit header on the live editor uses the same `Cover::Component` at `:hero` and refreshes through the existing Turbo Stream save.
+The shared kit header screen in `pk-editor` adds **Colour** and **Text colour**. A palette uses `FlatPack::RadioGroup` `variant: :swatches`. `:any` uses `FlatPack::ColorSwatch`. Text colour includes **Auto** as its own control. A preview tile follows the cover live. The kit header on the live editor uses the same `Cover::Component` at `:hero` and refreshes through the existing Turbo Stream save.
 
 When Recording Studio API is loaded, a press kit show and update include `cover_style`, `cover_color`, and `cover_text_color`. Those keys are writable. Title and description stay on the header screen. MCP uses the same payload. Duplicating a kit copies those fields.
 

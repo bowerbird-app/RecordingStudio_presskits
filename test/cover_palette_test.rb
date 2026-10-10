@@ -14,8 +14,10 @@ class CoverPaletteTest < Minitest::Test
     refute palette.any?
     assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_COLORS, palette.colors
     assert_equal "#1F2937", palette.default_color
-    assert palette.include?("#7c3aed")
+    assert palette.include?("#bfdbfe")
     refute palette.include?("#FFFFFF")
+    refute palette.include?("#7C3AED")
+    assert_equal "Sky", palette.label_for("#BFDBFE")
     assert_equal "Violet", palette.label_for("#7C3AED")
     assert_equal "#ABCDEF", palette.label_for("#abcdef")
     assert_equal "Ink", palette.options.first[:label]

@@ -48,9 +48,18 @@ module RecordingStudioPresskits
         {
           id: type_name,
           label: RecordingStudio.recordable_type_label(type_name),
-          icon: type_name.to_s.safe_constantize.try(:section_menu_icon).presence
+          icon: type_name.to_s.safe_constantize.try(:section_menu_icon).presence,
+          description: picker_description_for(type_name)
         }
       end
+    end
+
+    def picker_description_for(type_name)
+      key = type_name.to_s.demodulize.underscore
+      I18n.t(
+        "recording_studio_presskits.editor.picker_descriptions.#{key}",
+        default: I18n.t("recording_studio_presskits.editor.picker_descriptions.generic")
+      )
     end
 
     def editable_section_for(recording, highlight: false)
@@ -59,6 +68,7 @@ module RecordingStudioPresskits
         heading_path: heading_press_kit_section_path(@press_kit_recording, recording),
         content_path: edit_press_kit_section_path(@press_kit_recording, recording),
         add_path: press_kit_sections_path(@press_kit_recording),
+        remove_path: press_kit_section_path(@press_kit_recording, recording),
         picker_items: editor_picker_items,
         highlight: highlight
       )

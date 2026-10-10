@@ -1,25 +1,37 @@
-<div class="flex w-full flex-col gap-6">
-  <%= render RecordingStudioPresskits::Cover::Component.new(
-    recording: @press_kit_recording,
-    size: :hero
-  ) %>
-
-  <% if preview? && !live? %>
-    <%= render FlatPack::Alert::Component.new(
-      description: "This is just for you. Nobody else can see it yet.",
-      style: :info
+<%= render FlatPack::Card::Component.new(
+  style: :default,
+  class: RecordingStudioPresskits::PressKits::EditorChrome::KIT_CARD_CLASSES,
+  padding: :none
+) do %>
+  <div id="presskits-public-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>">
+    <%= render RecordingStudioPresskits::Cover::Component.new(
+      recording: @press_kit_recording,
+      size: :hero
     ) %>
-  <% end %>
 
-  <% if visible_section_recordings.empty? %>
-    <%= render FlatPack::EmptyState::Component.new(
-      title: "Nothing to show yet",
-      description: "Sections will land here once they add some.",
-      icon: :inbox
-    ) %>
-  <% else %>
-    <% visible_section_recordings.each do |recording| %>
-      <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: recording) %>
-    <% end %>
-  <% end %>
-</div>
+    <div id="presskits-public-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
+      <% if preview? && !live? %>
+        <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
+          <%= render FlatPack::Alert::Component.new(
+            description: "This is just for you. Nobody else can see it yet.",
+            style: :info
+          ) %>
+        </div>
+      <% end %>
+
+      <% if visible_section_recordings.empty? %>
+        <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
+          <%= render FlatPack::EmptyState::Component.new(
+            title: "Nothing to show yet",
+            description: "Sections will land here once they add some.",
+            icon: :inbox
+          ) %>
+        </div>
+      <% else %>
+        <% visible_section_recordings.each do |recording| %>
+          <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: recording) %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
