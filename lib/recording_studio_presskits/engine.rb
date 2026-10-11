@@ -260,6 +260,12 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.action_audiences" do
+      config.to_prepare do
+        RecordingStudioPresskits::Visibility.register_action!
+      end
+    end
+
     initializer "recording_studio_presskits.kit_download" do
       config.after_initialize do
         RecordingStudioPresskits::KitDownload.configure_audience!

@@ -20,6 +20,17 @@
       data: { modal_id: "presskits-sections-modal" }
     ) %>
 
+    <% if visibility_edit_path.present? %>
+      <%= render FlatPack::Button::Component.new(
+        text: I18n.t("recording_studio_presskits.editor.visibility"),
+        icon: "eye",
+        style: :default,
+        href: visibility_edit_path,
+        id: "presskits-visibility",
+        data: helpers.presskits_editor_open_data
+      ) %>
+    <% end %>
+
     <% if @download_edit_path.present? %>
       <%= render FlatPack::Button::Component.new(
         text: I18n.t("recording_studio_presskits.editor.downloads"),

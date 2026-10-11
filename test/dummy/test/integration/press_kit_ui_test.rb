@@ -169,6 +169,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes section_button["class"], "fp-button"
     refute_select "button#presskits-section-picker[disabled]"
     assert_select "#presskits-editor-toolbar", text: /Order/
+    assert_select "#presskits-visibility", text: "Visibility"
+    assert_select "#presskits-visibility [data-flat-pack--icon-name-value='eye']"
     assert_select "#presskits-downloads", text: "Downloads"
     assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
     assert_select "#presskits-sections-modal", text: /Reorder/
@@ -181,7 +183,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_section_menu_icon("RecordingStudioPresskits::FactsSection", "calculator")
     assert_section_menu_icon("RecordingStudioPresskits::VideoSection", "video-camera")
     toolbar_html = css_select("#presskits-editor-toolbar").to_html
-    assert_operator toolbar_html.index("presskits-section-picker"), :<, toolbar_html.index("publishable_quick_actions_")
+    assert_operator toolbar_html.index("presskits-section-picker"), :<, toolbar_html.index("presskits-visibility")
+    assert_operator toolbar_html.index("presskits-visibility"), :<, toolbar_html.index("presskits-downloads")
+    assert_operator toolbar_html.index("presskits-downloads"), :<, toolbar_html.index("publishable_quick_actions_")
     refute_includes css_select("#presskits-editor-preview").to_html, 'name="press_kit[title]"'
     refute_includes css_select("#presskits-editor-preview").to_html, 'name="press_kit[description]"'
     assert_select "#presskits-editor-preview #presskits-kit-header"

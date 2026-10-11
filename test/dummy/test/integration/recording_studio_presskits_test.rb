@@ -143,7 +143,13 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     page = Page.find_by!(title: "Getting Started")
     press_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Spring launch")
     unpublished_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Autumn recap")
+    members_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Members only launch")
+    invite_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Invite only launch")
+    quiet_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Quiet launch")
     assert_equal "Doors at noon. The one-sheet is inside.", press_kit.description
+    assert_equal "A kit for people who have an account.", members_kit.description
+    assert_equal "A kit for invited guests.", invite_kit.description
+    assert_equal "This stays off the public list.", quiet_kit.description
     admin_root = AdminRoot.find_by!(name: "Admin")
     root_recording = RecordingStudio::Recording.find_by!(recordable: workspace)
     accessible_root_recording = RecordingStudio::Recording.find_by!(recordable: accessible_workspace)
@@ -226,8 +232,17 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert press_kit_recording.currently_published?
     refute unpublished_kit.published?
     refute unpublished_kit_recording.currently_published?
+    members_recording = RecordingStudio::Recording.find_by!(recordable: members_kit)
+    invite_recording = RecordingStudio::Recording.find_by!(recordable: invite_kit)
+    quiet_recording = RecordingStudio::Recording.find_by!(recordable: quiet_kit)
+    assert_equal :signed_in, RecordingStudioPresskits::Visibility.effective_audience(members_recording)
+    assert_equal :preview, RecordingStudioPresskits::KitSettings.fallback_for(members_recording)
+    assert_equal :granted, RecordingStudioPresskits::Visibility.effective_audience(invite_recording)
+    assert_equal :preview, RecordingStudioPresskits::KitSettings.fallback_for(invite_recording)
+    assert_equal :granted, RecordingStudioPresskits::Visibility.effective_audience(quiet_recording)
+    assert_equal :hidden, RecordingStudioPresskits::KitSettings.fallback_for(quiet_recording)
     assert_equal 3, Workspace.count
-    assert_operator RecordingStudioPresskits::PressKit.count, :>=, 2
+    assert_operator RecordingStudioPresskits::PressKit.count, :>=, 5
 
     assert_no_difference -> { User.count } do
       assert_no_difference -> { RecordingStudio::Recording.count } do

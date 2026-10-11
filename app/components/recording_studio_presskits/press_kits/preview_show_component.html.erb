@@ -1,0 +1,35 @@
+<%= render FlatPack::Card::Component.new(
+  style: :default,
+  class: RecordingStudioPresskits::PressKits::EditorChrome::KIT_CARD_CLASSES,
+  padding: :none
+) do %>
+  <div id="presskits-public-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>" data-presskits-presentation="preview">
+    <%= render RecordingStudioPresskits::Cover::Component.new(
+      recording: @press_kit_recording,
+      size: :hero
+    ) %>
+
+    <div id="presskits-preview-details" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %> flex flex-col gap-6">
+      <%= render heading_component %>
+
+      <p data-presskits-preview-explanation><%= explanation %></p>
+
+      <% if show_auth_actions? %>
+        <div class="flex flex-wrap items-center gap-3">
+          <%= render FlatPack::Button::Component.new(
+            text: sign_in_label,
+            href: sign_in_path,
+            style: :primary
+          ) %>
+          <% if registration_path.present? %>
+            <%= render FlatPack::Button::Component.new(
+              text: register_label,
+              href: registration_path,
+              style: :secondary
+            ) %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

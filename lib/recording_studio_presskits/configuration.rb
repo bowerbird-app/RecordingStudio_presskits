@@ -5,18 +5,12 @@ module RecordingStudioPresskits
     attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
                   :section_components, :section_editors, :section_prepares, :excluded_picker_types,
                   :cover_colors, :default_cover_color, :cover_text_colors, :cover_text_auto,
-                  :section_library_keys, :download_audience_icons
+                  :section_library_keys, :sign_in_path, :registration_path, :site_name,
+                  :download_audience_icons
     attr_reader :hooks
 
     def initialize
-      @parent_root_type = "Workspace"
-      @authentication_method = :authenticate_user!
-      @current_actor_method = :current_user
-      @section_types = []
-      @section_components = {}
-      @section_editors = {}
-      @section_prepares = {}
-      @excluded_picker_types = []
+      assign_base_defaults
       assign_cover_defaults
       @hooks = RecordingStudio::Hooks.new
     end
@@ -55,7 +49,7 @@ module RecordingStudioPresskits
     end
 
     def to_h
-      base_settings.merge(cover_settings).merge(hooks_registered: hook_counts)
+      identity_settings.merge(editor_settings).merge(cover_settings).merge(hooks_registered: hook_counts)
     end
 
     def merge!(hash)
@@ -70,29 +64,43 @@ module RecordingStudioPresskits
 
     private
 
+    def assign_base_defaults
+      @parent_root_type = "Workspace"
+      @authentication_method = :authenticate_user!
+      @current_actor_method = :current_user
+      @section_types = []
+      @section_components = {}
+      @section_editors = {}
+      @section_prepares = {}
+      @excluded_picker_types = []
+    end
+
     def assign_cover_defaults
       @section_library_keys = {}
       @download_audience_icons = {}
+      @sign_in_path = "/users/sign_in"
+      @registration_path = nil
+      @site_name = nil
       @cover_colors = Cover::Palette::DEFAULT_COLORS.dup
       @default_cover_color = Cover::Palette::DEFAULT_COLOR
       @cover_text_colors = Cover::Palette::DEFAULT_TEXT_COLORS.dup
       @cover_text_auto = true
     end
 
-    def base_settings
+    def identity_settings
       {
-        parent_root_type: parent_root_type,
-        authentication_method: authentication_method,
-        current_actor_method: current_actor_method,
+        parent_root_type: parent_root_type, authentication_method: authentication_method,
+        current_actor_method: current_actor_method, sign_in_path: sign_in_path,
+        registration_path: registration_path, site_name: site_name
+      }
+    end
+
+    def editor_settings
+      {
         section_types: Array(section_types).map(&:to_s),
         section_components: section_components.dup,
         section_editors: section_editors.dup,
-        excluded_picker_types: Array(excluded_picker_types).map(&:to_s)
-      }.merge(hash_settings)
-    end
-
-    def hash_settings
-      {
+        excluded_picker_types: Array(excluded_picker_types).map(&:to_s),
         section_library_keys: (section_library_keys || {}).to_h,
         download_audience_icons: (download_audience_icons || {}).to_h
       }

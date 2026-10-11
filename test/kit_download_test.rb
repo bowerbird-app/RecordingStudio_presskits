@@ -86,9 +86,11 @@ class KitDownloadTest < Minitest::Test
       File.expand_path("../app/components/recording_studio_presskits/press_kits/kit_editor_component.html.erb", __dir__)
     )
     refute_includes editor, "presskits-kit-download"
+    assert_includes editor, 'id: "presskits-visibility"'
     assert_includes editor, 'id: "presskits-downloads"'
     assert_includes editor, 'icon: "arrow-down-tray"'
     assert_includes editor, "download_edit_path"
+    assert_operator editor.index('id: "presskits-visibility"'), :<, editor.index('id: "presskits-downloads"')
   end
 
   def test_download_copy_is_i18n

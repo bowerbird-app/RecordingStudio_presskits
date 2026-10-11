@@ -339,6 +339,72 @@ begin
     ]
   )
 
+  ensure_kit_description = lambda do |kit_recording, description, cover_color: nil|
+    recordable = kit_recording.recordable
+    needs_description = recordable.description != description
+    needs_color = cover_color.present? && recordable.cover_color != cover_color
+    return unless needs_description || needs_color
+
+    root_recording.revise(kit_recording, actor: user) do |press_kit|
+      press_kit.description = description
+      if cover_color.present?
+        press_kit.cover_style = "color"
+        press_kit.cover_color = cover_color
+      end
+    end
+    kit_recording.reload
+  end
+
+  ensure_visibility_kit = lambda do |title, description:, cover_color:, audience:, fallback:, slug:|
+    kit = find_or_record_named_child.call(
+      RecordingStudioPresskits::PressKit,
+      title,
+      root_recording,
+      root_recording,
+      description: description,
+      cover_style: "color",
+      cover_color: cover_color
+    )
+    ensure_kit_description.call(kit, description, cover_color: cover_color)
+    publish_kit.call(kit, slug: slug, status: "published")
+    RecordingStudioPresskits::Visibility.set_audience!(
+      recording: kit,
+      audience: audience,
+      actor: user
+    )
+    RecordingStudioPresskits::KitSettings.save_fallback!(
+      recording: kit,
+      fallback: fallback,
+      actor: user
+    )
+    kit.reload
+  end
+
+  ensure_visibility_kit.call(
+    "Members only launch",
+    description: "A kit for people who have an account.",
+    cover_color: "#1F2937",
+    audience: :signed_in,
+    fallback: :preview,
+    slug: "members-only-launch"
+  )
+  ensure_visibility_kit.call(
+    "Invite only launch",
+    description: "A kit for invited guests.",
+    cover_color: "#1F2937",
+    audience: :granted,
+    fallback: :preview,
+    slug: "invite-only-launch"
+  )
+  ensure_visibility_kit.call(
+    "Quiet launch",
+    description: "This stays off the public list.",
+    cover_color: "#1F2937",
+    audience: :granted,
+    fallback: :hidden,
+    slug: "quiet-launch"
+  )
+
   [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
     bootstrap_owner_access.call(recording, user)
   end
@@ -354,3 +420,6 @@ puts "Seeded: Admin root '#{admin_root.name}' with root recording ##{admin_root_
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
 puts "Seeded: Press kit 'Spring launch' published at /published/:uuid/spring-launch"
 puts "Seeded: Press kit 'Autumn recap' as unpublished"
+puts "Seeded: Press kit 'Members only launch' signed_in preview at /published/:uuid/members-only-launch"
+puts "Seeded: Press kit 'Invite only launch' granted preview at /published/:uuid/invite-only-launch"
+puts "Seeded: Press kit 'Quiet launch' granted hidden at /published/:uuid/quiet-launch"

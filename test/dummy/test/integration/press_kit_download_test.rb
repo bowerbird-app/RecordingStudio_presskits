@@ -260,8 +260,13 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     downloads_path = recording_studio_presskits.edit_press_kit_downloads_path(kit)
+    visibility_path = recording_studio_presskits.edit_press_kit_visibility_path(kit)
+    assert_select "#presskits-visibility[href='#{visibility_path}']", text: "Visibility"
+    assert_select "#presskits-visibility [data-flat-pack--icon-name-value='eye']"
     assert_select "#presskits-downloads[href='#{downloads_path}']", text: "Downloads"
     assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
+    toolbar_html = css_select("#presskits-editor-toolbar").to_html
+    assert_operator toolbar_html.index("presskits-visibility"), :<, toolbar_html.index("presskits-downloads")
 
     get downloads_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
     assert_response :success
@@ -396,9 +401,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
   def with_test_custom_download_audience
     previous = nil
-    unless RecordingStudioAccessible.registered_audience?(TEST_CUSTOM_AUDIENCE)
-      RecordingStudioAccessible.register_audience(TEST_CUSTOM_AUDIENCE) { |**_kwargs| false }
-    end
+    RecordingStudioAccessible.register_audience(TEST_CUSTOM_AUDIENCE) { |**_kwargs| false }
 
     audiences = RecordingStudioAccessible.configuration.action_audiences
     previous = audiences[:"presskits.kit_download"]

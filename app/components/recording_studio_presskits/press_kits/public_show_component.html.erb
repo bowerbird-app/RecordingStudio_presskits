@@ -3,7 +3,7 @@
   class: RecordingStudioPresskits::PressKits::EditorChrome::KIT_CARD_CLASSES,
   padding: :none
 ) do %>
-  <div id="presskits-public-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>">
+  <div id="presskits-public-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>" data-presskits-presentation="full">
     <%= render RecordingStudioPresskits::Cover::Component.new(
       recording: @press_kit_recording,
       size: :hero
