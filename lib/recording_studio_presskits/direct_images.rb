@@ -7,13 +7,7 @@ module RecordingStudioPresskits
         return [] if recording.blank? || !recording.respond_to?(:id)
         return [] unless defined?(RecordingStudioAttachable::Queries::ForRecording)
 
-        relation = RecordingStudioAttachable::Queries::ForRecording.new(
-          recording: recording,
-          scope: :direct,
-          kind: :images,
-          include_trashed: false
-        ).unpaged
-        sort_by_order(recording, relation.to_a)
+        sort_by_order(recording, image_recordings(recording))
       rescue StandardError
         []
       end
@@ -43,6 +37,15 @@ module RecordingStudioPresskits
       end
 
       private
+
+      def image_recordings(recording)
+        RecordingStudioAttachable::Queries::ForRecording.new(
+          recording: recording,
+          scope: :direct,
+          kind: :images,
+          include_trashed: false
+        ).unpaged.to_a
+      end
 
       def sort_by_order(recording, items)
         return items unless recording.respond_to?(:recording_studio_orderable_children)

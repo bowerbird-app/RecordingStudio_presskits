@@ -936,7 +936,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes editor, "attachment_import[attachments][][file]"
     refute_includes editor, "library-upload"
     refute_includes editor, "presskits_editor_nav(:push)"
-    refute File.exist?(presskits_path("app/javascript/recording_studio_presskits/controllers/image_upload_controller.js"))
+    image_upload = "app/javascript/recording_studio_presskits/controllers/image_upload_controller.js"
+    refute File.exist?(presskits_path(image_upload))
     refute_includes section_editor, "upload_form_data"
   end
 
