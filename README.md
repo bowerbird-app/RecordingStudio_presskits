@@ -20,7 +20,7 @@ gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publi
 gem "recording_studio_downloadable", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
 gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"
-gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"
+gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
 gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
@@ -401,7 +401,7 @@ Dummy kit pins:
 | FlatPack | `v0.1.224` |
 | Attachable | `v0.15.0` |
 | Company | `v0.3.0` |
-| Location | `v0.5.1` |
+| Location | `v0.6.0` |
 | Orderable | `v0.2.7` |
 | Trashable | `v0.6.0` |
 | Duplicatable | `v0.4.5` |
