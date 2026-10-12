@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.36.1] - 2026-10-12
+
+### Added
+- README section **Displaying press kits in a host**. It documents `Cover::Component` (`:card`, `:preview`, `:hero`), `PublicShowComponent`, `PreviewShowComponent`, `KitQuery.for_root`, `Visibility.presentation_for`, the publishable public URL, and `RecordingStudio::Capabilities::PressKits`. **Preview** is the audience preview. **Owner preview** is `PublicShowComponent` with `preview: true`. A **Planned** subsection names host helpers that are not in the gem yet.
+- Version `0.36.1`
+
+### Upgrade notes
+- Bump to `0.36.1`. There is no migration, no config change, and no new public method. Hosts that render a kit on their own page follow **Displaying press kits in a host**.
+
 ## [0.36.0] - 2026-10-12
 
 ### Changed

@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.36.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.36.1", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -347,6 +347,28 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme_source, "/downloads/edit"
     refute_includes readme_source, "flat_pack_sidebar"
     refute_includes readme_source, "/docs/"
+  end
+
+  def test_readme_explains_host_display
+    readme = File.read(File.expand_path("../README.md", __dir__))
+
+    assert_includes readme, "## Displaying press kits in a host"
+    assert_includes readme, "RecordingStudioPresskits::Cover::Component.new"
+    assert_includes readme, "size: :card"
+    assert_includes readme, "PressKits::PublicShowComponent.new"
+    assert_includes readme, "PressKits::PreviewShowComponent.new"
+    assert_includes readme, "KitQuery.for_root(root_recording)"
+    assert_includes readme, "Visibility.presentation_for(actor:, kit:, purpose: :public)"
+    assert_includes readme, "publishable_public_path"
+    assert_includes readme, "RecordingStudio::Capabilities::PressKits.to"
+    assert_includes readme, "does not call `Visibility.presentation_for`"
+    assert_includes readme, "recording_studio_downloadable_button"
+    assert_includes readme, "### Planned"
+    assert_includes readme, "presskit_card"
+    assert_includes readme, "presskit_public_url(recording)"
+    assert_includes readme, "presskit_visible_to?(recording, actor)"
+    assert_includes readme, "owner preview"
+    refute_includes readme, "teaser"
   end
 
   def test_product_readme_is_the_press_kit_guide

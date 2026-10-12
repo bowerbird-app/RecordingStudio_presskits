@@ -1,5 +1,9 @@
 # Upgrade notes
 
+## 0.36.1
+
+No migration, no config change, and no new public method. The README section **Displaying press kits in a host** documents the card, the full kit, the audience preview, `KitQuery.for_root`, and `Visibility.presentation_for`. Those calls already exist on `0.36.0`.
+
 ## 0.36.0
 
 Images and the kit cover no longer use the Attachable image library. There is no schema change in Press Kits and no data migration. Recording Studio is not in production. Reseed the dummy app, or upload the photos again.

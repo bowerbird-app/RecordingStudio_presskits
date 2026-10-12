@@ -217,7 +217,7 @@ When the host root enables companies (`allow: :one`), `Cover::Company` looks up 
 
 An optional cover image sits above the colour header. PressKit includes `Attachable.to` for one `image/*` file. `CoverImage` resolves the first direct image through `DirectImages`. `Cover::Image` paints it. The header screen uploads and removes that file itself. There is no library picker and no second photo model. Flatpack has no full-bleed crop image, so the hero uses `aspect-[1440/640]` and `object-cover` on a plain `image_tag`.
 
-`RecordingStudioPresskits::Cover::Component` is the reusable card. Pass a kit recording or the title, description, colour, and text colour. Sizes are `:card` (9/16 colour tile, or an image card with the title below the photo), `:preview` (9/16 colour tile in the header editor, no image), and `:hero` (optional full-width image above the colour header). Hero height comes from padding plus content (`p-12` on a phone, `md:p-24` on a desktop), not a fixed ratio. A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). The title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. The hero does not show the short description; cards and the header editor still do. Colour grid cards stay 9/16. Text colour is the chosen hex, or Auto.
+`RecordingStudioPresskits::Cover::Component` is the reusable card. Pass a kit recording or the title, description, colour, and text colour. Sizes are `:card` (9/16 colour tile, or an image card with the title below the photo), `:preview` (9/16 colour tile in the header editor, no image), and `:hero` (optional full-width image above the colour header). Hero height comes from padding plus content (`p-12` on a phone, `md:p-24` on a desktop), not a fixed ratio. A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). The title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. The hero does not show the short description; cards and the header editor still do. Colour grid cards stay 9/16. Text colour is the chosen hex, or Auto. A host page that renders this card, or the full kit, follows [Displaying press kits in a host](#displaying-press-kits-in-a-host).
 
 Create a section with `RecordingStudioPresskits.create_section!`. That call records a kit section under the kit, then records the chosen content type under the kit section, in one transaction. A failed content write leaves no kit section behind. Title and subtitle belong to the kit section. A content default belongs to the registered `prepare` hook.
 
@@ -379,6 +379,183 @@ A live kit is readable without signing in. Publishable serves `/published/:uuid/
 Logged-out visitors get a 404 for a kit that is not currently published. An authenticated owner can still open the owner preview on the default layout. A live kit whose audience is not public still goes through `Visibility.presentation_for`. Preview shows the hero (eyebrow, title, company, location, cover) then **See full press kit** with an explanation. Hidden is a plain 404.
 
 Use `PressKit.indexable` / `indexable?` for publish state. Use `KitQuery.discoverable_for(actor:)` for public lists, search, and discovery so hidden kits stay out for people who cannot view the full kit. Preview kits may show their preview card. Admin widgets still list live vs not-live work for staff.
+
+## Displaying press kits in a host
+
+A press center, or any other host page, renders kits with the components in this section. The mounted index, kit editor, and owner preview stay on the engine. Those screens call `authenticate_presskits_actor!`, use the current root from Root Switchable, and render inside `recording_studio/default_layout`. The editor modal is Turbo frame `pk-editor`. Use the components below on a host page. Leave the engine routes for people editing kits.
+
+In this section, **preview** means the audience preview: `Visibility.presentation_for` returns `:preview`, and the component is `RecordingStudioPresskits::PressKits::PreviewShowComponent`. **Owner preview** means `RecordingStudioPresskits::PressKits::PublicShowComponent` with `preview: true`, the authenticated page at engine `GET press_kits/:id/preview`. `Cover::Component` `size: :preview` is a third thing: the 9/16 colour tile on the header screen.
+
+### Requirements
+
+Include `RecordingStudio::Capabilities::PressKits.to` on the recordable that should hold kits. `.to` takes no options and calls `RecordingStudio::Capabilities.include_for(:press_kits)`. The gem registers `:press_kits` at boot with `child_recordables: ["RecordingStudioPresskits::PressKit"]`. Core allows that recordable as a parent through `extra_capability_parent_types_for`. PressKit `allowed_parent_types` stays the host root. A capability-owned kit cannot sit under a shared root.
+
+Register `PressKit`, `KitSection`, and each section content type the kits use. Section bodies resolve through `RecordingStudioPresskits.section_component_for` (the registered component, or `Type::Component`).
+
+The host layout loads `tailwind`, `flat_pack/variables`, and `flat_pack/application`. Text sections also need `flat_pack/rich_text`. These components draw Flatpack. They do not ship a layout. The publishable page uses `recording_studio_presskits/blank`: a full HTML document, `data-theme="rounded"`, those stylesheets, and no page nav.
+
+Publishable supplies the public URL and `currently_published?`. Accessible supplies `presskits.kit_view_full` for `Visibility.presentation_for`. Attachable supplies the cover photo and Images-section files. Without Attachable, the card and the hero stay colour-only. Downloadable, and its view helper, supply **Download kit** inside `PublicShowComponent`. Companies (`allow: :one` on the root) and Location are optional rows on the hero.
+
+### `KitQuery.for_root`
+
+```ruby
+RecordingStudioPresskits::KitQuery.for_root(root_recording)
+```
+
+`root_recording` is the workspace (or other root) recording. A blank root returns `RecordingStudio::Recording.none`. Otherwise the query returns trashable-active `PressKit` recordings with that `root_recording`, including kits nested under another recordable. Order is `recording_studio_orderable_position`, `created_at`, `id`. The relation includes the recordable.
+
+Live here means not trashed. Unpublished kits are included. Audience is not applied. The scope is the root, so every live kit in that root comes back, including kits that belong to a different parent in the same workspace.
+
+### `Visibility.presentation_for`
+
+```ruby
+RecordingStudioPresskits::Visibility.presentation_for(actor:, kit:, purpose: :public)
+```
+
+`actor` is the visitor (`current_user` or `nil`). `kit` is a recording, or a recordable that responds to `recording`. `purpose` defaults to `:public`.
+
+The return value is one of `:full`, `:preview`, `:hidden`, or `:unavailable`.
+
+- `:unavailable` when the recording is missing, or the kit is not `currently_published?`. With `purpose: :editor`, an actor Accessible allows to `:view` the kit gets `:full` instead.
+- `:full` when Accessible allows action `presskits.kit_view_full`.
+- `:preview` or `:hidden` from the kit fallback (`KitSettings`) when the kit is live and the actor lacks that action.
+
+On a host page, `:full` renders `PublicShowComponent`, `:preview` renders `PreviewShowComponent`, and `:hidden` and `:unavailable` render nothing. The publishable page does the same. `Visibility.apply_public_response!` sets `Cache-Control: private, no-store` for every presentation except `:full`, and sets status 404 for `:hidden` and `:unavailable`.
+
+### Card
+
+```erb
+<%= render RecordingStudioPresskits::Cover::Component.new(
+      recording: kit_recording,
+      size: :card,
+      href: kit_recording.publishable_public_path
+    ) %>
+```
+
+```ruby
+initialize(recording: nil, title: nil, description: nil, cover_color: nil,
+           cover_style: nil, cover_text_color: nil, size: :card, href: nil, id: nil)
+```
+
+Every argument is optional. An unknown `size` becomes `:card`. Title uses the argument, then the recordable title, then `"Press kit"`. Description uses the argument. Pass `description: nil` (the default) to read the recordable. Colours use the argument, then `resolved_cover_color` / `resolved_cover_style` / `resolved_cover_text_color`, then the gem default. A blank text colour uses Auto (WCAG contrast on that background).
+
+`:card` is the grid card. With no cover image it is a 9/16 colour tile, a large title, and a short description clamped to two lines when one is present. With a cover image (`Cover::Image` through `CoverImage` and `DirectImages`) the photo sits on top at `aspect-[1440/640]` and the title and description sit below. `href` makes the Flatpack card interactive, so the whole card is that link. Sections stay off the card.
+
+`:preview` is the header-editor tile. It stays 9/16, skips the cover image, and renders the title and description in `FlatPack::PageTitle::Component`. `href` still makes that card interactive.
+
+`:hero` is the kit header. It is a full-width stack, not a Flatpack card link, and `href` is unused. An attached cover image renders first at `aspect-[1440/640]`. Under it, a flush colour band (`p-12`, `md:p-24`) holds the **Press kit** eyebrow (`recording_studio_presskits.cover.eyebrow`), `PageTitle` at `size: :display`, then the company logo and name when the root has a company, then the kit location icon and `display_name` when that child exists. The short description stays off this band.
+
+### Full kit
+
+```erb
+<%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
+      press_kit_recording: kit_recording
+    ) %>
+```
+
+```ruby
+initialize(press_kit_recording:, section_recordings: nil, preview: false)
+```
+
+`press_kit_recording:` is required. `section_recordings:` defaults to `KitQuery.sections_for(press_kit_recording)`. `preview:` defaults to `false`.
+
+The component renders one Flatpack card: `Cover::Component` at `:hero`, then each visible section through `PressKits::SectionFrameComponent` (`section_recording:`). A section whose content component is missing, or whose `render?` is false, is skipped. When nothing remains, the card shows the empty state **Nothing to show yet**.
+
+`PublicShowComponent` does not call `Visibility.presentation_for`. It renders the recording you pass, sections included. Call `presentation_for` first and render this component only for `:full`.
+
+With `preview: false`, **Download kit** renders when the kit is `currently_published?` and `KitDownload.allowed?` for `helpers.current_user` or `Current.actor`. The button is Downloadable's `recording_studio_downloadable_button`. The host controller includes that helper (`helper RecordingStudioDownloadable::Engine.helpers`, the same include `PublicPressKitsController` uses). A live kit on a controller without the helper raises when the button renders.
+
+`preview: true` is owner preview. The download button stays off. A kit that is not `currently_published?` shows **This is just for you. Nobody else can see it yet.** The engine view `press_kits/preview` renders this inside `presskits_page_nav` on `recording_studio/default_layout`, after auth. That route is the owner page, not a fragment for a public host page.
+
+### Audience preview
+
+```erb
+<%= render RecordingStudioPresskits::PressKits::PreviewShowComponent.new(
+      press_kit_recording: kit_recording
+    ) %>
+```
+
+```ruby
+initialize(press_kit_recording:, reason: nil)
+```
+
+`press_kit_recording:` is required. `reason:` is optional. A blank reason uses `Visibility.preview_reason_for`, which returns `:signed_in` when the effective audience is `:signed_in`, and `:granted` otherwise.
+
+The component renders the same card chrome and `Cover::Component` at `:hero` (eyebrow, title, cover image, company, kit location). The short description stays off. Under the hero, `SectionHeadingComponent` renders **See full press kit**, then the explanation. `:signed_in` says “You must be signed in to {site name} to view this press kit.” and shows **Sign in** (`Visibility.sign_in_path`) plus **Create account** when `Visibility.registration_path` is present. Any other reason says “You need access to view this press kit.” and shows no buttons. Sections and **Download kit** stay off.
+
+### Publishable public URL
+
+A live kit is served at `/published/:uuid/:slug` when Publishable is mounted at `/`. Override that path only if it still includes `:uuid`. The recording method is `publishable_public_path`. Inside a presskits engine view, `presskits_public_path_for(recording)` returns that path when the recording responds to it.
+
+`PressKit` sets `public_controller: "recording_studio_presskits/public_press_kits"`, `public_action: :show`, and `public_layout: "recording_studio_presskits/blank"`. Publishable assigns `@parent_recording` and `@parent_recordable`. `PublicPressKitsController#show` sets `Current.actor` from `current_user` (including `nil`) and calls `presentation_for` with `purpose: :public`. `:full` renders `PublicShowComponent` with `preview: false` and the sections. `:preview` renders `PreviewShowComponent`. `:hidden` and `:unavailable` render no kit markup.
+
+That response is a full document. There is no embeddable kit endpoint, and no engine route that returns the card or the kit as a fragment. Engine `press_kits` routes stay behind `authenticate_presskits_actor!`.
+
+### Press center
+
+`Center` stands in for the host recordable. It includes the capability, and it is not a shared root. Kits recorded under it use the center's root for `for_root`.
+
+```ruby
+class Center < ApplicationRecord
+  recording_studio_recordable label: "Center",
+                              root: false,
+                              allowed_parent_types: ["Workspace"]
+
+  include RecordingStudio::Capabilities::PressKits.to
+end
+```
+
+The center page lists cards. `for_root` is every live kit in the workspace root, so other parents in that workspace appear in this grid until a parent-scoped query exists. Skip `:hidden` and `:unavailable` before rendering a card. `href` is the publishable path, which 404s for a kit that is not live.
+
+```erb
+<% kits = RecordingStudioPresskits::KitQuery.for_root(center_recording.root_recording) %>
+
+<%= render FlatPack::Grid::Component.new(cols: 3, gap: :md) do %>
+  <% kits.each do |kit| %>
+    <% presentation = RecordingStudioPresskits::Visibility.presentation_for(
+         actor: current_user,
+         kit: kit
+       ) %>
+    <% next unless %i[full preview].include?(presentation) %>
+
+    <%= render RecordingStudioPresskits::Cover::Component.new(
+          recording: kit,
+          size: :card,
+          href: kit.publishable_public_path
+        ) %>
+  <% end %>
+<% end %>
+```
+
+A center page that shows one kit branches on the same presentation. The controller that renders `PublicShowComponent` includes Downloadable's helper.
+
+```erb
+<% presentation = RecordingStudioPresskits::Visibility.presentation_for(
+     actor: current_user,
+     kit: kit_recording
+   ) %>
+
+<% if presentation == :full %>
+  <%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
+        press_kit_recording: kit_recording
+      ) %>
+<% elsif presentation == :preview %>
+  <%= render RecordingStudioPresskits::PressKits::PreviewShowComponent.new(
+        press_kit_recording: kit_recording
+      ) %>
+<% end %>
+```
+
+### Planned
+
+These are not in the gem. Do not call them.
+
+- `presskit_card` helper. Renders `Cover::Component` at `:card` with the kit's public URL as `href`.
+- A kit grid/list component. Cards for a set of kit recordings, plus an empty state. No index sidebar, no **My presskits** heading, no create button, and no credits link.
+- A host-safe full-kit wrapper. Calls `Visibility.presentation_for` and renders `PublicShowComponent` for `:full`, `PreviewShowComponent` for `:preview`, and nothing for `:hidden` and `:unavailable`.
+- `presskit_public_url(recording)`. A host helper for the publishable path. Today that path is `publishable_public_path` on the recording.
+- `presskit_visible_to?(recording, actor)`. True when `presentation_for` is `:full` or `:preview`.
+- A query for live kits under a given parent. `KitQuery.for_root` is scoped to the root recording.
 
 ## Admin
 
