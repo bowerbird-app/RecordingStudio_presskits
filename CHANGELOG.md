@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-10-12
+
+### Added
+- `RecordingStudio::Capabilities::PressKits`. Include `RecordingStudio::Capabilities::PressKits.to` on a recordable that should hold press kits. `.to` takes no options and calls `RecordingStudio::Capabilities.include_for(:press_kits)`.
+- The gem registers `:press_kits` at boot with `source: "recording_studio_presskits"` and `child_recordables: ["RecordingStudioPresskits::PressKit"]`. Registration stays outside `.to`. Core then allows that recordable as a parent through `extra_capability_parent_types_for`.
+- Dummy `Showcase` includes the capability so a kit can be recorded under it. PressKit `allowed_parent_types` stays the host root.
+- Version `0.35.0`
+
+### Changed
+- `KitQuery.for_root` returns live kits anywhere under the root. The kit index, the editor, and the owner preview find a kit that is not a direct child of the workspace.
+
+### Upgrade notes
+- Include `RecordingStudio::Capabilities::PressKits.to` on each recordable that should parent kits. Leave PressKit `allowed_parent_types` as the host root (`parent_root_type`). Do not add a second parent list.
+- A capability-owned kit cannot sit under a shared root. Workspace is not a shared root, so kits that already sit on the workspace stay valid.
+- Lists, the editor, and owner preview already use `KitQuery.for_root`. They now include kits nested under another recordable in that same root.
+
 ## [0.34.0] - 2026-10-12
 
 ### Added

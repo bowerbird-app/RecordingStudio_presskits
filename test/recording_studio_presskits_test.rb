@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.34.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.35.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -143,6 +143,51 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes source, "enable_capability(:orderable"
     refute_includes source, "enable_capability(:trashable"
     refute_includes source, "enable_capability(:duplicatable"
+    refute_includes source, "additional_parent_types"
+  end
+
+  def test_press_kits_capability_registers_at_boot
+    source = File.read(File.expand_path("../lib/recording_studio/capabilities/press_kits.rb", __dir__))
+    entry = File.read(File.expand_path("../lib/recording_studio_presskits.rb", __dir__))
+    query = File.read(File.expand_path("../lib/recording_studio_presskits/kit_query.rb", __dir__))
+
+    assert_includes entry, 'require "recording_studio/capabilities/press_kits"'
+    assert_includes source, "module PressKits"
+    assert_includes source, "def self.to\n"
+    assert_includes source, "RecordingStudio::Capabilities.include_for(:press_kits)"
+    refute_match(/def self\.to\(/, source)
+    assert_includes source, <<~RUBY
+      RecordingStudio.register_capability(
+        :press_kits,
+        source: "recording_studio_presskits",
+        child_recordables: ["RecordingStudioPresskits::PressKit"]
+      )
+    RUBY
+    register_at = source.index("RecordingStudio.register_capability")
+    method_end = source.index("end", source.index("def self.to"))
+    assert_operator register_at, :>, method_end
+    assert_includes query, ".where(root_recording: root_recording)"
+    refute_includes query, "parent_recording: root_recording"
+  end
+
+  def test_gem_does_not_name_a_press_center_or_extra_parent_list
+    root = File.expand_path("..", __dir__)
+    files = Dir.chdir(root) do
+      Dir[
+        "{lib,app,config}/**/*.{rb,erb,yml}",
+        "README.md",
+        "CHANGELOG.md",
+        "MIGRATION_NOTES.md",
+        "test/dummy/app/**/*.rb",
+        "test/dummy/config/**/*.rb"
+      ]
+    end
+
+    files.each do |path|
+      source = File.read(File.join(root, path))
+      refute_includes source, "PressCenter", path
+      refute_includes source, "additional_parent_types", path
+    end
   end
 
   def test_picker_helper_uses_core_public_parent_apis
@@ -267,6 +312,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer_source, '"RecordingStudioPresskits::Text"'
     assert_includes initializer_source, '"RecordingStudioPresskits::Images"'
     assert_includes initializer_source, '"FakeBlock"'
+    assert_includes initializer_source, '"Showcase"'
     presskits_initializer = File.read(
       File.expand_path("dummy/config/initializers/recording_studio_presskits.rb", __dir__)
     )
@@ -337,6 +383,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "KitLocation"
     assert_includes readme, "Capabilities::ImageLibrary.to"
     assert_includes readme, "Capabilities::LibraryPlacement.to"
+    assert_includes readme, "RecordingStudio::Capabilities::PressKits.to"
+    assert_includes readme, "include_for(:press_kits)"
+    assert_includes readme, "extra_capability_parent_types_for"
+    assert_includes readme, "KitQuery.for_root"
     assert_includes readme, "place_library_image"
     assert_includes readme, "upload_to_library_and_place"
     assert_includes readme, "LibraryImages"
@@ -448,6 +498,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes source, "Capabilities::Orderable"
     refute_includes source, "Capabilities::Duplicatable"
     refute_includes source, "Capabilities::Publishable"
+    refute_includes source, ".with("
+    refute_includes source, ".enabled"
+  end
+
+  def test_dummy_showcase_includes_press_kits
+    source = File.read(File.expand_path("dummy/app/models/showcase.rb", __dir__))
+
+    assert_includes source, 'label: "Showcase"'
+    assert_includes source, "root: false"
+    assert_includes source, 'allowed_parent_types: ["Workspace"]'
+    assert_includes source, "include RecordingStudio::Capabilities::PressKits.to"
+    refute_match(/PressKits\.to\(/, source)
     refute_includes source, ".with("
     refute_includes source, ".enabled"
   end

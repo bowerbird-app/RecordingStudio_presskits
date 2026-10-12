@@ -2,7 +2,7 @@
 
 A press kit holds ordered sections. Each section is a `RecordingStudioPresskits::KitSection` recording. The child under that recording is the content, such as text, images, or quotes. A later addon registers its own content type under a kit section.
 
-Kits sit under your workspace. You can have many. You publish the kit, not each block. This gem ships the authenticated editor, a public page for a live kit, an owner preview of a kit that is not live yet, and Admin widgets for live vs not-live work.
+Kits sit under your workspace, or under any recordable that includes Press kits. You can have many. You publish the kit, not each block. This gem ships the authenticated editor, a public page for a live kit, an owner preview of a kit that is not live yet, and Admin widgets for live vs not-live work.
 
 ## Install
 
@@ -149,6 +149,26 @@ include RecordingStudio::Capabilities::LibraryPlacement.to
 
 RecordingStudio.enable_capability(:action_audiences, on: self)
 ```
+
+PressKit names only the host root as a parent. A host that wants kits under another recordable includes Press kits on that recordable. `.to` takes no options and calls `RecordingStudio::Capabilities.include_for(:press_kits)`. Installing the gem does not turn the capability on.
+
+```ruby
+include RecordingStudio::Capabilities::PressKits.to
+```
+
+The gem registers the capability when it boots, not inside `.to`:
+
+```ruby
+RecordingStudio.register_capability(
+  :press_kits,
+  source: "recording_studio_presskits",
+  child_recordables: ["RecordingStudioPresskits::PressKit"]
+)
+```
+
+Core then treats each recordable that includes the capability as an allowed parent (`extra_capability_parent_types_for`). Do not add a second parent list on the kit. A capability-owned child cannot sit under a shared root. Workspace is not a shared root, so kits still sit directly on the workspace.
+
+`KitQuery.for_root` returns live kits anywhere under that root. The kit index, the editor, and the owner preview load kits through that query, so a kit under another recordable still opens.
 
 On the host root, turn companies on when you want the hero company row, and the image library on when kits should pick a cover photo. Dummy Workspace uses one company per root:
 
@@ -421,7 +441,7 @@ bin/rails db:setup
 bin/dev
 ```
 
-Seeds one published kit titled **Spring launch**, with a short description, a sky cover (`#BFDBFE`, Auto dark text), a Harbour Gallery cover photo from the workspace image library, **Harbour Studio** as the workspace company, **Harbour Gallery** as the kit location, credits, company statistics as cards, and project specifications as a list, and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. It also enables `Companies.to(allow: :one)` and `ImageLibrary.to`. Dummy `FakeBlock` stays test-only. Its parent is a kit section. It enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. Its `prepare` hook sets the block title from the create heading, or to Block when that heading is blank. The seeded admin user gets Accessible owner access on the workspace and the admin root.
+Seeds one published kit titled **Spring launch**, with a short description, a sky cover (`#BFDBFE`, Auto dark text), a Harbour Gallery cover photo from the workspace image library, **Harbour Studio** as the workspace company, **Harbour Gallery** as the kit location, credits, company statistics as cards, and project specifications as a list, and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. It also enables `Companies.to(allow: :one)` and `ImageLibrary.to`. Dummy `Showcase` includes `RecordingStudio::Capabilities::PressKits.to` so a kit can sit under a showcase as well as the workspace. It is a test recordable, not a screen. Dummy `FakeBlock` stays test-only. Its parent is a kit section. It enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. Its `prepare` hook sets the block title from the create heading, or to Block when that heading is blank. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
 ## Cloud Agent boot
 

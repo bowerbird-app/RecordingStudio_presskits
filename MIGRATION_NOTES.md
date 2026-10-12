@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## 0.35.0
+
+Include `RecordingStudio::Capabilities::PressKits.to` on a recordable that should hold press kits. `.to` takes no options. The gem registers `:press_kits` at boot with PressKit as its child recordable. Core adds that recordable to the kit's allowed parents. Leave `allowed_parent_types` on PressKit as the host root only. Do not add a second parent list.
+
+A capability-owned kit cannot sit under a shared root. Workspace is not a shared root, so a kit recorded directly on the workspace still belongs there.
+
+`KitQuery.for_root` returns every live kit under that root. The index, the editor, and the owner preview use that query.
+
 ## 0.34.0
 
 A Location section is a kit section whose content is `RecordingStudioPresskits::LocationSection`. That type is an empty table: a UUID primary key and `created_at`. Places are `RecordingStudio::Location::Location` children. Enable Location on `LocationSection`. Do not enable Location on `KitSection`. Do not copy `recording_studio_locations` into Press Kits.

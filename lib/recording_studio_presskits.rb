@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio"
+require "recording_studio/capabilities/press_kits"
 require "recording_studio_accessible"
 require "recording_studio_orderable"
 require "recording_studio_publishable"
