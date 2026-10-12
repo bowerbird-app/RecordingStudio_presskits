@@ -90,7 +90,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.7.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
@@ -318,7 +318,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "download_audience_icons"
     assert_includes readme, "set_audience!"
     assert_includes readme, "manage_role: :edit"
-    assert_includes readme, "v0.5.1"
+    assert_includes readme, "v0.6.0"
     assert_includes readme, "tag: \"v2.1.0\""
     assert_includes readme, "tag: \"v0.2.7\""
     assert_includes readme, "tag: \"v0.6.0\""

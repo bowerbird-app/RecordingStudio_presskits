@@ -82,10 +82,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_location.git
-  revision: f06c621cfc2c1f90e7cd9e8367a9282c8794011b
-  tag: v0.5.1
+  revision: 171fb420d7f7d5dbb8b887b66ec8a34f1dd816f8
+  tag: v0.6.0
   specs:
-    recording_studio_location (0.5.1)
+    recording_studio_location (0.6.0)
       flat_pack (>= 0.1.212)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
@@ -753,7 +753,7 @@ CHECKSUMS
   recording_studio_downloadable (0.3.0)
   recording_studio_duplicatable (0.4.1)
   recording_studio_external_embed (0.1.1)
-  recording_studio_location (0.5.1)
+  recording_studio_location (0.6.0)
   recording_studio_metrics (0.2.0)
   recording_studio_orderable (0.2.3)
   recording_studio_presskits (0.34.0)
