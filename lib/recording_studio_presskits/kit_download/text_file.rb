@@ -127,11 +127,9 @@ module RecordingStudioPresskits
       end
 
       def credit_block(line)
-        credit = Credits.credit_for(line)&.recordable
-        return if credit.blank?
-
-        role = line.recordable.role.to_s.strip.presence
-        name = credit.name.to_s.strip.presence
+        recordable = line.recordable
+        role = recordable.role.to_s.strip.presence
+        name = recordable.name.to_s.strip.presence
         return if name.blank?
 
         [role, name].compact.join(" — ")

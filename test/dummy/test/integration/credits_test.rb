@@ -24,142 +24,44 @@ class CreditsTest < ActionDispatch::IntegrationTest
     Current.actor = @previous_actor
   end
 
-  test "workspace credits keep their usual role when a kit overrides it" do
-    tom = create_credit("Tom Ross", usual_role: "Photography", url: "https://example.com/tom")
+  test "two kits keep independent copies of the same name" do
     kit = record_kit("Spring launch")
     other = record_kit("Autumn recap")
     spring = credits_content(add_credits_section(kit, "Project credits"))
     autumn = credits_content(add_credits_section(other, "Credits"))
 
-    spring_line = RecordingStudioPresskits::Credits.add!(
-      credits_section_recording: spring,
-      credit_recording: tom,
-      actor: @user
-    )
-    autumn_line = RecordingStudioPresskits::Credits.add!(
-      credits_section_recording: autumn,
-      credit_recording: tom,
-      role: "Creative Direction",
-      actor: @user
-    )
-    again = RecordingStudioPresskits::Credits.add!(
-      credits_section_recording: spring,
-      credit_recording: tom,
-      role: "Film",
-      actor: @user
-    )
+    spring_line = add_line(spring, name: "Tom Ross", role: "Photography", url: "https://example.com/tom")
+    autumn_line = add_line(autumn, name: "Tom Ross", role: "Creative Direction", url: "https://example.com/tom")
 
-    assert_equal "Photography", spring_line.recordable.role
-    assert_equal "Creative Direction", autumn_line.recordable.role
-    assert_equal tom.id, spring_line.recordable.credit_recording_id
-    assert_equal tom.id, autumn_line.recordable.credit_recording_id
-    assert_equal tom.id, again.recordable.credit_recording_id
-    workspace_toms = RecordingStudioPresskits::Credits.active_for_root(@root).select do |recording|
-      recording.recordable.name == "Tom Ross"
-    end
-    assert_equal [tom.id], workspace_toms.map(&:id)
+    assert_nil spring_line.recordable.credit_recording_id
+    assert_nil autumn_line.recordable.credit_recording_id
+    refute_equal spring_line.recordable.id, autumn_line.recordable.id
 
-    RecordingStudioPresskits::Credits.revise!(
-      credit_recording: tom,
+    RecordingStudioPresskits::Credits.revise_line!(
+      line_recording: spring_line,
       root_recording: @root,
-      name: "Tom Ross",
-      url: "https://example.com/tom",
-      usual_role: "Photographer"
+      name: "Thomas Ross",
+      url: "https://example.com/thomas",
+      role: "Photography"
     )
 
-    assert_equal "Photographer", tom.reload.recordable.usual_role
-    assert_equal "Photography", spring_line.reload.recordable.role
-    assert_equal "Creative Direction", autumn_line.reload.recordable.role
-    assert_equal "https://example.com/tom", tom.recordable.url
-    refute_includes spring_line.recordable.attributes.values, "Tom Ross"
+    assert_equal "Thomas Ross", spring_line.reload.recordable.name
+    assert_equal "Tom Ross", autumn_line.reload.recordable.name
+    assert_equal "https://example.com/tom", autumn_line.recordable.url
   end
 
-  test "trashing a credit hides it and restoring it shows the same line" do
-    tom = create_credit("Tom Ross", usual_role: "Photography", url: nil)
-    content = credits_content(add_credits_section(record_kit("Spring launch"), "Project credits"))
-    line = RecordingStudioPresskits::Credits.add!(
-      credits_section_recording: content,
-      credit_recording: tom,
-      actor: @user
-    )
-
-    RecordingStudioPresskits::Credits.trash!(tom, actor: @user)
-
-    assert tom.reload.trashed_at.present?
-    assert_nil line.reload.trashed_at
-    assert_empty RecordingStudioPresskits::Credits.active_for_root(@root)
-    assert_equal [line.id], RecordingStudioPresskits::Credits.lines_for(content).map(&:id)
-    assert_empty RecordingStudioPresskits::Credits.visible_lines(content)
-    assert_equal(
-      { role: "Photography", credit_id: tom.id },
-      RecordingStudioPresskits::Api::CreditLinePayload.for(line)
-    )
-
-    RecordingStudioPresskits::Credits.restore!(tom, actor: @user)
-
-    assert_nil tom.reload.trashed_at
-    assert_equal [line], RecordingStudioPresskits::Credits.visible_lines(content)
-    assert_equal(
-      { role: "Photography", credit_id: tom.id, name: "Tom Ross" },
-      RecordingStudioPresskits::Api::CreditLinePayload.for(line)
-    )
-  end
-
-  test "removing a line leaves the credit and reordering stays on the section" do
-    studio = create_credit("Studio Bright", usual_role: "Architecture", url: "https://studiobright.com.au")
-    flack = create_credit("Flack Studio", usual_role: "Interior Design", url: nil)
-    content = credits_content(add_credits_section(record_kit("Spring launch"), "Project credits"))
-    first = RecordingStudioPresskits::Credits.add!(credits_section_recording: content, credit_recording: studio, actor: @user)
-    second = RecordingStudioPresskits::Credits.add!(credits_section_recording: content, credit_recording: flack, actor: @user)
-
-    content.recording_studio_orderable_move!(second, to_index: 0, actor: @user)
-
-    assert_equal [second.id, first.id], RecordingStudioPresskits::Credits.lines_for(content).map(&:id)
-
-    RecordingStudioPresskits::Credits.remove!(second, actor: @user)
-
-    assert second.reload.trashed_at.present?
-    assert_nil flack.reload.trashed_at
-    assert_equal [first.id], RecordingStudioPresskits::Credits.visible_lines(content).map(&:id)
-    assert_includes RecordingStudioPresskits::Credits.active_for_root(@root), flack
-  end
-
-  test "a credit from another workspace cannot be added" do
-    other_root = RecordingStudio.root_recording_for(Workspace.create!(name: "Other #{SecureRandom.hex(4)}"))
-    outsider = RecordingStudioPresskits::Credits.create!(
-      root_recording: other_root,
-      name: "Outsider",
-      usual_role: "PR",
-      actor: @user
-    )
-    content = credits_content(add_credits_section(record_kit("Spring launch"), "Project credits"))
-
-    assert_raises(ArgumentError) do
-      RecordingStudioPresskits::Credits.add!(
-        credits_section_recording: content,
-        credit_recording: outsider,
-        actor: @user
-      )
-    end
-    assert_empty RecordingStudioPresskits::Credits.lines_for(content)
-    assert_nil RecordingStudioPresskits::Credits.find_for_root(@root, outsider.id)
-  end
-
-  test "api add copies the usual role and remove leaves the credit" do
-    tom = create_credit("Tom Ross", usual_role: "Photography", url: "https://example.com/tom")
+  test "api add stores name url and role and remove trashes the line" do
     section = add_credits_section(record_kit("Spring launch"), "Project credits")
     content = credits_content(section)
 
-    line = RecordingStudioPresskits::Api::AddCredit.call(action_context(content, params: { credit_id: tom.id }))
+    line = RecordingStudioPresskits::Api::AddCredit.call(
+      action_context(content, params: { name: "Tom Ross", url: "https://example.com/tom", role: "Photography" })
+    )
 
     assert_equal "Photography", line.recordable.role
+    assert_equal "Tom Ross", line.recordable.name
     assert_equal(
-      {
-        role: "Photography",
-        credit_id: tom.id,
-        name: "Tom Ross",
-        url: "https://example.com/tom"
-      },
+      { name: "Tom Ross", role: "Photography", url: "https://example.com/tom" },
       RecordingStudioPresskits::Api::CreditLinePayload.for(line)
     )
     assert_equal(
@@ -172,345 +74,299 @@ class CreditsTest < ActionDispatch::IntegrationTest
       RecordingStudioPresskits::Api::SectionPayload.for(section.recordable, section)
     )
 
+    error = assert_raises(ArgumentError) do
+      RecordingStudioPresskits::Api::AddCredit.call(action_context(content, params: { name: "  " }))
+    end
+    assert_equal "Give them a name.", error.message
+
     RecordingStudioPresskits::Api::RemoveCredit.call(action_context(line, params: {}))
 
     assert line.reload.trashed_at.present?
-    assert_nil tom.reload.trashed_at
   end
 
-  test "credits screens create, edit, add, reorder, and publish a section" do
+  test "credits editor saves name role and url rows and publishes them" do
     sign_in @user
     switch_to_root(@root)
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "a[data-flat-pack-sidebar-item='true'][href='#{recording_studio_presskits.credits_path}'] span.fp-sidebar-label",
-                  text: "Credits"
-    assert_select "a.fp-button[href='#{recording_studio_presskits.credits_path}']", count: 0
-
-    get recording_studio_presskits.credits_path
-    assert_response :success
-    assert_select "h1", text: "Credits"
-    assert_includes response.body, "People, companies and organisations that you credit in Press kits"
-    credit_button = css_select("a.fp-button[href='#{recording_studio_presskits.new_credit_path}']").first
-    assert_includes credit_button["class"], "w-fit"
-    refute_includes credit_button["class"], "w-full"
-    assert_equal "Credit", credit_button.at_css("span").text
-    assert_rounded_default_layout
-
-    get recording_studio_presskits.new_credit_path
-    assert_response :success
-    assert_select "form#credit-form input[name='credit[name]']"
-    create_button = css_select("button[type=submit][form='credit-form']").first
-    assert_operator response.body.index('id="credit-form"'), :<, response.body.index("Create")
-    assert_equal "Create", create_button.text.squish
-    assert_includes create_button["class"], "w-fit"
-    assert_select "[role=separator]", count: 0
-    assert_select "button", text: "Trash", count: 0
-
-    empty_kit = record_kit("Empty credits")
-    post recording_studio_presskits.press_kit_sections_path(empty_kit),
-         params: { type: "RecordingStudioPresskits::CreditsSection" }
-    empty_section = RecordingStudioPresskits::KitQuery.sections_for(empty_kit).first
-    follow_redirect!
-    get recording_studio_presskits.heading_press_kit_section_path(empty_kit, empty_section)
-    heading = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(empty_kit, empty_section)}']").first
-    assert_equal "flat-pack--unsaved-changes", heading["data-controller"]
-    refute_includes heading.inner_html, "credit_lines"
-
-    get recording_studio_presskits.edit_press_kit_section_path(empty_kit, empty_section)
-    assert_select "#presskits-credit-lines"
-    assert_select ".flat-pack-collection-editor-empty", text: "No credits yet"
-    assert_select "button[data-flat-pack--collection-editor-target='addButton']", text: "Credit"
-    assert_select "a", text: "Add credit", count: 0
-    assert_select "input[name='credit_id']", count: 0
-    assert_select "template input[data-create-field='name'][data-fill-from-query]"
-    assert_select "template input[data-create-field='usual_role']"
-    assert_select "template label", text: "Default role"
-    assert_select "template label", text: "Usual role", count: 0
-    assert_select "template input[data-create-field='url'][form='collection-editor-unattached']"
-    search_url = recording_studio_presskits.search_credits_path
-    assert_select "[data-search-url='#{search_url}']"
-    assert_select "[data-create-url='#{recording_studio_presskits.credits_path}']"
-    empty_order = recording_studio_presskits.press_kit_section_credit_order_path(empty_kit, empty_section)
-    assert_select "[data-flat-pack--list-orderable-orderable-url-value='#{empty_order}']"
-    assert_select "[data-flat-pack--list-orderable-param-uuid-name-value='moving_recording_id']"
-    assert_select "[data-flat-pack--list-orderable-param-target-position-name-value='target_position']"
-    lines_form = css_select("#presskits-credit-lines").first
-    assert_includes lines_form["data-controller"], "flat-pack--unsaved-changes"
-    assert_includes lines_form["data-controller"], "recording-studio-presskits--credit-preview"
-    empty_save = css_select("#presskits-credit-lines-save button[type=submit]").first
-    assert_equal "Save", empty_save.text.squish
-    assert_equal "default", empty_save["data-fp-style"]
-    assert_equal "submit", empty_save["data-flat-pack--unsaved-changes-target"]
-    assert_operator lines_form.inner_html.index("flat-pack-collection-editor"), :<,
-                    lines_form.inner_html.index('id="presskits-credit-lines-save"')
-    refute_select "#presskits-section-preview"
-    assert_select "#presskits-credit-lines[data-action*='collection-editor:selected->recording-studio-presskits--credit-preview#choose']"
-    assert_select "#presskits-credit-lines[data-action*='input->recording-studio-presskits--credit-preview#role']"
-    assert_select "#presskits-credit-lines[data-action*='click->recording-studio-presskits--credit-preview#drop']"
-    assert_equal({}, JSON.parse(css_select("script[data-credit-catalog]").first.text))
-
-    assert_no_difference -> { RecordingStudioPresskits::Credit.count } do
-      post recording_studio_presskits.credits_path, params: { credit: { name: "  ", usual_role: "PR" } }
-    end
-    assert_response :unprocessable_entity
-
-    post recording_studio_presskits.credits_path, params: {
-      credit: { name: "Tom Ross", usual_role: "Photography", url: "https://example.com/tom" }
-    }
-    tom = RecordingStudioPresskits::Credits.active_for_root(@root).first
-    assert_redirected_to recording_studio_presskits.edit_credit_path(tom)
-    follow_redirect!
-    assert_select "input[name='credit[name]'][value='Tom Ross']"
-    assert_select "input[name='credit[usual_role]'][value='Photography']"
-    edit_form = css_select("form#credit-form").first
-    assert edit_form.inner_html.include?('name="credit[url]"')
-    save_button = css_select("button[type=submit][form='credit-form']").first
-    assert_equal "Save", save_button.text.squish
-    assert_includes save_button["class"], "w-fit"
-    refute_includes save_button["class"], "w-full"
-    assert_select "[role=separator]", count: 0
-    actions = css_select("div.justify-between").first
-    assert_operator actions.inner_html.index("Save"), :<, actions.inner_html.index("Trash")
-    trash_button = css_select("div.justify-between button[data-fp-style='danger']").first
-    assert_equal "Trash", trash_button.text.squish
-
-    get recording_studio_presskits.credits_path
-    assert_select "th", text: "Name"
-    assert_select "thead th", count: 1
-    assert_select "a", text: "Tom Ross"
-    refute_includes response.body, "Usual role"
-    refute_includes response.body, "https://example.com/tom"
-
-    patch recording_studio_presskits.credit_path(tom), params: {
-      credit: { name: "Tom Ross", usual_role: "Photographer", url: "https://example.com/tom" }
-    }
-    assert_equal "Photographer", tom.reload.recordable.usual_role
+    assert_select "a[data-flat-pack-sidebar-item='true'] span.fp-sidebar-label", text: "Credits", count: 0
+    assert_select "a[data-flat-pack-sidebar-item='true'] span.fp-sidebar-label", text: "Images"
 
     kit = record_kit("Spring launch")
     post recording_studio_presskits.press_kit_sections_path(kit),
          params: { type: "RecordingStudioPresskits::CreditsSection" }
     section = RecordingStudioPresskits::KitQuery.sections_for(kit).first
     follow_redirect!
-    assert_response :success
     assert_equal "Credits", section.recordable.title
-    assert_select ".fp-section-title h2", text: "Credits"
-
-    get recording_studio_presskits.heading_press_kit_section_path(kit, section)
-    assert_select "input[name='kit_section[title]']"
-    assert_select "input[name='kit_section[subtitle]']"
-    form = css_select("form[action='#{recording_studio_presskits.press_kit_section_path(kit, section)}']").first
-    assert_equal "flat-pack--unsaved-changes", form["data-controller"]
-    update = css_select("#presskits-section-update button[type=submit]").first
-    assert_equal "Update", update.text.squish
-    assert_equal "default", update["data-fp-style"]
 
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    assert_select "h1", text: "Credits"
-    refute_select "input[name='kit_section[title]']"
-    assert_select "input[name='credit_id']", count: 0
-    assert_select "a", text: "Add credit", count: 0
+    assert_response :success
+    assert_select "#presskits-credit-lines"
+    assert_select ".flat-pack-collection-editor-empty", text: "No credits yet"
+    assert_select "button[data-flat-pack--collection-editor-target='addButton']", text: "Credit"
+    assert_select "template label", text: "Name"
+    assert_select "template label", text: "Role"
+    assert_select "template label", text: "URL"
+    assert_select "template label", text: "Default role", count: 0
+    assert_select "[data-search-url]", count: 0
+    assert_select "[data-create-url]", count: 0
+    assert_select "script[data-credit-catalog]", count: 0
+    lines_form = css_select("#presskits-credit-lines").first
+    assert_includes lines_form["data-controller"], "flat-pack--unsaved-changes"
+    assert_includes lines_form["data-controller"], "recording-studio-presskits--credit-preview"
+    assert_select "#presskits-credit-lines[data-action*='input->recording-studio-presskits--credit-preview#fields']"
+    assert_select "#presskits-credit-lines[data-action*='click->recording-studio-presskits--credit-preview#drop']"
+    assert_select "#presskits-credit-lines[data-action*='click->recording-studio-presskits--credit-preview#note']"
     save = css_select("#presskits-credit-lines-save button[type=submit]").first
     assert_equal "Save", save.text.squish
     assert_equal "default", save["data-fp-style"]
     assert_equal "submit", save["data-flat-pack--unsaved-changes-target"]
-    spring_lines = css_select("#presskits-credit-lines").first
-    assert_operator spring_lines.inner_html.index("flat-pack-collection-editor"), :<,
-                    spring_lines.inner_html.index('id="presskits-credit-lines-save"')
+    order = recording_studio_presskits.press_kit_section_credit_order_path(kit, section)
+    assert_select "[data-flat-pack--list-orderable-orderable-url-value='#{order}']"
+    assert_select "[data-flat-pack--list-orderable-param-uuid-name-value='moving_recording_id']"
+    assert_select "[data-flat-pack--list-orderable-param-target-position-name-value='target_position']"
 
-    get recording_studio_presskits.search_credits_path, params: { q: "tom" }, as: :json
-    assert_response :success
-    assert_equal(
-      [{ "id" => tom.id, "title" => "Tom Ross", "description" => "Photographer" }],
-      JSON.parse(response.body)["items"]
-    )
-    get recording_studio_presskits.search_credits_path, params: { q: " " }, as: :json
-    assert_empty JSON.parse(response.body)["items"]
-
-    assert_no_difference -> { RecordingStudioPresskits::Credits.active_for_root(@root).count } do
-      post recording_studio_presskits.credits_path, params: { name: "  ", usual_role: "PR" }, as: :json
-    end
-    assert_response :unprocessable_entity
-    assert_equal false, JSON.parse(response.body)["ok"]
-    assert_includes JSON.parse(response.body)["errors"], "Give them a name."
-
-    save_lines(kit, section, { "9" => { credit_recording_id: "", role: "Ghost" } })
+    save_lines(kit, section, { "0" => { name: "  ", role: "Ghost", url: "" } })
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_empty RecordingStudioPresskits::Credits.lines_for(credits_content(section))
 
-    save_lines(kit, section, { "0" => { credit_recording_id: tom.id, role: "" } })
-    line = RecordingStudioPresskits::Credits.lines_for(credits_content(section)).first
-    assert_equal "Photographer", line.recordable.role
-    follow_redirect!
-    assert_select "[data-collection-editor-title]", text: "Tom Ross"
-    assert_select "input[name='credit_lines[credit_lines_attributes][0][role]'][value='Photographer']"
-    assert_select "#presskits-credit-lines[data-controller*='recording-studio-presskits--credit-preview'][data-controller*='flat-pack--unsaved-changes']"
-    get recording_studio_presskits.edit_press_kit_path(kit)
-    assert_select "#presskits-editor-preview [data-credit-line-id='#{line.id}']"
-    assert_select "#presskits-editor-preview [data-credit-role]", text: "Photographer"
-    assert_select "#presskits-editor-preview [data-credit-name]", text: "Tom Ross"
-    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    assert_equal "https://example.com/tom", JSON.parse(css_select("script[data-credit-catalog]").first.text)[tom.id]
-
     save_lines(kit, section, {
-      "0" => { id: line.id, credit_recording_id: tom.id, role: "Photography", _destroy: "0" }
-    })
-    assert_equal "Photography", line.reload.recordable.role
-    assert_equal "Photographer", tom.reload.recordable.usual_role
-
-    patch recording_studio_presskits.credit_path(tom), params: {
-      credit: { name: "Tom Ross", usual_role: "Still photographer", url: "https://example.com/tom" }
-    }
-    assert_equal "Photography", line.reload.recordable.role
-    patch recording_studio_presskits.credit_path(tom), params: {
-      credit: { name: "Tom Ross", usual_role: "Photographer", url: "https://example.com/tom" }
-    }
-
-    post recording_studio_presskits.credits_path,
-         params: { name: "Studio Bright", usual_role: "Architecture", url: "https://studiobright.com.au" },
-         as: :json
-    assert_response :success
-    created = JSON.parse(response.body)
-    assert_equal true, created["ok"]
-    assert_equal "Studio Bright", created.dig("item", "title")
-    studio = RecordingStudioPresskits::Credits.find_for_root(@root, created.dig("item", "id"))
-
-    save_lines(kit, section, {
-      "0" => { id: line.id, role: "Photography", _destroy: "0" },
-      "1" => { credit_recording_id: studio.id, role: "Architecture" },
-      "2" => { credit_recording_id: tom.id, role: "Film" }
+      "0" => { name: "Tom Ross", role: "Photography", url: "https://example.com/tom" },
+      "1" => { name: "Studio Bright", role: "Architecture", url: "https://studiobright.com.au" }
     })
     lines = RecordingStudioPresskits::Credits.lines_for(credits_content(section))
-    studio_line = lines[1]
-    film_line = lines[2]
-    assert_equal "Studio Bright", RecordingStudioPresskits::Credits.credit_for(studio_line).recordable.name
-    assert_equal "Architecture", studio_line.recordable.role
-    assert_equal "Film", film_line.recordable.role
-    assert_equal tom.id, RecordingStudioPresskits::Credits.credit_for(film_line).id
+    tom = lines[0]
+    studio = lines[1]
+    assert_equal "Tom Ross", tom.recordable.name
+    assert_equal "Photography", tom.recordable.role
+    assert_equal "https://example.com/tom", tom.recordable.url
+    assert_equal "Studio Bright", studio.recordable.name
+    follow_redirect!
+    assert_select "input[name='credit_lines[credit_lines_attributes][0][name]'][value='Tom Ross']"
+    assert_select "input[name='credit_lines[credit_lines_attributes][0][role]'][value='Photography']"
+    assert_select "input[name='credit_lines[credit_lines_attributes][0][url]'][value='https://example.com/tom']"
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_select "#presskits-editor-preview [data-credit-line-id='#{tom.id}']"
+    assert_select "#presskits-editor-preview [data-credit-role]", text: "Photography"
+    assert_select "#presskits-editor-preview [data-credit-name]", text: "Tom Ross"
+    assert_select "#presskits-editor-preview a[href='https://example.com/tom']", text: "Tom Ross"
 
     save_lines(kit, section, {
-      "0" => { id: line.id, role: "Photography", _destroy: "0" },
-      "1" => { id: studio_line.id, role: "Architecture", _destroy: "0" },
-      "2" => { id: SecureRandom.uuid, role: "Nope", _destroy: "0" },
-      "3" => { id: film_line.id, role: "Film", _destroy: "1" }
+      "0" => { id: tom.id, name: "", role: "Photography", url: "https://example.com/tom", _destroy: "0" }
     })
-    assert film_line.reload.trashed_at.present?
-    assert_nil tom.reload.trashed_at
-    assert_equal(
-      [line.id, studio_line.id],
-      RecordingStudioPresskits::Credits.lines_for(credits_content(section)).map(&:id)
-    )
+    assert_equal "Give each credit a name.", flash[:alert]
+    assert_equal "Tom Ross", tom.reload.recordable.name
+
+    save_lines(kit, section, {
+      "0" => { id: tom.id, name: "Tom Ross", role: "Film", url: "https://example.com/tom", _destroy: "0" },
+      "1" => { id: studio.id, name: "Studio Bright", role: "Architecture", url: "https://studiobright.com.au", _destroy: "1" }
+    })
+    assert studio.reload.trashed_at.present?
+    assert_equal "Film", tom.reload.recordable.role
+    assert_equal [tom.id], RecordingStudioPresskits::Credits.lines_for(credits_content(section)).map(&:id)
+
+    save_lines(kit, section, {
+      "0" => { id: tom.id, name: "Tom Ross", role: "Photography", url: "https://example.com/tom", _destroy: "0" },
+      "1" => { name: "Studio Bright", role: "Architecture", url: "https://studiobright.com.au" }
+    })
+    studio = RecordingStudioPresskits::Credits.lines_for(credits_content(section)).last
 
     patch recording_studio_presskits.press_kit_section_credit_order_path(kit, section), params: {
-      recording_id: studio_line.id,
-      before_recording_id: line.id
+      recording_id: studio.id,
+      before_recording_id: tom.id
     }
     follow_redirect!
     assert_equal(
-      [studio_line.id, line.id],
+      [studio.id, tom.id],
       RecordingStudioPresskits::Credits.lines_for(credits_content(section)).map(&:id)
     )
-    assert_includes response.body, "Architecture"
     assert_includes response.body, "Studio Bright"
     assert_includes response.body, "https://studiobright.com.au"
-    catalog = JSON.parse(css_select("script[data-credit-catalog]").first.text)
-    assert_equal "https://studiobright.com.au", catalog[studio.id]
-    assert_equal "https://example.com/tom", catalog[tom.id]
 
     patch recording_studio_presskits.press_kit_section_credit_order_path(kit, section),
-          params: { moving_recording_id: line.id, target_position: 1 },
+          params: { moving_recording_id: tom.id, target_position: 1 },
           as: :json
     assert_response :success
     assert_equal true, JSON.parse(response.body)["ok"]
-    assert_equal [line.id, studio_line.id], RecordingStudioPresskits::Credits.lines_for(credits_content(section)).map(&:id)
-
-    patch recording_studio_presskits.press_kit_section_credit_order_path(kit, section),
-          params: { moving_recording_id: studio_line.id, target_position: 1 },
-          as: :json
-    assert_equal(
-      [studio_line.id, line.id],
-      RecordingStudioPresskits::Credits.lines_for(credits_content(section)).map(&:id)
-    )
-
-    patch recording_studio_presskits.press_kit_section_credit_order_path(kit, section), params: {}, as: :json
-    assert_response :unprocessable_entity
-    assert_equal false, JSON.parse(response.body)["ok"]
+    assert_equal [tom.id, studio.id], RecordingStudioPresskits::Credits.lines_for(credits_content(section)).map(&:id)
 
     publish_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-credits"
     assert_response :success
     assert_blank_public_layout
-    assert_operator response.body.index("Architecture"), :<, response.body.index("Studio Bright")
-    assert_includes response.body, "https://studiobright.com.au"
     assert_includes response.body, "Photography"
     assert_includes response.body, "Tom Ross"
-
-    save_lines(kit, section, {
-      "0" => { id: studio_line.id, role: "Architecture", _destroy: "1" },
-      "1" => { id: line.id, role: "Photography", _destroy: "0" }
-    })
-    follow_redirect!
-    assert studio_line.reload.trashed_at.present?
-    assert_includes RecordingStudioPresskits::Credits.active_for_root(@root).map { |credit| credit.recordable.name },
-                    "Studio Bright"
-    assert_select "[data-collection-editor-title]", text: "Studio Bright", count: 0
-    refute_includes css_select("#presskits-section-fields").text, "Studio Bright"
-
-    delete recording_studio_presskits.credit_path(tom)
-    assert_redirected_to recording_studio_presskits.credits_path
-    assert tom.reload.trashed_at.present?
-    get "/published/#{kit.publishable_child_recording.id}/spring-launch-credits"
-    refute_includes response.body, "Tom Ross"
-    assert_nil line.reload.trashed_at
-
-    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    assert_select "[data-collection-editor-title]", text: "In the trash"
+    assert_includes response.body, "https://example.com/tom"
+    assert_includes response.body, "Architecture"
+    assert_includes response.body, "Studio Bright"
   end
 
-  test "another workspace cannot open this credit" do
-    tom = create_credit("Tom Ross", usual_role: "Photography", url: nil)
-    other_workspace = Workspace.create!(name: "Elsewhere #{SecureRandom.hex(4)}")
-    other_root = RecordingStudio.root_recording_for(other_workspace)
-    RecordingStudioAccessible.bootstrap_owner_access!(recording: other_root, actor: @user)
-    sign_in @user
-    switch_to_root(other_root)
-
-    get recording_studio_presskits.edit_credit_path(tom)
-    assert_response :not_found
-
-    outsider = RecordingStudioPresskits::Credits.create!(
-      root_recording: other_root,
-      name: "Outsider",
-      usual_role: "PR",
-      actor: @user
-    )
-    switch_to_root(@root)
+  test "duplicating a kit copies credit lines that can change on their own" do
     kit = record_kit("Spring launch")
-    section = add_credits_section(kit, "Project credits")
-    post recording_studio_presskits.press_kit_section_credits_path(kit, section), params: { credit_id: outsider.id }
-    assert_response :not_found
-    assert_empty RecordingStudioPresskits::Credits.lines_for(credits_content(section))
+    content = credits_content(add_credits_section(kit, "Project credits"))
+    line = add_line(content, name: "Tom Ross", role: "Photography", url: "https://example.com/tom")
 
-    save_lines(kit, section, { "0" => { credit_recording_id: outsider.id, role: "PR" } })
-    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    assert_equal "That credit is not in this workspace.", flash[:alert]
-    assert_empty RecordingStudioPresskits::Credits.lines_for(credits_content(section))
+    duplicate = kit.duplicate_in_place!(actor: @user)
+    copied_section = duplicate.child_recordings.find { |child| child.recordable.is_a?(RecordingStudioPresskits::KitSection) }
+    copied_content = RecordingStudioPresskits::KitQuery.section_content(copied_section)
+    copied = RecordingStudioPresskits::Credits.visible_lines(copied_content).first
 
-    get recording_studio_presskits.search_credits_path, params: { q: "Outsider" }, as: :json
-    assert_empty JSON.parse(response.body)["items"]
+    refute_equal line.id, copied.id
+    assert_equal "Tom Ross (Copy)", copied.recordable.name
+    assert_equal "Photography", copied.recordable.role
+    assert_equal "https://example.com/tom", copied.recordable.url
+
+    RecordingStudioPresskits::Credits.revise_line!(
+      line_recording: copied,
+      root_recording: @root,
+      name: "Tom Copy",
+      url: "https://example.com/copy",
+      role: "Film"
+    )
+
+    assert_equal "Tom Ross", line.reload.recordable.name
+    assert_equal "Photography", line.recordable.role
+    assert_equal "https://example.com/tom", line.recordable.url
+    assert_equal "Tom Copy", copied.reload.recordable.name
+  end
+
+  test "migration copies a shared credit onto each kit and a rerun does not add lines" do
+    tom = create_credit("Tom Ross", url: "https://example.com/tom")
+    spring = credits_content(add_credits_section(record_kit("Spring launch"), "Project credits"))
+    autumn = credits_content(add_credits_section(record_kit("Autumn recap"), "Credits"))
+    spring_line = legacy_line(spring, tom, role: "Photography")
+    autumn_line = legacy_line(autumn, tom, role: "Creative Direction")
+    before = RecordingStudioPresskits::CreditLine.count
+
+    RecordingStudioPresskits::CreditLineOwnership.migrate!
+
+    assert_equal before, RecordingStudioPresskits::CreditLine.count
+    assert_equal "Tom Ross", spring_line.reload.recordable.name
+    assert_equal "https://example.com/tom", spring_line.recordable.url
+    assert_equal "Photography", spring_line.recordable.role
+    assert_equal "Tom Ross", autumn_line.reload.recordable.name
+    assert_equal tom.id, spring_line.recordable.credit_recording_id
+    assert_equal tom.id, autumn_line.recordable.credit_recording_id
+    assert_equal "Tom Ross", tom.reload.recordable.name
+
+    RecordingStudioPresskits::CreditLineOwnership.migrate!
+    assert_equal before, RecordingStudioPresskits::CreditLine.count
+    assert_equal "Tom Ross", spring_line.reload.recordable.name
+
+    RecordingStudioPresskits::Credits.revise_line!(
+      line_recording: spring_line,
+      root_recording: @root,
+      name: "Thomas Ross",
+      url: "https://example.com/thomas",
+      role: "Photography"
+    )
+
+    assert_equal "Tom Ross", autumn_line.reload.recordable.name
+    assert_equal "Tom Ross", tom.reload.recordable.name
+    assert_equal "Thomas Ross", spring_line.reload.recordable.name
+  end
+
+  test "migration names a missing credit from the role and hides a trashed credit" do
+    missing = legacy_line(
+      credits_content(add_credits_section(record_kit("Spring launch"), "Project credits")),
+      nil,
+      role: "Ghost"
+    )
+    RecordingStudioPresskits::CreditLine.where(id: missing.recordable.id).update_all(credit_recording_id: SecureRandom.uuid)
+
+    blank = legacy_line(
+      credits_content(add_credits_section(record_kit("Blank role"), "Credits")),
+      nil,
+      role: nil
+    )
+    RecordingStudioPresskits::CreditLine.where(id: blank.recordable.id).update_all(
+      credit_recording_id: SecureRandom.uuid,
+      role: nil
+    )
+
+    tom = create_credit("Tom Ross", url: "https://example.com/tom")
+    RecordingStudioPresskits::Credits.trash!(tom, actor: @user)
+    hidden = legacy_line(
+      credits_content(add_credits_section(record_kit("Hidden"), "Credits")),
+      tom,
+      role: "Photography"
+    )
+
+    RecordingStudioPresskits::CreditLineOwnership.migrate!
+
+    assert_equal "Ghost", missing.reload.recordable.name
+    assert_nil missing.trashed_at
+    assert_equal "Credit", blank.reload.recordable.name
+    assert_equal "Tom Ross", hidden.reload.recordable.name
+    assert_equal "https://example.com/tom", hidden.recordable.url
+    assert hidden.trashed_at.present?
+    assert_empty RecordingStudioPresskits::Credits.visible_lines(hidden.parent_recording)
+  end
+
+  test "down restores a line hidden for a trashed credit" do
+    tom = create_credit("Tom Ross", url: "https://example.com/tom")
+    RecordingStudioPresskits::Credits.trash!(tom, actor: @user)
+    line = legacy_line(
+      credits_content(add_credits_section(record_kit("Hidden"), "Credits")),
+      tom,
+      role: "Photography"
+    )
+    owned = add_line(
+      credits_content(add_credits_section(record_kit("Owned"), "Credits")),
+      name: "Studio Bright",
+      role: "Architecture",
+      url: nil
+    )
+    RecordingStudioPresskits::CreditLineOwnership.migrate!
+    assert line.reload.trashed_at.present?
+
+    migration_class.new.down
+
+    assert_nil line.reload.trashed_at
+    assert_nil RecordingStudio::Recording.find_by(id: owned.id)
+    refute ActiveRecord::Base.connection.column_exists?(:recording_studio_credit_lines, :name)
+    assert_equal false, RecordingStudioPresskits::CreditLine.columns_hash["credit_recording_id"].null
+  ensure
+    migration_class.new.up
+    RecordingStudioPresskits::CreditLine.reset_column_information
   end
 
   private
 
-  def create_credit(name, usual_role:, url:)
+  def migration_class
+    require Rails.root.join("db/migrate/20261012130000_copy_credit_names_onto_lines").to_s
+    ::CopyCreditNamesOntoLines
+  end
+
+  def create_credit(name, url:)
     RecordingStudioPresskits::Credits.create!(
       root_recording: @root,
       name: name,
-      usual_role: usual_role,
       url: url,
       actor: @user
     )
+  end
+
+  def add_line(section_recording, name:, role:, url:)
+    RecordingStudioPresskits::Credits.add!(
+      credits_section_recording: section_recording,
+      name: name,
+      role: role,
+      url: url,
+      actor: @user
+    )
+  end
+
+  def legacy_line(section_recording, credit_recording, role:)
+    line = add_line(section_recording, name: "Placeholder", role: role, url: "https://example.com/old")
+    RecordingStudioPresskits::CreditLine.where(id: line.recordable.id).update_all(
+      name: nil,
+      url: nil,
+      credit_recording_id: credit_recording&.id
+    )
+    line
   end
 
   def record_kit(title)

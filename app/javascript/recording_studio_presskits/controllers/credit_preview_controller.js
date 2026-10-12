@@ -2,10 +2,6 @@ import { Controller } from "@hotwired/stimulus"
 
 // The preview column follows the credit rows while the form is still open.
 export default class extends Controller {
-  connect() {
-    this.catalog = this.readCatalog()
-  }
-
   sync(event) {
     const lines = this.previewLines()
     const list = this.listElement(event)
@@ -17,36 +13,15 @@ export default class extends Controller {
     })
   }
 
-  choose(event) {
-    this.markFormChanged()
-
-    const row = event.target?.closest?.("[data-collection-editor-row]")
-    const name = event.detail?.title?.trim() || ""
-    const creditId = String(event.detail?.id || "")
-    if (!row || !name || !creditId) return
-
-    if (event.detail?.description) row.dataset.usualRole = event.detail.description
-
-    const line = this.ensureLine(row.dataset.id)
-    if (!line) return
-
-    this.setName(line, name, this.urlFor(creditId, row))
-    this.setRole(line, this.shownRole(row))
-    this.sync({target: row.closest("ul")})
-  }
-
-  role(event) {
+  fields(event) {
     const input = event.target
     if (!(input instanceof HTMLInputElement) && !(input instanceof HTMLTextAreaElement)) return
-    if (!input.name?.includes("[role]")) return
+    if (!this.creditField(input)) return
 
     const row = input.closest("[data-collection-editor-row]")
     if (!row || row.hidden || row.dataset.collectionEditorDestroyed === "true") return
 
-    const line = this.previewLine(row.dataset.id)
-    if (!line) return
-
-    this.setRole(line, this.shownRole(row))
+    this.paint(row)
   }
 
   drop(event) {
@@ -71,44 +46,31 @@ export default class extends Controller {
     this.markFormChanged()
   }
 
+  paint(row) {
+    const name = this.fieldValue(row, "name")
+    const existing = this.previewLine(row.dataset.id)
+    if (!name) {
+      existing?.remove()
+      return
+    }
+
+    const line = existing || this.ensureLine(row.dataset.id)
+    if (!line) return
+
+    this.setRole(line, this.fieldValue(row, "role"))
+    this.setName(line, name, this.fieldValue(row, "url"))
+  }
+
   markFormChanged() {
     this.element.dispatchEvent(new Event("change", { bubbles: true }))
   }
 
-  readCatalog() {
-    const node = this.element.querySelector("[data-credit-catalog]")
-    if (!node) return {}
-
-    try {
-      const parsed = JSON.parse(node.textContent)
-      return parsed && typeof parsed === "object" ? parsed : {}
-    } catch (_error) {
-      return {}
-    }
+  creditField(input) {
+    return ["name", "role", "url"].some((field) => input.name?.includes(`[${field}]`))
   }
 
-  urlFor(creditId, row) {
-    if (Object.prototype.hasOwnProperty.call(this.catalog, creditId)) {
-      return this.safeUrl(this.catalog[creditId])
-    }
-
-    const url = this.safeUrl(this.createdUrl(row))
-    this.catalog[creditId] = url
-    return url
-  }
-
-  createdUrl(row) {
-    const modalId = row.querySelector("[data-create-modal-id]")?.getAttribute("data-create-modal-id")
-    const modal = modalId ? document.getElementById(modalId) : null
-    return (modal || row).querySelector("[data-create-field='url']")?.value?.trim() || ""
-  }
-
-  shownRole(row) {
-    const typed = row.querySelector("input[name*='[role]'], textarea[name*='[role]']")?.value?.trim() || ""
-    if (typed) return typed
-    if (row.dataset.orderableUnsaved === "true") return row.dataset.usualRole?.trim() || ""
-
-    return ""
+  fieldValue(row, field) {
+    return row.querySelector(`input[name*='[${field}]'], textarea[name*='[${field}]']`)?.value?.trim() || ""
   }
 
   ensureLine(id) {

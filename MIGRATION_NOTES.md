@@ -1,5 +1,20 @@
 # Upgrade notes
 
+## 0.35.0
+
+A credit line stores its own `name`, optional `url`, and optional `role`. Two kits that credited the same person become two lines. Editing one name does not change the other, and it does not change the old workspace credit.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+The migration adds `name` and `url` on `recording_studio_credit_lines` and copies them from the credit `credit_recording_id` points at. It leaves `credit_recording_id` and the `recording_studio_credits` rows in place. `credit_recording_id` becomes nullable so a new line does not need a workspace credit. A missing credit sets the line name from the line's role, or `Credit` when the role is blank. A trashed credit is copied, then that line is trashed so the public page stays the same. The ids of those hidden lines are stored in `recording_studio_credit_line_library_hides` so `down` can restore them. Running the migration again does not add lines and does not overwrite a name that is already set.
+
+`down` restores the hidden lines, deletes lines whose `credit_recording_id` is null, requires `credit_recording_id` again, and drops `name`, `url`, and the hide table. Edits made to a line's name or URL after this release are not written back onto the shared credit.
+
+Keep `"RecordingStudioPresskits::Credit"` registered. The credits list, `GET /credits/search`, and the `Credit` API type are gone. `add_credit` takes `name` plus optional `url` and `role`. A line's show payload is `name`, `role`, and `url`. Reload the press kits JavaScript.
+
 ## 0.34.0
 
 A Location section is a kit section whose content is `RecordingStudioPresskits::LocationSection`. That type is an empty table: a UUID primary key and `created_at`. Places are `RecordingStudio::Location::Location` children. Enable Location on `LocationSection`. Do not enable Location on `KitSection`. Do not copy `recording_studio_locations` into Press Kits.

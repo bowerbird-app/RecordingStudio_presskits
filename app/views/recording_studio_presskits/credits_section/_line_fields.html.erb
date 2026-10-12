@@ -1,41 +1,28 @@
-<% row.with_entity(
-  form: row_form,
-  association_name: :credit_recording_id,
-  title: title,
-  label: "Credit",
-  search_url: search_path,
-  create_url: credits_path,
-  create_label: "Create",
-  search_placeholder: "Search credits",
-  empty_text: "No matches"
-) do %>
+<% row.with_field do %>
   <%= render FlatPack::TextInput::Component.new(
-    name: "name",
+    name: row_form.field_name(:name),
+    id: row_form.field_id(:name),
     label: "Name",
+    value: row_form.object.name,
     required: true,
-    form: "collection-editor-unattached",
-    data: { create_field: "name", fill_from_query: "true" }
-  ) %>
-  <%= render FlatPack::TextInput::Component.new(
-    name: "usual_role",
-    label: "Default role",
-    help_text: "Kits that already use this credit keep their own role.",
-    form: "collection-editor-unattached",
-    data: { create_field: "usual_role" }
-  ) %>
-  <%= render FlatPack::TextInput::Component.new(
-    name: "url",
-    label: "URL",
-    form: "collection-editor-unattached",
-    data: { create_field: "url" }
+    chrome: :cell
   ) %>
 <% end %>
 <% row.with_field do %>
   <%= render FlatPack::TextInput::Component.new(
     name: row_form.field_name(:role),
     id: row_form.field_id(:role),
-    label: "Role on this kit",
+    label: "Role",
     value: row_form.object.role,
+    chrome: :cell
+  ) %>
+<% end %>
+<% row.with_field do %>
+  <%= render FlatPack::TextInput::Component.new(
+    name: row_form.field_name(:url),
+    id: row_form.field_id(:url),
+    label: "URL",
+    value: row_form.object.url,
     chrome: :cell
   ) %>
 <% end %>

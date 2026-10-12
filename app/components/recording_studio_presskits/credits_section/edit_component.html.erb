@@ -5,12 +5,11 @@
         action: preview_actions
       ) do |form| %>
   <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
-  <script type="application/json" data-credit-catalog><%== credit_catalog_json %></script>
 
   <%= render FlatPack::CollectionEditor::Component.new(
     empty_text: "No credits yet",
     add_label: "Credit",
-    headers: ["Credit", "Role on this kit"],
+    headers: ["Name", "Role", "URL"],
     orderable: true,
     orderable_url: order_path,
     param_uuid_name: "moving_recording_id",
@@ -19,12 +18,7 @@
     <% batch.credit_lines.each_with_index do |draft, index| %>
       <% form.fields_for :credit_lines, draft, child_index: index do |row_form| %>
         <% editor.with_row(form: row_form, record_id: draft.id) do |row| %>
-          <%= render "recording_studio_presskits/credits_section/line_fields",
-                row: row,
-                row_form: row_form,
-                title: draft.title,
-                search_path: search_path,
-                credits_path: credits_path %>
+          <%= render "recording_studio_presskits/credits_section/line_fields", row: row, row_form: row_form %>
         <% end %>
       <% end %>
     <% end %>
@@ -32,12 +26,7 @@
     <% editor.with_template do %>
       <% form.fields_for :credit_lines, blank_line, child_index: "NEW_RECORD" do |row_form| %>
         <%= render FlatPack::CollectionEditor::Row::Component.new(form: row_form, index_token: "NEW_RECORD") do |row| %>
-          <%= render "recording_studio_presskits/credits_section/line_fields",
-                row: row,
-                row_form: row_form,
-                title: nil,
-                search_path: search_path,
-                credits_path: credits_path %>
+          <%= render "recording_studio_presskits/credits_section/line_fields", row: row, row_form: row_form %>
         <% end %>
       <% end %>
     <% end %>

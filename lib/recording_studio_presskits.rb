@@ -39,7 +39,7 @@ require "recording_studio_presskits/api"
 require "recording_studio_presskits/metrics"
 require "recording_studio_presskits/quote_order"
 require "recording_studio_presskits/credits"
-require "recording_studio_presskits/credits/picker"
+require "recording_studio_presskits/credit_line_ownership"
 require "recording_studio_presskits/credit_line_batch"
 require "recording_studio_presskits/credit_line_batch/sync"
 

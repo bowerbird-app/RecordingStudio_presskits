@@ -4,7 +4,6 @@ module RecordingStudioPresskits
   module Api
     module CreditRegistration
       def register_credits!
-        register_credit
         register_credit_line
         register_credits_section
         register_credit_actions
@@ -12,23 +11,13 @@ module RecordingStudioPresskits
 
       private
 
-      def register_credit
-        register_type(
-          "RecordingStudioPresskits::Credit",
-          operations: %i[index show create update],
-          serializer: ->(recordable, **) { CreditPayload.for(recordable) },
-          output_keys: %i[name url usual_role],
-          writable_attributes: %i[name url usual_role]
-        )
-      end
-
       def register_credit_line
         register_type(
           "RecordingStudioPresskits::CreditLine",
           operations: %i[index show update],
           serializer: credit_line_serializer,
-          output_keys: %i[role name url credit_id],
-          writable_attributes: %i[role],
+          output_keys: %i[name role url],
+          writable_attributes: %i[name role url],
           capability_actions: %i[remove_credit]
         )
       end
@@ -59,7 +48,7 @@ module RecordingStudioPresskits
           capability: :orderable,
           handler: AddCredit,
           input_contract: add_credit_input,
-          summary: "Add a workspace credit to this section"
+          summary: "Add a credit to this section"
         )
       end
 
@@ -85,7 +74,8 @@ module RecordingStudioPresskits
         {
           reject_unknown: true,
           fields: {
-            credit_id: { type: :string, required: true, allow_blank: false },
+            name: { type: :string, required: true, allow_blank: false },
+            url: { type: :string, required: false, allow_blank: true },
             role: { type: :string, required: false, allow_blank: true }
           }
         }

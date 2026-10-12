@@ -110,7 +110,10 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.column_exists?(:recording_studio_facts, :as_of_date)
     refute connection.column_exists?(:recording_studio_facts, :updated_at)
     assert connection.column_exists?(:recording_studio_credit_lines, :role)
+    assert connection.column_exists?(:recording_studio_credit_lines, :name)
+    assert connection.column_exists?(:recording_studio_credit_lines, :url)
     assert connection.column_exists?(:recording_studio_credit_lines, :credit_recording_id)
+    assert connection.table_exists?(:recording_studio_credit_line_library_hides)
     assert connection.column_exists?(:recording_studio_kit_sections, :title)
     assert connection.column_exists?(:recording_studio_kit_sections, :subtitle)
     refute connection.column_exists?(:recording_studio_kit_sections, :updated_at)
@@ -207,10 +210,11 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
       spring_lines.map { |line| line.recordable.role }
     )
     assert_equal ["Creative Direction"], autumn_lines.map { |line| line.recordable.role }
-    assert_equal(
-      spring_lines[2].recordable.credit_recording_id,
-      autumn_lines.first.recordable.credit_recording_id
-    )
+    assert_equal "Tom Ross", spring_lines[2].recordable.name
+    assert_equal "Tom Ross", autumn_lines.first.recordable.name
+    assert_nil spring_lines[2].recordable.credit_recording_id
+    assert_nil autumn_lines.first.recordable.credit_recording_id
+    refute_equal spring_lines[2].id, autumn_lines.first.id
     statistics = spring_sections.find { |section| section.recordable.title == "Company statistics" }
     specifications = spring_sections.find { |section| section.recordable.title == "Project specifications" }
     statistics_content = RecordingStudioPresskits::KitQuery.section_content(statistics)

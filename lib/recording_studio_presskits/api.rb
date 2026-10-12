@@ -2,7 +2,6 @@
 
 require "recording_studio_presskits/api/quote_payload"
 require "recording_studio_presskits/api/fact_payload"
-require "recording_studio_presskits/api/credit_payload"
 require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
 require "recording_studio_presskits/api/location_payload"

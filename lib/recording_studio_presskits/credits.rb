@@ -37,13 +37,16 @@ module RecordingStudioPresskits
         credit_recording.recording_studio_trashable_restore!(actor: actor)
       end
 
-      def add!(credits_section_recording:, credit_recording:, role: nil, actor: nil)
-        assert_usable!(credits_section_recording, credit_recording)
-        record_line(credits_section_recording, credit_recording, role, actor)
+      def add!(credits_section_recording:, name:, url: nil, role: nil, actor: nil)
+        credits_section_recording.record(CreditLine, parent_recording: credits_section_recording, actor: actor) do |line|
+          assign_line(line, name, url, role)
+        end
       end
 
-      def revise_role!(line_recording:, root_recording:, role:)
-        root_recording.revise(line_recording) { |line| line.role = role }
+      def revise_line!(line_recording:, root_recording:, name:, url:, role:)
+        root_recording.revise(line_recording) do |line|
+          assign_line(line, name, url, role)
+        end
       end
 
       def remove!(line_recording, actor:)
@@ -63,18 +66,7 @@ module RecordingStudioPresskits
       end
 
       def visible_lines(section_recording)
-        lines_for(section_recording).select { |line| shown_credit?(credit_for(line)) }
-      end
-
-      def credit_for(line_recording)
-        id = line_recording&.recordable&.try(:credit_recording_id)
-        return if id.blank?
-
-        RecordingStudio::Recording.includes(:recordable).find_by(id: id)
-      end
-
-      def shown_credit?(credit_recording)
-        credit_recording.present? && credit_recording.trashed_at.nil? && credit_recording.recordable.is_a?(Credit)
+        lines_for(section_recording).select { |line| line.recordable.name.to_s.strip.present? }
       end
 
       private
@@ -89,27 +81,10 @@ module RecordingStudioPresskits
         credit.usual_role = usual_role
       end
 
-      def assert_usable!(section_recording, credit_recording)
-        return if usable_credit?(section_recording, credit_recording)
-
-        raise ArgumentError, "That credit is not in this workspace"
-      end
-
-      def usable_credit?(section_recording, credit_recording)
-        shown_credit?(credit_recording) &&
-          credit_recording.root_recording_id == section_recording.root_recording_id &&
-          credit_recording.parent_recording_id == section_recording.root_recording_id
-      end
-
-      def record_line(section_recording, credit_recording, role, actor)
-        section_recording.record(CreditLine, parent_recording: section_recording, actor: actor) do |line|
-          line.credit_recording_id = credit_recording.id
-          line.role = chosen_role(role, credit_recording)
-        end
-      end
-
-      def chosen_role(role, credit_recording)
-        role.to_s.strip.presence || credit_recording.recordable.usual_role
+      def assign_line(line, name, url, role)
+        line.name = name
+        line.url = url
+        line.role = role
       end
 
       def hidden_line?(child)

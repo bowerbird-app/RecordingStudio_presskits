@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.34.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.35.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -20,6 +20,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "db/migrate/20261010150000_create_recording_studio_location_sections.rb",
+      "db/migrate/20261012130000_copy_credit_names_onto_lines.rb",
       "test/dummy/db/migrate/20261010000013_create_recording_studio_access_constraints.rb",
       "test/dummy/db/migrate/20261010000014_create_recording_studio_access_rules.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
@@ -32,6 +33,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "test/dummy/db/migrate/20261010150000_create_recording_studio_location_sections.rb",
+      "test/dummy/db/migrate/20261012130000_copy_credit_names_onto_lines.rb",
       "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
@@ -723,36 +725,25 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, 'text: "Images"'
     assert_includes index, 'icon: "photo"'
     assert_includes index, "@images_path"
-    assert_includes index, 'text: "Credits"'
-    assert_includes index, 'icon: "user-group"'
-    assert_includes index, "@credits_path"
+    refute_includes index, 'text: "Credits"'
+    refute_includes index, "@credits_path"
     assert_includes index, 'aria: { label: "Open sidebar" }'
     assert_includes index, "toggleMobile"
     assert_includes index, 'class: "md:hidden"'
     refute_match(/Button::Component\.new\(\s*text: "Credits"/m, index)
   end
 
-  def test_credits_list_shows_the_name_and_save_sits_under_the_fields
-    components = File.expand_path("../app/components/recording_studio_presskits/credits", __dir__)
-    index = File.read(File.expand_path("index_component.html.erb", components))
-    index_ruby = File.read(File.expand_path("index_component.rb", components))
-    form = File.read(File.expand_path("form_component.html.erb", components))
+  def test_credits_library_screens_are_gone
+    root = File.expand_path("..", __dir__)
+    routes = File.read(File.join(root, "config/routes.rb"))
 
-    assert_includes index, 'subtitle: "People, companies and organisations that you credit in Press kits"'
-    assert_includes index, 'text: "Credit"'
-    assert_includes index, 'class: "w-fit"'
-    assert_includes index, 'title: "Name"'
-    refute_includes index, "Usual role"
-    refute_includes index, 'title: "URL"'
-    refute_includes index_ruby, "def usual_role"
-    refute_includes index_ruby, "def url_cell"
-    assert_operator form.index('name: "credit[url]"'), :<, form.index("text: button_text")
-    assert_includes form, 'id: "credit-form"'
-    assert_includes form, 'form: "credit-form"'
-    assert_includes form, 'class: "w-fit"'
-    assert_includes form, 'class="flex w-full max-w-xl items-center justify-between gap-3"'
-    assert_includes form, "style: :danger"
-    refute_includes form, "Divider"
+    refute File.exist?(File.join(root, "app/controllers/recording_studio_presskits/credits_controller.rb"))
+    refute File.exist?(File.join(root, "app/views/recording_studio_presskits/credits/index.html.erb"))
+    refute File.exist?(File.join(root, "lib/recording_studio_presskits/credits/picker.rb"))
+    refute File.exist?(File.join(root, "lib/recording_studio_presskits/api/credit_payload.rb"))
+    refute_includes routes, "resources :credits"
+    refute_includes routes, "get :search"
+    refute_includes routes, "controller: \"section_credits\""
   end
 
   def test_section_dropdown_passes_a_menu_icon
@@ -991,29 +982,27 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute File.exist?(presskits_path(
                          "app/components/recording_studio_presskits/credits_section/actions_component.rb"
                        ))
-    assert_includes fields, 'label: "Role on this kit"'
+    assert_includes editor, 'headers: ["Name", "Role", "URL"]'
+    assert_includes fields, 'label: "Name"'
+    assert_includes fields, 'label: "Role"'
+    assert_includes fields, 'label: "URL"'
     assert_includes fields, "chrome: :cell"
-    assert_includes fields, 'label: "Credit"'
-    assert_includes fields, 'search_placeholder: "Search credits"'
-    assert_includes fields, 'data: { create_field: "name", fill_from_query: "true" }'
-    assert_includes fields, 'label: "Default role"'
-    refute_includes fields, 'label: "Usual role"'
-    assert_includes fields, 'create_field: "usual_role"'
-    assert_includes fields, 'form: "collection-editor-unattached"'
+    refute_includes fields, "Search credits"
+    refute_includes fields, "usual_role"
+    refute_includes fields, "Default role"
+    refute_includes editor, "data-credit-catalog"
     assert_includes order, "moving_recording_id"
     assert_includes order, "target_position"
-    assert_includes routes, "get :search"
+    refute_includes routes, "get :search"
     assert_includes routes, "resource :credit_lines, only: :update"
     assert_includes editor, "recording-studio-presskits--credit-preview"
     assert_includes editor, "preview_actions"
-    assert_includes editor, "data-credit-catalog"
     assert_includes component, "def preview_actions"
-    assert_includes component, "collection-editor:selected->recording-studio-presskits--credit-preview#choose"
-    assert_includes component, "input->recording-studio-presskits--credit-preview#role"
+    assert_includes component, "input->recording-studio-presskits--credit-preview#fields"
     assert_includes component, "click->recording-studio-presskits--credit-preview#drop"
     assert_includes component, "click->recording-studio-presskits--credit-preview#note"
     assert_includes component, "list:reordered->recording-studio-presskits--credit-preview#sync"
-    assert_includes component, "def credit_catalog"
+    refute_includes component, "def credit_catalog"
     show = File.read(presskits_path(
                        "app/components/recording_studio_presskits/credits_section/component.html.erb"
                      ))
@@ -1027,12 +1016,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
                         ))
     assert_includes preview, "presskits-section-preview"
     assert_includes preview, "data-credit-line-id"
-    assert_includes preview, "choose(event)"
-    assert_includes preview, "role(event)"
+    assert_includes preview, "fields(event)"
     assert_includes preview, "drop(event)"
     assert_includes preview, "note(event)"
     assert_includes preview, "markFormChanged"
-    assert_includes preview, "orderableUnsaved"
+    refute_includes preview, "usualRole"
     show_component = File.read(presskits_path(
                                  "app/components/recording_studio_presskits/credits_section/component.rb"
                                ))

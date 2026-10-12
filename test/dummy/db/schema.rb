@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_030254) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -147,10 +147,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_030254) do
     t.datetime "created_at", null: false
   end
 
+  create_table "recording_studio_credit_line_library_hides", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "line_recording_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["line_recording_id"], name: "index_credit_line_library_hides_on_line", unique: true
+  end
+
   create_table "recording_studio_credit_lines", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.uuid "credit_recording_id", null: false
+    t.uuid "credit_recording_id"
     t.string "role"
+    t.string "name"
+    t.string "url"
     t.index ["credit_recording_id"], name: "index_recording_studio_credit_lines_on_credit_recording_id"
   end
 

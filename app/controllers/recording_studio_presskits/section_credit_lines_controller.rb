@@ -12,8 +12,8 @@ module RecordingStudioPresskits
 
       save_lines
       respond_with_preview_or_redirect(html_redirect: section_edit_path, notice: "Saved.")
-    rescue ArgumentError
-      redirect_to section_edit_path, alert: "That credit is not in this workspace."
+    rescue ActiveRecord::RecordInvalid
+      redirect_to section_edit_path, alert: "Give each credit a name."
     end
 
     private
@@ -40,7 +40,7 @@ module RecordingStudioPresskits
       bag = params[:credit_lines]
       return ActionController::Parameters.new if bag.blank?
 
-      bag.permit(credit_lines_attributes: %i[id credit_recording_id role _destroy])
+      bag.permit(credit_lines_attributes: %i[id name url role _destroy])
     end
 
     def section_edit_path

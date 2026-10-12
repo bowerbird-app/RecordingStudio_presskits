@@ -33,22 +33,16 @@ module RecordingStudioPresskits
     class LineDraft
       include ActiveModel::Model
 
-      attr_accessor :id, :credit_recording_id, :role, :title
+      attr_accessor :id, :name, :url, :role
 
       def self.from(line)
+        recordable = line.recordable
         new(
           id: line.id,
-          credit_recording_id: line.recordable.credit_recording_id,
-          role: line.recordable.role,
-          title: title_for(line)
+          name: recordable.name,
+          url: recordable.url,
+          role: recordable.role
         )
-      end
-
-      def self.title_for(line)
-        credit = Credits.credit_for(line)
-        return "In the trash" unless Credits.shown_credit?(credit)
-
-        credit.recordable.name.to_s.strip.presence
       end
 
       def persisted?

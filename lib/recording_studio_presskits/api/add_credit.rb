@@ -10,12 +10,13 @@ module RecordingStudioPresskits
       end
 
       def self.add_credit(context)
-        credit = Credits.find_for_root(context.recording.root_recording, context.params[:credit_id])
-        SectionAction.reject!("That credit is not in this workspace") if credit.blank?
+        name = context.params[:name].to_s.strip
+        SectionAction.reject!("Give them a name.") if name.blank?
 
         Credits.add!(
           credits_section_recording: context.recording,
-          credit_recording: credit,
+          name: name,
+          url: context.params[:url],
           role: context.params[:role],
           actor: context.access_grant.actor
         )

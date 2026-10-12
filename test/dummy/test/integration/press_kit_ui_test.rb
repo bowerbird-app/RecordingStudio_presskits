@@ -1644,10 +1644,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   def assert_library_sidebar
     assert_select "[data-controller='flat-pack--sidebar-layout']"
     assert_select "button[aria-expanded='true'] span.fp-sidebar-label", text: "Library"
-    assert_select "a[data-flat-pack-sidebar-item='true'][href='#{recording_studio_presskits.credits_path}'] span.fp-sidebar-label",
-                  text: "Credits"
+    assert_select "a[data-flat-pack-sidebar-item='true'] span.fp-sidebar-label", text: "Credits", count: 0
     assert_select "a[data-flat-pack-sidebar-item='true'] span.fp-sidebar-label", text: "Images"
-    assert_select "a.fp-button[href='#{recording_studio_presskits.credits_path}']", count: 0
     assert_select "button[aria-label='Open sidebar'][data-action='click->flat-pack--sidebar-layout#toggleMobile']"
   end
 

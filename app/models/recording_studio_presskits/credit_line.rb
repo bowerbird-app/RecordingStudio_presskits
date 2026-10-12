@@ -10,17 +10,19 @@ module RecordingStudioPresskits
 
     include RecordingStudio::Capabilities::Trashable.to
 
-    validates :credit_recording_id, presence: true
+    validates :name, presence: true
 
-    before_validation :clear_blank_role
+    before_validation :clear_blank_details
 
     def title
-      role.to_s.strip.presence || "Credit"
+      name.to_s.strip.presence || "Credit"
     end
 
     private
 
-    def clear_blank_role
+    def clear_blank_details
+      self.name = name.to_s.strip
+      self.url = url.to_s.strip.presence
       self.role = role.to_s.strip.presence
     end
   end

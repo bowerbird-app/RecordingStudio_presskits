@@ -4,12 +4,6 @@
 # the index and kit editor. Admin screens register separately.
 # rubocop:disable Metrics/BlockLength
 RecordingStudioPresskits::Engine.routes.draw do
-  resources :credits, only: %i[index new create edit update destroy] do
-    collection do
-      get :search
-    end
-  end
-
   resources :press_kits, only: %i[index show new create edit] do
     member do
       get :preview
@@ -28,7 +22,6 @@ RecordingStudioPresskits::Engine.routes.draw do
       resource :quote_order, only: :update, controller: "quote_orders"
       resources :facts, only: %i[new create edit update destroy]
       resource :fact_order, only: :update, controller: "fact_orders"
-      resources :credits, only: %i[new create edit update destroy], controller: "section_credits"
       resource :credit_lines, only: :update, controller: "section_credit_lines"
       resource :credit_order, only: :update, controller: "credit_orders"
       resources :videos, only: %i[new create edit update destroy]

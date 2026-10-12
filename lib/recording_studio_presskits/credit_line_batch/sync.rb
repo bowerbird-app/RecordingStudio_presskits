@@ -45,17 +45,24 @@ module RecordingStudioPresskits
         line = find_line(row)
         return if line.blank?
 
-        Credits.revise_role!(line_recording: line, root_recording: @root_recording, role: row[:role])
+        Credits.revise_line!(
+          line_recording: line,
+          root_recording: @root_recording,
+          name: row[:name],
+          url: row[:url],
+          role: row[:role]
+        )
         line.id
       end
 
       def add(row)
-        credit_id = row[:credit_recording_id].to_s.strip.presence
-        return if credit_id.blank?
+        name = row[:name].to_s.strip
+        return if name.blank?
 
         Credits.add!(
           credits_section_recording: @section_recording,
-          credit_recording: Credits.find_for_root(@root_recording, credit_id),
+          name: name,
+          url: row[:url],
           role: row[:role],
           actor: @actor
         ).id

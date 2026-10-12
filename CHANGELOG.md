@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-10-12
+
+### Changed
+- A credit line owns its `name`, `url`, and `role`. The same person on two kits is two lines. Editing one does not change the other.
+- The credits section editor is Name, Role, and URL rows. **+ Credit** adds a row. Save, unsaved-changes, and drag reorder stay. The workspace credits list, credit search, the create-credit modal, and the sidebar Credits link are gone.
+- When Recording Studio API is loaded, `add_credit` takes `name` and optional `url` and `role`. A credit line's payload is `name`, `role`, and `url`. The workspace `Credit` type is no longer registered.
+- Version `0.35.0`
+
+### Upgrade notes
+- Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. That adds `name` and `url` on `recording_studio_credit_lines`, copies them from the linked credit, and makes `credit_recording_id` nullable. A line whose credit is missing gets its name from the line role, or `Credit`. A line whose credit is trashed is hidden. The migration is idempotent. `down` restores those hidden lines, deletes lines that have no `credit_recording_id`, and drops the new columns.
+- Keep `RecordingStudioPresskits::Credit` in `recordable_types`. The credit rows stay until a later release. New lines do not create them.
+- Reload the press kits JavaScript. API clients send `name` on `add_credit` and stop sending `credit_id`.
+
 ## [0.34.0] - 2026-10-12
 
 ### Added
