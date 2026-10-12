@@ -1,5 +1,19 @@
 # Upgrade notes
 
+## 0.36.0
+
+Images and the kit cover no longer use the Attachable image library. There is no schema change in Press Kits and no data migration. Recording Studio is not in production. Reseed the dummy app, or upload the photos again.
+
+`RecordingStudioPresskits::Images` includes `Attachable.to` for many `image/*` files and `Orderable.to(allows: ["RecordingStudioAttachable::Attachment"])`. Caption, credit, and alt are columns on each attachment. **Upload** is Attachable's file button (`attachment_file_buttons/button`) and keeps importing another file. The collection editor saves, reorders, and trashes those attachments.
+
+PressKit includes `Attachable.to` with `max_file_count: 1` for the cover photo. Cover colour stays on the kit. Upload and remove sit outside the header save form. `CoverImage` and the public gallery, hero, cards, and zip read `DirectImages`.
+
+Duplicating a kit copies each attachment onto a new blob through `AttachmentCopy`. The attachment `name` still gains Duplicatable's ` (Copy)` suffix. `original_filename` does not.
+
+Drop `LibraryPlacement.to` from PressKit and Images. Drop `config.section_library_keys`. Drop `ImageLibrary.to` from the host root when nothing else needs a workspace image library. Keep Attachable installed. Keep `Attachment`, `Library`, and `Placement` registered. Those tables belong to Attachable. Credits stay a library.
+
+`RecordingStudio::Capabilities::PressKits` from 0.35.0 stays. Include it on a recordable that should hold press kits. Leave PressKit `allowed_parent_types` as the host root.
+
 ## 0.35.0
 
 Include `RecordingStudio::Capabilities::PressKits.to` on a recordable that should hold press kits. `.to` takes no options. The gem registers `:press_kits` at boot with PressKit as its child recordable. Core adds that recordable to the kit's allowed parents. Leave `allowed_parent_types` on PressKit as the host root only. Do not add a second parent list.

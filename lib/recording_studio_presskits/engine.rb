@@ -219,6 +219,18 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.attachment_copy" do
+      config.to_prepare do
+        next unless defined?(RecordingStudioAttachable::Attachment)
+        next unless defined?(RecordingStudio)
+
+        RecordingStudio.configuration.register_recordable_dup_strategy(
+          "RecordingStudioAttachable::Attachment",
+          RecordingStudioPresskits::AttachmentCopy
+        )
+      end
+    end
+
     initializer "recording_studio_presskits.location_trash" do
       config.to_prepare do
         next unless defined?(RecordingStudio::Location::Location)

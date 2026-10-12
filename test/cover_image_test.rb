@@ -11,12 +11,7 @@ class CoverImageTest < Minitest::Test
   end
 
   def test_alt_falls_back_to_cover
-    recording = Object.new
-    def recording.library_placements
-      []
-    end
-
-    assert_equal "Cover", RecordingStudioPresskits::CoverImage.alt_for(recording)
+    assert_equal "Cover", RecordingStudioPresskits::CoverImage.alt_for(Object.new)
   end
 
   def test_enabled_is_false_without_a_recording

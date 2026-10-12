@@ -100,47 +100,39 @@ begin
       location.country_code = "AU"
     end
   end
-  find_or_import_harbour_photo = lambda do
-    return unless root_recording.respond_to?(:image_library)
+  attach_harbour_photo = lambda do |parent, source:|
+    next if parent.blank? || !parent.respond_to?(:import_attachment)
 
-    library = root_recording.image_library(actor: user)
-    path = Rails.root.join("db/seed_images/harbour-gallery.jpg")
-    return unless path.file?
-
-    existing = library.images(per_page: 20).find do |recording|
+    existing = RecordingStudioPresskits::DirectImages.list(parent).find do |recording|
       recording.recordable.original_filename == "harbour-gallery.jpg"
     end
-    photo = if existing && existing.recordable.file.blob.byte_size == path.size
-      existing
-    elsif existing
-      blob = File.open(path, "rb") do |io|
-        ActiveStorage::Blob.create_and_upload!(io: io, filename: "harbour-gallery.jpg", content_type: "image/jpeg")
-      end
-      existing.replace_attachment_file(signed_blob_id: blob.signed_id, actor: user)
-    else
-      File.open(path, "rb") do |io|
-        library.import_attachment(
-          io: io,
-          filename: "harbour-gallery.jpg",
-          content_type: "image/jpeg",
-          name: "Harbour Gallery",
-          actor: user,
-          source: "press_kit_cover"
-        )
-      end
+    next existing if existing
+
+    path = Rails.root.join("db/seed_images/harbour-gallery.jpg")
+    next unless path.file?
+
+    photo = File.open(path, "rb") do |io|
+      parent.import_attachment(
+        io: io,
+        filename: "harbour-gallery.jpg",
+        content_type: "image/jpeg",
+        name: "Harbour Gallery",
+        actor: user,
+        source: source
+      )
     end
-    return if photo.blank?
+    next if photo.blank?
 
     photo.revise_attachment_metadata(
       actor: user,
       alt_text: "A white gallery hall with paintings along both walls"
     )
+    if parent.recordable.is_a?(RecordingStudioPresskits::Images)
+      parent.recording_studio_orderable_append!(photo, actor: user)
+    end
     photo
   end
-  harbour_photo = find_or_import_harbour_photo.call
-  if harbour_photo && press_kit_recording.respond_to?(:place_library_image) && press_kit_recording.library_placements.none?
-    press_kit_recording.place_library_image(attachment_recording: harbour_photo, actor: user)
-  end
+  attach_harbour_photo.call(press_kit_recording, source: "press_kit_cover")
   spring_cover = press_kit_recording.recordable
   if spring_cover.cover_color != "#BFDBFE" || spring_cover.cover_text_color.present?
     root_recording.revise(press_kit_recording) do |press_kit|
@@ -265,8 +257,8 @@ begin
   )
   ensure_credits_section.call(unpublished_kit_recording, "Credits", [[tom, "Creative Direction"]])
 
-  ensure_images_section = lambda do |kit_recording, title, photo|
-    next if photo.blank? || !defined?(RecordingStudioAttachable)
+  ensure_images_section = lambda do |kit_recording, title|
+    next unless defined?(RecordingStudioAttachable)
 
     existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
       section.recordable.title == title
@@ -278,12 +270,9 @@ begin
       title: title
     )
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    next unless content&.respond_to?(:place_library_image)
-    next if content.library_placements.any?
-
-    content.place_library_image(attachment_recording: photo, actor: user)
+    attach_harbour_photo.call(content, source: "press_photos")
   end
-  ensure_images_section.call(press_kit_recording, "Press photos", harbour_photo)
+  ensure_images_section.call(press_kit_recording, "Press photos")
 
   ensure_facts_section = lambda do |kit_recording, title, display_style, columns, facts|
     existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|

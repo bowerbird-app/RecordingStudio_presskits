@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-10-12
+
+### Changed
+- Images sections attach `image/*` files directly. Caption, credit, and alt live on each attachment. Order is Orderable on those attachment recordings. **Upload** is Attachable's file button. Drag reorder, **Trash**, and the caption fields are Attachable's collection editor.
+- The kit cover is one direct image attachment on PressKit, the same shape as a quote image. The header screen uploads and removes it beside the colour fields. The cover colour stays columns on the kit.
+- Public gallery, hero, cards, and the download zip read `DirectImages`. A duplicated kit copies attachment bytes onto a new blob (`AttachmentCopy`).
+- Version `0.36.0`
+
+### Removed
+- Library placements on PressKit and Images. `LibraryImages`, `SectionImages`, `section_library_keys`, the library picker, **Add from library**, and the sidebar Library → Images link. Library → Credits stays.
+- Dummy Workspace no longer includes `ImageLibrary.to`. Attachable's Library and Placement tables stay; press kits do not use them.
+
+### Upgrade notes
+- Bump to `0.36.0`. There is no Press Kits migration and no data copy. Recording Studio is not in production. Reseed or upload the photos again.
+- Enable `Attachable.to` on Images (many images) and PressKit (one image). Orderable on Images allows `RecordingStudioAttachable::Attachment`. Orderable on PressKit allows kit sections only.
+- Drop `LibraryPlacement.to` from PressKit and Images, and drop `ImageLibrary.to` from the host root if press kits were the only caller. Keep Attachable mounted and `Attachment` registered.
+- `RecordingStudio::Capabilities::PressKits` from 0.35.0 stays as it shipped.
+
 ## [0.35.0] - 2026-10-12
 
 ### Added

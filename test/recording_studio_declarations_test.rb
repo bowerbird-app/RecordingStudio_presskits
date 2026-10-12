@@ -346,7 +346,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_nil blank.recordable.subtitle
   end
 
-  test "images is allowed under a kit section and uses library placements" do
+  test "images is allowed under a kit section and attaches image files" do
     _root, kit_recording = spring_kit
     section = record_section(kit_recording)
     assert RecordingStudio.parent_allowed?(
@@ -357,9 +357,9 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
       child_type: "RecordingStudioPresskits::Images",
       parent_recording: kit_recording
     )
-    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Images")
-    assert RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::Images")
-    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PressKit")
+    assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Images")
+    refute RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::Images")
+    assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PressKit")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::VideoSection")
@@ -432,10 +432,10 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:location, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:location, for: "RecordingStudioPresskits::KitSection")
     refute RecordingStudio.capability_enabled?(:location, for: "Workspace")
-    assert RecordingStudio.capability_enabled?(:image_library, for: "Workspace")
+    refute RecordingStudio.capability_enabled?(:image_library, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:image_library, for: "RecordingStudioPresskits::PressKit")
-    assert RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::PressKit")
-    assert RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::Images")
+    refute RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:library_placement, for: "Workspace")
     assert RecordingStudio.capability_enabled?(:accessible, for: "AdminRoot")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Folder")
@@ -461,7 +461,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
 
     press_kit_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::PressKit").to_h
-    assert_equal ["RecordingStudioPresskits::KitSection", "RecordingStudioAttachable::Placement"],
+    assert_equal ["RecordingStudioPresskits::KitSection"],
                  Array(press_kit_options[:allows]).map(&:to_s)
 
     quote_section_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::QuoteSection").to_h
@@ -471,7 +471,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal ["RecordingStudioPresskits::Fact"], Array(facts_section_options[:allows]).map(&:to_s)
 
     images_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::Images").to_h
-    assert_equal ["RecordingStudioAttachable::Placement"], Array(images_options[:allows]).map(&:to_s)
+    assert_equal ["RecordingStudioAttachable::Attachment"], Array(images_options[:allows]).map(&:to_s)
 
     workspace_options = RecordingStudio.capability_options(:orderable, for: "Workspace").to_h
     assert_equal ["RecordingStudioPresskits::PressKit"], Array(workspace_options[:allows]).map(&:to_s)

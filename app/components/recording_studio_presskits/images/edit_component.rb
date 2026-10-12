@@ -23,8 +23,7 @@ module RecordingStudioPresskits
 
       def attachment_collection_options
         {
-          association: :placements,
-          items: LibraryImages.resolve(@recording),
+          association: :images,
           fields: %i[caption credit alt_text],
           sortable: true,
           displays: %i[list carousel grid],
@@ -34,12 +33,16 @@ module RecordingStudioPresskits
         }
       end
 
-      def picker_path
-        helpers.press_kit_section_library_images_path(press_kit_recording, kit_section_recording)
+      def upload_path
+        helpers.recording_studio_attachable.recording_attachment_imports_path(
+          @recording,
+          redirect_mode: "return_to",
+          return_to: return_path
+        )
       end
 
-      def upload_path
-        helpers.press_kit_section_library_images_path(press_kit_recording, kit_section_recording)
+      def return_path
+        helpers.edit_press_kit_section_path(press_kit_recording, kit_section_recording)
       end
 
       def kit_section_recording
