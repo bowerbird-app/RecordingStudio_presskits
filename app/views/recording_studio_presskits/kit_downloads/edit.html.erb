@@ -1,0 +1,36 @@
+<% if presskits_editor_dialog? %>
+  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: presskits_editor_blank_chrome_title) do %>
+    <%= render FlatPack::PageTitle::Component.new(
+      title: I18n.t("recording_studio_presskits.downloads.title"),
+      subtitle: I18n.t("recording_studio_presskits.downloads.subtitle"),
+      variant: :h1
+    ) %>
+
+    <%= render RecordingStudioPresskits::PressKits::DownloadsEditorComponent.new(
+      press_kit_recording: @press_kit_recording,
+      audience: @download_audience,
+      options: @download_options,
+      constrained: @download_constrained
+    ) %>
+  <% end %>
+<% else %>
+  <% presskits_page_nav(
+    title: I18n.t("recording_studio_presskits.downloads.title"),
+    back_url: edit_press_kit_path(@press_kit_recording),
+    back_label: I18n.t("recording_studio_presskits.downloads.back"),
+    close_url: edit_press_kit_path(@press_kit_recording)
+  ) %>
+
+  <%= render FlatPack::PageTitle::Component.new(
+    title: I18n.t("recording_studio_presskits.downloads.title"),
+    subtitle: I18n.t("recording_studio_presskits.downloads.subtitle"),
+    variant: :h1
+  ) %>
+
+  <%= render RecordingStudioPresskits::PressKits::DownloadsEditorComponent.new(
+    press_kit_recording: @press_kit_recording,
+    audience: @download_audience,
+    options: @download_options,
+    constrained: @download_constrained
+  ) %>
+<% end %>

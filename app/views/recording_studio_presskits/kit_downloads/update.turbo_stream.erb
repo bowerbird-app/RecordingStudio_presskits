@@ -1,0 +1,8 @@
+<%= turbo_stream.replace "presskits-downloads-editor" do %>
+  <%= render RecordingStudioPresskits::PressKits::DownloadsEditorComponent.new(
+    press_kit_recording: @press_kit_recording,
+    audience: @download_audience,
+    options: @download_options,
+    constrained: @download_constrained
+  ) %>
+<% end %>

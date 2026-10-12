@@ -43,3 +43,7 @@
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/views/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/components/**/*.rb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_publishable-*/app/components/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_downloadable-*/app/views/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_downloadable-*/app/helpers/**/*.rb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_downloadable-*/app/views/**/*.erb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_downloadable-*/app/helpers/**/*.rb";

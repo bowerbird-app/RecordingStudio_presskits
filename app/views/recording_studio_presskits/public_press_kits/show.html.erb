@@ -1,7 +1,21 @@
-<% content_for :title, (@press_kit&.title.presence || "Press kit") %>
+<% presentation = RecordingStudioPresskits::Visibility.apply_public_response!(
+     presentation: @presskits_presentation,
+     response: response
+   ) %>
 
-<%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
-  press_kit_recording: @parent_recording || @press_kit_recording,
-  section_recordings: @section_recordings,
-  preview: false
-) %>
+<% if presentation == :preview %>
+  <% content_for :title, (@press_kit&.title.presence || "Press kit") %>
+
+  <%= render RecordingStudioPresskits::PressKits::PreviewShowComponent.new(
+    press_kit_recording: @parent_recording || @press_kit_recording,
+    reason: @presskits_preview_reason
+  ) %>
+<% elsif presentation == :full %>
+  <% content_for :title, (@press_kit&.title.presence || "Press kit") %>
+
+  <%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
+    press_kit_recording: @parent_recording || @press_kit_recording,
+    section_recordings: @section_recordings,
+    preview: false
+  ) %>
+<% end %>

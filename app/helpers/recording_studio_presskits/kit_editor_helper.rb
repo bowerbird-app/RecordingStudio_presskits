@@ -8,6 +8,12 @@ module RecordingStudioPresskits
       EDITOR_MODAL_ID
     end
 
+    # Navigable screens require a title. A zero-width space leaves the chrome
+    # heading empty so PageTitle is the only visible heading.
+    def presskits_editor_blank_chrome_title
+      "\u200B"
+    end
+
     def presskits_editor_screen_id
       "#{presskits_editor_modal_id}-screen"
     end

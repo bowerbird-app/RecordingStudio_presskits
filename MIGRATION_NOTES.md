@@ -1,12 +1,12 @@
 # Upgrade notes
 
-## 0.32.0
+## 0.34.0
 
 A Location section is a kit section whose content is `RecordingStudioPresskits::LocationSection`. That type is an empty table: a UUID primary key and `created_at`. Places are `RecordingStudio::Location::Location` children. Enable Location on `LocationSection`. Do not enable Location on `KitSection`. Do not copy `recording_studio_locations` into Press Kits.
 
 This is not the kit-header place. PressKit still includes `Location.to`. `KitLocation` still finds the one optional Location child of the kit. A section place has a different parent.
 
-The editor matches the other collection sections. Title and subtitle stay on the shared heading screen. Edit content is a `pk-editor` screen with + Location and the place list. New and edit use `recording_studio_location_search_fields`. Preview and the public page use `recording_studio_location_display`. Flatpack has no place-search or address card, so those stay Location's helpers. The display helper is a Card — fine in a section, too heavy for the hero byline (0.29.0).
+The editor matches the other collection sections. Title and subtitle stay on the shared heading screen. Edit content is a `pk-editor` screen with + Location and the place list. New and edit use `recording_studio_location_search_fields`. Preview and the public page use `recording_studio_location_display`. Flatpack has no place-search or address card, so those stay Location's helpers. The display helper is a Card — fine in a section, too heavy for the hero byline (0.29.0). Section FAB, Orderable, and Trashable match the other sections.
 
 ```bash
 bin/rails generate recording_studio_presskits:migrations
@@ -16,6 +16,23 @@ bin/rails db:migrate
 Register `"RecordingStudioPresskits::LocationSection"`. Keep `"RecordingStudio::Location::Location"`. Keep Location at `~> 0.4` (dummy tag `v0.5.1`). Rebuild Tailwind. Pin Location Stimulus controllers if they are not already pinned.
 
 When Recording Studio API is loaded, a kit section still returns `title`, `subtitle`, `content_type`, and `content_id`. `:locations` is declared on that output. The array is included only when the content type is `RecordingStudioPresskits::LocationSection`. Each entry is Location's `api_payload`. The Location section type returns `{ locations: ... }`. Do not register Location again from Press Kits.
+
+## 0.32.0
+
+A live kit can be downloaded as a zip of its public photos and a `kit.txt` of the public copy. PressKit opts into Downloadable (`source: :manifest`, action `:"presskits.kit_download"`, export scope `:public`). Presskits subscribes to Publishable's after-commit events: publish generates, unpublish invalidates immediately, a revision to a live kit rebuilds. Downloadable's debounce still covers ordinary content writes. The zip never includes drafts, unpublished revisions, trashed items, or private notes.
+
+Default audience for `:"presskits.kit_download"` is public, with granted roles `download`, `edit`, and `admin` — not `view` alone. `allowed` includes registered custom audiences. Host and workspace constraints still apply; Accessible falls back to granted when public is not allowed. Hosts overwrite `RecordingStudioAccessible.configuration.action_audiences[:"presskits.kit_download"]`. `downloadable_available_for?` is true only while the kit is currently published. **Download kit** sits on the public page through Downloadable's button helper, including for logged-out visitors on a public kit. It stays off preview and the editor. Kit owners and editors change who may download from **Downloads** on the kit toolbar (`set_audience!`, `manage_role: :edit`). That screen uses a Flatpack RadioGroup `variant: :inline` with per-audience icons (`config.download_audience_icons` or i18n `recording_studio_presskits.downloads.audience_icons`).
+
+Package show / create / status re-authorize on every request. Changing Anyone to Signed in immediately refuses an anonymous hit on the package path for a zip that is already built. A signed ActiveStorage blob URL already handed out stays valid until it expires — Downloadable uses `ActiveStorage.urls_expire_in` when positive, otherwise 5 minutes. Hosts that want a download-only grant declare `:download` in the root's `accessible_roles`; edit and admin grants already count. The public **Download kit** button follows the signed-in visitor, not a leftover `Current.actor`.
+
+```bash
+bin/rails generate recording_studio_downloadable:install
+bin/rails generate recording_studio_downloadable:migrations
+bin/rails generate recording_studio_accessible:migrations
+bin/rails db:migrate
+```
+
+Bump Accessible to `~> 0.14` (dummy tag `v0.14.0`) and Publishable to `~> 0.7` (dummy tag `v0.7.0`). Pin Downloadable `~> 0.3` (dummy tag `v0.3.0`). Mount Downloadable, pin its Stimulus controllers, and rebuild Tailwind so the download button classes generate. Flatpack has no download-control component at this pin — do not invent one.
 
 ## 0.31.0
 

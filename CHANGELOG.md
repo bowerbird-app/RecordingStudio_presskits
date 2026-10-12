@@ -7,22 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.32.0] - 2026-10-10
+## [0.34.0] - 2026-10-12
 
 ### Added
-- Location section type. `RecordingStudioPresskits::LocationSection` is an empty recording under the kit section. It includes Trashable and `RecordingStudio::Capabilities::Location.to`. Places are `RecordingStudio::Location::Location` children. A kit can hold zero, one, or many Location sections, and a section can hold one or more places.
+- Location section type. `RecordingStudioPresskits::LocationSection` is an empty recording under the kit section. It includes Trashable and `RecordingStudio::Capabilities::Location.to`. Places are `RecordingStudio::Location::Location` children (`recording_studio_location` `~> 0.4`). A kit can hold zero, one, or many Location sections, and a section can hold one or more places.
 - This is not the kit-header place from 0.29.0. `KitLocation` still looks up the one optional Location child of the press kit. Section places hang off `LocationSection`.
 - + Location opens Location's `recording_studio_location_search_fields` (place search, Add address manually, title, type, and icon when `icon_mode` is `:choose`) in `pk-editor`. Preview and the public page render `recording_studio_location_display`. Heading stays on the shared heading editor. Section FAB, Orderable, and Trashable match the other sections. A new section starts with the i18n type label.
 - When Recording Studio API is loaded, a Location section nests a `locations` array of Location's `api_payload`. Press Kits does not register Location again.
 - Dummy seeds **Where to find us** on Spring launch with The Pavilion in Melbourne, next to the Harbour Gallery kit location.
-- Version `0.32.0`
+- Version `0.34.0`
 
 ### Upgrade notes
-- Bump to `0.32.0`. Keep Location at `~> 0.4` (dummy tag `v0.5.1`). Do not downgrade.
+- Bump to `0.34.0`. Keep Location at `~> 0.4` (dummy tag `v0.5.1`). Do not downgrade. Visibility (0.33.0) and kit downloads (0.32.0) stay as they shipped on main.
 - Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate` for `recording_studio_location_sections`.
 - Add `RecordingStudioPresskits::LocationSection` to `recordable_types`. Location is already registered for the kit header.
 - Rebuild Tailwind so Location search-field classes generate. Pin Location's Stimulus controllers if the host has not already.
 - Flatpack has no place-search or address card of its own. The section uses Location's helpers. `recording_studio_location_display` is a Card — that is the right weight for a section, unlike the kit hero byline.
+
+## [0.33.0] - 2026-10-10
+
+### Added
+- Configurable kit visibility through Accessible action `presskits.kit_view_full` (default Public). The owner picks who can view the full kit on **Visibility** in the kit editor toolbar, next to **Downloads** and publish. When that is not Public, **What should other visitors see?** is Preview or Hidden (default Preview).
+- `RecordingStudioPresskits::Visibility.presentation_for` is the only resolver (`:full`, `:preview`, `:hidden`, `:unavailable`). Public show, listings, cards, and meta tags go through it.
+- Preview renders an allowlist only: title, cover colour and image, company, and kit location. The short description stays off the limited preview. A **See full press kit** heading introduces the access message. Signed-in audiences get Sign in (`config.sign_in_path`) and Create account (`config.registration_path`, hidden when blank). Site name in that copy is `config.site_name`, then i18n, then the Rails application name. Granted and custom audiences get a need-access message and no auth buttons. Hidden is a plain 404 with no metadata leak.
+- `visibility_fallback` lives on sidecar `KitSetting` rows, not the revisioned PressKit.
+- Dummy Workspace enables `:action_audiences`. Custom audiences stay a host `register_audience` concern; dummy does not register a journalist audience.
+- Version `0.33.0`
+
+### Changed
+- PressKit enables `:action_audiences` so kits can hold Accessible `AccessRule` children.
+- The visibility screen title is **Visibility**, subtitle **Who can view this press kit**. The form is `max-w-xl` on desktop. Preview/Hidden use Flatpack RadioGroup `variant: :inline` with `eye` / `eye-slash` icons.
+- **Visibility** on the kit editor toolbar sits beside **Downloads**. It opens that screen in `pk-editor`. It is not on the cover FAB.
+- Public show keeps one `set_public_actor`: `Current.actor = current_user` (including nil). Publishable `RendersPublicPage` skips filters, so `show` calls it too. Visibility, listings that take `actor:`, meta tags, and **Download kit** all follow the request user, not a leftover editor.
+
+### Upgrade notes
+- Install Accessible `0.14.0` and Publishable `0.7.0` if you have not already from 0.32.0. Run `bin/rails generate recording_studio_accessible:migrations`, `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`.
+- Enable `:action_audiences` on the host root if the workspace should narrow who can see kits. PressKit already enables it.
+- Hosts that want extra audiences `register_audience` and add them to `config.action_audiences[:"presskits.kit_view_full"][:allowed]`.
+- Set `config.sign_in_path` when sign-in is not `/users/sign_in`. Set `config.registration_path` to show Create account on signed-in previews; leave it blank to hide that button. Set `config.site_name` when the signed-in message should not use the Rails application name.
+- Use `KitQuery.discoverable_for(actor:)` for public lists. `PressKit.indexable` is still publish state only.
+- Future JSON serializers must call `Visibility.presentation_for`. Do not cache non-full responses on a shared cache. Fragment keys must include the presentation. Do not prefer a leftover `Current.actor` on the public page.
+- A visitor who cannot see the full kit does not get **Download kit**.
+- Flatpack has no “show this field when the select is not Public” control, so a small Stimulus controller (`recording-studio-presskits--visibility-fallback`) toggles the fallback RadioGroup. Accessible has no audience picker; Presskits renders Select + RadioGroup.
+
+## [0.32.0] - 2026-10-10
+
+### Added
+- Live kits can be downloaded as a zip. PressKit opts into Downloadable `source: :manifest`, `format: :zip`, action `:"presskits.kit_download"`, export scope `:public`. The zip holds every placed photo (cover plus Images-section placements, original files, unique filenames) and a `kit.txt` of public kit copy only: title, short description, company, location, date, section titles/subtitles and public text, quotes with attribution, story/credits, and image caption/credit/alt. Drafts, unpublished revisions, trashed items, and private notes stay out.
+- Presskits is the glue. On publish it calls `downloadable_generate!`. On unpublish it calls `downloadable_invalidate!(immediate: true)`. A revision to a live kit rebuilds. Downloadable's own debounce still covers ordinary content writes. Do not change Downloadable or Publishable for this.
+- Default Accessible `action_audiences` for `:"presskits.kit_download"`: allowed `public` / `signed_in` / `granted` plus registered custom audiences, default `public`, granted roles `download` / `edit` / `admin` (not `view` alone), `manage_role: :edit`. Host and workspace constraints still apply; Accessible falls back to granted when public is not allowed. Hosts overwrite `config.action_audiences[:"presskits.kit_download"]`. `downloadable_available_for?` is true only while the kit is currently published.
+- **Downloads** on the kit editor toolbar (Flatpack default button, Heroicons `arrow-down-tray`) opens a `pk-editor` screen with one PageTitle (Downloads, subtitle "Who can download this press kit"). Audience is a Flatpack RadioGroup `variant: :inline` with icons from Accessible `audience_options_for`. Defaults: Anyone `globe-alt`, Signed in `user`, People with access `lock-closed`, custom `user-group`. Hosts set `config.download_audience_icons` or i18n `recording_studio_presskits.downloads.audience_icons`. Save uses `set_audience!`. The same people who can edit the kit can change it.
+- **Download kit** on the public kit page uses Downloadable's existing button helper (preparing / ready / retry). The default public audience shows it to logged-out visitors on a live kit. It is never on owner preview or the editor preview. A visitor who cannot see the full kit, or who lacks the download audience, does not see it.
+- Downloadable package paths re-check the audience on every show / create / status request. Switching Anyone to Signed in immediately blocks an anonymous request to a previously built zip path. Signed ActiveStorage blob URLs already issued remain bearer links until expiry (Downloadable default 5 minutes). People with access is a `download` / `edit` / `admin` grant, not `view`.
+- The public kit download button uses the signed-in visitor (`current_user`), not a leftover `Current.actor` from an earlier editor request.
+- Depend on Downloadable `~> 0.3` (dummy tag `v0.3.0`), Accessible `~> 0.14` (dummy tag `v0.14.0`), and Publishable `~> 0.7` (dummy tag `v0.7.0`).
+- Version `0.32.0`
+
+### Upgrade notes
+- Add Downloadable, bump Accessible to `~> 0.14` and Publishable to `~> 0.7`. Run Downloadable and Accessible install plus migrations (package identity columns, AccessConstraint / AccessRule). Mount Downloadable. Pin its Stimulus controllers. Rebuild Tailwind so Downloadable's button classes generate.
+- PressKit already opts into Downloadable. Hosts overwrite the kit-download audience; they do not enable the mixin a second time. Kit editors change who may download from **Downloads** on the kit toolbar (`set_audience!`). Register custom audiences before boot so they land in `allowed`. Hosts set `config.download_audience_icons` (or the i18n `audience_icons` keys) when a custom audience should not use `user-group`. A download-only grant needs `:download` on the root `accessible_roles`; `edit` and `admin` already satisfy People with access. Treat issued blob URLs as bearer links until they expire (default 5 minutes).
+- Flatpack has no download-control component at this pin. The public page uses Downloadable's `recording_studio_downloadable_button`. Do not invent a second preparing / ready / retry control.
 
 ## [0.31.0] - 2026-10-10
 

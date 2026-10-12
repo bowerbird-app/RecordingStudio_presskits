@@ -1,0 +1,6 @@
+<%= turbo_stream.replace "presskits-kit-header" do %>
+  <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
+    press_kit_recording: @press_kit_recording,
+    header_edit_path: edit_press_kit_header_path(@press_kit_recording)
+  ) %>
+<% end %>

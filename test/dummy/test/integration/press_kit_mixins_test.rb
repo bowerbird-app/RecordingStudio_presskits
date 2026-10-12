@@ -227,6 +227,8 @@ class PressKitMixinsTest < ActiveSupport::TestCase
     assert(routes.any? { |path| path.start_with?("/recording_studio_duplicatable") })
     publishable_routes = RecordingStudioPublishable::Engine.routes.routes.map { |route| route.path.spec.to_s }
     assert(publishable_routes.any? { |path| path.include?("/published/:uuid/:slug") })
+    downloadable_routes = RecordingStudioDownloadable::Engine.routes.routes.map { |route| route.path.spec.to_s }
+    assert(downloadable_routes.any? { |path| path.include?("/package") })
   end
 
   test "fake block does not enable publishable" do

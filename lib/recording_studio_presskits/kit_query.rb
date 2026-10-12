@@ -30,6 +30,10 @@ module RecordingStudioPresskits
                  .reorder(created_at: :desc)
       end
 
+      def discoverable_for(actor:)
+        published_kits.select { |recording| Visibility.discoverable?(actor: actor, kit: recording) }
+      end
+
       def sections_for(press_kit_recording)
         return RecordingStudio::Recording.none if press_kit_recording.blank?
 

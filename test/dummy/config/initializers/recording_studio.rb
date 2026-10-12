@@ -21,6 +21,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::LocationSection",
     "RecordingStudioVideo::Video",
     "RecordingStudioPublishable::Publishable",
+    "RecordingStudio::AccessConstraint",
+    "RecordingStudio::AccessRule",
     "RecordingStudioAttachable::Attachment",
     "RecordingStudioAttachable::Library",
     "RecordingStudioAttachable::Placement",

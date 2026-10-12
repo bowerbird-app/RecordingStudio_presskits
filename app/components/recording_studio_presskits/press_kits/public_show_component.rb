@@ -29,6 +29,32 @@ module RecordingStudioPresskits
       def section_visible?(recording)
         SectionFrameComponent.new(section_recording: recording).content_visible?
       end
+
+      def show_download?
+        return false if preview?
+        return false unless live?
+
+        KitDownload.allowed?(@press_kit_recording, actor: download_actor)
+      end
+
+      def download_button_options
+        {
+          generate_text: I18n.t("recording_studio_presskits.download.button"),
+          ready_text: I18n.t("recording_studio_presskits.download.button"),
+          preparing_text: I18n.t("recording_studio_presskits.download.preparing"),
+          retry_text: I18n.t("recording_studio_presskits.download.retry")
+        }
+      end
+
+      private
+
+      def download_actor
+        return helpers.current_user if helpers.respond_to?(:current_user, true)
+
+        return Current.actor if defined?(Current) && Current.respond_to?(:actor) && Current.actor
+
+        nil
+      end
     end
   end
 end
