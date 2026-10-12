@@ -11,7 +11,7 @@ Add the gem next to Recording Studio 4.4, Accessible 0.14, Admin 2.0, Publishabl
 ```ruby
 # Gemfile
 gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.5.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.14.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"
 gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.6.0"
@@ -31,7 +31,7 @@ gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presski
 ```ruby
 # gemspec / host Gemfile constraints
 gem "recording_studio", "~> 4.2"
-gem "recording_studio_accessible", "~> 0.14"
+gem "recording_studio_accessible", "~> 0.15"
 gem "recording_studio_admin", "~> 2.0"
 gem "recording_studio_orderable", "~> 0.2"
 gem "recording_studio_trashable", "~> 0.6"
@@ -392,7 +392,7 @@ Dummy kit pins:
 | Gem | Pin |
 |-----|-----|
 | Recording Studio | `v4.5.0` |
-| Accessible | `v0.14.0` |
+| Accessible | `v0.15.0` |
 | Admin | `v2.1.0` |
 | Root Switchable | `v0.8.0` |
 | FlatPack | `v0.1.224` |
