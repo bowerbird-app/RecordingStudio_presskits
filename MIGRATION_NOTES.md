@@ -1,5 +1,22 @@
 # Upgrade notes
 
+## 0.38.0
+
+Press kits gain an optional `subtitle` column. Blank lines become nil. The limit is 120 characters.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+`Cover::Component` at `:card` is the grid card for a press center. The top is the cover photo (`object-cover`, rounded top corners) or the cover colour when the kit has no photo. A **Press kit** pill sits on that image. The white body shows the company name (from `Cover::Company`, hidden when the root has no company), the title, the subtitle, and the short description clamped to three lines. **View** links to `href`. Its background is `resolved_cover_color`, or the default cover colour. The label uses `Cover::Contrast.text_on`.
+
+The heart is Lists' `recording_studio_add_to_list` (`icon: "heart"`, `show_chevron: false`). It renders when Lists is loaded, the card has a recording, and `Current.actor` is present. The card is not itself a link, and the heart stops the click, so it does not open the kit. A press kit page still renders when Lists is not loaded.
+
+`:preview` stays a 9/16 colour tile and skips the photo. A subtitle, when present, is the preview line under the title, and the short description sits under that. `:hero` keeps the eyebrow, the display title, the company, and the location. The subtitle sits under the title. The short description stays off the hero.
+
+The header screen saves subtitle with the title and the short description. `Api::PressKitPayload` includes `subtitle`.
+
 ## 0.37.0
 
 Press kits now depend on Lists `~> 0.5` (dummy tag `v0.5.0`). Installing the gem does not add list controls to a press kit.

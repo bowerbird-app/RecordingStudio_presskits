@@ -6,6 +6,7 @@ module RecordingStudioPresskits
       def self.for(recordable)
         {
           title: recordable.title,
+          subtitle: recordable.subtitle,
           description: recordable.description,
           cover_style: recordable.resolved_cover_style,
           cover_color: recordable.resolved_cover_color,

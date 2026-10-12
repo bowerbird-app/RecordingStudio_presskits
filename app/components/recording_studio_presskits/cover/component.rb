@@ -7,15 +7,17 @@ module RecordingStudioPresskits
       include RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
       include Byline
       include Image
+      include GridCard
 
       SIZES = %i[card preview hero].freeze
 
-      def initialize(recording: nil, title: nil, description: nil, cover_color: nil, # rubocop:disable Metrics/ParameterLists
+      def initialize(recording: nil, title: nil, description: nil, subtitle: nil, cover_color: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
                      cover_style: nil, cover_text_color: nil, size: :card, href: nil, id: nil)
         super()
         @recording = recording
         @title = title
         @description = description
+        @subtitle = subtitle
         @cover_color = cover_color
         @cover_style = cover_style
         @cover_text_color = cover_text_color
@@ -30,6 +32,11 @@ module RecordingStudioPresskits
 
       def description
         text = @description.nil? ? recordable&.try(:description) : @description
+        text.to_s.strip.presence
+      end
+
+      def subtitle
+        text = @subtitle.nil? ? recordable&.try(:subtitle) : @subtitle
         text.to_s.strip.presence
       end
 
@@ -70,10 +77,6 @@ module RecordingStudioPresskits
         :default
       end
 
-      def heading_variant
-        :h1
-      end
-
       def cover_ratio
         hero? ? "auto" : "9 / 16"
       end
@@ -95,10 +98,8 @@ module RecordingStudioPresskits
         # Tailwind scans these literals: "aspect-[9/16]" "max-w-xs" "justify-start" "max-w-3xl" "p-12" "md:p-24"
         if hero?
           "flex w-full flex-col justify-start rounded-none p-12 md:p-24"
-        elsif preview?
-          "flex aspect-[9/16] w-full flex-col justify-end p-6"
         else
-          "flex aspect-[9/16] w-full flex-col justify-end p-5"
+          "flex aspect-[9/16] w-full flex-col justify-end p-6"
         end
       end
 

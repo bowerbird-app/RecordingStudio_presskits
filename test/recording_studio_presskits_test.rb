@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.37.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.38.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -655,10 +655,19 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes image, "aspect-[1440/640]"
     assert_includes image, "CoverImage.url_for"
     assert_includes cover_html, "hero_copy_classes"
-    assert_includes cover_html, "--page-title-h1-size"
+    grid_card = File.read(File.expand_path("../lib/recording_studio_presskits/cover/grid_card.rb", __dir__))
+    assert_includes grid_card, "cover_card: true"
+    assert_includes cover_html, "data-cover-fallback"
+    assert_includes cover_html, "data-cover-list"
+    assert_includes cover_html, "recording_studio_add_to_list"
+    assert_includes cover_html, "cover_view: true"
+    assert_includes cover_html, "line-clamp-3"
+    assert_includes cover_html, "arrow-right"
+    assert_includes cover_html, "data-cover-subtitle"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
     assert_includes locales, "cover:"
     assert_includes locales, 'eyebrow: "Press kit"'
+    assert_includes locales, 'view: "View"'
     refute_includes index, "card.media"
     refute_includes index, 'name: "photo"'
     refute_includes index, "presskits_cover_url_for"

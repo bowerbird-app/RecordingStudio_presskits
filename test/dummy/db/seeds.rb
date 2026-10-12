@@ -15,7 +15,7 @@ find_or_record_child = lambda do |recordable, root_recording, parent_recording|
   ).recording
 end
 
-find_or_record_named_child = lambda do |type, title, root_recording, parent_recording, description: nil, cover_style: nil, cover_color: nil|
+find_or_record_named_child = lambda do |type, title, root_recording, parent_recording, description: nil, subtitle: nil, cover_style: nil, cover_color: nil|
   existing = RecordingStudio::Recording.recording_studio_trashable_active
                                        .where(root_recording: root_recording, parent_recording: parent_recording,
                                               recordable_type: type.name)
@@ -25,6 +25,7 @@ find_or_record_named_child = lambda do |type, title, root_recording, parent_reco
   parent_recording.record(type, parent_recording: parent_recording) do |recordable|
     recordable.title = title
     recordable.description = description if description.present?
+    recordable.subtitle = subtitle if subtitle.present? && recordable.respond_to?(:subtitle=)
     recordable.cover_style = cover_style if cover_style.present?
     recordable.cover_color = cover_color if cover_color.present?
   end
@@ -74,7 +75,8 @@ begin
     "Spring launch",
     root_recording,
     root_recording,
-    description: "Doors at noon. The one-sheet is inside.",
+    description: "Doors at noon. The one-sheet is inside, with the photos, the credits, and the facts.",
+    subtitle: "Collection released",
     cover_style: "color",
     cover_color: "#BFDBFE"
   )
@@ -134,11 +136,15 @@ begin
   end
   attach_harbour_photo.call(press_kit_recording, source: "press_kit_cover")
   spring_cover = press_kit_recording.recordable
-  if spring_cover.cover_color != "#BFDBFE" || spring_cover.cover_text_color.present?
+  spring_description = "Doors at noon. The one-sheet is inside, with the photos, the credits, and the facts."
+  if spring_cover.cover_color != "#BFDBFE" || spring_cover.cover_text_color.present? ||
+     spring_cover.subtitle != "Collection released" || spring_cover.description != spring_description
     root_recording.revise(press_kit_recording) do |press_kit|
       press_kit.cover_style = "color"
       press_kit.cover_color = "#BFDBFE"
       press_kit.cover_text_color = nil
+      press_kit.subtitle = "Collection released"
+      press_kit.description = spring_description
     end
     press_kit_recording.reload
   end

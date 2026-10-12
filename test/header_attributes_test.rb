@@ -7,13 +7,18 @@ class HeaderAttributesTest < Minitest::Test
   def test_from_strips_title_and_blank_description
     fields = RecordingStudioPresskits::HeaderAttributes.from(
       title: " Spring launch ",
+      subtitle: "  Collection released  ",
       description: "  ",
       cover_style: "color",
       cover_color: "#BFDBFE"
     )
 
     assert_equal "Spring launch", fields[:title]
+    assert_equal "Collection released", fields[:subtitle]
     assert_nil fields[:description]
+    blank = RecordingStudioPresskits::HeaderAttributes.from(title: "Spring", subtitle: "   ")
+    assert_nil blank[:subtitle]
+
     assert_equal "color", fields[:cover_style]
     assert_equal "#BFDBFE", fields[:cover_color]
   end

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-10-12
+
+### Added
+- Optional press kit `subtitle`. It normalises like the short description, shows on the grid card, and sits under the title on the hero and the header preview.
+- Version `0.38.0`
+
+### Changed
+- `Cover::Component` at `:card` is a white rounded card. The top is the cover photo, or the cover colour when there is no photo, with a **Press kit** pill. The body shows the company name, the title, the subtitle, and the short description. **View** uses the cover colour and `Cover::Contrast` for the label. The link is that button.
+- When Lists is loaded and `Current.actor` is present, the card shows Lists' `recording_studio_add_to_list` heart. The heart does not open the kit. Without Lists, or without an actor, the card still renders.
+- The kit index grid is two columns. The header screen has a Subtitle field.
+
+### Upgrade notes
+- Bump to `0.38.0`. Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate` for `subtitle` on `recording_studio_press_kits`.
+- Hosts that replaced `Cover::Component` at `:card` should follow the new card: photo or colour block, company row, title, subtitle, clamped description, and a **View** button whose background is `resolved_cover_color`. `:hero` and `:preview` stay.
+- The heart is `recording_studio_add_to_list` with `icon: "heart"`. It renders only when Lists is available and there is a current actor. Pass the kit recording so the menu can target it.
+
 ## [0.37.0] - 2026-10-12
 
 ### Added

@@ -30,7 +30,7 @@ module RecordingStudioPresskits
 
     def press_kit_params
       params.fetch(:press_kit, {}).permit(
-        :title, :description, :cover_style, :cover_color, :cover_text_color, :cover_text_swatch
+        :title, :subtitle, :description, :cover_style, :cover_color, :cover_text_color, :cover_text_swatch
       )
     end
 
@@ -87,12 +87,21 @@ module RecordingStudioPresskits
 
     def assign_header_fields(overrides = {})
       recordable = @press_kit_recording.recordable
+      assign_header_copy(overrides, recordable)
+      assign_header_cover(overrides, recordable)
+      @header_location = kit_location_recording&.recordable || RecordingStudio::Location::Location.new
+    end
+
+    def assign_header_copy(overrides, recordable)
       @header_title = field_or_saved(overrides, :title, recordable.title)
+      @header_subtitle = field_or_saved(overrides, :subtitle, recordable.subtitle)
       @header_description = field_or_saved(overrides, :description, recordable.description)
+    end
+
+    def assign_header_cover(overrides, recordable)
       @header_cover_style = field_or_saved(overrides, :cover_style, recordable.cover_style)
       @header_cover_color = field_or_saved(overrides, :cover_color, recordable.cover_color)
       @header_cover_text_color = field_or_saved(overrides, :cover_text_color, recordable.cover_text_color)
-      @header_location = kit_location_recording&.recordable || RecordingStudio::Location::Location.new
     end
 
     def field_or_saved(overrides, key, saved)
@@ -107,18 +116,8 @@ module RecordingStudioPresskits
 
     def render_invalid_header(fields, error)
       assign_header_fields(fields)
-      flash.now[:alert] = invalid_header_alert(error)
+      flash.now[:alert] = HeaderAttributes.alert_for(error)
       render :edit, status: :unprocessable_entity
-    end
-
-    def invalid_header_alert(error)
-      messages = error.record.errors
-      return "Pick a colour we can actually paint." if messages[:cover_color].any?
-      return "Pick a text colour we can actually paint." if messages[:cover_text_color].any?
-      return "That cover style is not ready yet." if messages[:cover_style].any?
-      return "Check the place. Something there is off." if error.record.is_a?(RecordingStudio::Location::Location)
-
-      "Keep that description short. 280 characters is the limit."
     end
   end
 end

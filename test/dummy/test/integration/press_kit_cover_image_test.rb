@@ -37,8 +37,9 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-image-card]", count: 0
-    assert_select "[data-cover-ratio='9 / 16']", minimum: 1
+    assert_select "[data-cover-image]", count: 0
+    assert_select "[data-cover-card] [data-cover-fallback]", minimum: 1
+    assert_select "[data-cover-card] [data-cover-tag]", text: "Press kit"
   end
 
   test "public kit and editor show a direct cover attachment above the colour header" do
@@ -66,10 +67,11 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-image-card] [data-cover-image] img[alt='A white gallery hall']"
-    card = css_select("[data-cover-image-card]").first.to_html
+    assert_select "[data-cover-card] [data-cover-image] img[alt='A white gallery hall']"
+    card = css_select("[data-cover-card]").first.to_html
     assert_operator card.index("data-cover-image"), :<, card.index("Spring launch")
     refute_includes card, "aspect-[9/16]"
+    assert_includes card, "object-cover"
     assert_equal photo.id, RecordingStudioPresskits::DirectImages.list(kit).first.id
   end
 
