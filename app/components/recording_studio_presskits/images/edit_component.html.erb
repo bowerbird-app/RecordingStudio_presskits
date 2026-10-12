@@ -1,25 +1,6 @@
 <div class="flex w-full flex-col gap-6">
   <div class="flex flex-wrap items-center gap-3">
-    <%= form_with url: upload_path, method: :post, multipart: true, class: "inline-flex", html: {
-          data: {
-            controller: "recording-studio-presskits--image-upload",
-            turbo_frame: helpers.presskits_editor_dialog? ? helpers.presskits_editor_screen_id : nil
-          }
-        } do %>
-      <%= hidden_field_tag :redirect_mode, "return_to" %>
-      <%= hidden_field_tag :return_to, return_path %>
-      <%= file_field_tag "attachment_import[attachments][][file]",
-                         accept: "image/*",
-                         class: "sr-only",
-                         onchange: "this.form.requestSubmit()",
-                         aria: { label: "Upload" } %>
-      <%= render FlatPack::Button::Component.new(
-        text: "Upload",
-        icon: "upload",
-        style: :default,
-        type: "button",
-        data: { action: "click->recording-studio-presskits--image-upload#browse" }
-      ) %>
-    <% end %>
+    <%= helpers.render partial: "recording_studio_attachable/attachment_file_buttons/button",
+          locals: upload_button_locals %>
   </div>
 </div>

@@ -33,12 +33,19 @@ module RecordingStudioPresskits
         }
       end
 
-      def upload_path
-        helpers.recording_studio_attachable.recording_attachment_imports_path(
-          @recording,
-          redirect_mode: "return_to",
-          return_to: return_path
-        )
+      def upload_button_locals
+        # The file button replaces its one attachment once a file exists.
+        # An Images section keeps importing another file.
+        RecordingStudioAttachable::AttachmentFileButton.locals(
+          recording: @recording,
+          return_to: return_path,
+          target: upload_turbo_frame,
+          add_label: "Upload"
+        ).merge(attachment_recording: nil)
+      end
+
+      def upload_turbo_frame
+        helpers.presskits_editor_screen_id if helpers.presskits_editor_dialog?
       end
 
       def return_path

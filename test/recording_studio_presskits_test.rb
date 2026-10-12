@@ -925,13 +925,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes component, "def self.below?"
     refute_includes editor, 'text: "Add from library"'
     refute_includes editor, "library photo"
-    assert_includes editor, 'text: "Upload"'
-    assert_operator editor.index("flex flex-wrap items-center gap-3"), :<, editor.index('text: "Upload"')
-    assert_includes editor, "recording-studio-presskits--image-upload"
-    assert_includes editor, "multipart: true"
-    assert_includes editor, "attachment_import[attachments][][file]"
+    assert_includes editor, "recording_studio_attachable/attachment_file_buttons/button"
+    assert_includes editor, "upload_button_locals"
+    assert_operator editor.index("flex flex-wrap items-center gap-3"), :<,
+                    editor.index("attachment_file_buttons/button")
+    assert_includes component, 'add_label: "Upload"'
+    assert_includes component, "attachment_recording: nil"
+    refute_includes editor, "recording-studio-presskits--image-upload"
+    refute_includes editor, "multipart: true"
+    refute_includes editor, "attachment_import[attachments][][file]"
     refute_includes editor, "library-upload"
     refute_includes editor, "presskits_editor_nav(:push)"
+    refute File.exist?(presskits_path("app/javascript/recording_studio_presskits/controllers/image_upload_controller.js"))
     refute_includes section_editor, "upload_form_data"
   end
 

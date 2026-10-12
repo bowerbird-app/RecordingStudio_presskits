@@ -994,9 +994,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "No images yet."
     refute_includes response.body, ">Save<"
     refute_select "a", text: "Add from library"
-    assert_select "[data-controller='recording-studio-presskits--image-upload']", count: 1
-    assert_select "[data-controller='recording-studio-presskits--image-upload'] button[type='button']", text: "Upload"
+    assert_select "[data-controller='recording-studio-attachable--attachment-revision-upload']", count: 1
+    assert_select "[data-controller='recording-studio-attachable--attachment-revision-upload'] button[type='button']", text: "Upload"
     assert_select "input[type=file][accept='image/*']"
+    refute_select "[data-controller='recording-studio-presskits--image-upload']"
     refute_select "[data-controller='recording-studio-attachable--upload']"
     refute_includes response.body, "Drag images here"
     refute_includes response.body, "Choose images"
@@ -1028,9 +1029,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_response :success
     assert_select "img[alt='stage']"
-    upload_form = css_select("[data-controller='recording-studio-presskits--image-upload']").first.to_html
-    assert_includes upload_form, 'enctype="multipart/form-data"'
+    upload_form = css_select("[data-controller='recording-studio-attachable--attachment-revision-upload']").first.to_html
+    assert_includes upload_form, "/attachments/imports"
+    assert_includes upload_form, "attachment_import[attachments][][signed_blob_id]"
+    refute_includes upload_form, "multipart/form-data"
     refute_includes upload_form, "attachment_collection"
+    assert_select "button", text: "Upload"
+    refute_select "button", text: "Change"
     assert_select "form#attachment-collection-#{images.id}"
     assert_select "input[name='attachment_collection[rows][][caption]'][form='attachment-collection-#{images.id}']"
     assert_select "input[name='attachment_collection[rows][][credit]']"
