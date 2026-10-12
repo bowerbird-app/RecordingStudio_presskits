@@ -664,6 +664,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "line-clamp-3"
     assert_includes cover_html, "arrow-right"
     assert_includes cover_html, "data-cover-subtitle"
+    assert_includes cover_html, "gap-[14px]"
+    assert_includes cover_html, "mt-auto"
+    assert_includes cover_html, "flex flex-1 flex-col"
+    assert_includes index, "align: :stretch"
+    refute_includes index, "align: :start"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
     assert_includes locales, "cover:"
     assert_includes locales, 'eyebrow: "Press kit"'

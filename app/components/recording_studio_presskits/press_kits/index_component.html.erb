@@ -78,7 +78,7 @@
           <% table.column(title: "Added", html: ->(recording) { recording.created_at&.to_fs(:long) }) %>
         <% end %>
       <% else %>
-        <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
+        <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :stretch) do %>
           <% @press_kit_recordings.each do |recording| %>
             <%= render RecordingStudioPresskits::Cover::Component.new(
               recording: recording,

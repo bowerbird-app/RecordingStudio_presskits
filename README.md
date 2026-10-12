@@ -447,7 +447,7 @@ initialize(recording: nil, title: nil, description: nil, subtitle: nil, cover_co
 
 Every argument is optional. An unknown `size` becomes `:card`. Title uses the argument, then the recordable title, then `"Press kit"`. Description and subtitle use the argument. Pass `description: nil` or `subtitle: nil` (the defaults) to read the recordable. Colours use the argument, then `resolved_cover_color` / `resolved_cover_style` / `resolved_cover_text_color`, then the gem default. A blank text colour uses Auto (WCAG contrast on that background).
 
-`:card` is the grid card for a host press center. It is a Flatpack card with a soft shadow, not a link. The top is the cover photo (`Cover::Image` through `CoverImage` and `DirectImages`, `object-cover`, rounded top corners) or the cover colour when the kit has no photo. A **Press kit** pill sits on that image. The body shows the company name from `Cover::Company` in small uppercase type (hidden when there is no company), the title, the subtitle, and the short description clamped to three lines. **View** is a rounded Flatpack button. Its background is `resolved_cover_color` (or the default cover colour) and its label uses `Cover::Contrast.text_on`. `href` is that button's link. Sections stay off the card.
+`:card` is the grid card for a host press center. It is a Flatpack card with a soft shadow, not a link. The top is the cover photo (`Cover::Image` through `CoverImage` and `DirectImages`, `object-cover`, rounded top corners) or the cover colour when the kit has no photo. A **Press kit** pill sits on that image. The body is a flex column. The company name from `Cover::Company` sits in small uppercase type 14px above the title (hidden when there is no company). The heart stays on that company row, top-aligned, so it does not push the title down. The subtitle and the short description, clamped to three lines, follow the title. **View** is a rounded Flatpack button in a footer with `mt-auto`, so it sits on the bottom of the card. The card is `h-full` and fills its grid cell. Its background is `resolved_cover_color` (or the default cover colour) and its label uses `Cover::Contrast.text_on`. `href` is that button's link. Sections stay off the card.
 
 When `RecordingStudioLists::AddToListHelper` is loaded, the card has a recording, and `Current.actor` is present, the company row shows `recording_studio_add_to_list` with `icon: "heart"`. That control does not follow `href`. Without Lists, or without an actor, the card still renders and the heart stays off.
 
@@ -520,7 +520,7 @@ The center page lists cards. `for_root` is every live kit in the workspace root,
 ```erb
 <% kits = RecordingStudioPresskits::KitQuery.for_root(center_recording.root_recording) %>
 
-<%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start) do %>
+<%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :stretch) do %>
   <% kits.each do |kit| %>
     <% presentation = RecordingStudioPresskits::Visibility.presentation_for(
          actor: current_user,

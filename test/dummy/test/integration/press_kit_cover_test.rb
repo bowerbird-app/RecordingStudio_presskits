@@ -357,6 +357,8 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes amber["style"], "--button-primary-background-color: #D97706"
     assert_includes amber["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#D97706')}"
     assert_select "a[data-cover-view][href='#{recording_studio_presskits.edit_press_kit_path(first)}']", text: /View/
+    assert_includes css_select("a[data-cover-view]").first.parent["class"], "mt-auto"
+    assert_select ".grid.items-stretch"
     assert_select "a[data-cover-card]", count: 0
     assert_select "[data-cover-list] button[type=button]"
     list = css_select("[data-cover-card][data-cover-color='#BFDBFE'] [data-cover-list]").first
@@ -366,6 +368,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     RecordingStudioCompany.create(@root, actor: @user, name: "Harbour Studio")
     get recording_studio_presskits.press_kits_path
     assert_select "[data-cover-company]", text: "Harbour Studio", count: 2
+    harbour = css_select("[data-cover-card][data-cover-color='#BFDBFE']").first.to_html
+    assert_operator harbour.index("data-cover-company"), :<, harbour.index("data-cover-title")
+    assert_operator harbour.index("gap-[14px]"), :<, harbour.index("data-cover-title")
     assert_select "[data-cover-verification]", count: 2
     assert_select "[data-cover-company]", text: "HARBOUR STUDIO", count: 0
   end
