@@ -66,7 +66,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.224"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.7"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.13"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_location", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -88,7 +88,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.7.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
@@ -307,7 +307,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.5.0"
     assert_includes readme, "v0.15.0"
-    assert_includes readme, "v0.13.0"
+    assert_includes readme, "v0.15.0"
     assert_includes readme, "v0.3.0"
     assert_includes readme, "v0.7.0"
     assert_includes readme, "recording_studio_downloadable"
