@@ -221,6 +221,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_030254) do
     t.datetime "created_at", null: false
   end
 
+  create_table "recording_studio_location_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+  end
+
   create_table "recording_studio_kit_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "title"
     t.text "subtitle"

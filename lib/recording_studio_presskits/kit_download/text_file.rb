@@ -72,7 +72,8 @@ module RecordingStudioPresskits
           QuoteSection => :quote_lines,
           FactsSection => :fact_lines,
           CreditsSection => :credit_lines,
-          VideoSection => :video_lines
+          VideoSection => :video_lines,
+          LocationSection => :location_section_lines
         }[recordable.class]
       end
 
@@ -138,6 +139,23 @@ module RecordingStudioPresskits
 
       def video_lines(content, _recordable)
         VideoSection.active_videos(content).filter_map { |child| video_block(child.recordable) }
+      end
+
+      def location_section_lines(content, _recordable)
+        LocationSection.active_locations(content).filter_map { |child| location_block(child.recordable) }
+      end
+
+      def location_block(location)
+        return if location.blank?
+
+        if location.respond_to?(:display_name)
+          location.display_name.to_s.strip.presence
+        else
+          [location.try(:title), location.try(:locality)]
+            .filter_map { |part| part.to_s.strip.presence }
+            .join(", ")
+            .presence
+        end
       end
 
       def video_block(video)

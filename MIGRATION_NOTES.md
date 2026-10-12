@@ -1,5 +1,22 @@
 # Upgrade notes
 
+## 0.34.0
+
+A Location section is a kit section whose content is `RecordingStudioPresskits::LocationSection`. That type is an empty table: a UUID primary key and `created_at`. Places are `RecordingStudio::Location::Location` children. Enable Location on `LocationSection`. Do not enable Location on `KitSection`. Do not copy `recording_studio_locations` into Press Kits.
+
+This is not the kit-header place. PressKit still includes `Location.to`. `KitLocation` still finds the one optional Location child of the kit. A section place has a different parent.
+
+The editor matches the other collection sections. Title and subtitle stay on the shared heading screen. Edit content is a `pk-editor` screen with + Location and the place list. New and edit use `recording_studio_location_search_fields`. Preview and the public page use `recording_studio_location_display`. Flatpack has no place-search or address card, so those stay Location's helpers. The display helper is a Card — fine in a section, too heavy for the hero byline (0.29.0). Section FAB, Orderable, and Trashable match the other sections.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+Register `"RecordingStudioPresskits::LocationSection"`. Keep `"RecordingStudio::Location::Location"`. Keep Location at `~> 0.4` (dummy tag `v0.5.1`). Rebuild Tailwind. Pin Location Stimulus controllers if they are not already pinned.
+
+When Recording Studio API is loaded, a kit section still returns `title`, `subtitle`, `content_type`, and `content_id`. `:locations` is declared on that output. The array is included only when the content type is `RecordingStudioPresskits::LocationSection`. Each entry is Location's `api_payload`. The Location section type returns `{ locations: ... }`. Do not register Location again from Press Kits.
+
 ## 0.32.0
 
 A live kit can be downloaded as a zip of its public photos and a `kit.txt` of the public copy. PressKit opts into Downloadable (`source: :manifest`, action `:"presskits.kit_download"`, export scope `:public`). Presskits subscribes to Publishable's after-commit events: publish generates, unpublish invalidates immediately, a revision to a live kit rebuilds. Downloadable's debounce still covers ordinary content writes. The zip never includes drafts, unpublished revisions, trashed items, or private notes.

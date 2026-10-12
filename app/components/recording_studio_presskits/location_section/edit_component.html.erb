@@ -1,0 +1,38 @@
+<div class="flex w-full flex-col gap-6">
+  <% if locations.any? %>
+    <div id="presskits-location-list">
+      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+        <%= render FlatPack::List::Component.new(divider: true, class: "w-full") do %>
+          <% locations.each do |location_recording| %>
+            <%= render FlatPack::List::Item.new(id: location_recording.id, hover: true) do %>
+              <div class="flex w-full items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <%= link_to edit_path(location_recording), class: "block min-w-0", data: helpers.presskits_editor_nav(:push) do %>
+                    <span class="block truncate text-sm font-medium text-(--surface-content-color)">
+                      <%= location_title(location_recording) %>
+                    </span>
+                    <% if location_summary(location_recording).present? %>
+                      <span class="block truncate text-sm text-(--surface-muted-content-color)">
+                        <%= location_summary(location_recording) %>
+                      </span>
+                    <% end %>
+                  <% end %>
+                </div>
+                <%= form_with url: remove_path(location_recording), method: :delete, local: true do %>
+                  <%= render FlatPack::Button::Component.new(
+                    icon: "trash",
+                    icon_only: true,
+                    style: :ghost,
+                    size: :sm,
+                    type: "submit",
+                    aria: { label: "Remove location" }
+                  ) %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

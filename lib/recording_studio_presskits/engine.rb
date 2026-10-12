@@ -20,6 +20,7 @@ module RecordingStudioPresskits
         register_facts_section
         register_credits_section
         register_video_section
+        register_location_section
       end
 
       private
@@ -107,6 +108,14 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::VideoSection",
           component: "RecordingStudioPresskits::VideoSection::Component",
           editor: "RecordingStudioPresskits::VideoSection::EditComponent"
+        )
+      end
+
+      def register_location_section
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::LocationSection",
+          component: "RecordingStudioPresskits::LocationSection::Component",
+          editor: "RecordingStudioPresskits::LocationSection::EditComponent"
         )
       end
     end

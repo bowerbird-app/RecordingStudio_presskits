@@ -1,0 +1,7 @@
+<% if locations.any? %>
+  <div class="flex flex-col gap-6">
+    <% locations.each do |location_recording| %>
+      <%= display_for(location_recording) %>
+    <% end %>
+  </div>
+<% end %>
