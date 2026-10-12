@@ -394,7 +394,7 @@ Dummy kit pins:
 | Recording Studio | `v4.4.0` |
 | Accessible | `v0.14.0` |
 | Admin | `v2.1.0` |
-| Root Switchable | `v0.6.0` |
+| Root Switchable | `v0.8.0` |
 | FlatPack | `v0.1.224` |
 | Attachable | `v0.13.0` |
 | Company | `v0.3.0` |
