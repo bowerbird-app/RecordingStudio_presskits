@@ -18,7 +18,7 @@ gem "recording_studio_external_embed", "~> 0.1.1", github: "bowerbird-app/Record
 gem "recording_studio_location", "~> 0.4", github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"
 gem "recording_studio_metrics", "~> 0.2", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
 gem "recording_studio_orderable", "~> 0.2", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"
-gem "recording_studio_publishable", "~> 0.7", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.7.0"
+gem "recording_studio_publishable", "~> 0.8", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"
 gem "recording_studio_trashable", "~> 0.8", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"
 gem "recording_studio_video", "~> 0.1.0", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
 
