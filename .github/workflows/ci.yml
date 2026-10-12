@@ -24,6 +24,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Copy local git clones instead of hardlinking
+        run: .github/scripts/prefer-git-copies.sh
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -70,6 +73,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      - name: Copy local git clones instead of hardlinking
+        run: .github/scripts/prefer-git-copies.sh
 
       - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
