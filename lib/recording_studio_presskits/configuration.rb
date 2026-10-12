@@ -5,24 +5,13 @@ module RecordingStudioPresskits
     attr_accessor :parent_root_type, :authentication_method, :current_actor_method, :section_types,
                   :section_components, :section_editors, :section_prepares, :excluded_picker_types,
                   :cover_colors, :default_cover_color, :cover_text_colors, :cover_text_auto,
-                  :section_library_keys, :sign_in_path, :registration_path, :site_name,
-                  :download_audience_icons
+                  :sign_in_path, :registration_path, :site_name, :download_audience_icons
     attr_reader :hooks
 
     def initialize
       assign_base_defaults
       assign_cover_defaults
       @hooks = RecordingStudio::Hooks.new
-    end
-
-    def library_key_for(type_name)
-      keys = (section_library_keys || {}).to_h
-      name = type_name.to_s
-      short = name.demodulize
-      matched = keys.find do |key, _|
-        [name, short].include?(key.to_s) || key.to_s.demodulize == short
-      end
-      (matched&.last || :default).to_sym
     end
 
     def cover_palette
@@ -76,7 +65,6 @@ module RecordingStudioPresskits
     end
 
     def assign_cover_defaults
-      @section_library_keys = {}
       @download_audience_icons = {}
       @sign_in_path = "/users/sign_in"
       @registration_path = nil
@@ -101,7 +89,6 @@ module RecordingStudioPresskits
         section_components: section_components.dup,
         section_editors: section_editors.dup,
         excluded_picker_types: Array(excluded_picker_types).map(&:to_s),
-        section_library_keys: (section_library_keys || {}).to_h,
         download_audience_icons: (download_audience_icons || {}).to_h
       }
     end

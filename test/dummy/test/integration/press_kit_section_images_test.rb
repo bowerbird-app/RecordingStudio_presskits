@@ -24,106 +24,93 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     Current.actor = @previous_actor
   end
 
-  test "picker screen reuses Attachable picker UI inside pk-editor and places many photos" do
+  test "upload attaches a photo on the images section" do
     kit = record_kit("Spring launch")
     section = add_images_section(kit)
-    first = library_photo("one.jpg", alt: "One")
-    second = library_photo("two.jpg", alt: "Two")
+    content = section_content(section)
     sign_in @user
     switch_to_root(@root)
 
-    get recording_studio_presskits.press_kit_section_library_images_path(kit, section),
-        headers: { "Turbo-Frame" => "pk-editor-screen" }
-    assert_response :success
-    assert_includes response.body, "Add from library"
-    assert_includes response.body, "recording-studio-attachable--attachment-image-picker"
-    assert_includes response.body, "recording-studio-presskits--library-picker"
-    assert_includes response.body, "multiple-selection-value=\"true\""
-    refute_includes response.body, "openSinglePicker"
-    refute_includes response.body, "library-placement-picker"
-
-    post recording_studio_presskits.press_kit_section_library_images_path(kit, section), params: {
-      attachment_recording_ids: [first.id, second.id]
+    file = Rack::Test::UploadedFile.new(cover_fixture_path.to_s, "image/jpeg", true, original_filename: "upload.jpg")
+    post recording_studio_attachable.recording_attachment_imports_path(content), params: {
+      redirect_mode: "return_to",
+      return_to: recording_studio_presskits.edit_press_kit_section_path(kit, section),
+      attachment_import: { attachments: [{ file: file }] }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
     follow_redirect!
-    content = section_content(section)
-    assert_equal [first.id, second.id], content.library_placements.map { |item| item.attachment_recording.id }
 
-    post recording_studio_presskits.press_kit_section_library_images_path(kit, section), params: {
-      attachment_recording_ids: [first.id]
-    }
-    follow_redirect!
-    assert_equal 2, content.reload.library_placements.size
-    assert_includes response.body, "already in this section"
+    photos = RecordingStudioPresskits::DirectImages.list(content.reload)
+    assert_equal 1, photos.size
+    assert_equal content, photos.first.parent_recording
+    assert_equal "upload.jpg", photos.first.recordable.original_filename
+    assert_equal @root, photos.first.root_recording
   end
 
-  test "upload writes the photo into the library then places it" do
+  test "upload accepts a signed blob on the images section" do
     kit = record_kit("Spring launch")
     section = add_images_section(kit)
+    content = section_content(section)
     sign_in @user
     switch_to_root(@root)
-
     blob = ActiveStorage::Blob.create_and_upload!(
       io: File.open(cover_fixture_path),
-      filename: "upload.jpg",
+      filename: "signed.jpg",
       content_type: "image/jpeg"
     )
-    assert_difference -> { library_image_count }, 1 do
-      post recording_studio_presskits.press_kit_section_library_images_path(kit, section), params: {
-        signed_blob_id: blob.signed_id
-      }
-    end
+
+    post recording_studio_attachable.recording_attachment_imports_path(content), params: {
+      redirect_mode: "return_to",
+      return_to: recording_studio_presskits.edit_press_kit_section_path(kit, section),
+      attachment_import: { attachments: [{ signed_blob_id: blob.signed_id }] }
+    }
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    follow_redirect!
-    content = section_content(section)
-    assert_equal 1, content.library_placements.size
-    photo = content.library_placements.first.attachment_recording
-    assert_equal @root, photo.root_recording
-    assert_equal "RecordingStudioAttachable::Library", photo.parent_recording.recordable_type
+
+    photos = RecordingStudioPresskits::DirectImages.list(content.reload)
+    assert_equal ["signed.jpg"], photos.map { |photo| photo.recordable.original_filename }
   end
 
-  test "upload accepts a multipart file and lands it in the library" do
+  test "caption credit and alt save on the attachment" do
     kit = record_kit("Spring launch")
     section = add_images_section(kit)
+    content = section_content(section)
+    photo = attach_image!(content, "stage.jpg", alt: "stage")
     sign_in @user
     switch_to_root(@root)
 
-    file = Rack::Test::UploadedFile.new(cover_fixture_path.to_s, "image/jpeg")
-    assert_difference -> { library_image_count }, 1 do
-      post recording_studio_presskits.press_kit_section_library_images_path(kit, section), params: {
-        file: file
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    signed = css_select("input[name='attachment_collection[signed_editor]']").first["value"]
+    return_to = recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    patch recording_studio_attachable.recording_attachment_collection_path(content), params: {
+      redirect_mode: "return_to",
+      return_to: return_to,
+      attachment_collection: {
+        signed_editor: signed,
+        rows: [{
+          recording_id: photo.id,
+          caption: "Stage left",
+          credit: "Ada",
+          alt_text: "The stage"
+        }]
       }
-    end
-    assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
-    assert_equal 1, section_content(section).library_placements.size
-  end
-
-  test "remove from the kit keeps the library photo" do
-    kit = record_kit("Spring launch")
-    section = add_images_section(kit)
-    photo = place_photo!(section, "keep.jpg")
-    placement = section_content(section).library_placements.first.placement_recording
-    sign_in @user
-    switch_to_root(@root)
-
-    delete recording_studio_presskits.press_kit_section_library_image_path(kit, section, placement)
+    }
+    assert_response :redirect
     follow_redirect!
-
-    assert_empty section_content(section).reload.library_placements
-    assert_nil photo.reload.trashed_at
-    assert @root.image_library(actor: @user).images(per_page: 20).map(&:id).include?(photo.id)
+    photo.reload
+    assert_equal "Stage left", photo.recordable.caption
+    assert_equal "Ada", photo.recordable.credit
+    assert_equal "The stage", photo.recordable.alt_text
   end
 
-  test "reorder keeps placement order on the public kit" do
+  test "reorder keeps attachment order on the public kit" do
     kit = record_kit("Spring launch")
     section = add_images_section(kit)
-    first = place_photo!(section, "first.jpg", alt: "First")
-    second = place_photo!(section, "second.jpg", alt: "Second")
     content = section_content(section)
-    placements = content.library_placements.map(&:placement_recording)
-    content.reorder_library_placements!(
-      ordered_recording_ids: [placements.last.id, placements.first.id],
+    first = attach_image!(content, "first.jpg", alt: "First")
+    second = attach_image!(content, "second.jpg", alt: "Second")
+    content.recording_studio_orderable_reorder!(
+      ordered_recording_ids: [second.id, first.id],
       actor: @user
     )
     publish_kit!(kit)
@@ -132,31 +119,16 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert_response :success
     body = response.body
     assert_operator body.index("alt=\"Second\""), :<, body.index("alt=\"First\"")
-    assert_equal [second.id, first.id], content.reload.library_placements.map { |item| item.attachment_recording.id }
+    assert_equal [second.id, first.id], RecordingStudioPresskits::DirectImages.list(content.reload).map(&:id)
   end
 
-  test "a photo from another workspace is refused" do
+  test "trashing an attachment removes it from the public kit and the editor" do
     kit = record_kit("Spring launch")
     section = add_images_section(kit)
-    outsider = other_workspace_photo
-    sign_in @user
-    switch_to_root(@root)
-
-    post recording_studio_presskits.press_kit_section_library_images_path(kit, section), params: {
-      attachment_recording_ids: [outsider.id]
-    }
-    follow_redirect!
-
-    assert_empty section_content(section).library_placements
-    refute_includes response.body, "Photo added."
-  end
-
-  test "public kit and preview skip a trashed library photo" do
-    kit = record_kit("Spring launch")
-    section = add_images_section(kit)
-    live = place_photo!(section, "live.jpg", alt: "Live hall")
-    gone = place_photo!(section, "gone.jpg", alt: "Gone hall")
-    gone.recording_studio_trashable_trash!(actor: @user) if gone.respond_to?(:recording_studio_trashable_trash!)
+    content = section_content(section)
+    live = attach_image!(content, "live.jpg", alt: "Live hall")
+    gone = attach_image!(content, "gone.jpg", alt: "Gone hall")
+    gone.recording_studio_trashable_trash!(actor: @user)
     publish_kit!(kit)
 
     get kit.publishable_public_path
@@ -170,28 +142,62 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#presskits-editor-preview img[alt='Live hall']"
     assert_select "#presskits-editor-preview img[alt='Gone hall']", count: 0
-    assert_equal [live.id], section_content(section).library_placements.map { |item| item.attachment_recording.id }
+    assert_equal [live.id], RecordingStudioPresskits::DirectImages.list(content.reload).map(&:id)
   end
 
-  test "the same photo may sit in two sections" do
+  test "remove trashes the attachment" do
     kit = record_kit("Spring launch")
-    first = add_images_section(kit)
-    second = add_images_section(kit, title: "More photos")
-    photo = library_photo("shared.jpg")
-    RecordingStudioPresskits::SectionImages.place(
-      images_recording: section_content(first),
-      attachment_recording: photo,
-      actor: @user
-    )
-    result = RecordingStudioPresskits::SectionImages.place(
-      images_recording: section_content(second),
-      attachment_recording: photo,
-      actor: @user
-    )
+    section = add_images_section(kit)
+    content = section_content(section)
+    photo = attach_image!(content, "keep.jpg")
+    sign_in @user
+    switch_to_root(@root)
+    return_to = recording_studio_presskits.edit_press_kit_section_path(kit, section)
 
-    assert result.success?
-    assert_equal 1, section_content(first).library_placements.size
-    assert_equal 1, section_content(second).library_placements.size
+    delete recording_studio_attachable.destroy_attachment_path(
+      photo,
+      redirect_mode: "return_to",
+      return_to: return_to
+    )
+    assert_redirected_to return_to
+    follow_redirect!
+
+    assert photo.reload.trashed_at
+    assert_empty RecordingStudioPresskits::DirectImages.list(content.reload)
+  end
+
+  test "a duplicated kit gets independent image copies" do
+    kit = record_kit("Spring launch")
+    section = add_images_section(kit, title: "Press photos")
+    content = section_content(section)
+    photo = attach_image!(content, "shared.jpg", alt: "Hall", caption: "Doors")
+    attach_image!(kit, "cover.jpg", alt: "Cover hall")
+
+    copy = kit.duplicate_in_place!(actor: @user)
+    copy_section = RecordingStudioPresskits::KitQuery.sections_for(copy).find do |item|
+      section_content(item)&.recordable.is_a?(RecordingStudioPresskits::Images)
+    end
+    copy_content = section_content(copy_section)
+    copy_photo = RecordingStudioPresskits::DirectImages.list(copy_content).first
+    copy_cover = RecordingStudioPresskits::DirectImages.list(copy).first
+
+    refute_equal photo.id, copy_photo.id
+    refute_equal photo.recordable.file.blob.id, copy_photo.recordable.file.blob.id
+    refute_equal kit.id, copy.id
+    assert copy_cover
+    refute_equal RecordingStudioPresskits::DirectImages.list(kit).first.recordable.file.blob.id,
+                 copy_cover.recordable.file.blob.id
+
+    copy_photo.revise_attachment_metadata(actor: @user, caption: "Changed", alt_text: "Changed alt")
+    photo.reload
+    assert_equal "Doors", photo.recordable.caption
+    assert_equal "Hall", photo.recordable.alt_text
+
+    copy_photo.remove_attachment(actor: @user)
+    assert photo.reload.recordable.file.attached?
+    assert_nil photo.trashed_at
+    assert_empty RecordingStudioPresskits::DirectImages.list(copy_content.reload)
+    assert_equal [photo.id], RecordingStudioPresskits::DirectImages.list(content.reload).map(&:id)
   end
 
   private
@@ -213,53 +219,20 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     RecordingStudioPresskits::KitQuery.section_content(section)
   end
 
-  def library_photo(filename, alt: nil)
-    library = @root.image_library(actor: @user)
+  def attach_image!(parent, filename, alt: nil, caption: nil, credit: nil)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: File.open(cover_fixture_path),
       filename: filename,
       content_type: "image/jpeg"
     )
-    photo = library.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user)
-    photo.revise_attachment_metadata(actor: @user, alt_text: alt) if alt
+    photo = parent.record_attachment_upload(
+      signed_blob_id: blob.signed_id,
+      actor: @user,
+      name: File.basename(filename, ".*")
+    )
+    attrs = { alt_text: alt, caption: caption, credit: credit }.compact
+    photo.revise_attachment_metadata(actor: @user, **attrs) if attrs.any?
     photo
-  end
-
-  def place_photo!(section, filename, alt: nil)
-    photo = library_photo(filename, alt: alt || File.basename(filename, ".*"))
-    result = RecordingStudioPresskits::SectionImages.place(
-      images_recording: section_content(section),
-      attachment_recording: photo,
-      actor: @user
-    )
-    raise result.error if result.failure?
-
-    photo
-  end
-
-  def other_workspace_photo
-    other_user = User.create!(
-      email: "other-images-#{SecureRandom.hex(4)}@example.com",
-      password: "Password123!",
-      password_confirmation: "Password123!"
-    )
-    other_root = RecordingStudio.root_recording_for(Workspace.create!(name: "Other #{SecureRandom.hex(4)}"))
-    RecordingStudioAccessible.bootstrap_owner_access!(recording: other_root, actor: other_user)
-    previous = Current.actor
-    Current.actor = other_user
-    library = other_root.image_library(actor: other_user)
-    blob = ActiveStorage::Blob.create_and_upload!(
-      io: File.open(cover_fixture_path),
-      filename: "outsider.jpg",
-      content_type: "image/jpeg"
-    )
-    library.record_attachment_upload(signed_blob_id: blob.signed_id, actor: other_user)
-  ensure
-    Current.actor = previous
-  end
-
-  def library_image_count
-    @root.image_library(actor: @user).images(per_page: 50).size
   end
 
   def cover_fixture_path

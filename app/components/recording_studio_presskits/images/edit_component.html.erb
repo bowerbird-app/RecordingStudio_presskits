@@ -1,34 +1,6 @@
 <div class="flex w-full flex-col gap-6">
   <div class="flex flex-wrap items-center gap-3">
-    <%= render FlatPack::Button::Component.new(
-      text: "Add from library",
-      icon: "photo",
-      style: :primary,
-      href: picker_path,
-      data: helpers.presskits_editor_nav(:push).merge(turbo_frame: helpers.presskits_editor_screen_id)
-    ) %>
-    <%= form_with url: upload_path, method: :post, multipart: true, class: "inline-flex", html: {
-          data: {
-            controller: "recording-studio-presskits--library-upload",
-            turbo_frame: helpers.presskits_editor_dialog? ? helpers.presskits_editor_screen_id : nil
-          }
-        } do %>
-      <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
-      <%= file_field_tag :file,
-                         accept: "image/*",
-                         class: "sr-only",
-                         onchange: "this.form.requestSubmit()",
-                         aria: { label: "Upload" } %>
-      <%= render FlatPack::Button::Component.new(
-        text: "Upload",
-        icon: "upload",
-        style: :default,
-        type: "button",
-        data: { action: "click->recording-studio-presskits--library-upload#browse" }
-      ) %>
-    <% end %>
+    <%= helpers.render partial: "recording_studio_attachable/attachment_file_buttons/button",
+          locals: upload_button_locals %>
   </div>
-  <p class="text-sm text-(--surface-muted-content-color)">
-    Caption, credit, and alt live on the library photo. A change here shows everywhere that photo is used.
-  </p>
 </div>

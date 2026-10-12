@@ -24,6 +24,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Copy local git clones instead of hardlinking
+        run: .github/scripts/prefer-git-copies.sh
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -71,6 +74,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Copy local git clones instead of hardlinking
+        run: .github/scripts/prefer-git-copies.sh
+
       - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
@@ -79,7 +85,13 @@ jobs:
           cache-version: ${{ hashFiles('test/dummy/Gemfile.lock') }}
 
       - name: Install dummy app dependencies
-        run: bundle install
+        run: |
+          for attempt in 1 2 3; do
+            bundle install --jobs 1 && exit 0
+            echo "bundle install failed on attempt ${attempt}"
+            sleep $((attempt * 5))
+          done
+          exit 1
         working-directory: test/dummy
         env:
           BUNDLE_GITHUB__COM: x-access-token:${{ secrets.BOWERBIRD_ORG_CI_TOKEN }}

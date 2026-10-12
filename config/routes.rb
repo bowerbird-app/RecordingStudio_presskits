@@ -21,7 +21,6 @@ RecordingStudioPresskits::Engine.routes.draw do
       member do
         get :heading
       end
-      resources :library_images, only: %i[index create destroy], controller: "section_library_images"
       resources :quotes, only: %i[create edit update destroy] do
         resource :image, only: :destroy, controller: "quote_images"
       end

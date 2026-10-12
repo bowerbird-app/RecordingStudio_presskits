@@ -13,9 +13,15 @@ module RecordingStudioPresskits
     end
 
     include RecordingStudio::Capabilities::Trashable.to
-    include RecordingStudio::Capabilities::LibraryPlacement.to
+    include RecordingStudio::Capabilities::Attachable.to(
+      allowed_content_types: ["image/*"],
+      enabled_attachment_kinds: [:image],
+      max_file_size: 10.megabytes,
+      max_file_count: 50,
+      auth_roles: { remove: :edit }
+    )
     include RecordingStudio::Capabilities::Orderable.to(
-      allows: ["RecordingStudioAttachable::Placement"]
+      allows: ["RecordingStudioAttachable::Attachment"]
     )
   end
 end

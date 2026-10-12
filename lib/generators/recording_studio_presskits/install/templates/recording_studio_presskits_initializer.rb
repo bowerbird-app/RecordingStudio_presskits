@@ -14,10 +14,6 @@ RecordingStudioPresskits.configure do |config|
   # config.cover_text_colors = :any
   # config.cover_text_auto = true
 
-  # Default library key when an Images section uploads. Hosts with extra
-  # libraries can point a section type at another key.
-  # config.section_library_keys = { "RecordingStudioPresskits::Images" => :default }
-
   # Sign-in path on limited previews when the audience is signed_in.
   # config.sign_in_path = "/users/sign_in"
   # Registration path for the preview Create account button. Leave blank to hide it.

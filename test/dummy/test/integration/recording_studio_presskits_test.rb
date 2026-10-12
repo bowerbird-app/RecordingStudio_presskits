@@ -195,8 +195,12 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
     press_photos = spring_sections.find { |section| section.recordable.title == "Press photos" }
     press_photo_content = RecordingStudioPresskits::KitQuery.section_content(press_photos)
-    assert_equal 1, press_photo_content.library_placements.size
-    assert_equal "harbour-gallery.jpg", press_photo_content.library_placements.first.attachment.original_filename
+    photos = RecordingStudioPresskits::DirectImages.list(press_photo_content)
+    assert_equal 1, photos.size
+    assert_equal "harbour-gallery.jpg", photos.first.recordable.original_filename
+    cover = RecordingStudioPresskits::DirectImages.list(press_kit_recording)
+    assert_equal 1, cover.size
+    assert_equal "harbour-gallery.jpg", cover.first.recordable.original_filename
     spring_lines = RecordingStudioPresskits::Credits.visible_lines(
       RecordingStudioPresskits::KitQuery.section_content(spring_sections.first)
     )
@@ -283,7 +287,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute_includes workspace_source, "if defined?(RecordingStudioAccessible)"
     refute_includes workspace_source, ".with("
     assert_includes workspace_source, "Capabilities::Companies.to(allow: :one)"
-    assert_includes workspace_source, "Capabilities::ImageLibrary.to"
+    refute_includes workspace_source, "Capabilities::ImageLibrary.to"
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: RecordingStudioPresskits::PressKit)

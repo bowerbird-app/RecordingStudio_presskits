@@ -5,11 +5,12 @@
 >
   <%= form_with url: helpers.press_kit_header_path(@press_kit_recording), method: :patch,
         id: "presskits-header-form",
-        class: "flex flex-col gap-6",
+        html: { style: "display: contents" },
         data: helpers.presskits_editor_save_data.merge(controller: "flat-pack--unsaved-changes") do %>
     <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
     <%= hidden_field_tag "press_kit[cover_style]", header_cover_style %>
 
+    <div class="order-1 flex flex-col gap-6">
     <%= render FlatPack::TextInput::Component.new(
       name: "press_kit[title]",
       label: "Title",
@@ -29,24 +30,9 @@
     <%= fields_for :location, header_location do |location_form| %>
       <%= helpers.recording_studio_location_search_fields(location_form) %>
     <% end %>
+    </div>
 
-    <% if cover_image_path %>
-      <%= render FlatPack::FormField::Component.new(
-        field_id: "press_kit_cover_image",
-        label: cover_image_label
-      ) do |field| %>
-        <% field.with_control do %>
-          <%= render FlatPack::Button::Component.new(
-            text: cover_image_action,
-            style: :secondary,
-            href: cover_image_path,
-            icon: :photo,
-            data: { turbo_frame: "_top" }
-          ) %>
-        <% end %>
-      <% end %>
-    <% end %>
-
+    <div class="order-3 flex flex-col gap-6">
     <div id="presskits-header-colours" class="flex flex-col gap-6">
     <% if any_cover_color? %>
       <%= render FlatPack::FormField::Component.new(
@@ -159,6 +145,31 @@
         type: "submit",
         data: { "flat-pack--unsaved-changes-target": "submit" }
       ) %>
+    </div>
+    </div>
+  <% end %>
+
+  <% if cover_controls.cover_image_enabled? %>
+    <div id="press_kit_cover_image" class="order-2 flex flex-col gap-3">
+      <%= render FlatPack::FormField::Component.new(
+        field_id: "press_kit_cover_image_control",
+        label: cover_controls.cover_image_label
+      ) do |field| %>
+        <% field.with_control do %>
+          <div class="flex flex-wrap items-center gap-3">
+            <%= helpers.render partial: "recording_studio_attachable/attachment_file_buttons/button",
+                  locals: cover_controls.cover_file_button_locals %>
+            <% if cover_controls.cover_attachment_recording %>
+              <%= render FlatPack::Button::Component.new(
+                text: I18n.t("recording_studio_presskits.editor.remove_cover_image"),
+                style: :secondary,
+                href: cover_controls.cover_remove_path,
+                data: cover_controls.cover_remove_data
+              ) %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
     </div>
   <% end %>
 </div>

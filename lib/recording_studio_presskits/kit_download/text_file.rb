@@ -82,18 +82,18 @@ module RecordingStudioPresskits
       end
 
       def image_section_lines(content, _recordable)
-        LibraryImages.resolve(content).flat_map { |item| image_lines(item) }
+        DirectImages.list(content).flat_map { |item| image_lines(item) }
       end
 
       def image_lines(item)
-        attachment = item&.attachment
+        attachment = item&.recordable
         return [] if attachment.blank?
 
         [
           labeled(:photo, attachment.try(:original_filename).presence || attachment.try(:name)),
           labeled(:caption, attachment.try(:caption)),
           labeled(:credit, attachment.try(:credit)),
-          labeled(:alt, LibraryImages.alt_for(item))
+          labeled(:alt, DirectImages.alt_for(item))
         ].compact
       end
 

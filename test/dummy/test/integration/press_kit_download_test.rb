@@ -457,36 +457,25 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     section
   end
 
-  def library_photo(filename, alt: nil, caption: nil, credit: nil)
-    library = @root.image_library(actor: @user)
+  def attach_image!(parent, filename, alt: nil, caption: nil, credit: nil)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: File.open(cover_fixture_path),
       filename: filename,
       content_type: "image/jpeg"
     )
-    photo = library.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user)
+    photo = parent.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user, name: File.basename(filename, ".*"))
     attrs = { alt_text: alt, caption: caption, credit: credit }.compact
     photo.revise_attachment_metadata(actor: @user, **attrs) if attrs.any?
     photo
   end
 
   def place_cover!(kit, filename: "harbour-gallery.jpg", alt: "A white gallery hall", caption: nil, credit: nil)
-    photo = library_photo(filename, alt: alt, caption: caption, credit: credit)
-    kit.place_library_image(attachment_recording: photo, actor: @user)
-    photo
+    attach_image!(kit, filename, alt: alt, caption: caption, credit: credit)
   end
 
   def place_section_photo!(section, filename:, alt: nil, caption: nil, credit: nil)
-    photo = library_photo(filename, alt: alt, caption: caption, credit: credit)
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    result = RecordingStudioPresskits::SectionImages.place(
-      images_recording: content,
-      attachment_recording: photo,
-      actor: @user
-    )
-    raise result.error if result.failure?
-
-    photo
+    attach_image!(content, filename, alt: alt, caption: caption, credit: credit)
   end
 
   def cover_fixture_path

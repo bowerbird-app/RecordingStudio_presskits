@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.35.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.36.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -126,9 +126,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "RecordingStudio::Capabilities::Publishable.to"
     assert_includes source, "RecordingStudio::Capabilities::Downloadable.to"
     assert_includes source, "include RecordingStudio::Capabilities::Location.to"
-    assert_includes source, "include RecordingStudio::Capabilities::LibraryPlacement.to"
+    assert_includes source, "include RecordingStudio::Capabilities::Attachable.to"
+    assert_includes source, "max_file_count: 1"
+    refute_includes source, "LibraryPlacement"
+    refute_includes source, "RecordingStudioAttachable::Placement"
     assert_includes source, "RecordingStudio.enable_capability(:action_audiences, on: self)"
-    assert_includes source, '"RecordingStudioAttachable::Placement"'
     assert_includes source, 'public_controller: "recording_studio_presskits/public_press_kits"'
     assert_includes source, "public_action: :show"
     assert_includes source, 'public_layout: "recording_studio_presskits/blank"'
@@ -381,17 +383,21 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "LocationSection"
     assert_includes readme, "Cover::Company"
     assert_includes readme, "KitLocation"
-    assert_includes readme, "Capabilities::ImageLibrary.to"
-    assert_includes readme, "Capabilities::LibraryPlacement.to"
     assert_includes readme, "RecordingStudio::Capabilities::PressKits.to"
     assert_includes readme, "include_for(:press_kits)"
     assert_includes readme, "extra_capability_parent_types_for"
     assert_includes readme, "KitQuery.for_root"
-    assert_includes readme, "place_library_image"
-    assert_includes readme, "upload_to_library_and_place"
-    assert_includes readme, "LibraryImages"
-    assert_includes readme, "section_library_keys"
-    assert_includes readme, "library_path_for"
+    assert_includes readme, "DirectImages"
+    assert_includes readme, "AttachmentCopy"
+    refute_includes readme, "Capabilities::ImageLibrary.to"
+    refute_includes readme, "Capabilities::LibraryPlacement.to"
+    refute_includes readme, "place_library_image"
+    refute_includes readme, "upload_to_library_and_place"
+    refute_includes readme, "LibraryImages"
+    refute_includes readme, "section_library_keys"
+    refute_includes readme, "library_path_for"
+    refute_includes readme, "Add from library"
+    refute_includes readme, "Choose from the library"
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[1440/640]"
@@ -480,8 +486,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     helper = File.read(File.expand_path("../app/helpers/recording_studio_presskits/application_helper.rb", __dir__))
     assert_includes helper, "recording_studio_accessible_avatars"
-    assert_includes helper, "def presskits_library_path"
-    assert_includes helper, "library_path_for"
+    refute_includes helper, "def presskits_library_path"
+    refute_includes helper, "library_path_for"
     refute_includes helper, "root_switch"
     refute_includes helper, "Sign out"
     refute_includes helper, "presskits_extra_nav"
@@ -522,7 +528,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "Capabilities::Orderable.to(allows:"
     assert_includes source, '"RecordingStudioPresskits::PressKit"'
     assert_includes source, "Capabilities::Companies.to(allow: :one)"
-    assert_includes source, "Capabilities::ImageLibrary.to"
+    refute_includes source, "Capabilities::ImageLibrary.to"
     refute_includes source, "if defined?(RecordingStudioAccessible)"
     refute_includes source, "Capabilities::Trashable"
     refute_includes source, "Capabilities::Duplicatable"
@@ -696,9 +702,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, 'name: "press_kit[description]"'
     assert_includes header, "fields_for :location"
     assert_includes header, "recording_studio_location_search_fields"
-    assert_includes header, "cover_image_path"
-    assert_includes header, "cover_image_action"
+    assert_includes header, 'id="press_kit_cover_image"'
+    assert_includes header, "cover_file_button_locals"
     assert_includes header, "cover_image_label"
+    assert_includes header, "cover_remove_path"
+    refute_includes header, "Choose from the library"
+    refute_includes header, "recording_placements_path"
     assert_includes header, 'name: "press_kit[cover_color]"'
     assert_includes header, 'name: "press_kit[cover_text_color]"'
     assert_includes header, "Text colour"
@@ -782,9 +791,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "FlatPack::Sidebar::Group::Component"
     assert_includes index, 'title: "Library"'
     assert_includes index, "open: true"
-    assert_includes index, 'text: "Images"'
-    assert_includes index, 'icon: "photo"'
-    assert_includes index, "@images_path"
+    refute_includes index, 'text: "Images"'
+    refute_includes index, 'icon: "photo"'
+    refute_includes index, "@images_path"
     assert_includes index, 'text: "Credits"'
     assert_includes index, 'icon: "user-group"'
     assert_includes index, "@credits_path"
@@ -851,9 +860,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, "picker_description_for"
     assert_includes text, '"document-text"'
     assert_includes images, '"photo"'
-    assert_includes images, "LibraryPlacement.to"
-    assert_includes images, '"RecordingStudioAttachable::Placement"'
-    refute_includes images, "Capabilities::Attachable"
+    assert_includes images, "Capabilities::Attachable.to"
+    assert_includes images, '"RecordingStudioAttachable::Attachment"'
+    refute_includes images, "LibraryPlacement"
+    refute_includes images, "RecordingStudioAttachable::Placement"
     assert_includes quotes, '"chat-bubble-bottom-center-text"'
     assert_includes videos, '"video-camera"'
     assert_includes locations, '"map-pin"'
@@ -913,12 +923,21 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes component, "def self.preview?"
     refute_includes component, "preview_card_title"
     assert_includes component, "def self.below?"
-    assert_includes editor, 'text: "Add from library"'
-    assert_includes editor, 'text: "Upload"'
-    assert_operator editor.index("flex flex-wrap items-center gap-3"), :<, editor.index('text: "Upload"')
-    assert_includes editor, "recording-studio-presskits--library-upload"
-    assert_includes editor, "multipart: true"
-    assert_includes editor, "presskits_editor_nav(:push)"
+    refute_includes editor, 'text: "Add from library"'
+    refute_includes editor, "library photo"
+    assert_includes editor, "recording_studio_attachable/attachment_file_buttons/button"
+    assert_includes editor, "upload_button_locals"
+    assert_operator editor.index("flex flex-wrap items-center gap-3"), :<,
+                    editor.index("attachment_file_buttons/button")
+    assert_includes component, 'add_label: "Upload"'
+    assert_includes component, "attachment_recording: nil"
+    refute_includes editor, "recording-studio-presskits--image-upload"
+    refute_includes editor, "multipart: true"
+    refute_includes editor, "attachment_import[attachments][][file]"
+    refute_includes editor, "library-upload"
+    refute_includes editor, "presskits_editor_nav(:push)"
+    image_upload = "app/javascript/recording_studio_presskits/controllers/image_upload_controller.js"
+    refute File.exist?(presskits_path(image_upload))
     refute_includes section_editor, "upload_form_data"
   end
 
@@ -1110,7 +1129,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes routes, "resources :videos"
     assert_includes routes, "resources :locations"
-    assert_includes routes, "resources :library_images"
+    refute_includes routes, "resources :library_images"
     refute_includes routes, "resources :images, only: :destroy"
     refute_includes routes, "video_order"
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'

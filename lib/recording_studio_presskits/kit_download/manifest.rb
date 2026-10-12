@@ -35,7 +35,7 @@ module RecordingStudioPresskits
         files = []
         visible_image_sections.each do |section|
           prefix = section_prefix(section)
-          LibraryImages.resolve(KitQuery.section_content(section)).each do |item|
+          DirectImages.list(KitQuery.section_content(section)).each do |item|
             append_image(files, item, prefix: prefix, seen: seen)
           end
         end
@@ -60,11 +60,11 @@ module RecordingStudioPresskits
       end
 
       def original_name(item, blob)
-        item.attachment.try(:original_filename).presence || blob.filename.to_s
+        item.recordable.try(:original_filename).presence || blob.filename.to_s
       end
 
       def blob_for(item)
-        file = item&.attachment&.file
+        file = item&.recordable&.try(:file)
         return unless file&.attached?
 
         file.blob

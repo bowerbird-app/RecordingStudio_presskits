@@ -9,12 +9,15 @@ module RecordingStudioPresskits
                                 allowed_parent_types: [RecordingStudioPresskits.parent_root_type]
 
     include RecordingStudio::Capabilities::Orderable.to(
-      allows: [
-        "RecordingStudioPresskits::KitSection",
-        "RecordingStudioAttachable::Placement"
-      ]
+      allows: ["RecordingStudioPresskits::KitSection"]
     )
-    include RecordingStudio::Capabilities::LibraryPlacement.to
+    include RecordingStudio::Capabilities::Attachable.to(
+      allowed_content_types: ["image/*"],
+      enabled_attachment_kinds: [:image],
+      max_file_size: 10.megabytes,
+      max_file_count: 1,
+      auth_roles: { remove: :edit }
+    )
     include RecordingStudio::Capabilities::Trashable.to
     include RecordingStudio::Capabilities::Duplicatable.to(
       suffix: " (Copy)",

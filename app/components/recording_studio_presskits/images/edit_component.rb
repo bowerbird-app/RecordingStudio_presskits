@@ -23,8 +23,7 @@ module RecordingStudioPresskits
 
       def attachment_collection_options
         {
-          association: :placements,
-          items: LibraryImages.resolve(@recording),
+          association: :images,
           fields: %i[caption credit alt_text],
           sortable: true,
           displays: %i[list carousel grid],
@@ -34,12 +33,23 @@ module RecordingStudioPresskits
         }
       end
 
-      def picker_path
-        helpers.press_kit_section_library_images_path(press_kit_recording, kit_section_recording)
+      def upload_button_locals
+        # The file button replaces its one attachment once a file exists.
+        # An Images section keeps importing another file.
+        RecordingStudioAttachable::AttachmentFileButton.locals(
+          recording: @recording,
+          return_to: return_path,
+          target: upload_turbo_frame,
+          add_label: "Upload"
+        ).merge(attachment_recording: nil)
       end
 
-      def upload_path
-        helpers.press_kit_section_library_images_path(press_kit_recording, kit_section_recording)
+      def upload_turbo_frame
+        helpers.presskits_editor_screen_id if helpers.presskits_editor_dialog?
+      end
+
+      def return_path
+        helpers.edit_press_kit_section_path(press_kit_recording, kit_section_recording)
       end
 
       def kit_section_recording

@@ -129,14 +129,12 @@ class PressKitDownloadAudienceTest < ActionDispatch::IntegrationTest
 
   def publish_downloadable_kit!(slug)
     kit = @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = "Spring launch" }
-    library = @root.image_library(actor: @user)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: File.open(RecordingStudioPresskits::Engine.root.join("test/fixtures/files/cover.jpg")),
       filename: "harbour-gallery.jpg",
       content_type: "image/jpeg"
     )
-    photo = library.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user)
-    kit.place_library_image(attachment_recording: photo, actor: @user)
+    kit.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user, name: "Harbour Gallery")
     perform_enqueued_jobs do
       result = RecordingStudioPublishable::Services::Publishables::Update.call(
         parent_recording: kit,

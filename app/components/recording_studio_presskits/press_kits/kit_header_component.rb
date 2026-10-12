@@ -54,13 +54,8 @@ module RecordingStudioPresskits
 
       def cover_image_path
         return unless CoverImage.enabled?(@press_kit_recording)
-        return unless helpers.respond_to?(:recording_studio_attachable)
 
-        helpers.recording_studio_attachable.recording_placements_path(
-          @press_kit_recording,
-          redirect_mode: "return_to",
-          return_to: helpers.edit_press_kit_path(@press_kit_recording)
-        )
+        "#{@header_edit_path}#press_kit_cover_image"
       end
     end
   end
