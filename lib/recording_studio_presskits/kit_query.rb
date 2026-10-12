@@ -7,7 +7,7 @@ module RecordingStudioPresskits
         return RecordingStudio::Recording.none if root_recording.blank?
 
         live_kits
-          .where(root_recording: root_recording, parent_recording: root_recording)
+          .where(root_recording: root_recording)
           .includes(:recordable)
           .reorder(:recording_studio_orderable_position, :created_at, :id)
       end

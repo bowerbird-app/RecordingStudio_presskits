@@ -5,6 +5,7 @@ RecordingStudio.configure do |config|
     "Workspace",
     "Folder",
     "Page",
+    "Showcase",
     "AdminRoot",
     "RecordingStudioPresskits::PressKit",
     "RecordingStudioPresskits::KitSection",

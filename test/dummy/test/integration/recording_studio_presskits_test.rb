@@ -25,7 +25,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert RecordingStudio.validate_recordable_declarations!
     assert_equal [ "AdminRoot", "Workspace" ].sort, RecordingStudio.root_recordable_types.sort
     assert_equal [ "Workspace", "Folder" ], RecordingStudio.allowed_parent_types_for("Page")
-    assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
+    assert_equal [ "Workspace" ], RecordingStudio.declared_allowed_parent_types_for("RecordingStudioPresskits::PressKit")
+    assert_equal [ "Workspace", "Showcase" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
     assert_equal(
       [ "RecordingStudioPresskits::LocationSection", "RecordingStudioPresskits::PressKit" ],
       RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location").sort

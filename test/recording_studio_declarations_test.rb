@@ -29,6 +29,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     Page
     RecordingStudioPresskits::PressKit
     RecordingStudioPresskits::KitSection
+    Showcase
     RecordingStudioPublishable::Publishable
     RecordingStudioAttachable::Attachment
     RecordingStudioCompany::Company
@@ -39,7 +40,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal %w[AdminRoot Workspace], RecordingStudio.root_recordable_types.sort
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for("Folder")
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for(Page)
-    assert_equal ["Workspace"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
+    assert_equal ["Workspace"], RecordingStudio.declared_allowed_parent_types_for("RecordingStudioPresskits::PressKit")
+    assert_equal ["Workspace", "Showcase"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PressKit")
     assert_equal(
       %w[RecordingStudioPresskits::LocationSection RecordingStudioPresskits::PressKit],
       RecordingStudio.allowed_parent_types_for("RecordingStudio::Location::Location").sort
@@ -195,6 +197,76 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_raises(RecordingStudio::RootNotAllowed) do
       RecordingStudio.root_recording_for(press_kit)
     end
+  end
+
+  test "a recordable that includes press kits can parent a kit" do
+    registration = RecordingStudio.registered_capabilities.fetch(:press_kits)
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Showcase Workspace")))
+    showcase = root_recording.record(Showcase) { |row| row.name = "Launch week" }
+
+    assert_equal "recording_studio_presskits", registration.fetch(:source)
+    assert_equal ["RecordingStudioPresskits::PressKit"], registration.fetch(:child_recordables)
+    assert_equal ["RecordingStudioPresskits::PressKit"], RecordingStudio.capability_child_recordables_for(:press_kits)
+    assert_empty RecordingStudio::Capabilities::PressKits.method(:to).parameters
+    assert RecordingStudio.capability_enabled?(:press_kits, for: "Showcase")
+    refute RecordingStudio.capability_enabled?(:press_kits, for: "Workspace")
+    refute RecordingStudio.capability_enabled?(:press_kits, for: "Folder")
+    refute RecordingStudio.capability_enabled?(:press_kits, for: "RecordingStudioPresskits::PressKit")
+    refute RecordingStudio.shared_root_type?("Workspace")
+    assert_includes RecordingStudio.child_recordable_types_for("Showcase"), "RecordingStudioPresskits::PressKit"
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::PressKit",
+      parent_recording: showcase
+    )
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::PressKit",
+      parent_recording: root_recording
+    )
+
+    kit = root_recording.record(
+      RecordingStudioPresskits::PressKit,
+      parent_recording: showcase
+    ) do |press_kit|
+      press_kit.title = unique_name("Under the showcase")
+    end
+
+    assert_equal showcase, kit.parent_recording
+    assert_equal root_recording, kit.root_recording
+    assert_includes RecordingStudioPresskits::KitQuery.for_root(root_recording), kit
+  end
+
+  test "for_root returns live kits anywhere under the root" do
+    root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Nested kits")))
+    other_root = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Other kits")))
+    direct = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Direct")
+    end
+    showcase = root_recording.record(Showcase) { |row| row.name = "Desk" }
+    nested = root_recording.record(
+      RecordingStudioPresskits::PressKit,
+      parent_recording: showcase
+    ) do |press_kit|
+      press_kit.title = unique_name("Nested")
+    end
+    trashed = root_recording.record(
+      RecordingStudioPresskits::PressKit,
+      parent_recording: showcase
+    ) do |press_kit|
+      press_kit.title = unique_name("Gone")
+    end
+    outsider = other_root.record(RecordingStudioPresskits::PressKit) do |press_kit|
+      press_kit.title = unique_name("Elsewhere")
+    end
+    trashed.recording_studio_trashable_trash!(actor: quote_owner(root_recording))
+
+    found = RecordingStudioPresskits::KitQuery.for_root(root_recording)
+
+    assert_includes found, direct
+    assert_includes found, nested
+    refute_includes found, trashed
+    refute_includes found, outsider
+    assert_equal root_recording, nested.root_recording
+    assert_equal showcase, nested.parent_recording
   end
 
   test "press kit cannot be recorded under a folder" do
