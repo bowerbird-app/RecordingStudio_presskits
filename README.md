@@ -18,7 +18,7 @@ gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashab
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"
 gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.7.0"
 gem "recording_studio_downloadable", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"
-gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"
+gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
 gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"
 gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.5.1"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
@@ -38,7 +38,7 @@ gem "recording_studio_trashable", "~> 0.6"
 gem "recording_studio_duplicatable", "~> 0.4"
 gem "recording_studio_publishable", "~> 0.7"
 gem "recording_studio_downloadable", "~> 0.3"
-gem "recording_studio_attachable", "~> 0.13"
+gem "recording_studio_attachable", "~> 0.15"
 gem "recording_studio_company", "~> 0.3"
 gem "recording_studio_location", "~> 0.4"
 gem "recording_studio_external_embed", "~> 0.1.1"
@@ -399,7 +399,7 @@ Dummy kit pins:
 | Admin | `v2.1.0` |
 | Root Switchable | `v0.8.0` |
 | FlatPack | `v0.1.224` |
-| Attachable | `v0.13.0` |
+| Attachable | `v0.15.0` |
 | Company | `v0.3.0` |
 | Location | `v0.5.1` |
 | Orderable | `v0.2.7` |
