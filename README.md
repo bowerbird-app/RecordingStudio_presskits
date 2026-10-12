@@ -20,6 +20,7 @@ gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publi
 gem "recording_studio_downloadable", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
 gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"
+gem "recording_studio_lists", github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"
 gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
@@ -40,6 +41,7 @@ gem "recording_studio_publishable", "~> 0.8"
 gem "recording_studio_downloadable", "~> 0.3"
 gem "recording_studio_attachable", "~> 0.15"
 gem "recording_studio_company", "~> 0.3"
+gem "recording_studio_lists", "~> 0.5"
 gem "recording_studio_location", "~> 0.4"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
@@ -70,6 +72,8 @@ bin/rails generate recording_studio_company:install
 bin/rails generate recording_studio_company:migrations
 bin/rails generate recording_studio_location:install
 bin/rails generate recording_studio_location:migrations
+bin/rails generate recording_studio_lists:install --mount-path /
+bin/rails generate recording_studio_lists:migrations
 bin/rails generate recording_studio_video:install
 bin/rails generate recording_studio_video:migrations
 bin/rails active_storage:install
@@ -78,6 +82,8 @@ bin/rails db:migrate
 ```
 
 The install generator mounts the user slice, writes `parent_root_type`, and enables `section :press_kits` when an `AdminRoot` model is already there. Duplicatable has no engine-owned schema. Publishable's install mounts that engine at `/` so live kits use `/published/:uuid/:slug`.
+
+Lists ships with the gem. Register `RecordingStudio::Lists::List` and `RecordingStudio::Lists::ListItem`, and enable `:lists` on the host root (`RecordingStudio.enable_capability(:lists, on: Workspace)`). Mount `RecordingStudioLists::Engine` at `/` after the host routes so `/` stays the host home and the screens are `/lists`, `/lists/new`, and `/lists/:id`. The lists install generator defaults to `/recording_studio_lists`; pass `--mount-path /`. Decline its optional `config/recording_studio_lists.yml` prompt. Dummy enables `:lists` on Workspace only. Press kits do not call the lists API.
 
 Point the host root at the mounted slice, or redirect `/` there. Dummy redirects `/` to `/recording_studio_presskits`.
 
@@ -104,6 +110,8 @@ RecordingStudio.configure do |config|
     "RecordingStudio::AccessConstraint",
     "RecordingStudio::AccessRule",
     "RecordingStudioCompany::Company",
+    "RecordingStudio::Lists::List",
+    "RecordingStudio::Lists::ListItem",
     "RecordingStudio::Location::Location"
   ]
   config.require_recordable_declarations = true

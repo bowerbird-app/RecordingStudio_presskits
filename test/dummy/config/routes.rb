@@ -21,4 +21,8 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   root to: redirect("/recording_studio_presskits")
+
+  # Lists README: mount after host routes so / stays the host home.
+  # Screens are /lists, /lists/new, and /lists/:id.
+  mount RecordingStudioLists::Engine, at: "/"
 end

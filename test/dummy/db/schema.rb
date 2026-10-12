@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_150001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -63,12 +63,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_140000) do
   create_table "pages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "title"
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "showcases", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "name"
     t.datetime "updated_at", null: false
   end
 
@@ -227,13 +221,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_140000) do
     t.datetime "created_at", null: false
   end
 
-  create_table "recording_studio_location_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-  end
-
   create_table "recording_studio_kit_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "title"
     t.text "subtitle"
+    t.datetime "created_at", null: false
+  end
+
+  create_table "recording_studio_list_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "item_recording_id", null: false
+    t.integer "position", null: false
+    t.datetime "created_at", null: false
+    t.index ["item_recording_id"], name: "index_recording_studio_list_items_on_item_recording_id"
+    t.check_constraint "\"position\" >= 1", name: "recording_studio_list_items_position_check"
+  end
+
+  create_table "recording_studio_lists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+  end
+
+  create_table "recording_studio_location_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
   end
 
@@ -376,6 +384,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_140000) do
     t.datetime "created_at", null: false
   end
 
+  create_table "showcases", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
@@ -398,6 +412,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_140000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "recording_studio_access_invitations", "recording_studio_recordings", column: "recording_id"
   add_foreign_key "recording_studio_events", "recording_studio_recordings", column: "recording_id"
+  add_foreign_key "recording_studio_list_items", "recording_studio_recordings", column: "item_recording_id", on_delete: :restrict
   add_foreign_key "recording_studio_publishable_publishables", "recording_studio_recordings", column: "social_image_attachment_recording_id", name: "fk_rs_publishables_social_image_attachment_recording"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "parent_recording_id"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "root_recording_id"

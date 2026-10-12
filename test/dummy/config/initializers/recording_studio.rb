@@ -28,6 +28,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioAttachable::Library",
     "RecordingStudioAttachable::Placement",
     "RecordingStudioCompany::Company",
+    "RecordingStudio::Lists::List",
+    "RecordingStudio::Lists::ListItem",
     "RecordingStudio::Location::Location",
     "FakeBlock"
   ]

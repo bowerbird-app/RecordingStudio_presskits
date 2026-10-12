@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-10-12
+
+### Added
+- Runtime dependency `recording_studio_lists` `~> 0.5` (GitHub tag `v0.5.0`).
+- Dummy registers `RecordingStudio::Lists::List` and `RecordingStudio::Lists::ListItem`, enables `:lists` on Workspace, mounts `RecordingStudioLists::Engine` at `/` after the host routes, copies the lists migrations, and scans lists views in the Tailwind bundle.
+- Version `0.37.0`
+
+### Upgrade notes
+- Add `recording_studio_lists` `~> 0.5` (tag `v0.5.0`). Run `bin/rails generate recording_studio_lists:install --mount-path /` and `bin/rails generate recording_studio_lists:migrations`, then `bin/rails db:migrate`.
+- Register `"RecordingStudio::Lists::List"` and `"RecordingStudio::Lists::ListItem"`. Enable `:lists` on the host root. The screens are `/lists`, `/lists/new`, and `/lists/:id`.
+- The lists install generator defaults the mount to `/recording_studio_lists`. `--mount-path /` matches the lists README. Skip the optional YAML prompt.
+- The engine pins `controllers/recording_studio_lists`. Eager-load that path if the host already eager-loads other engine controllers. Rebuild Tailwind so lists views are scanned.
+- Press kits do not call the lists API. This release only installs the gem.
+
 ## [0.36.1] - 2026-10-12
 
 ### Added

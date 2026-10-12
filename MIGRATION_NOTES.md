@@ -1,5 +1,23 @@
 # Upgrade notes
 
+## 0.37.0
+
+Press kits now depend on Lists `~> 0.5` (dummy tag `v0.5.0`). Installing the gem does not add list controls to a press kit.
+
+```bash
+bin/rails generate recording_studio_lists:install --mount-path /
+bin/rails generate recording_studio_lists:migrations
+bin/rails db:migrate
+```
+
+Register `"RecordingStudio::Lists::List"` and `"RecordingStudio::Lists::ListItem"`. Enable `:lists` on the host root:
+
+```ruby
+RecordingStudio.enable_capability(:lists, on: Workspace)
+```
+
+Mount `RecordingStudioLists::Engine` at `/` after the host routes. `/` stays the host home. The screens are `/lists`, `/lists/new`, and `/lists/:id`. The lists install generator's default mount is `/recording_studio_lists`. Pass `--mount-path /`. Say no to the optional `config/recording_studio_lists.yml` prompt. The engine pins its add-to-list Stimulus controller. Rebuild Tailwind so the lists screens are included. This dummy writes that scan from `rake tailwind:bundle_sources`.
+
 ## 0.36.1
 
 No migration, no config change, and no new public method. The README section **Displaying press kits in a host** documents the card, the full kit, the audience preview, `KitQuery.for_root`, and `Visibility.presentation_for`. Those calls already exist on `0.36.0`.
