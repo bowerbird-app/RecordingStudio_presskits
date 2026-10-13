@@ -127,13 +127,24 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-section-#{section.id} [data-turbo-confirm]"
     actions = css_select("#presskits-section-#{section.id}-actions").first
     assert_includes actions["class"], "max-sm:opacity-100"
+    assert_includes actions["class"], "self-end"
+    assert_includes actions["class"], "sm:self-auto"
     assert_includes actions["class"], "[@media(hover:none)]:opacity-100"
     assert_includes actions["class"], "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
+    assert_includes actions.parent["class"], "flex-col-reverse"
+    assert_includes actions.parent["class"], "sm:flex-row"
+    assert_includes css_select("#presskits-section-#{section.id} .fp-section-title").first["class"], "max-sm:mt-0"
     text_actions = css_select("#presskits-section-#{section.id}-actions").first.to_html
     assert_operator text_actions.index(">Order<"), :<, text_actions.index("fp-trash-button")
     assert_select "#presskits-section-#{section.id} .fp-trash-button[data-fp-size='sm'][style*='--hit-target-min: 0px']"
     assert_select "#presskits-section-#{section.id}-actions a[href='##{section.id}']", text: "Order"
     assert_select "#presskits-section-#{section.id}-actions a[data-modal-id='presskits-sections-modal']", text: "Order"
+    order_link = css_select("#presskits-section-#{section.id}-actions a[href='##{section.id}']").first
+    assert_equal "Order", order_link["aria-label"]
+    assert_includes order_link["class"], "max-sm:[&>span]:sr-only"
+    assert_includes order_link["class"], "max-sm:px-[var(--button-icon-only-padding-sm)]"
+    refute_includes order_link["class"], "fp-hit-target"
+    assert_select "#presskits-section-#{section.id}-actions a span", text: "Order"
     refute_select "#presskits-section-#{section.id}-actions a", text: "Edit"
     assert_select "#presskits-section-#{section.id} .fp-trash-button form[action='#{remove}']"
     assert_select "#presskits-section-#{section.id} .fp-trash-button input[name='_method'][value='delete']"
@@ -159,6 +170,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
                   text: "Edit"
     assert_select "#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor'][data-turbo-frame='pk-editor-screen']",
                   text: "Edit"
+    edit_link = css_select("#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor']").first
+    assert_equal "Edit", edit_link["aria-label"]
+    assert_includes edit_link["class"], "max-sm:[&>span]:sr-only"
+    refute_includes edit_link["class"], "fp-hit-target"
     refute_select "#presskits-section-#{images.id} [data-flat-pack--inline-edit-mode-value='rich']"
   end
 
