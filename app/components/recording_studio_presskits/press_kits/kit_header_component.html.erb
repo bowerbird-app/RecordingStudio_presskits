@@ -8,40 +8,38 @@
     recording: @press_kit_recording,
     size: :card,
     heading: :h1,
-    id: "presskits-kit-cover"
-  ) %>
-
-  <div class="<%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>" style="display: contents; <%= RecordingStudioPresskits::BrandStyle.neutral_style_attribute %>">
-  <%= render FlatPack::Fab::Component.new(
-    contained: true,
-    position: :top_right,
-    backdrop: false,
-    size: :sm,
-    icon: :plus,
-    offset: fab_offset,
-    label: header_actions_label,
-    class: fab_classes
-  ) do |fab| %>
-    <% fab.with_action(
-      icon: :pencil,
-      label: edit_heading_label,
-      href: @header_edit_path,
-      data: helpers.presskits_editor_open_data
-    ) %>
-    <% fab.with_action(
-      icon: :swatch,
-      label: style_label,
-      href: "#{@header_edit_path}#presskits-header-brand",
-      data: helpers.presskits_editor_open_data
-    ) %>
+    id: "presskits-kit-cover",
+    inline_path: helpers.press_kit_header_path(@press_kit_recording)
+  ) do |cover| %>
+    <% cover.with_body_actions do %>
+      <div
+        class="<%= action_row_classes %> <%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>"
+        style="<%= RecordingStudioPresskits::BrandStyle.neutral_style_attribute %>"
+        data-presskits-header-actions
+      >
+        <%= render RecordingStudioPresskits::PressKits::EditorActionButtonComponent.new(
+          text: edit_label,
+          icon: "pencil",
+          href: @header_edit_path,
+          data: helpers.presskits_editor_open_data
+        ) %>
+      </div>
+    <% end %>
     <% if cover_image_path %>
-      <% fab.with_action(
-        icon: :photo,
-        label: cover_image_label,
-        href: cover_image_path,
-        data: helpers.presskits_editor_open_data
-      ) %>
+      <% cover.with_image_actions do %>
+        <div
+          class="<%= image_action_classes %> <%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>"
+          style="<%= RecordingStudioPresskits::BrandStyle.neutral_style_attribute %>"
+          data-presskits-header-image-actions
+        >
+          <%= render RecordingStudioPresskits::PressKits::EditorActionButtonComponent.new(
+            text: edit_image_label,
+            icon: "photo",
+            href: cover_image_path,
+            data: helpers.presskits_editor_open_data
+          ) %>
+        </div>
+      <% end %>
     <% end %>
   <% end %>
-  </div>
 </div>

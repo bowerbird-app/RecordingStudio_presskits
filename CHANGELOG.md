@@ -12,15 +12,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `RecordingStudioPresskits.branding_style_for` drives Flatpack primary buttons on the kit itself. The string now includes `--color-primary-active` and the pressed-fill button tokens. Hover, focus, and the pressed fill are `oklch(from var(--color-primary) …)`, so they follow the resolved brand (kit, then press center, then `#333333`) instead of the colour Flatpack resolved on the theme root. `--color-primary-text` is still auto contrast.
 - That string sits on `#presskits-public-page`, `#presskits-kit-embed`, `#presskits-owner-preview`, the audience preview (`#presskits-public-preview`), and `#presskits-editor-preview` (the header card and the section cards). It does not sit on `<html>`.
-- Editor chrome keeps Flatpack's primary. The toolbar, page nav, header form, and tabs are outside the preview wrapper. Section edit, order, and remove, the empty-section action, and the header FAB use `presskits-neutral-controls`, which restores the theme's primary tokens.
+- Editor chrome keeps Flatpack's primary. The toolbar, page nav, header form, and tabs are outside the preview wrapper. Section edit, order, and remove, the empty-section action, header **Edit**, and **Edit image** use `presskits-neutral-controls`, which restores the theme's primary tokens.
 - Layouts that render a kit link `recording_studio_presskits/brand_buttons`.
-- The cover photo and the **Press kit** badge use `FlatPack::Overlay`. The photo is `with_media`. The badge is `with_item(placement: :top_left, inset: :md)` and `FlatPack::Badge` `style: :default`. Overlay only places it. The default badge uses the muted surface and content text (`#e5e5e5` and `#333` on the rounded theme), not the brand and not a forced white chip. **View** and other primary buttons still use the brand. Flatpack is `>= 0.1.231`.
+- The cover photo and the **Press kit** badge use `FlatPack::Overlay`. The photo is `with_media`. The badge is `with_item(placement: :top_left, inset: :md)` and `FlatPack::Badge` `style: :default`. On the editor, **Edit image** is `with_item(placement: :top_right, inset: :md)`. Overlay only places them. The default badge uses the muted surface and content text (`#e5e5e5` and `#333` on the rounded theme), not the brand and not a forced white chip. **View** and other primary buttons still use the brand. Flatpack is `>= 0.1.231`.
 - Version `0.46.0`
 
 ### Upgrade notes
 - Bump to `0.46.0`. There is no migration. Bump Flatpack to `>= 0.1.231` and rebuild Tailwind so the overlay placement utilities generate. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` next to `flat_pack/application` on the public layout and the authenticated layout.
 - Hosts that wrapped only `#presskits-public-page` or `#presskits-kit-embed` now also get the style on the editor preview, owner preview, and audience preview. Do not copy it onto the toolbar, the header form, or `<html>`.
-- Hosts that replaced the section action row or the header FAB should wrap those controls with `presskits-neutral-controls` and `BrandStyle.neutral_style_attribute` so they stay on Flatpack's primary.
+- Hosts that replaced the section action row, header **Edit**, or **Edit image** should wrap those controls with `presskits-neutral-controls` and `BrandStyle.neutral_style_attribute` so they stay on Flatpack's primary.
+
+## [0.45.0] - 2026-10-13
+
+### Changed
+- On the kit editor, the kit title, subtitle, and short description use `FlatPack::InlineEdit::Component` (`mode: :text`) on the cover card. Hover shows they can be edited. Click edits in place. An empty title shows **Add a title** and cannot be saved empty. An empty subtitle shows **Add a subtitle**. An empty short description shows **Add a short description** and stays clickable. Each save PATCHes one field on the header update path. A request that includes only one leaves the others, including brand and location.
+- The header FAB is gone. Hover shows **Edit** at the top right of the card body, the same `FlatPack::Button::Component` (`size: :sm`) as a section's **Edit**. It opens the header screen (kit location and **Brand**). **Edit image** sits in the cover's top bar, opposite the **Press kit** badge, and opens **Cover image**. Below `sm`, and on touch, both stay visible and show only their icons. Index cards, the public kit, and the owner preview do not get those buttons.
+- Kit location on the cover card sits under the short description. A blank short description puts it under the title and subtitle. Index cards, the public kit, the owner preview, the audience preview, and the kit editor use that order.
+- Version `0.45.0`
+
+### Upgrade notes
+- No migration. Bump to `0.45.0`. `0.44.0` already shipped the embargo dependency. On the kit editor, title, subtitle, and short description are no longer fields on the header form. They save from the card, one field at a time, on the same header update path. A PATCH that omits a field leaves the stored value. A blank title is still rejected. Index cards, the public kit, and the owner preview stay static.
+- The header plus FAB is gone. Hosts that replaced `KitHeaderComponent` should drop it. On the editor card only, pass `body_actions` and `image_actions` into `Cover::Component`. **Edit** and **Edit image** are `EditorActionButtonComponent` (a Flatpack button, `size: :sm`), the same control as a section's **Edit** and **Order**.
 
 ## [0.44.0] - 2026-10-13
 

@@ -29,9 +29,15 @@
             data: { cover_tag: true, cover_eyebrow: true }
           ) %>
         <% end %>
+        <% if image_actions? %>
+          <% overlay.with_item(placement: :top_right, inset: :md) do %>
+            <%= image_actions %>
+          <% end %>
+        <% end %>
       <% end %>
 
       <div class="<%= grid_card_body_classes %>">
+        <% brand_row = capture do %>
         <div class="flex items-start gap-3"<% if show_brand_row? %> data-cover-brand<% end %>>
           <div class="flex min-w-0 flex-1 flex-col gap-[14px]">
             <% if company_name.present? %>
@@ -41,6 +47,25 @@
               </div>
             <% end %>
 
+            <% if inline_edit? %>
+              <%= render RecordingStudioPresskits::PressKits::HeaderInlineCopyComponent.new(
+                recording: @recording,
+                update_path: inline_path,
+                heading: title_tag
+              ) %>
+            <% else %>
+              <div class="flex flex-col gap-0.5">
+                <%= content_tag title_tag, title, class: "text-[30px] font-bold leading-[38px] tracking-[-0.45px] text-balance", data: { cover_title: true } %>
+                <% if subtitle.present? %>
+                  <p class="text-[30px] font-normal leading-[38px] tracking-[-0.45px]" data-cover-subtitle><%= subtitle %></p>
+                <% end %>
+              </div>
+
+              <% if description.present? %>
+                <p class="line-clamp-3 text-base leading-6 text-[var(--surface-muted-content-color)]" data-cover-description><%= description %></p>
+              <% end %>
+            <% end %>
+
             <% if location_recordable %>
               <div class="flex items-center gap-2 text-sm" data-cover-location>
                 <% if location_recordable.resolved_icon.present? %>
@@ -48,17 +73,6 @@
                 <% end %>
                 <span><%= location_recordable.display_name %></span>
               </div>
-            <% end %>
-
-            <div class="flex flex-col gap-0.5">
-              <%= content_tag title_tag, title, class: "text-[30px] font-bold leading-[38px] tracking-[-0.45px] text-balance", data: { cover_title: true } %>
-              <% if subtitle.present? %>
-                <p class="text-[30px] font-normal leading-[38px] tracking-[-0.45px]" data-cover-subtitle><%= subtitle %></p>
-              <% end %>
-            </div>
-
-            <% if description.present? %>
-              <p class="line-clamp-3 text-base leading-6 text-[var(--surface-muted-content-color)]" data-cover-description><%= description %></p>
             <% end %>
           </div>
           <% if show_add_to_list? %>
@@ -76,6 +90,19 @@
             </div>
           <% end %>
         </div>
+        <% end %>
+
+        <% if body_actions? %>
+          <%# Same row as a section: actions sit at the trailing edge, above the copy below sm. %>
+          <div class="flex flex-col-reverse gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0 flex-1">
+              <%= brand_row %>
+            </div>
+            <%= body_actions %>
+          </div>
+        <% else %>
+          <%= brand_row %>
+        <% end %>
 
         <% if href.present? %>
           <div class="mt-auto flex justify-end pb-8 pt-6">

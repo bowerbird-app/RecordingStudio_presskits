@@ -3,13 +3,10 @@
 module RecordingStudioPresskits
   module PressKits
     class HeaderEditorComponent < ViewComponent::Base
-      def initialize(press_kit_recording:, title:, description:, subtitle: nil, brand_color: nil, # rubocop:disable Metrics/ParameterLists
+      def initialize(press_kit_recording:, brand_color: nil,
                      font_family: nil, brand_source: nil, location: nil)
         super()
         @press_kit_recording = press_kit_recording
-        @title = title
-        @description = description
-        @subtitle = subtitle
         @brand_color = brand_color
         @font_family = font_family
         @brand_source = brand_source
@@ -18,18 +15,6 @@ module RecordingStudioPresskits
 
       def header_location
         @location || RecordingStudio::Location::Location.new
-      end
-
-      def header_title
-        @title.to_s
-      end
-
-      def header_description
-        @description.to_s
-      end
-
-      def header_subtitle
-        @subtitle.to_s
       end
 
       def inherit_available?

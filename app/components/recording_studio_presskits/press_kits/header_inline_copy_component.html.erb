@@ -1,0 +1,50 @@
+<div
+  class="relative z-20 min-w-0"
+  data-presskits-inline-copy
+  onclick="event.stopPropagation()"
+  onpointerdown="event.stopPropagation()"
+>
+  <div class="flex flex-col gap-[14px]">
+    <div class="flex flex-col gap-0.5">
+      <div data-cover-title>
+        <%= render FlatPack::InlineEdit::Component.new(
+          tag: heading_tag,
+          mode: :text,
+          value: title,
+          name: "press_kit[title]",
+          update_url: @update_path,
+          label: title_label,
+          placeholder: title_placeholder,
+          required: true,
+          class: title_classes
+        ) %>
+      </div>
+      <div data-cover-subtitle>
+        <%= render FlatPack::InlineEdit::Component.new(
+          tag: :p,
+          mode: :text,
+          value: subtitle,
+          name: "press_kit[subtitle]",
+          update_url: @update_path,
+          label: subtitle_label,
+          placeholder: subtitle_placeholder,
+          maxlength: RecordingStudioPresskits::PressKit::SUBTITLE_LIMIT,
+          class: subtitle_classes
+        ) %>
+      </div>
+    </div>
+    <div data-cover-description>
+      <%= render FlatPack::InlineEdit::Component.new(
+        tag: :p,
+        mode: :text,
+        value: description,
+        name: "press_kit[description]",
+        update_url: @update_path,
+        label: description_label,
+        placeholder: description_placeholder,
+        maxlength: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT,
+        class: description_classes
+      ) %>
+    </div>
+  </div>
+</div>

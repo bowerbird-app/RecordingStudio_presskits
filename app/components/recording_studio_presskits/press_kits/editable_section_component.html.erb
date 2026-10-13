@@ -20,25 +20,17 @@
         data-presskits-section-actions
       >
         <% if show_content_edit? %>
-          <%= render FlatPack::Button::Component.new(
+          <%= render RecordingStudioPresskits::PressKits::EditorActionButtonComponent.new(
             text: edit_label,
             icon: "pencil",
-            style: :default,
-            size: :sm,
             href: @content_path,
-            class: mobile_icon_classes,
-            aria: { label: edit_label },
             data: helpers.presskits_editor_open_data
           ) %>
         <% end %>
-        <%= render FlatPack::Button::Component.new(
+        <%= render RecordingStudioPresskits::PressKits::EditorActionButtonComponent.new(
           text: order_label,
           icon: "bars-3-bottom-left",
-          style: :default,
-          size: :sm,
           href: reorder_focus_href,
-          class: mobile_icon_classes,
-          aria: { label: order_label },
           data: { modal_id: "presskits-sections-modal" }
         ) %>
         <%= render FlatPack::TrashButton::Component.new(

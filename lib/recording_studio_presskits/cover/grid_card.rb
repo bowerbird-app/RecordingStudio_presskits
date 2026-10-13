@@ -35,6 +35,12 @@ module RecordingStudioPresskits
         @title_tag || :h2
       end
 
+      def inline_edit?
+        card? && inline_path.present?
+      end
+
+      attr_reader :inline_path
+
       def grid_card_data
         { cover_card: true, brand_color: brand_color, brand_text_color: brand_text_color, presskits_brand: "true" }
       end
@@ -79,6 +85,11 @@ module RecordingStudioPresskits
       end
 
       private
+
+      def assign_inline_heading(heading, inline_path)
+        @title_tag = %i[h1 h2].include?(heading&.to_sym) ? heading.to_sym : :h2
+        @inline_path = inline_path.presence
+      end
 
       def lists_installed?
         defined?(RecordingStudioLists::AddToListHelper)

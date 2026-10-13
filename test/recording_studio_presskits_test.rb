@@ -466,19 +466,21 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Who can view this press kit"
     assert_includes readme, "KitQuery.discoverable_for"
     assert_includes readme, 'data-turbo-frame="_top"'
-    assert_includes readme, "Edit heading"
+    assert_includes readme, "**Edit image**"
+    assert_includes readme, "Add a short description"
+    refute_includes readme, "Edit heading"
     assert_includes readme, "FlatPack::InlineEdit::Component"
     assert_includes readme, "Add a subtitle"
     assert_includes readme, "Section actions"
     assert_includes readme, "FlatPack::TrashButton::Component"
     assert_includes readme, "mode: :rich"
-    assert_includes readme, "FlatPack::Fab::Component"
+    refute_includes readme, "FlatPack::Fab::Component"
     assert_includes readme, "recording-studio-presskits--editor-chrome"
-    assert_includes readme, "icon: :plus"
+    refute_includes readme, "icon: :plus"
     assert_includes readme, "p-8 md:p-10 lg:p-12"
     assert_includes readme, "overflow-hidden"
     assert_includes readme, "rounded-tr-none"
-    assert_includes readme, 'offset: "1rem"'
+    refute_includes readme, 'offset: "1rem"'
     refute_includes readme, "p-4 -m-4"
     assert_includes readme, "variant: :inline"
     refute_includes readme, "named radios"
@@ -664,6 +666,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "data-cover-company"
     assert_includes cover_html, "data-cover-location"
     assert_includes cover_html, "location_recordable.display_name"
+    assert_operator cover_html.index("data-cover-description"), :<, cover_html.index("data-cover-location")
+    assert_operator cover_html.index("data-cover-company"), :<, cover_html.index("data-cover-location")
     company = File.read(File.expand_path("../lib/recording_studio_presskits/cover/company.rb", __dir__))
     assert_includes company, "RecordingStudioCompany.company"
     assert_includes company, "RecordingStudioCompany.allowance"
@@ -751,18 +755,32 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes kit_header, "size: :card"
     assert_includes kit_header, "heading: :h1"
     refute_includes kit_header, "size: :hero"
-    assert_includes kit_header, "FlatPack::Fab::Component"
-    assert_includes kit_header, "contained: true"
-    assert_includes kit_header, "position: :top_right"
-    assert_includes kit_header, "backdrop: false"
-    assert_includes kit_header, "size: :sm"
-    assert_includes kit_header, "icon: :plus"
-    assert_includes kit_header, "offset: fab_offset"
+    refute_includes kit_header, "FlatPack::Fab::Component"
+    refute_includes kit_header, "icon: :plus"
+    refute_includes kit_header, "offset: fab_offset"
     refute_includes kit_header, "ellipsis_vertical"
-    assert_includes kit_header, "edit_heading_label"
-    assert_includes kit_header, "style_label"
-    assert_includes kit_header, "cover_image_label"
+    assert_includes kit_header, "with_body_actions"
+    assert_includes kit_header, "with_image_actions"
+    assert_includes kit_header, "EditorActionButtonComponent"
+    assert_includes kit_header, "edit_label"
+    assert_includes kit_header, "edit_image_label"
+    assert_includes kit_header, "inline_path:"
     assert_includes kit_header, "cover_image_path"
+    assert_includes kit_header, "action_row_classes"
+    assert_includes kit_header, "image_action_classes"
+    kit_header_rb = File.read(File.expand_path("press_kits/kit_header_component.rb", components))
+    assert_includes kit_header_rb, "EditorChrome::ACTION_ROW_CLASSES"
+    assert_includes kit_header_rb, "EditorChrome::IMAGE_ACTION_CLASSES"
+    cover = File.read(File.expand_path("cover/component.html.erb", components))
+    assert_includes cover, "body_actions?"
+    assert_includes cover, "image_actions?"
+    assert_includes cover, "with_item(placement: :top_left, inset: :md)"
+    assert_includes cover, "with_item(placement: :top_right, inset: :md)"
+    refute_includes cover, "inset-x-0 top-0"
+    refute_includes cover, "left-5 top-5"
+    locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
+    assert_includes locales, 'edit_image: "Edit image"'
+    refute_includes locales, "header_actions:"
     refute_includes kit_header, "arrows-up-down"
     refute_includes kit_header, "trash"
     section = File.read(File.expand_path("press_kits/editable_section_component.html.erb", components))
@@ -776,9 +794,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section, "data-presskits-section-actions"
     assert_includes section, "flex-col-reverse"
     assert_includes section, "sm:flex-row"
-    assert_includes section, "mobile_icon_classes"
-    assert_includes section, "aria: { label: edit_label }"
-    assert_includes section, "aria: { label: order_label }"
+    assert_includes section, "EditorActionButtonComponent"
     refute_includes section, "icon_only:"
     assert_includes section, "order_label"
     assert_includes section, "edit_label"
@@ -792,12 +808,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section, "text_section?"
     assert_includes section, "text_inline"
     assert_includes section_ruby, "TRASH_SIZE_STYLE = \"--hit-target-min: 0px\""
-    assert_includes section_ruby, "max-sm:px-[var(--button-icon-only-padding-sm)]"
-    assert_includes section_ruby, "max-sm:[&>span]:sr-only"
-    assert_includes section_ruby, "self-end sm:self-auto"
-    assert_includes section_ruby, "max-sm:opacity-100"
-    assert_includes section_ruby, "[@media(hover:none)]:opacity-100"
-    assert_includes section_ruby, "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
+    assert_includes section_ruby, "EditorChrome::ACTION_ROW_CLASSES"
+    action_button = File.read(File.expand_path("press_kits/editor_action_button_component.rb", components))
+    assert_includes action_button, "size: :sm"
+    assert_includes action_button, "aria: { label: @text }"
+    assert_includes action_button, "EditorChrome::MOBILE_ICON_CLASSES"
     assert_includes inline_heading, "FlatPack::InlineEdit::Component"
     assert_includes inline_heading, 'name: "kit_section[title]"'
     assert_includes inline_heading, 'name: "kit_section[subtitle]"'
@@ -810,8 +825,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes section, "SectionDropdownComponent"
     refute_includes section, "hover:outline-[var(--color-primary)]"
     refute_includes section, "p-4 -mx-4"
-    assert_includes header, 'name: "press_kit[title]"'
-    assert_includes header, 'name: "press_kit[description]"'
+    refute_includes header, 'name: "press_kit[title]"'
+    refute_includes header, 'name: "press_kit[subtitle]"'
+    refute_includes header, 'name: "press_kit[description]"'
+    assert_includes header, 'id="presskits-header-location"'
     assert_includes header, "fields_for :location"
     assert_includes header, "recording_studio_location_search_fields"
     assert_includes header, 'id="press_kit_cover_image"'
@@ -845,13 +862,19 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "focus-visible:outline"
     assert_includes chrome, "[@media(hover:hover)]"
     assert_includes chrome, "data-[pk-edit-active]"
-    assert_includes chrome, "group-data-[pk-edit-active]/pk-edit"
-    refute_includes chrome, "[@media(hover:none)]:opacity-100"
+    refute_includes chrome, "group-data-[pk-edit-active]/pk-edit"
+    assert_includes chrome, "ACTION_VISIBILITY_CLASSES"
+    assert_includes chrome, "[@media(hover:none)]:opacity-100"
+    assert_includes chrome, "max-sm:opacity-100"
+    assert_includes chrome, "self-end sm:self-auto"
+    assert_includes chrome, "IMAGE_ACTION_CLASSES"
+    assert_includes chrome, "max-sm:px-[var(--button-icon-only-padding-sm)]"
+    assert_includes chrome, "max-sm:[&>span]:sr-only"
     assert_includes chrome, "relative"
     assert_includes chrome, "pt-8 pb-8 px-8"
     assert_includes chrome, "md:pt-10 md:pb-10 md:px-10"
     assert_includes chrome, "lg:pt-12 lg:pb-12 lg:px-12"
-    assert_includes chrome, "pr-20"
+    refute_includes chrome, "pr-20"
     assert_includes chrome, "HEADER_REGION_CLASSES"
     assert_includes chrome, "after:inset-0"
     assert_includes chrome, "hover:after:bg-[color-mix(in_oklab,black_16%,transparent)]"
@@ -863,7 +886,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
     refute_includes chrome, "p-5 md:p-8 lg:p-10"
     refute_includes chrome, "md:p-4 lg:p-6"
-    assert_includes chrome, 'FAB_OFFSET = "1rem"'
+    refute_includes chrome, "FAB_OFFSET"
     refute_includes chrome, "-m-4"
     refute_includes chrome, "rounded-none"
     assert_includes chrome, "rounded-[var(--radius-lg)]"
@@ -902,7 +925,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome_js, "data-presskits-editor-region"
     refute_includes chrome_js, "opacity-100"
     refute_includes header, "inherit_font_label"
-    assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
+    refute_includes header, "max_characters:"
     assert_includes header, "flat-pack--unsaved-changes"
     refute_includes header, 'text: "Cancel"'
     refute_includes header, "cols: 2"
@@ -915,7 +938,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes brand_js, "press_center"
     refute_includes brand_js, "chooseFont"
     refute_includes brand_js, "presskits-header-edit-preview"
-    assert_operator header.index('name: "press_kit[title]"'), :<, header.index("presskits-header-brand")
+    assert_operator header.index("fields_for :location"), :<, header.index("presskits-header-brand")
+    inline_copy = File.read(File.expand_path("press_kits/header_inline_copy_component.html.erb", components))
+    assert_includes inline_copy, "FlatPack::InlineEdit::Component"
+    assert_includes inline_copy, 'name: "press_kit[title]"'
+    assert_includes inline_copy, 'name: "press_kit[subtitle]"'
+    assert_includes inline_copy, 'name: "press_kit[description]"'
+    assert_includes inline_copy, "required: true"
+    assert_includes inline_copy, "mode: :text"
+    assert_includes inline_copy, "data-presskits-inline-copy"
+    assert_includes inline_copy, "relative z-20"
+    assert_includes inline_copy, "event.stopPropagation()"
+    cover = File.read(File.expand_path("cover/component.html.erb", components))
+    assert_operator cover.index("inline_edit?"), :<, cover.index("HeaderInlineCopyComponent")
+    assert_operator cover.index("HeaderInlineCopyComponent"), :<, cover.index("cover_title: true")
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
     refute_includes show, "FlatPack::Picker::Component"

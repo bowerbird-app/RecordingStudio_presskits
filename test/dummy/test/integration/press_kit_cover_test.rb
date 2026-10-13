@@ -114,9 +114,12 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
+    refute_select "[data-presskits-inline-copy]"
     assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
     assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
     assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    refute_select "[data-presskits-header-actions]"
+    refute_select "[data-presskits-header-image-actions]"
     refute_includes css_select("#presskits-kit-cover [data-cover-frame]").first.to_html, "Doors at noon."
     refute_select "#presskits-cover-hero"
     assert_default_eyebrow("#presskits-kit-cover [data-cover-eyebrow]", absent: "#059669")
@@ -143,6 +146,8 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
     assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    refute_select "[data-presskits-header-actions]"
+    refute_select "[data-presskits-header-image-actions]"
     refute_select "#presskits-public-page"
     refute_select "#presskits-cover-hero"
     preview = css_select("#presskits-public-preview").first
@@ -258,6 +263,10 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-cover-feature]", count: 0
     assert_select "[data-cover-card]", count: 2
+    refute_select "[data-presskits-inline-copy]"
+    refute_select "[data-presskits-header-actions]"
+    refute_select "[data-presskits-header-image-actions]"
+    refute_select "input[name='press_kit[title]']"
     grid_card = css_select("[data-cover-card]").first
     assert_includes grid_card["class"], "@container"
     assert_includes grid_card.to_html, "aspect-[430/368]"
@@ -281,13 +290,20 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "@min-[640px]:min-w-0"
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
     assert_default_eyebrow("#presskits-kit-header [data-cover-eyebrow]", absent: "#0F766E")
-    assert_select "#presskits-kit-header h1[data-cover-title]", text: "Spring launch"
+    assert_select "#presskits-kit-header [data-cover-title] h1", text: "Spring launch"
     assert_select "#presskits-kit-header [data-cover-subtitle]", text: "Collection released"
     assert_select "#presskits-kit-header [data-cover-description]", text: "Doors at noon."
     refute_includes frame.to_html, "Doors at noon."
     assert_select "#presskits-kit-header a[data-cover-view]", count: 0
-    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Edit heading']"
-    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Style']"
+    assert_select "#presskits-kit-header [data-presskits-inline-copy].relative.z-20"
+    assert_select "#presskits-kit-header [data-flat-pack--inline-edit-required-value='true']"
+    assert_select "#presskits-kit-header [data-presskits-header-actions] a[aria-label='Edit']"
+    assert_select "#presskits-kit-header [data-presskits-header-image-actions] a[aria-label='Edit image']"
+    badge = css_select("#presskits-kit-header [data-cover-tag]").first
+    assert_equal "top_left", badge.parent["data-fp-placement"]
+    image_actions = css_select("#presskits-kit-header [data-presskits-header-image-actions]").first
+    assert_equal "top_right", image_actions.parent["data-fp-placement"]
+    assert_equal "md", image_actions.parent["data-fp-inset"]
     refute_includes header.to_html, "Share"
     refute_includes header.to_html, "RELEASE DATE"
     refute_select "#presskits-cover-hero"
