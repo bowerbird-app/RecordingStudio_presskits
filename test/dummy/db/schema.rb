@@ -179,6 +179,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_120000) do
     t.index ["state"], name: "index_recording_studio_downloadable_packages_on_state"
   end
 
+  create_table "recording_studio_embargo_embargoes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "enabled", default: false, null: false
+    t.datetime "lifts_at"
+    t.string "time_zone", default: "UTC", null: false
+    t.boolean "early_access", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["lifts_at"], name: "index_recording_studio_embargo_embargoes_on_lifts_at"
+  end
+
   create_table "recording_studio_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "action", null: false
     t.uuid "actor_id"
@@ -329,6 +339,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_120000) do
     t.index ["parent_recording_id", "recording_studio_orderable_position"], name: "idx_rs_recordings_orderable_sibling_position"
     t.index ["parent_recording_id"], name: "idx_rs_attachable_parent_active", where: "(((recordable_type)::text = 'RecordingStudioAttachable::Attachment'::text) AND (trashed_at IS NULL))"
     t.index ["parent_recording_id"], name: "index_recording_studio_recordings_on_parent_recording_id"
+    t.index ["parent_recording_id"], name: "index_rs_embargo_child_per_parent", unique: true, where: "(((recordable_type)::text = 'RecordingStudioEmbargo::Embargo'::text) AND (trashed_at IS NULL))"
     t.index ["parent_recording_id"], name: "index_rs_publishable_child_per_parent", unique: true, where: "(((recordable_type)::text = 'RecordingStudioPublishable::Publishable'::text) AND (trashed_at IS NULL))"
     t.index ["recordable_type", "recordable_id", "parent_recording_id", "trashed_at"], name: "index_recording_studio_recordings_on_recordable_parent_trashed"
     t.index ["recordable_type", "recordable_id"], name: "index_recording_studio_recordings_on_recordable"

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "recording_studio_presskits/api/exposure"
 require "recording_studio_presskits/api/quote_payload"
 require "recording_studio_presskits/api/fact_payload"
 require "recording_studio_presskits/api/credit_payload"
@@ -52,7 +53,7 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::PressKit",
           operations: %i[show update],
-          serializer: ->(recordable, **) { PressKitPayload.for(recordable) },
+          serializer: ->(recordable, context: nil, **) { PressKitPayload.for(recordable, context: context) },
           output_keys: %i[title description brand_color font_family],
           writable_attributes: %i[brand_color font_family],
           capability_actions: %i[create_section reorder_sections]
@@ -63,45 +64,42 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
-          serializer: ->(recordable, recording: nil, **) { SectionPayload.for(recordable, recording) },
+          serializer: method(:kit_section_serializer),
           output_keys: %i[title subtitle content_type content_id videos display facts locations],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )
       end
 
+      def kit_section_serializer(recordable, recording: nil, context: nil, **)
+        source = Exposure.named_recording(recording: recording, context: context)
+        SectionPayload.for(recordable, source, context: context)
+      end
+
       def register_text
         register_type(
           "RecordingStudioPresskits::Text",
           operations: %i[show update],
-          serializer: ->(recordable, **) { { body: recordable.body } },
+          serializer: method(:text_serializer),
           output_keys: %i[body],
           writable_attributes: %i[body]
         )
       end
 
+      def text_serializer(recordable, recording: nil, context: nil, **)
+        source = Exposure.named_recording(recording: recording, context: context)
+        body = Exposure.withhold?(context, source) ? nil : recordable.body
+        { body: body }
+      end
+
       def register_quote
-        ::RecordingStudioApi.register_recordable_type_api(
+        register_type(
           "RecordingStudioPresskits::Quote",
-          **quote_registration
-        )
-      end
-
-      def quote_registration
-        {
           operations: %i[index show create update destroy],
-          serializer: quote_serializer,
-          output_keys: quote_keys,
-          writable_attributes: quote_keys
-        }
-      end
-
-      def quote_keys
-        %i[body name role organisation]
-      end
-
-      def quote_serializer
-        ->(recordable, **) { QuotePayload.for(recordable) }
+          serializer: ->(recordable, context: nil, **) { QuotePayload.for(recordable, context: context) },
+          output_keys: %i[body name role organisation],
+          writable_attributes: %i[body name role organisation]
+        )
       end
 
       def register_quote_section
@@ -112,11 +110,14 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::VideoSection",
           operations: %i[index show],
-          serializer: lambda { |_recordable, recording: nil, **|
-            { videos: VideoPayload.for_recording(recording) }
-          },
+          serializer: method(:video_section_serializer),
           output_keys: %i[videos]
         )
+      end
+
+      def video_section_serializer(_recordable, recording: nil, context: nil, **)
+        source = Exposure.named_recording(recording: recording, context: context)
+        { videos: VideoPayload.for_recording(source, context: context) }
       end
 
       def register_type(type_name, **)

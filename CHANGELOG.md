@@ -7,16 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.44.0] - 2026-10-13
+## [0.45.0] - 2026-10-13
 
 ### Changed
 - On the kit editor, the kit title, subtitle, and short description use `FlatPack::InlineEdit::Component` (`mode: :text`) on the cover card. Hover shows they can be edited. Click edits in place. An empty title shows **Add a title** and cannot be saved empty. An empty subtitle shows **Add a subtitle**. An empty short description shows **Add a short description** and stays clickable. Each save PATCHes one field on the header update path. A request that includes only one leaves the others, including brand and location.
 - The header FAB's first action is **Location**. It opens the header screen at the kit location. **Style** and **Cover image** stay. The header screen is kit location, **Brand**, and **Cover image**.
 - Kit location on the cover card sits under the short description. A blank short description puts it under the title and subtitle. Index cards, the public kit, the owner preview, the audience preview, and the kit editor use that order.
+- Version `0.45.0`
+
+### Upgrade notes
+- No migration. Bump to `0.45.0`. `0.44.0` already shipped the embargo dependency. On the kit editor, title, subtitle, and short description are no longer fields on the header form. They save from the card, one field at a time, on the same header update path. A PATCH that omits a field leaves the stored value. A blank title is still rejected. Index cards, the public kit, and the owner preview stay static.
+
+## [0.44.0] - 2026-10-13
+
+### Added
+- Press kits depend on `recording_studio_embargo` 0.1.0 and opt into `RecordingStudio::Capabilities::Embargo` for `presskits.kit_view_full` and `presskits.kit_download`.
+- The kit editor toolbar calls `render_embargo_button` after **Downloads**. The button opens the embargo gem's editor (enable, release time, time zone, and one early-access switch). Default English copy stays in that gem. Hosts can override `recording_studio_embargo.editor.subtitle`, `enable_help`, and `early_access_help`.
+- While an embargo is active, `Visibility.presentation_for` still returns `:full`, `:preview`, `:hidden`, or `:unavailable`. An unpublished kit stays unavailable. Early access follows Accessible's `:granted` audience for each action, so a view grant does not include download. Everyone else gets the kit's own visibility fallback. A preview shows an **Embargoed** badge, the release time, and no cover image, sections, or download.
+- Public responses, `KitQuery.discoverable_for`, fragment cache keys, and API payloads follow that same decision. Download generate, fetch, and status stay behind `downloadable_available_for?`, including a zip that already exists. After `lifts_at`, the hold ends on the next request. Copying a kit clears the window.
 - Version `0.44.0`
 
 ### Upgrade notes
-- No migration. On the kit editor, title, subtitle, and short description are no longer fields on the header form. They save from the card, one field at a time, on the same header update path. A PATCH that omits a field leaves the stored value. A blank title is still rejected. Index cards, the public kit, and the owner preview stay static.
+- Bump to `0.44.0`. There is no press kit migration. Hosts install `recording_studio_embargo` and run its migration (`recording_studio_embargo_embargoes`, plus the one-child index on recordings). This repo vendors tag `v0.1.0` at `vendor/gems/recording_studio_embargo` until CI can fetch the private git source.
+- Mount `RecordingStudioEmbargo::Engine` (the dummy uses `/recording_studio_embargo`). The toolbar button needs that mount. Preview and hidden stay on the kit's visibility screen.
+
 
 ## [0.43.0] - 2026-10-13
 

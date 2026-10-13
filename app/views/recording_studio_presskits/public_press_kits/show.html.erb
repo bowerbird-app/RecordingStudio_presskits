@@ -1,6 +1,7 @@
 <% presentation = RecordingStudioPresskits::Visibility.apply_public_response!(
      presentation: @presskits_presentation,
-     response: response
+     response: response,
+     kit: @parent_recording || @press_kit_recording
    ) %>
 
 <% kit_recording = @parent_recording || @press_kit_recording %>

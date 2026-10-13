@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   mount RecordingStudioAccessible::Engine, at: "/admin/access"
   mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
   mount RecordingStudioDownloadable::Engine, at: "/recording_studio_downloadable"
+  mount RecordingStudioEmbargo::Engine, at: "/recording_studio_embargo"
   mount RecordingStudioCompany::Engine, at: "/recording_studio_company"
   mount RecordingStudioLocation::Engine, at: "/recording_studio_location"
   recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits

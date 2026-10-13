@@ -34,6 +34,12 @@ module RecordingStudioPresskits
       action: KitDownload::ACTION,
       export_scope: KitDownload::EXPORT_SCOPE
     )
+
+    if defined?(RecordingStudio::Capabilities::Embargo)
+      include RecordingStudio::Capabilities::Embargo.to(
+        actions: [Visibility::ACTION, KitDownload::ACTION]
+      )
+    end
     include RecordingStudio::Capabilities::Location.to
     include BrandAttributes
 
@@ -43,11 +49,14 @@ module RecordingStudioPresskits
       KitDownload.manifest_for(RecordingStudio::Recording.find_by(recordable: self))
     end
 
-    def downloadable_available_for?(actor:, action:) # rubocop:disable Lint/UnusedMethodArgument
+    def downloadable_available_for?(actor:, action:)
       return false if action.present? && action.to_sym != KitDownload::ACTION
 
       recording = RecordingStudio::Recording.find_by(recordable: self)
-      recording.respond_to?(:currently_published?) && recording.currently_published?
+      return false unless recording.respond_to?(:currently_published?) && recording.currently_published?
+      return false if Embargo.denies?(recording: recording, action: KitDownload::ACTION, actor: actor)
+
+      true
     end
 
     # The header is the kit itself. Title is required. The short description

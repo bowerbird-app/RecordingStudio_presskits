@@ -3,7 +3,9 @@
 module RecordingStudioPresskits
   module Api
     class FactPayload
-      def self.for(recordable)
+      def self.for(recordable, context: nil)
+        return withheld_fact if Exposure.withhold?(context, recording_for(recordable, context))
+
         {
           label: recordable.label,
           value: recordable.value,
@@ -14,12 +16,32 @@ module RecordingStudioPresskits
         }
       end
 
-      def self.for_recording(recording)
+      def self.for_recording(recording, context: nil)
+        return withheld_section if Exposure.withhold?(context, recording)
+
         {
           display: display_for(recording&.recordable),
           facts: FactsSection.active_facts(recording).map { |child| FactPayload.for(child.recordable) }
         }
       end
+
+      def self.withheld_fact
+        { label: nil, value: nil, unit: nil, description: nil, source_url: nil, as_of_date: nil }
+      end
+      private_class_method :withheld_fact
+
+      def self.withheld_section
+        { display: { style: nil, columns: nil }, facts: [] }
+      end
+      private_class_method :withheld_section
+
+      def self.recording_for(recordable, context)
+        return context.recording if context.respond_to?(:recording) && context.recording.present?
+        return unless defined?(RecordingStudio::Recording)
+
+        RecordingStudio::Recording.find_by(recordable: recordable)
+      end
+      private_class_method :recording_for
 
       def self.display_for(recordable)
         {
