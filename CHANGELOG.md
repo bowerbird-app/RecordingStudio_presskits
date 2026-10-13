@@ -26,11 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - On `Cover::Component` at `:card`, a container at least 640px wide adds `pt-16` above the copy (`@min-[640px]:pt-16` on the company, title, subtitle, heart, and description). The body keeps `pt-7`, so that block starts about 6rem from the top of the card. Below 640px of container width the extra padding stays off.
 - **View** stays in the `mt-auto` footer. **Edit image** stays on the cover overlay.
-- On the editor card, **Edit** is `FlatPack::Overlay` on the body. The copy is `with_media`. **Edit** is `with_item(placement: :top_right, inset: :lg)`, so it no longer shares a row with the heart. The heart keeps the same right inset as the public card. Below 640px the editor copy has no extra top padding, the same as the public card. At 640px and wider, `@min-[640px]:pt-16` still applies.
+- On the editor card, **Edit** is rendered twice and a container query shows one. Below 640px it sits on the cover overlay, in the same `top_right` item as **Edit image**, immediately to its left, with `gap-2`. From 640px that copy is `@min-[640px]:hidden`, and **Edit** is the body overlay item (`placement: :top_right`, `inset: :lg`). The copy row does not reserve space for it. Below 640px the copy has no extra top padding. At 640px and wider, `@min-[640px]:pt-16` still applies.
 - Version `0.47.0`
 
 ### Upgrade notes
-- Bump to `0.47.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16` generates. Flatpack stays `>= 0.1.231`. Hosts that reserved a flex column for header **Edit** should drop it. The cover places that slot.
+- Bump to `0.47.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:hidden`, and `@min-[640px]:contents` generate. Flatpack stays `>= 0.1.231`. Hosts that reserved a flex column for header **Edit** should drop it. The cover places that slot. On a narrow card, **Edit** shares the cover's top-right overlay with **Edit image**.
 
 ## [0.46.0] - 2026-10-13
 

@@ -314,11 +314,20 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     copy = css_select("#presskits-kit-header [data-cover-copy]").first
     assert_equal "flex items-start gap-3 @min-[640px]:pt-16", copy["class"]
     refute_includes copy["class"], "pt-12"
-    actions = css_select("#presskits-kit-header [data-presskits-header-actions]").first
-    refute actions.ancestors.any? { |node| node["data-cover-copy"] }
-    assert_equal "top_right", actions.parent["data-fp-placement"]
-    assert_equal "lg", actions.parent["data-fp-inset"]
-    refute_includes actions.parent["class"], "flex-col-reverse"
+    assert_select "#presskits-kit-header [data-presskits-header-actions]", count: 2
+    css_select("#presskits-kit-header [data-presskits-header-actions]").each do |actions|
+      refute actions.ancestors.any? { |node| node["data-cover-copy"] }
+    end
+    wide_edit = css_select("#presskits-kit-header [data-cover-edit='wide']").first
+    assert_includes wide_edit["class"], "hidden"
+    assert_includes wide_edit["class"], "@min-[640px]:contents"
+    wide_item = wide_edit.ancestors.find { |node| node["data-fp-placement"] }
+    assert_equal "top_right", wide_item["data-fp-placement"]
+    assert_equal "lg", wide_item["data-fp-inset"]
+    refute wide_edit.ancestors.any? { |node| node["data-cover-frame"] }
+    stacked_edit = css_select("#presskits-kit-header [data-cover-edit='stacked']").first
+    assert_equal "@min-[640px]:hidden", stacked_edit["class"]
+    assert stacked_edit.ancestors.any? { |node| node["data-cover-frame"] }
     body_overlay = css_select("#presskits-kit-header [data-cover-body]").first
     assert_includes body_overlay["class"], "fp-overlay"
     assert_includes body_overlay["class"], "px-8"
@@ -337,8 +346,13 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     badge = css_select("#presskits-kit-header [data-cover-tag]").first
     assert_equal "top_left", badge.parent["data-fp-placement"]
     image_actions = css_select("#presskits-kit-header [data-presskits-header-image-actions]").first
-    assert_equal "top_right", image_actions.parent["data-fp-placement"]
-    assert_equal "md", image_actions.parent["data-fp-inset"]
+    image_group = image_actions.parent
+    assert_includes image_group["class"], "gap-2"
+    assert_equal image_group, stacked_edit.parent
+    assert_operator image_group.to_html.index(">Edit<"), :<, image_group.to_html.index(">Edit image<")
+    image_item = image_group.parent
+    assert_equal "top_right", image_item["data-fp-placement"]
+    assert_equal "md", image_item["data-fp-inset"]
     refute_includes header.to_html, "Share"
     refute_includes header.to_html, "RELEASE DATE"
     refute_select "#presskits-cover-hero"

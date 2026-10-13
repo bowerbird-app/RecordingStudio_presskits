@@ -9,7 +9,7 @@
     class: grid_card_classes,
     data: grid_card_data
   ) do %>
-    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:pt-16" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" "flex items-start gap-3 @min-[640px]:pt-16" "flex w-full min-w-0 flex-col self-stretch" %>
+    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:pt-16" "@min-[640px]:hidden" "@min-[640px]:contents" "hidden" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" "flex items-start gap-3 @min-[640px]:pt-16" "flex items-center gap-2" "flex w-full min-w-0 flex-col self-stretch" %>
     <div class="<%= grid_card_row_classes %>" style="<%= font_style %>" data-cover-row>
       <%= render FlatPack::Overlay::Component.new(class: grid_card_frame_classes, data: { cover_frame: true }) do |overlay| %>
         <% overlay.with_media do %>
@@ -29,9 +29,16 @@
             data: { cover_tag: true, cover_eyebrow: true }
           ) %>
         <% end %>
-        <% if image_actions? %>
+        <% if body_actions? || image_actions? %>
           <% overlay.with_item(placement: :top_right, inset: :md) do %>
-            <%= image_actions %>
+            <div class="flex items-center gap-2" data-cover-image-actions>
+              <% if body_actions? %>
+                <div class="@min-[640px]:hidden" data-cover-edit="stacked">
+                  <%= body_actions %>
+                </div>
+              <% end %>
+              <%= image_actions if image_actions? %>
+            </div>
           <% end %>
         <% end %>
       <% end %>
@@ -117,7 +124,9 @@
               </div>
             <% end %>
             <% overlay.with_item(placement: :top_right, inset: :lg) do %>
-              <%= body_actions %>
+              <div class="hidden @min-[640px]:contents" data-cover-edit="wide">
+                <%= body_actions %>
+              </div>
             <% end %>
           <% end %>
         <% else %>
