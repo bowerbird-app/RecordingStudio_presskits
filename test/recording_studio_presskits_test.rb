@@ -60,14 +60,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.15"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.8"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.224"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.3"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.3"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_lists", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_location", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
@@ -81,16 +81,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.224"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
@@ -402,11 +402,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "set_audience!"
     assert_includes readme, "manage_role: :edit"
     assert_includes readme, "v0.6.0"
-    assert_includes readme, "tag: \"v2.1.0\""
-    assert_includes readme, "tag: \"v0.2.7\""
+    assert_includes readme, "tag: \"v2.2.0\""
+    assert_includes readme, "tag: \"v0.3.0\""
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "v0.8.0"
-    assert_includes readme, "tag: \"v0.4.5\""
+    assert_includes readme, "tag: \"v0.5.0\""
     assert_includes readme, "tag: \"v0.1.224\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
