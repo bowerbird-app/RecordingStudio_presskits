@@ -2,7 +2,7 @@
 
 module RecordingStudioPresskits
   module Cover
-    class Component < ViewComponent::Base # rubocop:disable Metrics/ClassLength
+    class Component < ViewComponent::Base
       include RecordingStudioCompany::DisplayHelper if defined?(RecordingStudioCompany::DisplayHelper)
       include RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
       include Byline

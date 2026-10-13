@@ -20,6 +20,15 @@ module RecordingStudioPresskits
 
         nil
       end
+
+      # Callers pass the section as `recording:`. The Recording Studio API
+      # passes it on `context` instead. Prefer the explicit recording.
+      def named_recording(recording: nil, context: nil)
+        return recording if recording.present?
+        return context.recording if context.respond_to?(:recording)
+
+        nil
+      end
     end
   end
 end

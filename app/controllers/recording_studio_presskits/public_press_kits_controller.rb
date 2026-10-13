@@ -16,15 +16,7 @@ module RecordingStudioPresskits
       set_public_actor
       @press_kit_recording = @parent_recording
       @press_kit = @parent_recordable
-      @presskits_presentation = Visibility.presentation_for(
-        actor: public_actor,
-        kit: @press_kit_recording,
-        purpose: :public
-      )
-      @presskits_preview_reason = Visibility.preview_reason_for(
-        @press_kit_recording,
-        actor: public_actor
-      )
+      assign_public_presentation
       @section_recordings = sections_for_presentation
     end
 
@@ -34,6 +26,18 @@ module RecordingStudioPresskits
       return unless defined?(Current) && Current.respond_to?(:actor=)
 
       Current.actor = respond_to?(:current_user, true) ? current_user : nil
+    end
+
+    def assign_public_presentation
+      @presskits_presentation = Visibility.presentation_for(
+        actor: public_actor,
+        kit: @press_kit_recording,
+        purpose: :public
+      )
+      @presskits_preview_reason = Visibility.preview_reason_for(
+        @press_kit_recording,
+        actor: public_actor
+      )
     end
 
     def public_actor
