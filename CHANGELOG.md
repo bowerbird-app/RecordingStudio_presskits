@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - That string sits on `#presskits-public-page`, `#presskits-kit-embed`, `#presskits-owner-preview`, the audience preview (`#presskits-public-preview`), and `#presskits-editor-preview` (the header card and the section cards). It does not sit on `<html>`.
 - Editor chrome keeps Flatpack's primary. The toolbar, page nav, header form, and tabs are outside the preview wrapper. Section edit, order, and remove, the empty-section action, and the header FAB use `presskits-neutral-controls`, which restores the theme's primary tokens.
 - Layouts that render a kit link `recording_studio_presskits/brand_buttons`.
+- The **Press kit** pill on the cover is white (`#FFFFFF`) with dark text (`#111827`) on every page. It does not use the brand colour. **View** and other primary buttons still do.
 - Version `0.44.0`
 
 ### Upgrade notes

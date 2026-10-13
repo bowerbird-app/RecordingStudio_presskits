@@ -10,6 +10,8 @@ The same string is on `#presskits-editor-preview` (header card and section cards
 
 Editor chrome stays on Flatpack. Toolbar, page nav, the header form, and tabs are outside those wrappers. Section edit, order, and remove, the empty-section action, and the header FAB use `presskits-neutral-controls`, which puts Flatpack's primary tokens back.
 
+The **Press kit** pill on the cover is white (`#FFFFFF`) with dark text (`#111827`). It does not follow the brand. **View** and other primary buttons still do.
+
 ## 0.43.0
 
 Run the new migration. It drops `cover_style`, `cover_color`, and `cover_text_color` from `recording_studio_press_kits` and adds nullable `brand_color` and `font_family`. Nothing is copied across. A kit that should keep a colour needs `brand_color` written again.

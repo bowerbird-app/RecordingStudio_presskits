@@ -85,7 +85,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, ">Table<"
   end
 
-  test "card view paints the kit brand on the pill and the view button" do
+  test "card view paints the kit brand on the view button and keeps a white pill" do
     kit = record_kit("Spring launch")
     @root.revise(kit) { |press_kit| press_kit.brand_color = "#DB2777" }
     sign_in @user
@@ -99,7 +99,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes cover["style"], "--button-primary-background-color: #DB2777"
     assert_includes cover["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#DB2777')}"
     pill = css_select("[data-brand-color='#DB2777'] [data-cover-eyebrow]").first
-    assert_includes pill["style"], "background-color: #DB2777"
+    assert_includes pill["style"], "background-color: #FFFFFF"
+    assert_includes pill["style"], "color: #111827"
+    assert_includes pill["style"], "--badge-primary-background-color: #FFFFFF"
+    assert_includes pill["style"], "--badge-primary-text-color: #111827"
+    refute_includes pill["style"], "#DB2777"
     assert_select "[data-cover-fallback]"
     refute_includes response.body, "https://cdn.example/cover.jpg"
   end

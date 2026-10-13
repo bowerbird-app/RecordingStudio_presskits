@@ -10,6 +10,9 @@ module RecordingStudioPresskits
       include GridCard
 
       SIZES = %i[card].freeze
+      # The cover label stays a white chip. Primary buttons use the brand; this pill does not.
+      PILL_BACKGROUND = "#FFFFFF"
+      PILL_TEXT = Contrast::DARK
 
       def initialize(recording: nil, title: nil, description: nil, subtitle: nil, brand_color: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
                      font_family: nil, size: :card, href: nil, id: nil, heading: :h2, add_to_list: true)
@@ -98,10 +101,10 @@ module RecordingStudioPresskits
 
       def pill_declarations
         [
-          "background-color: #{brand_color}",
-          "color: #{brand_text_color}",
-          "--badge-primary-background-color: #{brand_color}",
-          "--badge-primary-text-color: #{brand_text_color}",
+          "background-color: #{PILL_BACKGROUND}",
+          "color: #{PILL_TEXT}",
+          "--badge-primary-background-color: #{PILL_BACKGROUND}",
+          "--badge-primary-text-color: #{PILL_TEXT}",
           "--badge-primary-border-color: transparent"
         ]
       end
