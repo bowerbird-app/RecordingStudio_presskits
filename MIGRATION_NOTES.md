@@ -1,5 +1,16 @@
 # Upgrade notes
 
+## 0.44.0
+
+No press kit migration. Embargo rows belong to `recording_studio_embargo` 0.1.0.
+
+This repo vendors that gem at `vendor/gems/recording_studio_embargo` (tag `v0.1.0`, commit `8d1e787`) and loads it with `path:`. Switch the Gemfile to `git: "https://github.com/bowerbird-app/RecordingStudio_embargo.git", tag: "v0.1.0"` once CI can reach the private repo. Hosts run `bin/rails generate recording_studio_embargo:migrations` and `bin/rails db:migrate`. That creates `recording_studio_embargo_embargoes` and a partial unique index so a recording has one live embargo child. Mount `RecordingStudioEmbargo::Engine`.
+
+Press kits include `RecordingStudio::Capabilities::Embargo.to` for `presskits.kit_view_full` and `presskits.kit_download`. `RecordingStudioEmbargo.restriction_for` returns `:allow`, `:deny`, or `:not_applicable`. Publishable still wins for a kit that is not live. `:deny` uses the kit's visibility fallback (`preview` or `hidden`) and blocks package generate, fetch, and status through `downloadable_available_for?`. Downloadable already calls that hook from `Authorization.allowed?` after the standing audience check, on show, create, and status, so that gem does not need a code change. A signed Active Storage URL that was already issued stays valid until it expires. `:not_applicable` after `lifts_at` needs no job.
+
+Early access is one switch on the embargo gem. It allows an actor who already satisfies Accessible's `:granted` audience for that action. Download's granted roles stay `download`, `edit`, and `admin`, so a view grant does not include the zip. The toolbar uses `render_embargo_button`. The editor is the gem's screen. Override `recording_studio_embargo.editor.subtitle`, `enable_help`, and `early_access_help` to change its copy. The public **Embargoed** badge stays in `recording_studio_presskits.embargo`. Copying a kit runs `RecordingStudioEmbargo.attributes_for_duplicate`, which clears the window.
+
+
 ## 0.43.0
 
 Run the new migration. It drops `cover_style`, `cover_color`, and `cover_text_color` from `recording_studio_press_kits` and adds nullable `brand_color` and `font_family`. Nothing is copied across. A kit that should keep a colour needs `brand_color` written again.

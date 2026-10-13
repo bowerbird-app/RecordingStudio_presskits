@@ -130,6 +130,84 @@ class VisibilityTest < Minitest::Test
                  RecordingStudioPresskits::Visibility.fragment_cache_key(kit, :preview)
   end
 
+  def test_unpublished_kit_stays_unavailable_while_an_embargo_would_deny
+    kit = FakeKit.new("kit-1", "PressKit", "rec-1", false)
+
+    result = RecordingStudioPresskits::Embargo.stub(:denies?, true) do
+      RecordingStudioPresskits::Visibility.presentation_for(actor: nil, kit: kit)
+    end
+
+    assert_equal :unavailable, result
+  end
+
+  def test_active_embargo_denial_uses_the_embargo_fallback
+    kit = FakeKit.new("kit-1", "PressKit", "rec-1", true)
+
+    preview = RecordingStudioPresskits::Embargo.stub(:denies?, true) do
+      RecordingStudioPresskits::Embargo.stub(:restricted_presentation, :preview) do
+        RecordingStudioPresskits::Visibility.presentation_for(actor: nil, kit: kit)
+      end
+    end
+    hidden = RecordingStudioPresskits::Embargo.stub(:denies?, true) do
+      RecordingStudioPresskits::Embargo.stub(:restricted_presentation, :hidden) do
+        RecordingStudioPresskits::Visibility.presentation_for(actor: nil, kit: kit)
+      end
+    end
+
+    assert_equal :preview, preview
+    assert_equal :hidden, hidden
+  end
+
+  def test_early_access_allow_keeps_the_standing_full_presentation
+    kit = FakeKit.new("kit-1", "PressKit", "rec-1", true)
+
+    result = RecordingStudioPresskits::Embargo.stub(:denies?, false) do
+      RecordingStudioPresskits::Visibility.stub(:authorized_full?, true) do
+        RecordingStudioPresskits::Visibility.presentation_for(actor: :journalist, kit: kit)
+      end
+    end
+
+    assert_equal :full, result
+  end
+
+  def test_full_response_is_private_while_an_embargo_is_active
+    kit = FakeKit.new("kit-1", "PressKit", "rec-1", true)
+    response = FakeResponse.new
+
+    RecordingStudioPresskits::Embargo.stub(:active?, true) do
+      assert_equal :full, RecordingStudioPresskits::Visibility.apply_public_response!(
+        presentation: :full,
+        response: response,
+        kit: kit
+      )
+    end
+
+    assert_equal 200, response.status
+    assert_equal "private, no-store", response.headers["Cache-Control"]
+  end
+
+  def test_fragment_cache_key_includes_the_embargo_boundary
+    kit = FakeKit.new("kit-1", "PressKit", "rec-1", true)
+
+    key = RecordingStudioPresskits::Embargo.stub(:active?, true) do
+      RecordingStudioPresskits::Embargo.stub(:cache_boundary, "2026-10-20T09:00:00Z") do
+        RecordingStudioPresskits::Visibility.fragment_cache_key(kit, :full, actor: nil)
+      end
+    end
+
+    assert_equal ["presskits", "kit-1", :full, "rec-1", "embargo", "2026-10-20T09:00:00Z", "anonymous"], key
+  end
+
+  def test_preview_reason_is_embargoed_when_the_embargo_denies_the_actor
+    kit = FakeKit.new("kit-1", "PressKit", "rec-1", true)
+
+    reason = RecordingStudioPresskits::Embargo.stub(:denies?, true) do
+      RecordingStudioPresskits::Visibility.preview_reason_for(kit, actor: nil)
+    end
+
+    assert_equal :embargoed, reason
+  end
+
   def test_kit_settings_blank_fallback_is_preview
     assert_equal :preview, RecordingStudioPresskits::KitSettings.fallback_for(nil)
   end

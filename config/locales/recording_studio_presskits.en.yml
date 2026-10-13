@@ -102,3 +102,6 @@ en:
         sign_in_action: "Sign in"
         register_action: "Create account"
         need_access: "You need access to view this press kit."
+    embargo:
+      badge: "Embargoed"
+      until: "Until %{when}"

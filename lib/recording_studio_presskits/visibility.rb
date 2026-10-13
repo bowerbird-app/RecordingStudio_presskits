@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/visibility/host"
+require "recording_studio_presskits/visibility/caching"
 
 module RecordingStudioPresskits
   # One resolver for who sees a kit. Controllers, views, listings, cards, and
@@ -20,6 +21,8 @@ module RecordingStudioPresskits
     }.freeze
     PRIVATE_CACHE = "private, no-store"
 
+    extend Caching
+
     class << self
       def register_action!
         return unless defined?(RecordingStudioAccessible)
@@ -32,13 +35,10 @@ module RecordingStudioPresskits
       def presentation_for(actor:, kit:, purpose: :public)
         recording = recording_for(kit)
         return :unavailable if recording.blank?
+        return draft_presentation(actor, recording, purpose) unless published?(recording)
 
-        unless published?(recording)
-          return :full if purpose.to_sym == :editor && editor?(actor, recording)
-
-          return :unavailable
-        end
-
+        denied = Embargo.denies?(recording: recording, action: ACTION, actor: actor)
+        return Embargo.restricted_presentation(recording) if denied
         return :full if authorized_full?(actor, recording)
 
         policy_for(recording).fetch(:fallback)
@@ -46,22 +46,6 @@ module RecordingStudioPresskits
 
       def discoverable?(actor:, kit:)
         %i[full preview].include?(presentation_for(actor: actor, kit: kit, purpose: :public))
-      end
-
-      def apply_public_response!(presentation:, response:)
-        resolved = normalize_presentation(presentation)
-        response.set_header("Cache-Control", PRIVATE_CACHE) unless resolved == :full
-        # Publishable renders this page through RendersPublicPage: the inner
-        # controller response is discarded, and a RoutingError during view
-        # render is rebuilt by the exceptions app (losing Cache-Control).
-        # Set 404 on the live response and skip kit HTML instead.
-        response.status = 404 unless %i[full preview].include?(resolved)
-        resolved
-      end
-
-      def fragment_cache_key(kit, presentation)
-        recording = recording_for(kit)
-        ["presskits", recording&.id, normalize_presentation(presentation), recording&.recordable_id]
       end
 
       def audience_options_for(recording)
@@ -108,15 +92,30 @@ module RecordingStudioPresskits
         Host.site_name
       end
 
-      def preview_reason_for(recording)
+      def preview_reason_for(recording, actor: nil)
+        return :embargoed if Embargo.denies?(recording: recording, action: ACTION, actor: actor)
+
         audience = effective_audience(recording)
         audience == :signed_in ? :signed_in : :granted
+      end
+
+      def edits?(actor, recording)
+        return false unless defined?(RecordingStudioAccessible)
+        return false if actor.blank? || recording.blank?
+
+        RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :edit)
       end
 
       private
 
       def policy_for(recording)
         { fallback: KitSettings.fallback_for(recording) }
+      end
+
+      def draft_presentation(actor, recording, purpose)
+        return :full if purpose.to_sym == :editor && editor?(actor, recording)
+
+        :unavailable
       end
 
       def published?(recording)
@@ -144,3 +143,5 @@ module RecordingStudioPresskits
     end
   end
 end
+
+require "recording_studio_presskits/embargo"

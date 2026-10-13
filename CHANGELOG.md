@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-10-13
+
+### Added
+- Press kits depend on `recording_studio_embargo` 0.1.0 and opt into `RecordingStudio::Capabilities::Embargo` for `presskits.kit_view_full` and `presskits.kit_download`.
+- The kit editor toolbar calls `render_embargo_button` after **Downloads**. The button opens the embargo gem's editor (enable, release time, time zone, and one early-access switch). Default English copy stays in that gem. Hosts can override `recording_studio_embargo.editor.subtitle`, `enable_help`, and `early_access_help`.
+- While an embargo is active, `Visibility.presentation_for` still returns `:full`, `:preview`, `:hidden`, or `:unavailable`. An unpublished kit stays unavailable. Early access follows Accessible's `:granted` audience for each action, so a view grant does not include download. Everyone else gets the kit's own visibility fallback. A preview shows an **Embargoed** badge, the release time, and no cover image, sections, or download.
+- Public responses, `KitQuery.discoverable_for`, fragment cache keys, and API payloads follow that same decision. Download generate, fetch, and status stay behind `downloadable_available_for?`, including a zip that already exists. After `lifts_at`, the hold ends on the next request. Copying a kit clears the window.
+- Version `0.44.0`
+
+### Upgrade notes
+- Bump to `0.44.0`. There is no press kit migration. Hosts install `recording_studio_embargo` and run its migration (`recording_studio_embargo_embargoes`, plus the one-child index on recordings). This repo vendors tag `v0.1.0` at `vendor/gems/recording_studio_embargo` until CI can fetch the private git source.
+- Mount `RecordingStudioEmbargo::Engine` (the dummy uses `/recording_studio_embargo`). The toolbar button needs that mount. Preview and hidden stay on the kit's visibility screen.
+
+
 ## [0.43.0] - 2026-10-13
 
 ### Added
