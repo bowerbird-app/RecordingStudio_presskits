@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.40.0
+
+No migration and no new card content. `:card` now switches on its own width, not the viewport.
+
+`Cover::Component` at `:card` is a container (`@container`). Below 640px it stays the stacked grid card: cover or colour on top (`aspect-[430/368]`), **Press kit** pill, company and heart, title, subtitle, description, and **View** at the bottom when `href` is set. At 640px and wider, the same elements sit in a row. The cover is the left half, full height, at least as tall as it is wide (`min-h-[50cqw]`). The pill stays on the cover. The body is the right half. The company row and heart stay at the top. **View** uses `mt-auto`, so it stays at the bottom right.
+
+The kit editor header renders that same `:card` with no `href` and `heading: :h1`, so the wide row replaces the colour hero on the edit page and the kit name stays the page heading. Index cards stay `h2`. **Edit heading**, **Cover colours**, and **Cover image** stay on the header FAB. The short description shows in the card body. Kit location stays on the public `:hero` and on the header form. Section editing is unchanged. `:hero` stays on the public kit and owner preview. `:preview` stays the 9/16 tile on the header screen.
+
+Rebuild Tailwind so the container-query utilities generate. Tailwind 4 includes `@container`. A host on an older Tailwind needs a small scoped `@container (min-width: 640px)` rule with the same layout. A grid cell narrower than 640px keeps the stacked card.
+
 ## 0.39.0
 
 No migration and no new gem. Press kits still does not depend on press centers.

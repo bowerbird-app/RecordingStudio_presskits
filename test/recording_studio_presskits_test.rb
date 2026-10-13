@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.39.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.40.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -349,6 +349,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme_source, "This Rails app exists to prove Recording Studio Press Kits"
     assert_includes readme_source, "/recording_studio"
     assert_includes readme_source, "redirects to the press kit index"
+    assert_includes readme_source, "full width of the preview"
+    assert_includes readme_source, "640px"
     assert_includes readme_source, "Visibility (eye icon"
     assert_includes readme_source, "Downloads (Heroicons `arrow-down-tray`"
     assert_includes readme_source, "/visibility/edit"
@@ -363,6 +365,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "## Displaying press kits in a host"
     assert_includes readme, "RecordingStudioPresskits::Cover::Component.new"
     assert_includes readme, "size: :card"
+    assert_includes readme, "@container"
+    assert_includes readme, "640px"
+    assert_includes readme, "The kit editor header is this card with no `href`"
     assert_includes readme, "PressKits::PublicShowComponent.new"
     assert_includes readme, "PressKits::PreviewShowComponent.new"
     assert_includes readme, "KitQuery.for_root(root_recording)"
@@ -657,6 +662,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "hero_copy_classes"
     grid_card = File.read(File.expand_path("../lib/recording_studio_presskits/cover/grid_card.rb", __dir__))
     assert_includes grid_card, "cover_card: true"
+    assert_includes grid_card, "@container"
+    assert_includes grid_card, "@min-[640px]:flex-row"
+    assert_includes grid_card, "@min-[640px]:w-1/2"
+    assert_includes grid_card, "@min-[640px]:min-h-[50cqw]"
+    assert_includes grid_card, "aspect-[430/368]"
+    assert_includes grid_card, "flex flex-1 flex-col px-8 pt-7"
+    assert_includes cover_html, "grid_card_row_classes"
+    assert_includes cover_html, "data-cover-row"
+    assert_includes cover_html, "@min-[640px]:flex-row"
+    assert_includes cover_html, "@min-[640px]:rounded-tr-none"
+    assert_includes cover_html, "flex flex-1 flex-col px-8 pt-7"
+    refute_includes cover_html.split("<% if card? %>").first, "@min-[640px]"
+    preview_markup = cover_html.split('data-recording-studio-presskits--cover-preview-target="surface"').last
+    refute_includes preview_markup, "@min-[640px]"
     assert_includes cover_html, "data-cover-fallback"
     assert_includes cover_html, "data-cover-list"
     assert_includes cover_html, "recording_studio_add_to_list"
@@ -668,7 +687,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "data-cover-subtitle"
     assert_includes cover_html, "gap-[14px]"
     assert_includes cover_html, "mt-auto"
-    assert_includes cover_html, "flex flex-1 flex-col"
+    refute_includes index, "featured_card?"
+    refute_includes index, "data-cover-feature"
+    refute_includes index, "featured_recording"
     assert_includes index, "align: :stretch"
     refute_includes index, "align: :start"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
@@ -715,6 +736,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'text: "Save"'
     assert_includes kit_header, 'id="presskits-kit-header"'
     assert_includes kit_header, "Cover::Component"
+    assert_includes kit_header, "size: :card"
+    assert_includes kit_header, "heading: :h1"
+    refute_includes kit_header, "size: :hero"
     assert_includes kit_header, "FlatPack::Fab::Component"
     assert_includes kit_header, "contained: true"
     assert_includes kit_header, "position: :top_right"

@@ -6,7 +6,8 @@
 >
   <%= render RecordingStudioPresskits::Cover::Component.new(
     recording: @press_kit_recording,
-    size: :hero
+    size: :card,
+    heading: :h1
   ) %>
 
   <%= render FlatPack::Fab::Component.new(
