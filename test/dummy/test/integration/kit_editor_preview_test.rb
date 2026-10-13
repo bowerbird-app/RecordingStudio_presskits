@@ -56,10 +56,11 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes header["class"], "-m-4"
     refute_includes header["class"], "pr-20"
     preview = css_select("#presskits-editor-preview").first
-    assert_includes preview["class"], "overflow-hidden"
-    assert_includes preview["class"], "rounded-[var(--radius-lg)]"
+    assert_includes preview["class"], "gap-6"
+    refute_includes preview["class"], "overflow-hidden"
     refute_includes preview["class"], "md:p-4"
     refute_includes preview["class"], "lg:p-6"
+    assert_select "#presskits-editor-sections [data-section-card]"
     refute_select "#presskits-cover-hero"
     card = css_select("#presskits-kit-header [data-cover-card]").first
     assert_includes card["class"], "@container"
@@ -70,8 +71,8 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes card.to_html, "fp-display"
     sections = css_select("#presskits-editor-sections").first
     assert_includes sections["class"], "flex"
+    assert_includes sections["class"], "gap-6"
     refute_includes sections["class"], "p-5"
-    refute_includes sections["class"], "gap-6"
     refute_includes sections["class"], "md:p-8"
     refute_includes sections["class"], "lg:p-10"
     assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
@@ -83,8 +84,12 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"
     assert_select "#presskits-section-picker-modal"
-    assert_includes preview.parent["class"], "rounded-[var(--radius-lg)]"
-    assert_includes preview.parent["class"], "bg-[var(--card-background-color)]"
+    header_card = css_select("#presskits-kit-header [data-cover-card]").first
+    assert_includes header_card["class"], "rounded-[var(--radius-lg)]"
+    assert_includes header_card["class"], "bg-[var(--card-background-color)]"
+    empty_card = css_select("#presskits-editor-sections [data-section-card]").first
+    assert_includes empty_card["class"], "rounded-[var(--radius-lg)]"
+    assert_includes empty_card["class"], "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
     editor = css_select("[data-controller='recording-studio-presskits--editor-chrome']").first
     assert editor
     assert_includes editor["data-action"], "onPointerDown"
@@ -114,8 +119,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "lg:pt-12"
     assert_includes body["class"], "pr-20"
     refute_includes body["class"], "-m-4"
-    assert_includes body["class"], "rounded-none"
-    refute_includes body["class"], "rounded-[var(--radius-lg)]"
+    assert_includes body["class"], "rounded-[var(--radius-lg)]"
+    section_card = css_select("#presskits-section-#{section.id} [data-section-card]").first
+    assert_includes section_card["class"], "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
+    assert_includes section_card["class"], "bg-[var(--card-background-color)]"
     refute_includes body["class"], "hover:outline-[var(--color-primary)]"
     assert_select "#presskits-section-#{section.id} .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     section_fab = css_select("#presskits-section-#{section.id} .fp-fab").first

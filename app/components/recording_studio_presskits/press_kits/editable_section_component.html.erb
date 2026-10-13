@@ -1,4 +1,5 @@
 <%= helpers.turbo_frame_tag section_id do %>
+  <%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>
   <section
     id="<%= section_id %>-body"
     class="<%= region_classes %>"
@@ -64,6 +65,7 @@
       ) %>
     <% end %>
   </section>
+  <% end %>
 
   <%= render FlatPack::Modal::Component.new(
     id: picker_modal_id,
