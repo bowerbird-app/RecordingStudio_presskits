@@ -8,6 +8,8 @@ On the kit editor, the cover card edits the kit title, subtitle, and short descr
 
 The header screen is kit location, **Brand**, and **Cover image**. The header FAB is **Location**, **Style**, and **Cover image**. **Style** still opens `#presskits-header-brand`. **Cover image** is still its own upload and remove. Index cards, the public kit, and the owner preview do not pass `inline_path`, so they keep the static title, subtitle, and clamped short description.
 
+On every cover card, the kit location sits under the short description. A blank short description puts it under the title and subtitle. The limited preview leaves the short description off, so location sits under the title and subtitle there. A Location section is unchanged: those places stay inside the section, not on the card.
+
 ## 0.43.0
 
 Run the new migration. It drops `cover_style`, `cover_color`, and `cover_text_color` from `recording_studio_press_kits` and adds nullable `brand_color` and `font_family`. Nothing is copied across. A kit that should keep a colour needs `brand_color` written again.

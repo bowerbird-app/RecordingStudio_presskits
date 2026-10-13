@@ -43,15 +43,6 @@
               </div>
             <% end %>
 
-            <% if location_recordable %>
-              <div class="flex items-center gap-2 text-sm" data-cover-location>
-                <% if location_recordable.resolved_icon.present? %>
-                  <%= render FlatPack::Shared::IconComponent.new(name: location_recordable.resolved_icon, size: :sm) %>
-                <% end %>
-                <span><%= location_recordable.display_name %></span>
-              </div>
-            <% end %>
-
             <% if inline_edit? %>
               <%= render RecordingStudioPresskits::PressKits::HeaderInlineCopyComponent.new(
                 recording: @recording,
@@ -69,6 +60,15 @@
               <% if description.present? %>
                 <p class="line-clamp-3 text-base leading-6 text-[var(--surface-muted-content-color)]" data-cover-description><%= description %></p>
               <% end %>
+            <% end %>
+
+            <% if location_recordable %>
+              <div class="flex items-center gap-2 text-sm" data-cover-location>
+                <% if location_recordable.resolved_icon.present? %>
+                  <%= render FlatPack::Shared::IconComponent.new(name: location_recordable.resolved_icon, size: :sm) %>
+                <% end %>
+                <span><%= location_recordable.display_name %></span>
+              </div>
             <% end %>
           </div>
           <% if show_add_to_list? %>

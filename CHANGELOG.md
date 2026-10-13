@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - On the kit editor, the kit title, subtitle, and short description use `FlatPack::InlineEdit::Component` (`mode: :text`) on the cover card. Hover shows they can be edited. Click edits in place. An empty title shows **Add a title** and cannot be saved empty. An empty subtitle shows **Add a subtitle**. An empty short description shows **Add a short description** and stays clickable. Each save PATCHes one field on the header update path. A request that includes only one leaves the others, including brand and location.
 - The header FAB's first action is **Location**. It opens the header screen at the kit location. **Style** and **Cover image** stay. The header screen is kit location, **Brand**, and **Cover image**.
+- Kit location on the cover card sits under the short description. A blank short description puts it under the title and subtitle. Index cards, the public kit, the owner preview, the audience preview, and the kit editor use that order.
 - Version `0.44.0`
 
 ### Upgrade notes

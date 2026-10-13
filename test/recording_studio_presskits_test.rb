@@ -660,6 +660,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "data-cover-company"
     assert_includes cover_html, "data-cover-location"
     assert_includes cover_html, "location_recordable.display_name"
+    assert_operator cover_html.index("data-cover-description"), :<, cover_html.index("data-cover-location")
+    assert_operator cover_html.index("data-cover-company"), :<, cover_html.index("data-cover-location")
     assert_includes cover_html, "pill_style"
     company = File.read(File.expand_path("../lib/recording_studio_presskits/cover/company.rb", __dir__))
     assert_includes company, "RecordingStudioCompany.company"

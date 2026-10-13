@@ -45,6 +45,7 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
 
   test "hero shows the root company and kit location on the public kit and editor" do
     kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
     create_company!("Harbour Studio")
     create_location!(kit, title: "Harbour Gallery", locality: "Sydney")
     publish_kit!(kit)
@@ -55,6 +56,8 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-cover [data-cover-location]", text: /Harbour Gallery/
     hero = css_select("#presskits-kit-cover").first.to_html
     assert_operator hero.index("Harbour Studio"), :<, hero.index("Harbour Gallery")
+    assert_operator hero.index("data-cover-description"), :<, hero.index("data-cover-location")
+    assert_operator hero.index("data-cover-title"), :<, hero.index("data-cover-location")
 
     sign_in @user
     switch_to_root(@root)
@@ -62,6 +65,9 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#presskits-kit-header [data-cover-company]", text: /Harbour Studio/
     assert_select "#presskits-kit-header [data-cover-location]", text: /Harbour Gallery/
+    header = css_select("#presskits-kit-header").first.to_html
+    assert_operator header.index("data-cover-description"), :<, header.index("data-cover-location")
+    assert_operator header.index("data-cover-title"), :<, header.index("data-cover-location")
   end
 
   test "header editor shows location search fields and can create revise and clear a place" do
