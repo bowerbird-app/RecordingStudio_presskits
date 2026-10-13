@@ -1,7 +1,8 @@
 <%# Public kit page: a document and the kit, with no page nav and no TopNav. %>
 <% presentation = RecordingStudioPresskits::Visibility.apply_public_response!(
      presentation: @presskits_presentation,
-     response: response
+     response: response,
+     kit: @parent_recording || @press_kit_recording
    ) %>
 <% if %i[full preview].include?(presentation) %>
 <!DOCTYPE html>

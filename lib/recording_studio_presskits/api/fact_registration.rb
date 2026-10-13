@@ -14,7 +14,7 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::Fact",
           operations: %i[index show create update destroy],
-          serializer: ->(recordable, **) { FactPayload.for(recordable) },
+          serializer: ->(recordable, context: nil, **) { FactPayload.for(recordable, context: context) },
           output_keys: fact_keys,
           writable_attributes: fact_keys
         )
@@ -35,8 +35,9 @@ module RecordingStudioPresskits
       end
 
       def facts_section_serializer
-        lambda { |recordable, recording: nil, **|
-          FactPayload.for_recording(recording || RecordingStudio::Recording.find_by(recordable: recordable))
+        lambda { |recordable, context: nil, **|
+          recording = context&.recording || RecordingStudio::Recording.find_by(recordable: recordable)
+          FactPayload.for_recording(recording, context: context)
         }
       end
     end

@@ -2,7 +2,7 @@
 
 module RecordingStudioPresskits
   module Cover
-    class Component < ViewComponent::Base
+    class Component < ViewComponent::Base # rubocop:disable Metrics/ClassLength
       include RecordingStudioCompany::DisplayHelper if defined?(RecordingStudioCompany::DisplayHelper)
       include RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
       include Byline
@@ -12,7 +12,8 @@ module RecordingStudioPresskits
       SIZES = %i[card preview hero].freeze
 
       def initialize(recording: nil, title: nil, description: nil, subtitle: nil, cover_color: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
-                     cover_style: nil, cover_text_color: nil, size: :card, href: nil, id: nil, heading: :h2)
+                     cover_style: nil, cover_text_color: nil, size: :card, href: nil, id: nil,
+                     heading: :h2, show_image: true)
         super()
         @recording = recording
         @title = title
@@ -25,6 +26,7 @@ module RecordingStudioPresskits
         @href = href
         @id = id
         @title_tag = %i[h1 h2].include?(heading&.to_sym) ? heading.to_sym : :h2
+        @show_image = show_image
       end
 
       def title

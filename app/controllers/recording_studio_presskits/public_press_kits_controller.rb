@@ -21,7 +21,10 @@ module RecordingStudioPresskits
         kit: @press_kit_recording,
         purpose: :public
       )
-      @presskits_preview_reason = Visibility.preview_reason_for(@press_kit_recording)
+      @presskits_preview_reason = Visibility.preview_reason_for(
+        @press_kit_recording,
+        actor: public_actor
+      )
       @section_recordings = sections_for_presentation
     end
 

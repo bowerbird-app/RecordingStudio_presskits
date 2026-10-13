@@ -15,8 +15,8 @@ module RecordingStudioPresskits
       private
 
       def location_section_serializer
-        lambda { |_recordable, recording: nil, **|
-          { locations: LocationPayload.for_recording(recording) }
+        lambda { |_recordable, context: nil, **|
+          { locations: LocationPayload.for_recording(context&.recording, context: context) }
         }
       end
     end

@@ -19,6 +19,10 @@ gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashab
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
 gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"
+# Mirrors bowerbird-app/RecordingStudio_embargo v0.1.0 (commit 8d1e787).
+# Switch to the git source once CI can reach the private repo:
+# gem "recording_studio_embargo", git: "https://github.com/bowerbird-app/RecordingStudio_embargo.git", tag: "v0.1.0"
+gem "recording_studio_embargo", path: "../../vendor/gems/recording_studio_embargo"
 
 # Root switcher for the top nav
 gem "recording_studio_root_switchable", github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"

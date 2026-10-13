@@ -34,9 +34,9 @@ module RecordingStudioPresskits
       end
 
       def credit_line_serializer
-        lambda { |recordable, recording: nil, **|
-          recording ||= RecordingStudio::Recording.find_by(recordable: recordable)
-          CreditLinePayload.for(recording)
+        lambda { |recordable, context: nil, **|
+          recording = context&.recording || RecordingStudio::Recording.find_by(recordable: recordable)
+          CreditLinePayload.for(recording, context: context)
         }
       end
 

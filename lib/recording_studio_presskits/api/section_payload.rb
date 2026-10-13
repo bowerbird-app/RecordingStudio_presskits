@@ -7,13 +7,21 @@ require "recording_studio_presskits/api/location_payload"
 module RecordingStudioPresskits
   module Api
     class SectionPayload
-      def self.for(recordable, recording = nil)
+      def self.for(recordable, recording = nil, context: nil)
+        recording ||= context.recording if context.respond_to?(:recording)
         recording ||= RecordingStudio::Recording.find_by(recordable: recordable)
+        return withheld if Exposure.withhold?(context, recording)
+
         content = recording && KitQuery.section_content(recording)
         payload = headings(recordable, content)
         extras = extras_for(content)
         extras ? payload.merge(extras) : payload
       end
+
+      def self.withheld
+        { title: nil, subtitle: nil, content_type: nil, content_id: nil }
+      end
+      private_class_method :withheld
 
       def self.extras_for(content)
         case content&.recordable_type

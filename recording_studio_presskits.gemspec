@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "recording_studio_company", "~> 0.3"
   spec.add_dependency "recording_studio_downloadable", "~> 0.3"
   spec.add_dependency "recording_studio_duplicatable", "~> 0.4"
+  spec.add_dependency "recording_studio_embargo", "~> 0.1.0"
   spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"
   spec.add_dependency "recording_studio_lists", "~> 0.5"
   spec.add_dependency "recording_studio_location", "~> 0.4"

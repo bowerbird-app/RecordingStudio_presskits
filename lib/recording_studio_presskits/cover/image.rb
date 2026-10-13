@@ -8,9 +8,15 @@ module RecordingStudioPresskits
       end
 
       def cover_image_url
-        return if preview?
+        return if preview? || !show_cover_image?
 
         CoverImage.url_for(@recording, helpers: helpers)
+      end
+
+      def show_cover_image?
+        return true unless instance_variable_defined?(:@show_image)
+
+        @show_image != false
       end
 
       def cover_image_alt

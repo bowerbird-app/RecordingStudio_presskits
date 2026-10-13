@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.41.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.42.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -716,6 +716,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, 'icon: "arrow-down-tray"'
     assert_includes show, "download_edit_path"
     assert_operator show.index('id: "presskits-visibility"'), :<, show.index('id: "presskits-downloads"')
+    assert_includes show, "render_embargo_button"
+    refute_includes show, 'id: "presskits-embargo"'
+    assert_operator show.index('id: "presskits-downloads"'), :<, show.index("render_embargo_button")
     assert_includes show, 'id="presskits-editor-preview"'
     assert_includes show, "KitHeaderComponent"
     assert_includes show, "EditableSectionComponent"

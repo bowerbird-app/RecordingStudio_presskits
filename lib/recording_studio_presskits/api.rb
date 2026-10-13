@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "recording_studio_presskits/api/exposure"
 require "recording_studio_presskits/api/quote_payload"
 require "recording_studio_presskits/api/fact_payload"
 require "recording_studio_presskits/api/credit_payload"
@@ -52,7 +53,7 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::PressKit",
           operations: %i[show update],
-          serializer: ->(recordable, **) { PressKitPayload.for(recordable) },
+          serializer: ->(recordable, context: nil, **) { PressKitPayload.for(recordable, context: context) },
           output_keys: %i[title description cover_style cover_color cover_text_color],
           writable_attributes: %i[cover_style cover_color cover_text_color],
           capability_actions: %i[create_section reorder_sections]
@@ -63,7 +64,9 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
-          serializer: ->(recordable, recording: nil, **) { SectionPayload.for(recordable, recording) },
+          serializer: lambda { |recordable, context: nil, **|
+            SectionPayload.for(recordable, context&.recording, context: context)
+          },
           output_keys: %i[title subtitle content_type content_id videos display facts locations],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
@@ -74,7 +77,13 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::Text",
           operations: %i[show update],
-          serializer: ->(recordable, **) { { body: recordable.body } },
+          serializer: lambda { |recordable, context: nil, **|
+            if Exposure.withhold?(context, context&.recording)
+              { body: nil }
+            else
+              { body: recordable.body }
+            end
+          },
           output_keys: %i[body],
           writable_attributes: %i[body]
         )
@@ -101,7 +110,7 @@ module RecordingStudioPresskits
       end
 
       def quote_serializer
-        ->(recordable, **) { QuotePayload.for(recordable) }
+        ->(recordable, context: nil, **) { QuotePayload.for(recordable, context: context) }
       end
 
       def register_quote_section
@@ -112,8 +121,8 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::VideoSection",
           operations: %i[index show],
-          serializer: lambda { |_recordable, recording: nil, **|
-            { videos: VideoPayload.for_recording(recording) }
+          serializer: lambda { |_recordable, context: nil, **|
+            { videos: VideoPayload.for_recording(context&.recording, context: context) }
           },
           output_keys: %i[videos]
         )
