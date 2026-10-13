@@ -683,6 +683,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes grid_card, "flex flex-1 flex-col px-8 pt-7"
     assert_includes grid_card, "def grid_card_copy_classes"
     assert_includes grid_card, "flex items-start gap-3 @min-[640px]:pt-16"
+    assert_includes grid_card, "flex items-start gap-3 pt-12 @min-[640px]:pt-16"
+    assert_includes grid_card, "body_actions?"
     refute_includes grid_card[/def grid_card_body_classes.*?end/m], "@min-[640px]:pt-"
     assert_includes cover_html, "grid_card_copy_classes"
     assert_includes cover_html, "data-cover-copy"
@@ -781,6 +783,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover, "image_actions?"
     assert_includes cover, "with_item(placement: :top_left, inset: :md)"
     assert_includes cover, "with_item(placement: :top_right, inset: :md)"
+    assert_includes cover, "with_item(placement: :top_right, inset: :lg)"
+    assert_includes cover, "data: { cover_body: true }"
+    refute_includes cover, "flex-col-reverse"
     refute_includes cover, "inset-x-0 top-0"
     refute_includes cover, "left-5 top-5"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))

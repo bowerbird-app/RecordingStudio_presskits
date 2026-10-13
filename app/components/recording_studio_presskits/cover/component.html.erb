@@ -9,7 +9,7 @@
     class: grid_card_classes,
     data: grid_card_data
   ) do %>
-    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:pt-16" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" "flex items-start gap-3 @min-[640px]:pt-16" %>
+    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:pt-16" "pt-12" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" "flex items-start gap-3 @min-[640px]:pt-16" "flex items-start gap-3 pt-12 @min-[640px]:pt-16" "flex w-full min-w-0 flex-col self-stretch" %>
     <div class="<%= grid_card_row_classes %>" style="<%= font_style %>" data-cover-row>
       <%= render FlatPack::Overlay::Component.new(class: grid_card_frame_classes, data: { cover_frame: true }) do |overlay| %>
         <% overlay.with_media do %>
@@ -36,8 +36,7 @@
         <% end %>
       <% end %>
 
-      <div class="<%= grid_card_body_classes %>">
-        <% brand_row = capture do %>
+      <% brand_row = capture do %>
         <div class="<%= grid_card_copy_classes %>" data-cover-copy<% if show_brand_row? %> data-cover-brand<% end %>>
           <div class="flex min-w-0 flex-1 flex-col gap-[14px]">
             <% if company_name.present? %>
@@ -92,32 +91,40 @@
         </div>
         <% end %>
 
-        <% if body_actions? %>
-          <%# Same row as a section: actions sit at the trailing edge, above the copy below sm. %>
-          <div class="flex flex-col-reverse gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div class="min-w-0 flex-1">
-              <%= brand_row %>
-            </div>
-            <%= body_actions %>
-          </div>
-        <% else %>
+        <% column = capture do %>
           <%= brand_row %>
+          <% if href.present? %>
+            <div class="mt-auto flex justify-end pb-8 pt-6">
+              <%= render FlatPack::Button::Component.new(
+                text: view_label,
+                icon: "arrow-right",
+                style: :primary,
+                size: :lg,
+                href: href,
+                class: "rounded-full [&>svg]:order-last",
+                data: { cover_view: true }
+              ) %>
+            </div>
+          <% end %>
         <% end %>
 
-        <% if href.present? %>
-          <div class="mt-auto flex justify-end pb-8 pt-6">
-            <%= render FlatPack::Button::Component.new(
-              text: view_label,
-              icon: "arrow-right",
-              style: :primary,
-              size: :lg,
-              href: href,
-              class: "rounded-full [&>svg]:order-last",
-              data: { cover_view: true }
-            ) %>
+        <% if body_actions? %>
+          <%# Edit is out of flow. inset lg is the overlay step nearest the old 29/33 inset. %>
+          <%= render FlatPack::Overlay::Component.new(class: grid_card_body_classes, data: { cover_body: true }) do |overlay| %>
+            <% overlay.with_media do %>
+              <div class="flex w-full min-w-0 flex-col self-stretch">
+                <%= column %>
+              </div>
+            <% end %>
+            <% overlay.with_item(placement: :top_right, inset: :lg) do %>
+              <%= body_actions %>
+            <% end %>
+          <% end %>
+        <% else %>
+          <div class="<%= grid_card_body_classes %>" data-cover-body>
+            <%= column %>
           </div>
         <% end %>
-      </div>
     </div>
   <% end %>
   </div>

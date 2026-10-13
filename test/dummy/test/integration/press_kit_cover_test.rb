@@ -120,6 +120,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
     public_copy = css_select("#presskits-kit-cover [data-cover-copy]").first
     assert_includes public_copy["class"], "@min-[640px]:pt-16"
+    refute_includes public_copy["class"], "pt-12"
     public_body = css_select("#presskits-kit-cover [data-cover-row] > div").last
     assert_includes public_body["class"], "pt-7"
     refute_includes public_body["class"], "@min-[640px]:pt-16"
@@ -248,6 +249,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     copy = css_select("[data-cover-copy]").first
     assert_includes copy["class"], "@min-[640px]:pt-16"
     assert_includes copy["class"], "flex items-start gap-3"
+    refute_includes copy["class"], "pt-12"
     body = css_select("[data-cover-row] > div").last
     assert_includes body["class"], "pt-7"
     refute_includes body["class"], "@min-[640px]:pt-16"
@@ -301,14 +303,26 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes frame["class"], "@min-[640px]:w-1/2"
     assert_includes frame["class"], "@min-[640px]:aspect-auto"
     body = css_select("#presskits-kit-header [data-cover-row] > div").last
-    assert_includes body["class"], "flex flex-1 flex-col"
+    assert_includes body["class"], "fp-overlay"
+    assert_includes body["class"], "inline-flex"
+    assert_includes body["class"], "flex-1"
+    assert_includes body["class"], "flex-col"
+    assert_includes body["class"], "px-8"
     assert_includes body["class"], "pt-7"
     assert_includes body["class"], "@min-[640px]:min-w-0"
     refute_includes body["class"], "@min-[640px]:pt-16"
     copy = css_select("#presskits-kit-header [data-cover-copy]").first
+    assert_includes copy["class"], "pt-12"
     assert_includes copy["class"], "@min-[640px]:pt-16"
     actions = css_select("#presskits-kit-header [data-presskits-header-actions]").first
     refute actions.ancestors.any? { |node| node["data-cover-copy"] }
+    assert_equal "top_right", actions.parent["data-fp-placement"]
+    assert_equal "lg", actions.parent["data-fp-inset"]
+    refute_includes actions.parent["class"], "flex-col-reverse"
+    body_overlay = css_select("#presskits-kit-header [data-cover-body]").first
+    assert_includes body_overlay["class"], "fp-overlay"
+    assert_includes body_overlay["class"], "px-8"
+    assert_includes body_overlay["class"], "pt-7"
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
     assert_default_eyebrow("#presskits-kit-header [data-cover-eyebrow]", absent: "#0F766E")
     assert_select "#presskits-kit-header [data-cover-title] h1", text: "Spring launch"

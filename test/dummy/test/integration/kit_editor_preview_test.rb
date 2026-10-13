@@ -91,8 +91,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes header_actions["class"], "self-end"
     assert_includes header_actions["class"], "[@media(hover:none)]:opacity-100"
     assert_includes header_actions["class"], "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
-    assert_includes header_actions.parent["class"], "flex-col-reverse"
-    assert_includes header_actions.parent["class"], "sm:justify-between"
+    assert_equal "top_right", header_actions.parent["data-fp-placement"]
+    assert_equal "lg", header_actions.parent["data-fp-inset"]
+    refute_includes header_actions.parent["class"], "flex-col-reverse"
+    refute_includes header_actions.parent["class"], "sm:justify-between"
     edit = css_select("#presskits-kit-header [data-presskits-header-actions] a[aria-label='Edit']").first
     assert_includes edit["class"], "px-[var(--button-padding-x-sm)]"
     assert_includes edit["class"], "text-xs"
