@@ -1,5 +1,17 @@
 # Upgrade notes
 
+## 0.45.0
+
+No migration.
+
+On the kit editor, the cover card edits the kit title, subtitle, and short description in place with `FlatPack::InlineEdit::Component` (`mode: :text`). Hover shows the words can be edited. Click edits them in place. An empty title shows **Add a title**. An empty save is blocked on the card and the stored title stays. An empty subtitle shows **Add a subtitle**. An empty short description shows **Add a short description** and stays clickable. Each save PATCHes `press_kit[title]`, `press_kit[subtitle]`, or `press_kit[description]` on the header update path. A request that includes only one of those leaves the others, and leaves `brand_color`, `font_family`, and the kit location.
+
+The header screen is kit location, **Brand**, and **Cover image**. The header plus FAB is gone. Hover shows **Edit** at the top right of the card body. It opens that screen. **Edit image** sits in the cover's top bar, opposite the **Press kit** badge, and opens `#press_kit_cover_image`. Below `sm`, and on touch, both stay visible and show only their icons. They are `EditorActionButtonComponent`, the same Flatpack button (`size: :sm`) as a section's **Edit** and **Order**. `Cover::Component` takes those as `body_actions` and `image_actions`. Index cards, the public kit, and the owner preview do not pass `inline_path` or those slots, so they keep the static title, subtitle, and clamped short description, with the badge alone in the cover's top bar.
+
+Hosts that replaced `KitHeaderComponent` should drop the FAB and pass those two slots on the editor card only.
+
+On every cover card, the kit location sits under the short description. A blank short description puts it under the title and subtitle. The limited preview leaves the short description off, so location sits under the title and subtitle there. A Location section is unchanged: those places stay inside the section, not on the card.
+
 ## 0.44.0
 
 No press kit migration. Embargo rows belong to `recording_studio_embargo` 0.1.0.

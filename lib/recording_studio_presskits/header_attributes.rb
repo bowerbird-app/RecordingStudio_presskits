@@ -8,11 +8,12 @@ module RecordingStudioPresskits
       end
 
       def copy(submitted)
-        {
-          title: submitted[:title].to_s.strip,
-          subtitle: submitted[:subtitle].to_s.strip.presence,
-          description: submitted[:description].to_s.strip.presence
-        }
+        %i[title subtitle description].each_with_object({}) do |key, fields|
+          next unless submitted.key?(key)
+
+          text = submitted[key].to_s.strip
+          fields[key] = key == :title ? text : text.presence
+        end
       end
 
       def brand(submitted)

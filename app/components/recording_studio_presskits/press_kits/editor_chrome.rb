@@ -4,8 +4,6 @@ module RecordingStudioPresskits
   module PressKits
     module EditorChrome
       CONTROLLER = "recording-studio-presskits--editor-chrome"
-      FAB_OFFSET = "1rem"
-      FAB_RESERVE_CLASS = "pr-20 md:pr-20 lg:pr-20"
       KIT_CARD_CLASSES = "w-full overflow-hidden"
       # Tailwind scans this literal: "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
       SECTION_CARD_CLASSES = "w-full shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
@@ -39,20 +37,47 @@ module RecordingStudioPresskits
 
       HIGHLIGHT_CLASSES = "ring-2 ring-[var(--color-primary)]"
 
-      FAB_CLASSES = [
-        "z-20 opacity-0 pointer-events-none",
+      # Desktop hides the row until hover or focus. Narrow widths and touch keep it visible.
+      # Tailwind scans these literals: "opacity-0" "pointer-events-none" "transition-opacity"
+      # "duration-[var(--duration-base)]"
+      # "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
+      # "[@media(hover:hover)]:group-hover/pk-edit:pointer-events-auto"
+      # "group-focus-within/pk-edit:opacity-100" "group-focus-within/pk-edit:pointer-events-auto"
+      # "focus-within:opacity-100" "focus-within:pointer-events-auto"
+      # "[@media(hover:none)]:opacity-100" "[@media(hover:none)]:pointer-events-auto"
+      # "max-sm:opacity-100" "max-sm:pointer-events-auto"
+      ACTION_VISIBILITY_CLASSES = [
+        "opacity-0 pointer-events-none",
         "transition-opacity duration-[var(--duration-base)]",
         "[@media(hover:hover)]:group-hover/pk-edit:opacity-100",
         "[@media(hover:hover)]:group-hover/pk-edit:pointer-events-auto",
         "group-focus-within/pk-edit:opacity-100 group-focus-within/pk-edit:pointer-events-auto",
         "focus-within:opacity-100 focus-within:pointer-events-auto",
-        "[@media(hover:none)]:group-data-[pk-edit-active]/pk-edit:opacity-100",
-        "[@media(hover:none)]:group-data-[pk-edit-active]/pk-edit:pointer-events-auto"
+        "[@media(hover:none)]:opacity-100 [@media(hover:none)]:pointer-events-auto",
+        "max-sm:opacity-100 max-sm:pointer-events-auto"
       ].join(" ").freeze
 
-      def self.region_classes(highlight: false, reserve_fab: false, header: false)
+      # Beside a title. On a column, self-end keeps the row at the trailing edge.
+      # Tailwind scans these literals: "self-end" "sm:self-auto"
+      ACTION_ROW_CLASSES = [
+        "flex shrink-0 flex-wrap items-center justify-end gap-2 self-end sm:self-auto",
+        ACTION_VISIBILITY_CLASSES
+      ].join(" ").freeze
+
+      # On the cover image. The bar already aligns to the top, so self-end would
+      # drop this row to the bottom of the badge.
+      IMAGE_ACTION_CLASSES = [
+        "flex shrink-0 flex-wrap items-center justify-end gap-2",
+        ACTION_VISIBILITY_CLASSES
+      ].join(" ").freeze
+
+      # Below sm the label span stays in the tree (sr-only) and aria-label names the control.
+      # icon_only: adds fp-hit-target, which floors the box at 2.75rem.
+      # "max-sm:px-[var(--button-icon-only-padding-sm)]" "max-sm:[&>span]:sr-only"
+      MOBILE_ICON_CLASSES = "max-sm:px-[var(--button-icon-only-padding-sm)] max-sm:[&>span]:sr-only"
+
+      def self.region_classes(highlight: false, header: false)
         classes = header ? HEADER_REGION_CLASSES : REGION_CLASSES
-        classes = "#{classes} #{FAB_RESERVE_CLASS}" if reserve_fab
         return classes unless highlight
 
         "#{classes} #{HIGHLIGHT_CLASSES}"

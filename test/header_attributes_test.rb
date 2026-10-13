@@ -51,8 +51,15 @@ class HeaderAttributesTest < Minitest::Test
     fields = RecordingStudioPresskits::HeaderAttributes.from(title: "Spring", subtitle: "   ")
 
     assert_nil fields[:subtitle]
+    refute fields.key?(:description)
     refute fields.key?(:brand_color)
     refute fields.key?(:font_family)
     refute fields.key?(:brand_source)
+  end
+
+  def test_omitted_copy_stays_out_of_the_header_write
+    fields = RecordingStudioPresskits::HeaderAttributes.from(title: " Spring ")
+
+    assert_equal({ title: "Spring" }, fields)
   end
 end

@@ -2,9 +2,6 @@
   <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: I18n.t("recording_studio_presskits.editor.header")) do %>
     <%= render RecordingStudioPresskits::PressKits::HeaderEditorComponent.new(
       press_kit_recording: @press_kit_recording,
-      title: @header_title,
-      subtitle: @header_subtitle,
-      description: @header_description,
       brand_color: @header_brand_color,
       font_family: @header_font_family,
       brand_source: @header_brand_source,
@@ -23,9 +20,6 @@
 
   <%= render RecordingStudioPresskits::PressKits::HeaderEditorComponent.new(
     press_kit_recording: @press_kit_recording,
-    title: @header_title,
-    subtitle: @header_subtitle,
-    description: @header_description,
     brand_color: @header_brand_color,
     font_family: @header_font_family,
     brand_source: @header_brand_source,

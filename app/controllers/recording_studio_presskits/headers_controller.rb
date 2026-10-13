@@ -40,7 +40,7 @@ module RecordingStudioPresskits
 
     def save_header
       fields = HeaderAttributes.from(press_kit_params)
-      return render_missing_title(fields) if fields[:title].blank?
+      return render_missing_title(fields) if missing_title?(fields)
 
       revise_header(fields)
       save_kit_location
@@ -68,6 +68,11 @@ module RecordingStudioPresskits
       current_presskits_root.revise(@press_kit_recording) do |press_kit|
         press_kit.assign_attributes(fields.slice(:title, :subtitle, :description, :brand_color, :font_family))
       end
+      @press_kit_recording.reload
+    end
+
+    def missing_title?(fields)
+      fields.key?(:title) && fields[:title].blank?
     end
 
     def save_kit_location
@@ -87,15 +92,8 @@ module RecordingStudioPresskits
 
     def assign_header_fields(overrides = {})
       recordable = @press_kit_recording.recordable
-      assign_header_copy(overrides, recordable)
       assign_header_brand(overrides, recordable)
       @header_location = kit_location_recording&.recordable || RecordingStudio::Location::Location.new
-    end
-
-    def assign_header_copy(overrides, recordable)
-      @header_title = field_or_saved(overrides, :title, recordable.title)
-      @header_subtitle = field_or_saved(overrides, :subtitle, recordable.subtitle)
-      @header_description = field_or_saved(overrides, :description, recordable.description)
     end
 
     def assign_header_brand(overrides, recordable)

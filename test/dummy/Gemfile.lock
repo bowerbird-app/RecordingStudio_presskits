@@ -183,7 +183,7 @@ PATH
 PATH
   remote: ../..
   specs:
-    recording_studio_presskits (0.44.0)
+    recording_studio_presskits (0.45.0)
       flat_pack (>= 0.1.228)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
@@ -779,7 +779,7 @@ CHECKSUMS
   recording_studio_location (0.6.0)
   recording_studio_metrics (0.2.0)
   recording_studio_orderable (0.3.0)
-  recording_studio_presskits (0.44.0)
+  recording_studio_presskits (0.45.0)
   recording_studio_publishable (0.8.0)
   recording_studio_root_switchable (0.8.0)
   recording_studio_trashable (0.8.0)
