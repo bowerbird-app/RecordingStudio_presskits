@@ -14,13 +14,13 @@ Hosts that replaced `SectionFrameComponent` should render `TextSectionHeadingCom
 
 ## 0.47.0
 
-No migration. Rebuild Tailwind so `@min-[640px]:pt-16` and `pt-12` generate. Flatpack stays `>= 0.1.231`.
+No migration. Rebuild Tailwind so `@min-[640px]:pt-16` generates. Flatpack stays `>= 0.1.231`.
 
-On a cover card whose container is at least 640px wide, the company name, title, subtitle, list heart, and description sit lower. The body still has `pt-7`. The copy adds `pt-16`, so the company name starts about 6rem from the top of the card. A narrower public card keeps only the body's `pt-7`.
+On a cover card whose container is at least 640px wide, the company name, title, subtitle, list heart, and description sit lower. The body still has `pt-7`. The copy adds `pt-16`, so the company name starts about 6rem from the top of the card. A narrower card keeps only the body's `pt-7`.
 
 **View** stays in the footer with `mt-auto`. **Edit image** stays on the cover overlay.
 
-On the kit editor, **Edit** is out of the copy row. The body is `FlatPack::Overlay`: the copy is `with_media`, and **Edit** is `with_item(placement: :top_right, inset: :lg)`. The heart lines up with the public card. Below 640px of container width, that editor copy adds `pt-12` so the button does not cover the heart. From 640px, `@min-[640px]:pt-16` replaces it. Index cards, the public kit, and the owner preview do not pass `body_actions`, so they do not get `pt-12`.
+On the kit editor, **Edit** is out of the copy row. The body is `FlatPack::Overlay`: the copy is `with_media`, and **Edit** is `with_item(placement: :top_right, inset: :lg)`. The heart lines up with the public card on a wide card. Below 640px of container width, the editor copy has no extra top padding. It keeps only the body's `pt-7`, the same as the public card. From 640px, the copy adds `@min-[640px]:pt-16`.
 
 ## 0.46.0
 

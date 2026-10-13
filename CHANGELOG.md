@@ -26,11 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - On `Cover::Component` at `:card`, a container at least 640px wide adds `pt-16` above the copy (`@min-[640px]:pt-16` on the company, title, subtitle, heart, and description). The body keeps `pt-7`, so that block starts about 6rem from the top of the card. Below 640px of container width the extra padding stays off.
 - **View** stays in the `mt-auto` footer. **Edit image** stays on the cover overlay.
-- On the editor card, **Edit** is `FlatPack::Overlay` on the body. The copy is `with_media`. **Edit** is `with_item(placement: :top_right, inset: :lg)`, so it no longer shares a row with the heart. The heart keeps the same right inset as the public card. Below 640px that editor copy adds `pt-12` so the heart stays clear of the button. At 640px and wider, `@min-[640px]:pt-16` still applies. Index cards, the public kit, and the owner preview do not get `pt-12`.
+- On the editor card, **Edit** is `FlatPack::Overlay` on the body. The copy is `with_media`. **Edit** is `with_item(placement: :top_right, inset: :lg)`, so it no longer shares a row with the heart. The heart keeps the same right inset as the public card. Below 640px the editor copy has no extra top padding, the same as the public card. At 640px and wider, `@min-[640px]:pt-16` still applies.
 - Version `0.47.0`
 
 ### Upgrade notes
-- Bump to `0.47.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16` and `pt-12` generate. Flatpack stays `>= 0.1.231`. Hosts that reserved a flex column for header **Edit** should drop it. The cover places that slot.
+- Bump to `0.47.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16` generates. Flatpack stays `>= 0.1.231`. Hosts that reserved a flex column for header **Edit** should drop it. The cover places that slot.
 
 ## [0.46.0] - 2026-10-13
 

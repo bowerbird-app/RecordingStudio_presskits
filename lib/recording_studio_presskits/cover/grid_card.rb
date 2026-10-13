@@ -32,17 +32,11 @@ module RecordingStudioPresskits
       end
 
       # pt-16 on the wide copy, on top of the body's pt-7, so the company name
-      # starts about 6rem from the card top. Editor Edit is an overlay item, so
-      # it does not share this row. On a stacked editor card, pt-12 clears that
-      # button; the wide rule still wins. Tailwind scans these literals:
+      # starts about 6rem from the card top. A narrower card, editor included,
+      # keeps only that body padding. Tailwind scans this literal:
       # "flex items-start gap-3 @min-[640px]:pt-16"
-      # "flex items-start gap-3 pt-12 @min-[640px]:pt-16"
       def grid_card_copy_classes
-        if body_actions?
-          "flex items-start gap-3 pt-12 @min-[640px]:pt-16"
-        else
-          "flex items-start gap-3 @min-[640px]:pt-16"
-        end
+        "flex items-start gap-3 @min-[640px]:pt-16"
       end
 
       def title_tag

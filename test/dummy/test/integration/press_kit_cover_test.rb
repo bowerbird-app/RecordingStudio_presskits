@@ -312,8 +312,8 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "@min-[640px]:min-w-0"
     refute_includes body["class"], "@min-[640px]:pt-16"
     copy = css_select("#presskits-kit-header [data-cover-copy]").first
-    assert_includes copy["class"], "pt-12"
-    assert_includes copy["class"], "@min-[640px]:pt-16"
+    assert_equal "flex items-start gap-3 @min-[640px]:pt-16", copy["class"]
+    refute_includes copy["class"], "pt-12"
     actions = css_select("#presskits-kit-header [data-presskits-header-actions]").first
     refute actions.ancestors.any? { |node| node["data-cover-copy"] }
     assert_equal "top_right", actions.parent["data-fp-placement"]
