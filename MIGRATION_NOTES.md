@@ -2,9 +2,11 @@
 
 ## 0.47.0
 
-No migration. Bump to `0.47.0`. Flatpack stays `>= 0.1.231`. Rebuild Tailwind so the masonry column classes (`columns-1`, `md:columns-2`, `lg:columns-4`) are generated.
+No migration. Bump to `0.47.0`. Flatpack is `>= 0.1.233` (dummy tag `v0.1.233`). Rebuild Tailwind so the masonry column classes (`columns-1`, `md:columns-2`, `lg:columns-4`) and the Section Title trailing-row utilities (`flex-wrap`, `flex-1`, `max-w-max`, `break-words`, `shrink-0`) are generated.
 
 The public Images section uses `FlatPack::Masonry::Component` (`order: :columns`) and `FlatPack::Masonry::Image`. Photos keep their natural ratio. The first 12 render. **Show more images (N)** replaces the gallery Turbo frame (`presskits-images-<id>`) with the rest. N is the number of photos in the section.
+
+The public Images heading passes a `FlatPack::Badge` (`size: :sm`, text is the photo count) through `FlatPack::SectionTitle` `with_trailing`. The badge is outside the heading and outside the copy-link anchor. The editor still edits the title with `FlatPack::InlineEdit`. `SectionTitle` `title:` is a string, and Inline Edit has no trailing slot, so the count badge stays off the editor.
 
 **Download all images** is on the public heading row. It zips that section's photos only, from `GET /recording_studio_presskits/image_archives/:id` (the images content recording). The kit zip still includes the cover, every images section, and `kit.txt`. The section zip is sent only when `Visibility.presentation_for` is `:full`.
 

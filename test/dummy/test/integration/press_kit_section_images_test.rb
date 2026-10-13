@@ -184,6 +184,13 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert_select "#{frame} img", count: 12
     assert_select "a", text: "Download all images"
     assert_select "a", text: "Show more images (13)"
+    heading = css_select("h2").find { |node| node.text == "Images" }
+    assert_equal "Images", heading.text
+    row = heading.parent
+    badge = row.css("span.shrink-0").find { |node| node.text.strip == "13" }
+    assert badge
+    assert_equal "Copy link to Images", row.at_css("a")["aria-label"]
+    refute_includes row.at_css("a").text, "13"
     assert_includes response.body, "JPG · 64×28 · 16:7"
     assert_includes response.body, "Credit the studio."
     refute_includes response.body, "aspect-video"
@@ -199,6 +206,11 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#presskits-editor-preview .fp-masonry img", count: 12
     assert_select "#presskits-editor-preview a", text: "Show more images (13)"
+    images_section = css_select("#presskits-editor-preview section").find do |node|
+      node.at_css("[name='kit_section[title]'][value='Images']")
+    end
+    assert images_section
+    assert_select images_section, "span", text: "13", count: 0
   end
 
   test "download all images zips this section only" do

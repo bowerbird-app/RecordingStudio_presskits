@@ -36,7 +36,8 @@ module RecordingStudioPresskits
           size: :lg,
           spacing: images_download_button ? :none : :md,
           level: :h2,
-          anchor_link: true
+          anchor_link: true,
+          trailing: images_count_badge
         )
       end
 
@@ -75,6 +76,16 @@ module RecordingStudioPresskits
         return helpers.recording_studio_presskits if helpers.respond_to?(:recording_studio_presskits)
 
         helpers
+      end
+
+      def images_count_badge
+        content = @content_recording
+        return unless content&.recordable.is_a?(Images)
+
+        count = DirectImages.list(content).size
+        return if count.zero?
+
+        FlatPack::Badge::Component.new(text: count.to_s, size: :sm)
       end
 
       def build_images_download_button
