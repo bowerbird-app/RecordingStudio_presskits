@@ -1,8 +1,10 @@
 # Lists section
 
-A press kit section for an ordered set of lines: awards, stops, key points, a filmography. The heading stays on the kit section. Each line is its own recording under a list section, so people can add, edit, reorder, and trash one line.
+A press kit section for ordered labeled lines: a spec, an amenity, a short pair of words. The heading stays on the kit section. Each line is its own recording under a list section, so people can add, edit, reorder, and trash one line.
 
 This is not Recording Studio Lists. That gem (`recording_studio_lists`) is a workspace collection: `RecordingStudio::Lists::List` and `RecordingStudio::Lists::ListItem`, tables `recording_studio_lists` and `recording_studio_list_items`, a pointer `item_recording_id`, and a `position` column. Press kits already depend on that gem for the add-to-list control on the kit index. A Lists section does not call it, store a recording id, or share those tables.
+
+It is also thinner than Facts & Figures. A fact is a figure: label, value, unit, description, source, as-of date, and a display style. A list item is only an optional icon, a key, and a value.
 
 Recording Studio is not in production. Ship the new types clean. No compatibility shim, no backfill, no reparent of old rows.
 
@@ -25,18 +27,21 @@ A kit can hold more than one list section. Each has its own heading. `create_sec
 | --- | --- |
 | `KitSection` | `title`, `subtitle`. Already there. The list section does not copy them. |
 | `ListSection` | No columns. Same empty snapshot as `QuoteSection`. |
-| `ListItem` | `text` (required), `detail` (optional), `url` (optional). |
+| `ListItem` | `icon` (optional), `key` (required), `value` (required). |
 
-`text` is the line. `detail` is one optional second line (a year, a role, a short note). `url`, when present, is an HTTP or HTTPS link, validated the same way as `Fact#source_url` (`HTTP_URL`, blank allowed). Blank `detail` and `url` become nil on validation. `text` is stripped and required.
+`key` is the short label. `value` is the string next to it. Both are plain text, stripped, and required. There is no rich text, no second detail line, and no URL.
 
-These fields stay off the item:
+`icon` stores an icon name from the set Flatpack already renders. The kit uses that set today: section menus, buttons, and list rows pass names such as `map-pin`, `photo`, and `list-bullet` as `icon:`, and the rendered control exposes `data-flat-pack--icon-name-value`. Blank becomes nil. A present name must be one of those names. An unknown name is invalid. The column does not store a file, a URL, or SVG markup.
 
-- A label/value pair. That is Facts & Figures.
+These stay off the item:
+
+- Unit, description, source, as-of date, and a display style. That is Facts & Figures.
 - A rich-text body. That is Text. A text section can already contain a `<ul>`. A list section exists so each line is its own recording.
-- A photo. Quotes have one image. A list line does not, so the kit zip does not grow a new file kind.
+- A detail line and a link. The text of an item is the key and the value.
+- An uploaded glyph. The icon is a name. A custom file is an open question below.
 - A pointer at a workspace recording. That is a credit line, and it is also what Recording Studio Lists stores.
 
-The public page shows a bulleted list in saved order. Numbers are not a display setting in this proposal. See open questions.
+The public page shows the rows in saved order. The icon is the marker. There is no bullet or number setting.
 
 ## Data model and migration
 
@@ -56,7 +61,7 @@ Two recordables. Both are product-managed objects in the tree: people create the
 - Table `recording_studio_kit_list_items`. Do not use `recording_studio_list_items`. That table belongs to Recording Studio Lists.
 - `recording_studio_recordable label: "Item", root: false, allowed_parent_types: ["RecordingStudioPresskits::ListSection"]`
 - `Trashable.to`
-- No Orderable, Publishable, Duplicatable, Attachable, or Location. The press kit already duplicates with `exclude_children: []`, so a copied kit copies the list section and its items. Publishable stays on the kit.
+- No Orderable, Publishable, Duplicatable, Attachable, or Location. The press kit already duplicates with `exclude_children: []`, so a copied kit copies the list section and its items. Publishable stays on the kit. Attachable stays off because the icon is a name, not a file.
 
 Snapshot tables follow quotes and facts: uuid primary key, `created_at` only, no `updated_at`.
 
@@ -66,16 +71,20 @@ create_table :recording_studio_list_sections, id: :uuid do |t|
 end
 
 create_table :recording_studio_kit_list_items, id: :uuid do |t|
-  t.string :text, null: false, default: ""
-  t.text :detail
-  t.string :url
+  t.string :icon
+  t.string :key, null: false, default: ""
+  t.text :value, null: false, default: ""
   t.datetime :created_at, null: false
 end
 ```
 
+`key` is a string column. `value` is `text`, the same shape as `Fact#value`, so a longer line is not cut off. Both are plain strings in the product.
+
 One migration in `db/migrate` and the same file under `test/dummy/db/migrate`, matching `20261008180000_create_recording_studio_facts.rb`. `down` can drop both tables. There is no data to preserve.
 
 Writes go through the root. Create an item with `list_section_recording.record(ListItem, parent_recording: list_section_recording)`. Change one with `root.revise`. Trash with `recording_studio_trashable_trash!`. Do not insert `Recording` or `Event` rows.
+
+Before validation, strip `key` and `value`, and store a blank `icon` as nil. `key` and `value` are required. `icon`, when present, is included in the Flatpack icon names the app already passes to `icon:`. Do not add a second icon catalog.
 
 ## How it plugs into the section framework
 
@@ -114,7 +123,7 @@ Picker copy, looked up as `picker_descriptions.list_section` because the key is 
 
 - Menu label: List
 - Icon: `list-bullet`
-- Description: "A few lines, in the order you want."
+- Description: "Labeled lines, in the order you want."
 - Empty kit card: "Add a line"
 
 ## Editing
@@ -129,11 +138,17 @@ Follow facts and quotes, not the credits collection editor. A list line is writt
 
 `SectionEditorComponent` then renders `section_actions` and the editor outside the shared content form. Title, subtitle, and Update stay on `SectionHeadingEditorComponent`. The content screen has no display-style form, because the section stores none.
 
-**+ Item** is a primary button with a Heroicons plus icon and the label Item. It links to `new_press_kit_section_list_item_path`. That matches + Fact. Quotes can create a blank row because body and name default to `""`. Item text is required, so the new screen collects it before `record`, the same as facts.
+**+ Item** is a primary button with a Heroicons plus icon and the label Item. It links to `new_press_kit_section_list_item_path`. That matches + Fact. Quotes can create a blank row because body and name default to `""`. Key and value are required, so the new screen collects them before `record`, the same as facts.
 
-The item screen is `ListItem::EditComponent` on `list_items/new` and `list_items/edit`, with the modal wrapper facts use when `presskits_editor_dialog?` is set. Fields: Text, Detail, Link. Detail and Link can be blank. Save revises the item. A validation error re-renders the form.
+The item screen is `ListItem::EditComponent` on `list_items/new` and `list_items/edit`, with the modal wrapper facts use when `presskits_editor_dialog?` is set. Fields, in order:
 
-The content tab lists active items in order inside `FlatPack::List` (`orderable: true`, `divider: true`) and `FlatPack::Card`, with `recording-studio-presskits--section-order` pointed at the item order path. Each row links to the item editor and shows `text`, with `detail` as the muted second line when present. Trash posts delete and calls `recording_studio_trashable_trash!` on that item only. The empty state is `FlatPack::EmptyState` with title "No lines yet" and description "Add a point, an award, or a stop."
+- **Icon.** Optional. A choice of Flatpack icon names, the same names buttons and section rows already use. Look up Flatpack before adding a control. Use an existing icon picker if one is there. If the only API today is the `icon:` argument, use a Flatpack select of those names. The stored value is the name, such as `star`. Empty means no icon. Do not offer a file field here.
+- **Key.** Required. The short label.
+- **Value.** Required. The string.
+
+Save revises the item. A missing key, a missing value, or an unknown icon name re-renders the form.
+
+The content tab lists active items in order inside `FlatPack::List` (`orderable: true`, `divider: true`) and `FlatPack::Card`, with `recording-studio-presskits--section-order` pointed at the item order path. The row keeps `arrows-up-down` as the drag icon, the same as facts. Inside the row, show the chosen icon when present, then `key`, with `value` as the muted second line. Trash posts delete and calls `recording_studio_trashable_trash!` on that item only. The empty state is `FlatPack::EmptyState` with title "No lines yet" and description "Add a label and a short line."
 
 Routes, nested under `press_kits` / `sections` like facts:
 
@@ -142,13 +157,13 @@ resources :list_items, only: %i[new create edit update destroy]
 resource :list_item_order, only: :update, controller: "list_item_orders"
 ```
 
-`ListItemsController` and `ListItemOrdersController` copy `FactsController` and `FactOrdersController`: load the kit, load the kit section, require the content recording to be a `ListSection`, authorize `:edit`. Create and update permit `:text`, `:detail`, `:url`.
+`ListItemsController` and `ListItemOrdersController` copy `FactsController` and `FactOrdersController`: load the kit, load the kit section, require the content recording to be a `ListSection`, authorize `:edit`. Create and update permit `:icon`, `:key`, `:value`.
 
 Removing the section stays on `SectionsController#destroy`. That trashes the kit section. It does not delete rows. `KitQuery.sections_for` drops a trashed kit section, so the lines leave the public page with it. Restoring the kit section brings them back. Trashing one item leaves the section.
 
 ## Public rendering and preview
 
-`ListSection::Component` takes `recording:`. `render?` is true only when `active_items` is non-empty. An empty list does not leave a blank card.
+`ListSection::Component` takes `recording:`. `render?` is true only when `active_items` is non-empty. An empty list does not leave a blank card. An item with a blank key or value is not shown, the same way a quote with a blank body is skipped.
 
 `SectionFrameComponent#content_visible?` uses that `render?`. Effects that already key off it:
 
@@ -157,7 +172,7 @@ Removing the section stays on `SectionsController#destroy`. That trashes the kit
 - Preview uses the same frame, so an empty list stays out of the preview column.
 - `KitDownload::TextFile` and `KitDownload::Manifest` skip the section. See below.
 
-The public list is a stack of lines in order, in the same type sizes as the facts list: `text` at `text-base font-medium`, `detail` at `text-sm` muted. A present `url` is rendered only after `FlatPack::AttributeSanitizer.sanitize_url`, and the line links to it. A rejected URL is not shown as a link. Bullets, not numbers.
+Each public row is the icon, the key, and the value, in saved order. Render the icon with the same Flatpack `icon:` argument the rest of the kit uses, so the name becomes `data-flat-pack--icon-name-value`. A blank icon leaves that slot empty and does not invent a default glyph. Key uses the muted label size from the facts list. Value uses the medium body size. No link, no second paragraph, no bullets, no numbers.
 
 The component does not print the kit-section title or subtitle.
 
@@ -177,19 +192,19 @@ Position lives on the item recordings. Reorder history is an event on the list s
 
 ## Download and manifest
 
-`KitDownload::Manifest` stays cover images, Images-section photos, and `kit.txt`. A list item has no blob, so it adds no zip entry and no filename.
+`KitDownload::Manifest` stays cover images, Images-section photos, and `kit.txt`. A list item has no blob, so it adds no zip entry and no filename. The icon name is not a file.
 
-`KitDownload::TextFile#content_handler_for` gains `ListSection => :list_lines`. `list_lines` walks `ListSection.active_items` and prints each item as:
+`KitDownload::TextFile#content_handler_for` gains `ListSection => :list_lines`. `list_lines` walks `ListSection.active_items` and prints each item on one line:
 
 ```text
-Line text
-Optional detail
-https://example.com/optional
+Capacity: 120 seats
 ```
 
-Skip an item whose `text` is blank. Skip trashed items by using `active_items`. The section block already starts with the kit-section heading and subtitle. A section whose component `render?` is false is omitted, so an empty list does not appear in `kit.txt`.
+That is `key`, then `: `, then `value`. Do not print the icon name. A press kit text file is the words. The icon is only on the page.
 
-No new locale key is required if the lines are plain. Facts prefix a line with `Fact:`. A list line should not, because the heading above it is the list title.
+Skip an item whose key or value is blank. Skip trashed items by using `active_items`. The section block already starts with the kit-section heading and subtitle. A section whose component `render?` is false is omitted, so an empty list does not appear in `kit.txt`.
+
+No new locale key is required. Facts prefix a line with `Fact:` and then the label. A list line should not add another prefix, because the heading above it is the list title.
 
 Publish, unpublish, and revise already regenerate or invalidate the zip through `KitDownload.subscribe!`. A list edit that revises the kit's published tree follows that path. No new subscriber.
 
@@ -197,7 +212,7 @@ Publish, unpublish, and revise already regenerate or invalidate the zip through 
 
 Register both types from `Api.register_recordable_types`, the way facts are registered.
 
-`ListItem`: operations `index`, `show`, `create`, `update`, `destroy`. Writable and output keys: `text`, `detail`, `url`. Blank optional fields serialize as nil. A withheld item serializes all three as nil.
+`ListItem`: operations `index`, `show`, `create`, `update`, `destroy`. Writable and output keys: `icon`, `key`, `value`. A blank icon serializes as nil. A withheld item serializes all three as nil.
 
 `ListSection`: `index` and `show` with the empty serializer and empty `output_keys`, like `QuoteSection`. It has no attributes to update.
 
@@ -211,25 +226,25 @@ Behavior lands with tests in the same change. Mirror facts.
 
 Gem suite:
 
-- `test/recording_studio_declarations_test.rb`. Declare both types. Parent of `ListSection` is `KitSection`. Parent of `ListItem` is `ListSection`. Neither is a root. `ListSection` is not allowed under the press kit or the workspace. Orderable on `ListSection` allows only `ListItem`. Trashable on both. Publishable and Duplicatable off both. Menu icon `list-bullet`. Label "List".
-- `test/list_item_payload_test.rb` (new), beside `test/fact_payload_test.rb`. Payload shape, blank detail and url as nil, rejected http scheme left to the model test, withheld item, kit section `items` in order, trashed item omitted, empty section serializes `items: []`.
-- `test/kit_download_test.rb` or the text-file coverage next to it. A list section contributes lines to `kit.txt` and no extra zip file. A trashed item and an empty list stay out.
+- `test/recording_studio_declarations_test.rb`. Declare both types. Parent of `ListSection` is `KitSection`. Parent of `ListItem` is `ListSection`. Neither is a root. `ListSection` is not allowed under the press kit or the workspace. Orderable on `ListSection` allows only `ListItem`. Trashable on both. Publishable, Duplicatable, and Attachable off both. Menu icon `list-bullet`. Label "List".
+- `test/list_item_payload_test.rb` (new), beside `test/fact_payload_test.rb`. Payload keys are `icon`, `key`, and `value`. A blank icon is nil. A withheld item is all nil. Kit section `items` stay in order. A trashed item is omitted. An empty section serializes `items: []`.
+- `test/kit_download_test.rb` or the text-file coverage next to it. A list section contributes `Key: Value` lines to `kit.txt`, omits the icon name, and adds no zip file. A trashed item and an empty list stay out.
 - `test/recording_studio_presskits_test.rb`. Engine source includes `register_list_section`. README and the install guide mention `ListSection` once those docs are updated.
 
 Dummy suite:
 
-- `test/dummy/test/integration/list_section_test.rb`. `create_section!` writes the kit section and an empty list section in one transaction and does not write an item. Two list sections on one kit keep their own items. The editor adds, edits, reorders, and trashes an item. A bad URL re-renders. Trashing the section removes it from `KitQuery.sections_for` and leaves the rows. Public and preview HTML show the heading, the lines, and the link, and hide a section with no items.
+- `test/dummy/test/integration/list_section_test.rb`. `create_section!` writes the kit section and an empty list section in one transaction and does not write an item. Two list sections on one kit keep their own items. The editor adds, edits, reorders, and trashes an item. A blank key or value re-renders. An unknown icon name re-renders. A blank icon saves as nil. Trashing the section removes it from `KitQuery.sections_for` and leaves the rows. Public and preview HTML show the heading, the icon name on `data-flat-pack--icon-name-value`, the key, and the value. A section with no items is hidden. A row with no icon has no icon name.
 - `test/dummy/test/integration/press_kit_ui_test.rb`. The picker row is List, the description is the new sentence, the icon is `list-bullet`.
-- `test/dummy/test/integration/press_kit_download_test.rb`. Extend the manifest example with one list so `kit.txt` includes the line and a trashed line is absent.
+- `test/dummy/test/integration/press_kit_download_test.rb`. Extend the manifest example with one list so `kit.txt` includes `Key: Value`, excludes the icon name, and excludes a trashed line.
 - `test/dummy/config/initializers/recording_studio.rb` lists both types. `RecordingStudio.validate_recordable_declarations!` keeps passing.
 
-Model specs worth a few assertions inside the integration test or a small gem test: `text` presence, `url` format, blank detail stored as nil.
+Model assertions, in the integration test or a small gem test: `key` and `value` presence, blank icon stored as nil, a known name such as `star` accepted, an unknown name rejected.
 
 No test should require `RecordingStudio::Lists::List` or `recording_studio_list_items`.
 
 ## Docs to update with the implementation
 
-`README.md` gets a Lists paragraph next to Facts, in the same shape: two recordings, fields, editor, public page, order, trash. The picker sentence that lists type names and icons gains List / `list-bullet`. The install step that registers recordable types gains both class names.
+`README.md` gets a Lists paragraph next to Facts, in the same shape: two recordings, fields, icon name, editor, public page, order, trash. The picker sentence that lists type names and icons gains List / `list-bullet`. The install step that registers recordable types gains both class names.
 
 `MIGRATION_NOTES.md` tells hosts to run the new migration and add the two types. There is no data move.
 
@@ -237,10 +252,6 @@ No test should require `RecordingStudio::Lists::List` or `recording_studio_list_
 
 ## Open questions
 
-1. **Numbered lists.** This proposal is bullets only, in saved order. A ranking (tour dates, a top five) might want `1.` `2.` `3.` If that is in the first version, add `marker` on `ListSection` (`bullet` or `number`, default `bullet`), a Show as select on the content tab, and `permitted_attributes` of `[:marker]`. That is the facts `display_style` pattern, and it makes `ListSection` an updatable API type instead of an empty one. Leave it off until someone asks.
+1. **Custom icon uploads.** This proposal stores a Flatpack icon name and does not attach a file. A host that needs a drawn mark would put Attachable on `ListItem` (one image, the way a quote has one image), render that file on the public row, and add the blob to the kit zip. That is a different column, a different editor control, and a manifest change. Leave it out until someone asks. Do not store both a name and a file on the first version.
 
-2. **How long is detail.** One plain string covers a year or a role. A filmography note that runs to a paragraph is a different field, closer to Text, and `kit.txt` would need a blank line between items. Stay with one optional line unless a real kit needs more.
-
-3. **API reorder.** The UI can reorder items. Facts and quotes do not expose a reorder capability action, so this proposal does not either. An agent that can add items still cannot reorder them except by whatever Orderable already exposes on its own. Add `reorder_items` on `ListSection`, implemented with `QuoteOrder`, if agents need the same action as the editor.
-
-4. **Link treatment.** The public page links the line. `kit.txt` prints the URL on its own line. The editor label is Link. No separate link label, and no `target` control. Say if the URL should be visible text next to the line on the public page as well.
+2. **API reorder.** The UI can reorder items. Facts and quotes do not expose a reorder capability action, so this proposal does not either. An agent that can add items still cannot reorder them except by whatever Orderable already exposes on its own. Add `reorder_items` on `ListSection`, implemented with `QuoteOrder`, if agents need the same action as the editor.
