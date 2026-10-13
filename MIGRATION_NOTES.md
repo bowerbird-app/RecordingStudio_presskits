@@ -1,5 +1,17 @@
 # Upgrade notes
 
+## 0.48.0
+
+No migration. Rebuild Tailwind so the text-section utilities generate.
+
+On the public kit and the owner preview, a text section heading is `TextSectionHeadingComponent`: bold, `text-[2rem]`, `--surface-content-color`, with an empty `data-presskits-text-copy-slot` on the right. Do not put a copy button there yet. Other section types still render `SectionTitle` with its anchor, including the Images count badge and **Download all images**. Section cards stay `rounded-[var(--radius-lg)]` (1.5rem / 24px).
+
+The public text body uses `--surface-muted-content-color`, `text-base`, `leading-7`, and `max-w-[65ch]`. It does not use `.ProseMirror`. Copy longer than 700 characters clamps to eight lines (`max-h-[14rem]`) with a fade and **Show more** / **Show less** (`aria-expanded`). Shorter copy has no toggle. The kit editor always shows the full body and still edits it with `FlatPack::InlineEdit` `mode: :rich` (the bubble toolbar). A text section's editor title uses the same bold classes. Other sections stay semibold `text-2xl`.
+
+`FlatPack::Collapse` hides a whole region behind a title. It is not this clamp.
+
+Hosts that replaced `SectionFrameComponent` should render `TextSectionHeadingComponent` for a text section and leave the copy slot empty. Images sections still use the download row and the count badge.
+
 ## 0.47.0
 
 No migration. Bump to `0.47.0`. Flatpack is `>= 0.1.233` (dummy tag `v0.1.233`). Rebuild Tailwind so the masonry column classes (`columns-1`, `md:columns-2`, `lg:columns-4`) and the Section Title trailing-row utilities (`flex-wrap`, `flex-1`, `max-w-max`, `break-words`, `shrink-0`) are generated.

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-10-14
+
+### Changed
+- A text section on the public kit and the owner preview uses a heading row: the title is bold and dark (`text-[2rem]`, `font-bold`, `--surface-content-color`) on the left, and an empty right-aligned slot (`data-presskits-text-copy-slot`) waits for Flatpack's copy control. The slot is empty. There is no copy button and no clipboard script. Other section types still use `SectionTitle`.
+- Section cards already use Flatpack `--radius-lg` (1.5rem / 24px). That matches the text-block corners, so the radius is unchanged and still shared.
+- Public and owner-preview text body no longer borrows `.ProseMirror` styles. It uses the theme muted text token other sections use for body copy (`--surface-muted-content-color`), `text-base`, `leading-7`, paragraph spacing, and `max-w-[65ch]`.
+- Long public text (plain text longer than 700 characters) clamps to eight lines with a fade into the card colour and a **Show more** / **Show less** control (`aria-expanded`). Shorter copy, including the designed three-paragraph blurb, has no toggle. The kit editor always shows the full body. `FlatPack::Collapse` is a titled disclosure, so this stays a small Stimulus controller.
+- Text editing on the kit stays `FlatPack::InlineEdit` `mode: :rich`, which is the bubble toolbar. The editor heading for a text section uses the same bold title. Other sections stay `text-2xl` semibold.
+- Version `0.48.0`
+
+### Upgrade notes
+- Bump to `0.48.0`. There is no migration. Rebuild Tailwind so the text-section utilities generate. The public text heading is `TextSectionHeadingComponent`. Hosts that replaced `SectionFrameComponent` and still want this heading should branch on a text section. The copy slot is `data-presskits-text-copy-slot`. Leave it empty until Flatpack's copy control is ready.
+- Show more is public and owner preview only. The editor does not mount `recording-studio-presskits--text-collapse`.
+
 ## [0.47.0] - 2026-10-13
 
 ### Changed

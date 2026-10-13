@@ -71,8 +71,15 @@ module RecordingStudioPresskits
       def inline_heading
         SectionInlineHeadingComponent.new(
           section_recording: @section_recording,
-          update_path: @remove_path
+          update_path: @remove_path,
+          title_classes: text_title_classes
         )
+      end
+
+      def text_title_classes
+        return unless text_section?
+
+        TextSectionHeadingComponent::TITLE_CLASSES
       end
 
       def text_inline

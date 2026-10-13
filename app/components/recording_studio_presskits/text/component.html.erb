@@ -1,7 +1,41 @@
-<div class="flat-pack-richtext--view-mode">
-  <div class="flat-pack-richtext-editor">
-    <div class="ProseMirror">
-      <%= body_html %>
+<% if collapsible? %>
+  <div
+    class="max-w-[65ch]"
+    data-presskits-text-collapse
+    data-controller="recording-studio-presskits--text-collapse"
+    data-recording-studio-presskits--text-collapse-more-label-value="<%= show_more_label %>"
+    data-recording-studio-presskits--text-collapse-less-label-value="<%= show_less_label %>"
+  >
+    <div class="relative">
+      <div
+        id="<%= body_id %>"
+        class="<%= body_classes %> <%= collapsed_classes %>"
+        data-presskits-text-body
+        data-recording-studio-presskits--text-collapse-target="body"
+      >
+        <%= body_html %>
+      </div>
+      <div
+        class="<%= fade_classes %>"
+        data-recording-studio-presskits--text-collapse-target="fade"
+        aria-hidden="true"
+      ></div>
     </div>
+    <%= render FlatPack::Button::Component.new(
+      text: show_more_label,
+      style: :ghost,
+      size: :sm,
+      type: "button",
+      class: "mt-3",
+      aria: { expanded: "false", controls: body_id },
+      data: {
+        recording_studio_presskits__text_collapse_target: "toggle",
+        action: "recording-studio-presskits--text-collapse#toggle"
+      }
+    ) %>
   </div>
-</div>
+<% else %>
+  <div class="<%= body_classes %>" data-presskits-text-body>
+    <%= body_html %>
+  </div>
+<% end %>
