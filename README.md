@@ -464,10 +464,12 @@ When `RecordingStudioLists::AddToListHelper` is loaded, the card has a recording
 ```
 
 ```ruby
-initialize(press_kit_recording:, section_recordings: nil, preview: false)
+initialize(press_kit_recording:, section_recordings: nil, preview: false, branding: true)
 ```
 
-`press_kit_recording:` is required. `section_recordings:` defaults to `KitQuery.sections_for(press_kit_recording)`. `preview:` defaults to `false`.
+`press_kit_recording:` is required. `section_recordings:` defaults to `KitQuery.sections_for(press_kit_recording)`. `preview:` defaults to `false`. `branding:` defaults to `true`.
+
+`branding: true` wraps the card in `#presskits-kit-embed`. That is the kit embed a host drops on its own page. The style on that wrapper is `RecordingStudioPresskits.branding_style_for` (see **Press center branding**). `branding: false` skips the wrapper. The published page and owner preview pass `false`.
 
 The component renders one Flatpack card: `Cover::Component` at `:hero`, then each visible section through `PressKits::SectionFrameComponent` (`section_recording:`). A section whose content component is missing, or whose `render?` is false, is skipped. When nothing remains, the card shows the empty state **Nothing to show yet**.
 
@@ -500,6 +502,18 @@ A live kit is served at `/published/:uuid/:slug` when Publishable is mounted at 
 `PressKit` sets `public_controller: "recording_studio_presskits/public_press_kits"`, `public_action: :show`, and `public_layout: "recording_studio_presskits/blank"`. Publishable assigns `@parent_recording` and `@parent_recordable`. `PublicPressKitsController#show` sets `Current.actor` from `current_user` (including `nil`) and calls `presentation_for` with `purpose: :public`. `:full` renders `PublicShowComponent` with `preview: false` and the sections. `:preview` renders `PreviewShowComponent`. `:hidden` and `:unavailable` render no kit markup.
 
 That response is a full document. There is no embeddable kit endpoint, and no engine route that returns the card or the kit as a fragment. Engine `press_kits` routes stay behind `authenticate_presskits_actor!`.
+
+The published page wraps both the full kit and the audience preview in `#presskits-public-page`. The full kit inside that page is `PublicShowComponent` with `branding: false`, so the style is declared once.
+
+### Press center branding
+
+Press kits does not depend on press centers. When `RecordingStudioPressCenters` is loaded, `RecordingStudioPresskits.branding_style_for(kit_recording)` returns `RecordingStudioPressCenters.branding_for(kit_recording)&.style_attribute`. When the constant is missing, or branding is nil, the method returns nil and the Flatpack theme stays as it is.
+
+That string goes on one wrapper. The published page uses `#presskits-public-page`. A host embed of `PublicShowComponent` uses `#presskits-kit-embed`. It never goes on `<html>`.
+
+The string redeclares `--color-primary`, `--color-primary-text`, `--color-primary-hover`, the primary button tokens, the ring tokens, and `font-family`. It has to sit on the wrapper. Flatpack resolves the button tokens and the ring tokens on the theme root, so changing only `--color-primary` on a parent does not repaint a primary button.
+
+Cover tiles keep `cover_color` and `cover_text_color`. The brand is not copied onto the kit. Owner preview and the kit editor do not use the wrapper.
 
 ### Press center
 

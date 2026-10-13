@@ -3,19 +3,26 @@
      response: response
    ) %>
 
-<% if presentation == :preview %>
+<% kit_recording = @parent_recording || @press_kit_recording %>
+<% if %i[full preview].include?(presentation) %>
   <% content_for :title, (@press_kit&.title.presence || "Press kit") %>
 
-  <%= render RecordingStudioPresskits::PressKits::PreviewShowComponent.new(
-    press_kit_recording: @parent_recording || @press_kit_recording,
-    reason: @presskits_preview_reason
-  ) %>
-<% elsif presentation == :full %>
-  <% content_for :title, (@press_kit&.title.presence || "Press kit") %>
-
-  <%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
-    press_kit_recording: @parent_recording || @press_kit_recording,
-    section_recordings: @section_recordings,
-    preview: false
-  ) %>
+  <%= render RecordingStudioPresskits::PressKits::BrandedFrameComponent.new(
+    press_kit_recording: kit_recording,
+    id: "presskits-public-page"
+  ) do %>
+    <% if presentation == :preview %>
+      <%= render RecordingStudioPresskits::PressKits::PreviewShowComponent.new(
+        press_kit_recording: kit_recording,
+        reason: @presskits_preview_reason
+      ) %>
+    <% else %>
+      <%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
+        press_kit_recording: kit_recording,
+        section_recordings: @section_recordings,
+        preview: false,
+        branding: false
+      ) %>
+    <% end %>
+  <% end %>
 <% end %>

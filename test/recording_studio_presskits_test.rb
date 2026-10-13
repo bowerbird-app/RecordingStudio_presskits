@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.38.1", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.39.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -189,7 +189,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
 
     files.each do |path|
       source = File.read(File.join(root, path))
-      refute_includes source, "PressCenter", path
+      refute_match(/(?<!RecordingStudio)PressCenter/, source, path)
       refute_includes source, "additional_parent_types", path
     end
   end

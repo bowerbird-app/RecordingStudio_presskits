@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-10-13
+
+### Added
+- The published kit and a host embed of `PublicShowComponent` pick up the parent press center's brand when `RecordingStudioPressCenters` is loaded. `RecordingStudioPresskits.branding_style_for` calls `RecordingStudioPressCenters.branding_for(kit_recording)&.style_attribute`. That string goes on one wrapper: `#presskits-public-page` on the published page, and `#presskits-kit-embed` around a host embed. It is never on `<html>`.
+- Version `0.39.0`
+
+### Upgrade notes
+- Bump to `0.39.0`. There is no migration and no new dependency. Press kits does not require press centers. When that gem is absent, or `branding_for` returns nil, the Flatpack theme stays as it is.
+- The published page passes `branding: false` into `PublicShowComponent`, so the style sits on `#presskits-public-page` only. A host that renders `PublicShowComponent` on its own page gets `#presskits-kit-embed` (the default). Pass `branding: false` to skip that wrapper. Owner preview already does.
+- Cover tiles keep `cover_color` and `cover_text_color`. Nothing from the center brand is copied onto the kit. The style string has to live on the wrapper, because Flatpack resolves the primary button tokens and the ring tokens on the theme root.
+
 ## [0.38.1] - 2026-10-13
 
 ### Changed

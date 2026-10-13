@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits
 
   get "up" => "rails/health#show", as: :rails_health_check
+  get "/kit-embeds/:id", to: "kit_embeds#show", as: :kit_embed
 
   root to: redirect("/recording_studio_presskits")
 
