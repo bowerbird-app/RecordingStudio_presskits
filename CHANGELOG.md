@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-10-13
+
+### Changed
+- `Cover::Component` at `:card` follows the card's own width. From 640px of container width, the cover sits on the left at half the width and the full height of the card, with the **Press kit** pill still on that cover. The company row and heart stay at the top of the body, then the title, subtitle, and description. **View** stays pinned to the bottom right. A narrower card keeps the stacked layout.
+- The dummy index shows one full-width card above the two-column grid, so both widths are on the same page.
+- Version `0.40.0`
+
+### Upgrade notes
+- Bump to `0.40.0`. There is no migration, no new field, and no new control on the card.
+- Rebuild Tailwind so `@container`, `@min-[640px]:flex-row`, `@min-[640px]:w-1/2`, and `@min-[640px]:min-h-[50cqw]` generate. This dummy uses Tailwind 4, which includes container queries. `:hero` and `:preview` stay as they are.
+- A grid cell narrower than 640px keeps the stacked card. A full-width card turns horizontal. Dummy passes the first kit as `featured_recording:` on `PressKits::IndexComponent`.
+
 ## [0.38.0] - 2026-10-12
 
 ### Added

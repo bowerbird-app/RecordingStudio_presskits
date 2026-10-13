@@ -52,6 +52,8 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-cover-image[data-cover-image] img[alt='A white gallery hall']"
     hero = css_select("[data-cover-stack]").first.to_html
     assert_operator hero.index("presskits-cover-image"), :<, hero.index("presskits-cover-hero")
+    refute_includes hero, "@container"
+    refute_includes hero, "@min-[640px]"
     assert_includes css_select("#presskits-cover-image").first["class"], "aspect-[1440/640]"
     assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
     assert_select "#presskits-cover-hero h1", text: "Spring launch"
@@ -85,6 +87,10 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     assert_select "#press_kit_cover_image button", text: "Upload"
     assert_select "#presskits-header-edit-preview [data-cover-image]", count: 0
     assert_select "#presskits-header-edit-preview [data-cover-ratio='9 / 16']"
+    preview = css_select("#presskits-header-edit-preview").first.to_html
+    refute_includes preview, "@container"
+    refute_includes preview, "@min-[640px]"
+    refute_includes preview, "aspect-[430/368]"
     refute_includes response.body, "Choose from the library"
     refute_includes response.body, "recording-studio-attachable--library-placement"
 

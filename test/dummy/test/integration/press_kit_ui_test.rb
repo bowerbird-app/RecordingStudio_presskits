@@ -54,7 +54,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_presskit_create_button
     assert_library_sidebar
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
-    assert_select "[data-cover-color='#1F2937']", count: 1
+    assert_select "[data-cover-feature] [data-cover-card]", count: 1
+    assert_select "[data-cover-grid] [data-cover-card]", count: 1
+    assert_select "[data-cover-grid] [data-cover-feature]", count: 0
+    assert_select "[data-cover-color='#1F2937']", count: 2
     assert_select "[data-cover-fallback]"
     assert_select "a[data-cover-view][href='#{edit_href}']", text: /View/
     assert_includes response.body, "aspect-[430/368]"
@@ -76,6 +79,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_presskit_create_button
     assert_library_sidebar
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
+    assert_select "[data-cover-feature]", count: 0
     assert_select "[data-cover-color]", count: 0
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
@@ -89,7 +93,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-card][data-cover-color='#DB2777']", count: 1
+    assert_select "[data-cover-card][data-cover-color='#DB2777']", count: 2
     cover = css_select("[data-cover-color='#DB2777']").first
     assert_includes cover.to_html, "Spring launch"
     assert_includes cover.to_html, "background-color: #DB2777"

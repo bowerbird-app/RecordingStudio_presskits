@@ -1,5 +1,17 @@
 # Upgrade notes
 
+## 0.40.0
+
+No migration and no new card content. `:card` now switches on its own width, not the viewport.
+
+`Cover::Component` at `:card` is a container (`@container`). Below 640px it stays the stacked grid card: cover or colour on top (`aspect-[430/368]`), **Press kit** pill, company and heart, title, subtitle, description, and **View** at the bottom. At 640px and wider, the same elements sit in a row. The cover is the left half, full height, at least as tall as it is wide (`min-h-[50cqw]`). The pill stays on the cover. The body is the right half. The company row and heart stay at the top. **View** uses `mt-auto`, so it stays at the bottom right.
+
+`:hero` and `:preview` are unchanged.
+
+Rebuild Tailwind so the container-query utilities generate. Tailwind 4 includes `@container`. A host on an older Tailwind needs a small scoped `@container (min-width: 640px)` rule with the same layout.
+
+Dummy passes `featured_recording:` (the first kit) into `PressKits::IndexComponent`, which renders that card full width above the grid. The table view skips it. Other hosts can pass the same argument. Leaving it blank keeps the grid only.
+
 ## 0.38.0
 
 Press kits gain an optional `subtitle` column. Blank lines become nil. The limit is 120 characters.

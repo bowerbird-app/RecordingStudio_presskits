@@ -78,15 +78,27 @@
           <% table.column(title: "Added", html: ->(recording) { recording.created_at&.to_fs(:long) }) %>
         <% end %>
       <% else %>
-        <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :stretch) do %>
-          <% @press_kit_recordings.each do |recording| %>
+        <% if featured_card? %>
+          <div class="w-full" data-cover-feature>
             <%= render RecordingStudioPresskits::Cover::Component.new(
-              recording: recording,
+              recording: featured_recording,
               size: :card,
-              href: @show_path.call(recording)
+              href: @show_path.call(featured_recording)
             ) %>
-          <% end %>
+          </div>
         <% end %>
+
+        <div data-cover-grid>
+          <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :stretch) do %>
+            <% @press_kit_recordings.each do |recording| %>
+              <%= render RecordingStudioPresskits::Cover::Component.new(
+                recording: recording,
+                size: :card,
+                href: @show_path.call(recording)
+              ) %>
+            <% end %>
+          <% end %>
+        </div>
       <% end %>
     </div>
   <% end %>
