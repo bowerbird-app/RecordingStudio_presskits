@@ -10,9 +10,6 @@ module RecordingStudioPresskits
       include GridCard
 
       SIZES = %i[card].freeze
-      # The cover label stays a white chip. Primary buttons use the brand; this pill does not.
-      PILL_BACKGROUND = "#FFFFFF"
-      PILL_TEXT = Contrast::DARK
 
       def initialize(recording: nil, title: nil, description: nil, subtitle: nil, brand_color: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
                      font_family: nil, size: :card, href: nil, id: nil, heading: :h2, add_to_list: true,
@@ -71,10 +68,6 @@ module RecordingStudioPresskits
         "font-family: #{css};"
       end
 
-      def pill_style
-        "#{pill_declarations.join('; ')};"
-      end
-
       def card?
         @size == :card
       end
@@ -100,16 +93,6 @@ module RecordingStudioPresskits
       end
 
       private
-
-      def pill_declarations
-        [
-          "background-color: #{PILL_BACKGROUND}",
-          "color: #{PILL_TEXT}",
-          "--badge-primary-background-color: #{PILL_BACKGROUND}",
-          "--badge-primary-text-color: #{PILL_TEXT}",
-          "--badge-primary-border-color: transparent"
-        ]
-      end
 
       def kit_branding
         @kit_branding ||= KitBranding.for(@recording)

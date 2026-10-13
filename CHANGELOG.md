@@ -7,18 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.45.0] - 2026-10-13
+## [0.46.0] - 2026-10-13
 
 ### Changed
 - `RecordingStudioPresskits.branding_style_for` drives Flatpack primary buttons on the kit itself. The string now includes `--color-primary-active` and the pressed-fill button tokens. Hover, focus, and the pressed fill are `oklch(from var(--color-primary) …)`, so they follow the resolved brand (kit, then press center, then `#333333`) instead of the colour Flatpack resolved on the theme root. `--color-primary-text` is still auto contrast.
 - That string sits on `#presskits-public-page`, `#presskits-kit-embed`, `#presskits-owner-preview`, the audience preview (`#presskits-public-preview`), and `#presskits-editor-preview` (the header card and the section cards). It does not sit on `<html>`.
 - Editor chrome keeps Flatpack's primary. The toolbar, page nav, header form, and tabs are outside the preview wrapper. Section edit, order, and remove, the empty-section action, and the header FAB use `presskits-neutral-controls`, which restores the theme's primary tokens.
 - Layouts that render a kit link `recording_studio_presskits/brand_buttons`.
-- The **Press kit** pill on the cover is white (`#FFFFFF`) with dark text (`#111827`) on every page. It does not use the brand colour. **View** and other primary buttons still do.
-- Version `0.45.0`
+- The cover photo and the **Press kit** badge use `FlatPack::Overlay`. The photo is `with_media`. The badge is `with_item(placement: :top_left, inset: :md)` and `FlatPack::Badge` `style: :default`. Overlay only places it. The default badge uses the muted surface and content text (`#e5e5e5` and `#333` on the rounded theme), not the brand and not a forced white chip. **View** and other primary buttons still use the brand. Flatpack is `>= 0.1.231`.
+- Version `0.46.0`
 
 ### Upgrade notes
-- Bump to `0.45.0`. There is no migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` next to `flat_pack/application` on the public layout and the authenticated layout.
+- Bump to `0.46.0`. There is no migration. Bump Flatpack to `>= 0.1.231` and rebuild Tailwind so the overlay placement utilities generate. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` next to `flat_pack/application` on the public layout and the authenticated layout.
 - Hosts that wrapped only `#presskits-public-page` or `#presskits-kit-embed` now also get the style on the editor preview, owner preview, and audience preview. Do not copy it onto the toolbar, the header form, or `<html>`.
 - Hosts that replaced the section action row or the header FAB should wrap those controls with `presskits-neutral-controls` and `BrandStyle.neutral_style_attribute` so they stay on Flatpack's primary.
 

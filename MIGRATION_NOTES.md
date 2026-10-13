@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.45.0
+## 0.46.0
 
 No migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` on every layout that renders a kit, next to `flat_pack/application`. That sheet paints the pressed fill of a primary button from `--button-primary-active-background-color`. Without it, hover and the focus ring still follow the brand, and the pressed fill stays on Flatpack's hover.
 
@@ -10,7 +10,7 @@ The same string is on `#presskits-editor-preview` (header card and section cards
 
 Editor chrome stays on Flatpack. Toolbar, page nav, the header form, and tabs are outside those wrappers. Section edit, order, and remove, the empty-section action, and the header FAB use `presskits-neutral-controls`, which puts Flatpack's primary tokens back.
 
-The **Press kit** pill on the cover is white (`#FFFFFF`) with dark text (`#111827`). It does not follow the brand. **View** and other primary buttons still do.
+Bump Flatpack to `>= 0.1.231` and rebuild Tailwind. The cover uses `FlatPack::Overlay`: the photo is `with_media`, and the **Press kit** badge is `with_item(placement: :top_left, inset: :md)` with `FlatPack::Badge` `style: :default`. Overlay only places the badge. That style follows `--badge-default-background-color` and `--badge-default-text-color` (muted surface `#e5e5e5` and `#333` on the rounded theme). It does not follow the brand, and Presskits does not override those colours. **View** and other primary buttons still use the brand.
 
 ## 0.44.0
 
