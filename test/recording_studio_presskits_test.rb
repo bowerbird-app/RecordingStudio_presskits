@@ -809,7 +809,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, "variant: :pills"
     refute_includes header, "Inherit from press center"
     refute_includes header, "Cover::Component"
-    swatches = File.read(File.expand_path("../app/views/recording_studio_presskits/press_kits/_brand_swatches.html.erb", __dir__))
+    swatches = File.read(File.expand_path(
+                           "../app/views/recording_studio_presskits/press_kits/_brand_swatches.html.erb",
+                           __dir__
+                         ))
     assert_includes swatches, 'name: "press_kit[brand_color]"'
     assert_includes swatches, 'name: "press_kit[font_family]"'
     assert_includes swatches, "FlatPack::FontSwatch::Component"
