@@ -1276,9 +1276,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes ruby, '"user"'
     assert_includes ruby, '"lock-closed"'
     assert_includes ruby, '"user-group"'
-    fallback_js = File.read(File.join(
-      root, "app/javascript/recording_studio_presskits/controllers/visibility_fallback_controller.js"
-    ))
+    controller = "app/javascript/recording_studio_presskits/controllers/visibility_fallback_controller.js"
+    fallback_js = File.read(File.join(root, controller))
     assert_includes fallback_js, "[name='visibility[audience]']:checked"
     screen = File.read(File.join(root, "app/views/recording_studio_presskits/visibilities/edit.html.erb"))
     assert_includes screen, "flat_pack_modal_screen"
