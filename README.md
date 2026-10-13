@@ -622,17 +622,17 @@ Dummy kit pins:
 |-----|-----|
 | Recording Studio | `v4.5.0` |
 | Accessible | `v0.15.0` |
-| Admin | `v2.1.0` |
+| Admin | `v2.2.0` |
 | Root Switchable | `v0.8.0` |
 | FlatPack | `v0.1.224` |
 | Attachable | `v0.15.0` |
-| Company | `v0.3.0` |
+| Company | `v0.4.0` |
 | Location | `v0.6.0` |
-| Orderable | `v0.2.7` |
+| Orderable | `v0.3.0` |
 | Trashable | `v0.8.0` |
 | Duplicatable | `v0.5.0` |
 | Publishable | `v0.8.0` |
-| Downloadable | `v0.3.0` |
+| Downloadable | `v0.4.0` |
 | External Embed | `v0.1.4` |
 | Video | `v0.1.1` |
 | Metrics | `v0.2.0` |
