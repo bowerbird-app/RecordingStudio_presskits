@@ -118,6 +118,11 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
     assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
     assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    public_copy = css_select("#presskits-kit-cover [data-cover-copy]").first
+    assert_includes public_copy["class"], "@min-[640px]:pt-7"
+    public_body = css_select("#presskits-kit-cover [data-cover-row] > div").last
+    assert_includes public_body["class"], "pt-7"
+    refute_includes public_body["class"], "@min-[640px]:pt-7"
     refute_select "[data-presskits-header-actions]"
     refute_select "[data-presskits-header-image-actions]"
     refute_includes css_select("#presskits-kit-cover [data-cover-frame]").first.to_html, "Doors at noon."
@@ -159,6 +164,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   end
 
   test "hosts can override the card eyebrow" do
+    I18n.t("recording_studio_presskits.cover.eyebrow")
     I18n.backend.store_translations(:en, recording_studio_presskits: { cover: { eyebrow: "Media kit" } })
     kit = record_kit("Spring launch")
     publish_kit!(kit)
@@ -235,7 +241,16 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_default_eyebrow("[data-brand-color='#BFDBFE'] [data-cover-eyebrow]", absent: "#BFDBFE")
     assert_default_eyebrow("[data-brand-color='#D97706'] [data-cover-eyebrow]", absent: "#D97706")
     assert_select "a[data-cover-view][href='#{recording_studio_presskits.edit_press_kit_path(first)}']", text: /View/
-    assert_includes css_select("a[data-cover-view]").first.parent["class"], "mt-auto"
+    view = css_select("a[data-cover-view]").first
+    assert_includes view.parent["class"], "mt-auto"
+    assert_includes view.parent["class"], "pb-8"
+    refute view.ancestors.any? { |node| node["data-cover-copy"] }
+    copy = css_select("[data-cover-copy]").first
+    assert_includes copy["class"], "@min-[640px]:pt-7"
+    assert_includes copy["class"], "flex items-start gap-3"
+    body = css_select("[data-cover-row] > div").last
+    assert_includes body["class"], "pt-7"
+    refute_includes body["class"], "@min-[640px]:pt-7"
     assert_select ".grid.items-stretch"
     assert_select "a[data-cover-card]", count: 0
     assert_select "[data-cover-list] button[type=button] svg.w-6.h-6"
@@ -287,7 +302,13 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes frame["class"], "@min-[640px]:aspect-auto"
     body = css_select("#presskits-kit-header [data-cover-row] > div").last
     assert_includes body["class"], "flex flex-1 flex-col"
+    assert_includes body["class"], "pt-7"
     assert_includes body["class"], "@min-[640px]:min-w-0"
+    refute_includes body["class"], "@min-[640px]:pt-7"
+    copy = css_select("#presskits-kit-header [data-cover-copy]").first
+    assert_includes copy["class"], "@min-[640px]:pt-7"
+    actions = css_select("#presskits-kit-header [data-presskits-header-actions]").first
+    refute actions.ancestors.any? { |node| node["data-cover-copy"] }
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
     assert_default_eyebrow("#presskits-kit-header [data-cover-eyebrow]", absent: "#0F766E")
     assert_select "#presskits-kit-header [data-cover-title] h1", text: "Spring launch"

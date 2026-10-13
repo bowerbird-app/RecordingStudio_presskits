@@ -31,6 +31,14 @@ module RecordingStudioPresskits
         "flex flex-1 flex-col px-8 pt-7 @min-[640px]:min-w-0"
       end
 
+      # Another pt-7 on the wide copy, so company, title, subtitle, heart, and
+      # description sit twice as far from the top. The body's pt-7 stays, and
+      # the editor Edit control lives outside this padding. Tailwind scans
+      # this literal: "@min-[640px]:pt-7"
+      def grid_card_copy_classes
+        "flex items-start gap-3 @min-[640px]:pt-7"
+      end
+
       def title_tag
         @title_tag || :h2
       end
