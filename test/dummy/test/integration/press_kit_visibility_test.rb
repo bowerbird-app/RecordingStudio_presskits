@@ -258,9 +258,12 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
 
     get visibility_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
     assert_response :success
-    assert_includes response.body, "Visibility"
+    assert_select "h1", text: "Visibility", count: 1
+    assert_select "h2", text: "Visibility", count: 0
+    assert_select "[data-fp-screen][data-title=?]", "\u200B"
     assert_includes response.body, "Who can view this press kit"
     assert_select "#presskits-visibility-form.max-w-xl"
+    assert_select "#presskits-visibility-actions.mt-4"
     assert_select "select[name='visibility[audience]'] option[value='public']"
     assert_select "select[name='visibility[audience]'] option[value='signed_in']"
     assert_select "select[name='visibility[audience]'] option[value='granted']"

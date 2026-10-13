@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.38.1
+
+No migration and no config change. The visibility screen in `pk-editor` keeps one heading: PageTitle **Visibility**. The small chrome title is blank, the same way Downloads does it. **Update** has `mt-4` above it.
+
+Hosts that copied `app/views/recording_studio_presskits/visibilities/edit.html.erb` should pass `presskits_editor_blank_chrome_title` into `flat_pack_modal_screen` and keep the PageTitle. The Update row stays `#presskits-visibility-actions`.
+
 ## 0.38.0
 
 Press kits gain an optional `subtitle` column. Blank lines become nil. The limit is 120 characters.

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.38.1] - 2026-10-13
+
+### Changed
+- The visibility screen in `pk-editor` has one heading: PageTitle **Visibility**, subtitle "Who can view this press kit". The small chrome title is blank, the same way Downloads does it.
+- **Update** on that screen has `mt-4` above it, so the button is not flush with the last field.
+- Version `0.38.1`
+
+### Upgrade notes
+- Bump to `0.38.1`. There is no migration and no config change.
+- Hosts that copied `visibilities/edit` should pass `presskits_editor_blank_chrome_title` to `flat_pack_modal_screen` and keep the PageTitle. The Update row is `#presskits-visibility-actions` with `mt-4`.
+
 ## [0.38.0] - 2026-10-12
 
 ### Added
