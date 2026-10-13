@@ -1,5 +1,19 @@
 # Upgrade notes
 
+## 0.42.0
+
+No migration. Bump Flatpack to `>= 0.1.228` (dummy tag `v0.1.228`) and reload its CSS and JavaScript. Rebuild Tailwind so inline-edit and trash-button classes generate. Link `stylesheet_link_tag "flat_pack/inline_edit"` on the kit editor layout, next to `flat_pack/application`. Propshaft fingerprints that file, and the `@import` inside `flat_pack/application` does not resolve it. Without the link, the empty-subtitle placeholder and the hover cue do not paint.
+
+On the kit editor, section title and subtitle are `FlatPack::InlineEdit::Component` with `mode: :text`. Hover shows they can be edited. Click edits in place. An empty subtitle shows **Add a subtitle**. Each save PATCHes `kit_section[title]` or `kit_section[subtitle]` on the section. A request that includes only one of those leaves the other stored value.
+
+`TrashButton` focuses its arm when it connects. The kit editor stops that focus from scrolling the page, then blurs it, so the editor opens at the top and the action row stays hidden until hover.
+
+The section plus FAB is gone. There is no per-section **Add new section**. The toolbar **Section** control is the only add. Hover (or focus) shows **Order**, **Edit**, and an icon-only `FlatPack::TrashButton::Component` (`size: :sm`, `expand: :left`). **Order** opens the existing Reorder modal. **Edit** opens the content screen for images, credits, quotes, facts, video, and location. It does not edit the title or subtitle. Trash deletes with Trashable. The button's own confirm animation is the only confirm. Below `sm`, and on touch (`hover: none`), the row stays visible.
+
+A text section hides **Edit**. Its body is inline edit with `mode: :rich` (the bubble toolbar) and saves `text[body]` on that same section path. The public kit and the owner preview still use `SectionTitle`.
+
+`EditableSectionComponent` now takes `section_recording`, `content_path`, `remove_path`, and `highlight`. `KitEditorComponent` no longer takes `heading_path`. The heading screen is still there for a direct visit.
+
 ## 0.41.0
 
 No migration. Each section is a Flatpack card (`SectionCardComponent`) on the kit editor, the public kit, and the owner preview. The card is white and rounded, with the same soft shadow as the editor header (`shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]`). `gap-6` separates the header from each section, and each section from the next. Padding inside a section stays `pt-8 pb-8 px-8`, then `md:pt-10`, then `lg:pt-12`.

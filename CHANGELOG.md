@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.42.0] - 2026-10-13
+
+### Changed
+- On the kit editor, a section title and subtitle use `FlatPack::InlineEdit::Component` (`mode: :text`). Hover shows the text is editable. Click edits it in place. An empty subtitle shows **Add a subtitle** and stays clickable. Saves PATCH `kit_section[title]` or `kit_section[subtitle]` on the section. A save that sends only one leaves the other.
+- The section FAB and its menu are gone, including per-section **Add new section**. Hover shows **Order**, **Edit**, and an icon-only `FlatPack::TrashButton::Component`. **Order** opens Reorder. **Edit** opens the content screen. Trash confirms with the button's own animation and deletes through Trashable. Below `sm`, and on touch, the row stays visible.
+- A text section hides **Edit**. Its body uses inline edit `mode: :rich` (the bubble toolbar) and saves `text[body]` on the section update path.
+- Flatpack is `>= 0.1.228` (dummy tag `v0.1.228`) for Inline Edit and Trash Button.
+- Version `0.42.0`
+
+### Upgrade notes
+- Bump to `0.42.0` and Flatpack `>= 0.1.228` (dummy tag `v0.1.228`). There is no migration. Reload Flatpack CSS and JavaScript, and rebuild Tailwind so the inline-edit and trash-button utilities generate. Link `flat_pack/inline_edit` on the kit editor layout. The `@import` in `flat_pack/application` does not resolve that fingerprinted file.
+- Link `flat_pack/inline_edit` on the kit editor layout. Trash Button focuses its arm on connect; the editor keeps that from scrolling the page and blurs it so the action row stays hidden until hover.
+- The kit editor no longer links a section to the heading screen. Title and subtitle save on `PATCH press_kits/:id/sections/:section_id`. Send only the field that changed. The heading screen remains for a direct visit.
+- Hosts that replaced `EditableSectionComponent` should drop the per-section FAB, the per-section picker, and `heading_path` / `add_path` / `picker_items` on that component. Render inline edit for the heading, the action row, and rich inline edit for text. `KitEditorComponent` no longer takes `heading_path`.
+
 ## [0.41.0] - 2026-10-13
 
 ### Changed
