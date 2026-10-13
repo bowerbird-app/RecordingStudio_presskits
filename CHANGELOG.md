@@ -12,11 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - The visibility screen in `pk-editor` has one heading: PageTitle **Visibility**, subtitle "Who can view this press kit". The small chrome title is blank, the same way Downloads does it.
 - **Update** on that screen has `mt-4` above it, so the button is not flush with the last field.
+- Audience is an inline RadioGroup with the same icons as Downloads: Anyone `globe-alt`, Signed in `user`, People with access `lock-closed`, and custom audiences `user-group`. The field label stays available to screen readers (`sr-only`).
 - Version `0.38.1`
 
 ### Upgrade notes
 - Bump to `0.38.1`. There is no migration and no config change.
 - Hosts that copied `visibilities/edit` should pass `presskits_editor_blank_chrome_title` to `flat_pack_modal_screen` and keep the PageTitle. The Update row is `#presskits-visibility-actions` with `mt-4`.
+- Hosts that replaced the visibility editor should render audience as `FlatPack::RadioGroup` `variant: :inline` and keep **Who can view the full press kit?** in an `sr-only` label. Icons match Downloads.
 
 ## [0.38.0] - 2026-10-12
 

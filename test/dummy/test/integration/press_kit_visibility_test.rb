@@ -264,16 +264,37 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Who can view this press kit"
     assert_select "#presskits-visibility-form.max-w-xl"
     assert_select "#presskits-visibility-actions.mt-4"
-    assert_select "select[name='visibility[audience]'] option[value='public']"
-    assert_select "select[name='visibility[audience]'] option[value='signed_in']"
-    assert_select "select[name='visibility[audience]'] option[value='granted']"
-    refute_select "select[name='visibility[audience]'] option[value='presskits.verified_journalist']"
-    refute_select "select[name='visibility[audience]'] option[value='#{TEST_CUSTOM_AUDIENCE}']"
+    assert_select "#presskits-visibility-audience-label.sr-only", text: "Who can view the full press kit?"
+    refute_select "legend", text: "Who can view the full press kit?"
+    refute_select "label", text: "Who can view the full press kit?"
+    refute_select "select[name='visibility[audience]']"
+    assert_select "input[type='radio'][name='visibility[audience]'][value='public'][checked]"
+    assert_select "input[type='radio'][name='visibility[audience]'][value='signed_in']"
+    assert_select "input[type='radio'][name='visibility[audience]'][value='granted']"
+    refute_select "input[type='radio'][name='visibility[audience]'][value='presskits.verified_journalist']"
+    refute_select "input[type='radio'][name='visibility[audience]'][value='#{TEST_CUSTOM_AUDIENCE}']"
+    assert_select "#presskits-visibility-audience [data-flat-pack--icon-name-value='globe-alt']"
+    assert_select "#presskits-visibility-audience [data-flat-pack--icon-name-value='user']"
+    assert_select "#presskits-visibility-audience [data-flat-pack--icon-name-value='lock-closed']"
+    refute_select "#presskits-visibility-audience [data-flat-pack--icon-name-value='user-group']"
     assert_select "[data-recording-studio-presskits--visibility-fallback-target='fallback'][hidden]"
     assert_select "input[name='visibility[visibility_fallback]'][value='preview']"
     assert_select "[data-flat-pack--icon-name-value='eye']"
     assert_select "[data-flat-pack--icon-name-value='eye-slash']"
     refute_includes response.body, "min-h-[7rem]"
+  end
+
+  test "visibility editor lists a custom audience with the group icon" do
+    kit = record_kit("Spring launch")
+    with_test_custom_audience do
+      sign_in @user
+      switch_to_root(@root)
+      get recording_studio_presskits.edit_press_kit_visibility_path(kit),
+          headers: { "Turbo-Frame" => "pk-editor-screen" }
+      assert_response :success
+      assert_select "input[type='radio'][name='visibility[audience]'][value='#{TEST_CUSTOM_AUDIENCE}']"
+      assert_select "#presskits-visibility-audience [data-flat-pack--icon-name-value='user-group']"
+    end
   end
 
   test "restricting then returning to public keeps the stored fallback" do
@@ -315,9 +336,9 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.edit_press_kit_visibility_path(kit)
     assert_response :success
-    assert_select "select[name='visibility[audience]'] option[selected][value='granted']"
-    refute_select "select[name='visibility[audience]'] option[value='public']"
-    refute_select "select[name='visibility[audience]'] option[value='signed_in']"
+    assert_select "input[type='radio'][name='visibility[audience]'][value='granted'][checked]"
+    refute_select "input[type='radio'][name='visibility[audience]'][value='public']"
+    refute_select "input[type='radio'][name='visibility[audience]'][value='signed_in']"
   ensure
     RecordingStudioAccessible.configuration.action_audiences[:"presskits.kit_view_full"] = previous if previous
   end
@@ -337,9 +358,9 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.edit_press_kit_visibility_path(kit)
     assert_response :success
-    assert_select "select[name='visibility[audience]'] option[selected][value='granted']"
-    refute_select "select[name='visibility[audience]'] option[value='public']"
-    refute_select "select[name='visibility[audience]'] option[value='signed_in']"
+    assert_select "input[type='radio'][name='visibility[audience]'][value='granted'][checked]"
+    refute_select "input[type='radio'][name='visibility[audience]'][value='public']"
+    refute_select "input[type='radio'][name='visibility[audience]'][value='signed_in']"
     assert_includes response.body, "Your workspace only allows some of these choices"
   end
 

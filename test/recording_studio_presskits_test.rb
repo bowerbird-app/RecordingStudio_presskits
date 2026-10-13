@@ -1266,6 +1266,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, "mt-4"
     assert_includes editor, 'id="presskits-visibility-actions"'
     assert_includes editor, "variant: :inline"
+    assert_includes editor, 'name: "visibility[audience]"'
+    assert_includes editor, "RadioGroup::Component"
+    assert_includes editor, "presskits-visibility-audience-label"
+    assert_includes editor, 'class="sr-only"'
+    refute_includes editor, "Select::Component"
+    ruby = File.read(File.join(components, "visibility_editor_component.rb"))
+    assert_includes ruby, '"globe-alt"'
+    assert_includes ruby, '"user"'
+    assert_includes ruby, '"lock-closed"'
+    assert_includes ruby, '"user-group"'
+    fallback_js = File.read(File.join(
+      root, "app/javascript/recording_studio_presskits/controllers/visibility_fallback_controller.js"
+    ))
+    assert_includes fallback_js, "[name='visibility[audience]']:checked"
     screen = File.read(File.join(root, "app/views/recording_studio_presskits/visibilities/edit.html.erb"))
     assert_includes screen, "flat_pack_modal_screen"
     assert_includes screen, "presskits_editor_blank_chrome_title"
