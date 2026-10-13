@@ -42,6 +42,10 @@
       ) %>
     <% end %>
 
+    <% if helpers.respond_to?(:render_embargo_button) %>
+      <%= helpers.render_embargo_button(@press_kit_recording) %>
+    <% end %>
+
     <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
   </div>
 

@@ -188,6 +188,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-visibility [data-flat-pack--icon-name-value='eye']"
     assert_select "#presskits-downloads", text: "Downloads"
     assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
+    assert_select "#embargo_button_#{kit.id}", text: "+ Embargo"
     assert_select "#presskits-sections-modal", text: /Reorder/
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span", text: "Text"
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AText'] span",
@@ -205,7 +206,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     toolbar_html = css_select("#presskits-editor-toolbar").to_html
     assert_operator toolbar_html.index("presskits-section-picker"), :<, toolbar_html.index("presskits-visibility")
     assert_operator toolbar_html.index("presskits-visibility"), :<, toolbar_html.index("presskits-downloads")
-    assert_operator toolbar_html.index("presskits-downloads"), :<, toolbar_html.index("publishable_quick_actions_")
+    assert_operator toolbar_html.index("presskits-downloads"), :<, toolbar_html.index("embargo_button_")
+    assert_operator toolbar_html.index("embargo_button_"), :<, toolbar_html.index("publishable_quick_actions_")
     refute_includes css_select("#presskits-editor-preview").to_html, 'name="press_kit[title]"'
     refute_includes css_select("#presskits-editor-preview").to_html, 'name="press_kit[description]"'
     assert_select "#presskits-editor-preview #presskits-kit-header"

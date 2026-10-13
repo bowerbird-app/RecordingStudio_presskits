@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.44.0] - 2026-10-13
+## [0.45.0] - 2026-10-13
 
 ### Changed
 - `RecordingStudioPresskits.branding_style_for` drives Flatpack primary buttons on the kit itself. The string now includes `--color-primary-active` and the pressed-fill button tokens. Hover, focus, and the pressed fill are `oklch(from var(--color-primary) …)`, so they follow the resolved brand (kit, then press center, then `#333333`) instead of the colour Flatpack resolved on the theme root. `--color-primary-text` is still auto contrast.
@@ -15,12 +15,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Editor chrome keeps Flatpack's primary. The toolbar, page nav, header form, and tabs are outside the preview wrapper. Section edit, order, and remove, the empty-section action, and the header FAB use `presskits-neutral-controls`, which restores the theme's primary tokens.
 - Layouts that render a kit link `recording_studio_presskits/brand_buttons`.
 - The **Press kit** pill on the cover is white (`#FFFFFF`) with dark text (`#111827`) on every page. It does not use the brand colour. **View** and other primary buttons still do.
+- Version `0.45.0`
+
+### Upgrade notes
+- Bump to `0.45.0`. There is no migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` next to `flat_pack/application` on the public layout and the authenticated layout.
+- Hosts that wrapped only `#presskits-public-page` or `#presskits-kit-embed` now also get the style on the editor preview, owner preview, and audience preview. Do not copy it onto the toolbar, the header form, or `<html>`.
+- Hosts that replaced the section action row or the header FAB should wrap those controls with `presskits-neutral-controls` and `BrandStyle.neutral_style_attribute` so they stay on Flatpack's primary.
+
+## [0.44.0] - 2026-10-13
+
+### Added
+- Press kits depend on `recording_studio_embargo` 0.1.0 and opt into `RecordingStudio::Capabilities::Embargo` for `presskits.kit_view_full` and `presskits.kit_download`.
+- The kit editor toolbar calls `render_embargo_button` after **Downloads**. The button opens the embargo gem's editor (enable, release time, time zone, and one early-access switch). Default English copy stays in that gem. Hosts can override `recording_studio_embargo.editor.subtitle`, `enable_help`, and `early_access_help`.
+- While an embargo is active, `Visibility.presentation_for` still returns `:full`, `:preview`, `:hidden`, or `:unavailable`. An unpublished kit stays unavailable. Early access follows Accessible's `:granted` audience for each action, so a view grant does not include download. Everyone else gets the kit's own visibility fallback. A preview shows an **Embargoed** badge, the release time, and no cover image, sections, or download.
+- Public responses, `KitQuery.discoverable_for`, fragment cache keys, and API payloads follow that same decision. Download generate, fetch, and status stay behind `downloadable_available_for?`, including a zip that already exists. After `lifts_at`, the hold ends on the next request. Copying a kit clears the window.
 - Version `0.44.0`
 
 ### Upgrade notes
-- Bump to `0.44.0`. There is no migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` next to `flat_pack/application` on the public layout and the authenticated layout.
-- Hosts that wrapped only `#presskits-public-page` or `#presskits-kit-embed` now also get the style on the editor preview, owner preview, and audience preview. Do not copy it onto the toolbar, the header form, or `<html>`.
-- Hosts that replaced the section action row or the header FAB should wrap those controls with `presskits-neutral-controls` and `BrandStyle.neutral_style_attribute` so they stay on Flatpack's primary.
+- Bump to `0.44.0`. There is no press kit migration. Hosts install `recording_studio_embargo` and run its migration (`recording_studio_embargo_embargoes`, plus the one-child index on recordings). This repo vendors tag `v0.1.0` at `vendor/gems/recording_studio_embargo` until CI can fetch the private git source.
+- Mount `RecordingStudioEmbargo::Engine` (the dummy uses `/recording_studio_embargo`). The toolbar button needs that mount. Preview and hidden stay on the kit's visibility screen.
 
 ## [0.43.0] - 2026-10-13
 

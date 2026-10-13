@@ -21,7 +21,13 @@ module RecordingStudioPresskits
         reason.to_sym == :signed_in
       end
 
+      def embargoed?
+        reason.to_sym == :embargoed
+      end
+
       def explanation
+        return embargo_until if embargoed?
+
         if signed_in_reason?
           I18n.t(
             "recording_studio_presskits.visibility.preview.sign_in",
@@ -30,6 +36,21 @@ module RecordingStudioPresskits
         else
           I18n.t("recording_studio_presskits.visibility.preview.need_access")
         end
+      end
+
+      def embargo_badge
+        I18n.t("recording_studio_presskits.embargo.badge")
+      end
+
+      def embargo_until
+        moment = Embargo.lifts_at(@press_kit_recording)
+        return if moment.blank?
+
+        zone_name = Embargo.time_zone(@press_kit_recording).presence
+        local = zone_name ? moment.in_time_zone(zone_name) : moment.in_time_zone
+        I18n.t("recording_studio_presskits.embargo.until", when: I18n.l(local, format: :long))
+      rescue StandardError
+        nil
       end
 
       def heading
@@ -47,7 +68,11 @@ module RecordingStudioPresskits
       end
 
       def show_auth_actions?
-        signed_in_reason?
+        signed_in_reason? && !embargoed?
+      end
+
+      def show_access_heading?
+        !embargoed?
       end
 
       def sign_in_path

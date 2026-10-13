@@ -231,6 +231,18 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.embargo_copy" do
+      config.to_prepare do
+        next unless defined?(RecordingStudioEmbargo::Embargo)
+        next unless defined?(RecordingStudio)
+
+        RecordingStudio.configuration.register_recordable_dup_strategy(
+          "RecordingStudioEmbargo::Embargo",
+          RecordingStudioPresskits::EmbargoCopy
+        )
+      end
+    end
+
     initializer "recording_studio_presskits.location_trash" do
       config.to_prepare do
         next unless defined?(RecordingStudio::Location::Location)
@@ -294,6 +306,12 @@ module RecordingStudioPresskits
       config.after_initialize do
         RecordingStudioPresskits::KitDownload.configure_audience!
         RecordingStudioPresskits::KitDownload.subscribe!
+      end
+    end
+
+    initializer "recording_studio_presskits.embargo" do
+      config.to_prepare do
+        RecordingStudioPresskits::Embargo.install!
       end
     end
   end

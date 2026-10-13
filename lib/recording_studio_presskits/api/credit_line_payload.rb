@@ -3,8 +3,8 @@
 module RecordingStudioPresskits
   module Api
     class CreditLinePayload
-      def self.for(recording)
-        return {} if recording.blank?
+      def self.for(recording, context: nil)
+        return {} if recording.blank? || Exposure.withhold?(context, recording)
 
         credit = Credits.credit_for(recording)
         payload = {}
