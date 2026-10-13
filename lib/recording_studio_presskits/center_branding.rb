@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  # Optional look-up for a parent press center's brand. Press kits does not
-  # depend on that gem. A missing constant, or nil branding, leaves the
-  # Flatpack theme alone.
+  # Press kits does not depend on press centers. When that gem is loaded,
+  # each field resolves as kit, then center, then the default. Otherwise
+  # BrandStyle paints the same tokens from the kit and the defaults.
   module CenterBranding
     def branding_style_for(kit_recording)
-      return unless defined?(RecordingStudioPressCenters)
-
-      RecordingStudioPressCenters.branding_for(kit_recording)&.style_attribute.presence
+      KitBranding.style_for(kit_recording).presence
     end
   end
 end

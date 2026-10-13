@@ -69,6 +69,15 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header [data-cover-title]", text: "Spring launch"
     refute_includes card.to_html, "aspect-[1440/640]"
     refute_includes card.to_html, "fp-display"
+    cover = css_select("#presskits-kit-cover").first
+    assert_includes cover["class"], "w-full"
+    assert_includes cover["class"], "h-full"
+    title = css_select("#presskits-kit-cover [data-cover-title]").first
+    assert_equal "h1", title.name
+    frame = css_select("#presskits-kit-cover [data-cover-frame]").first
+    assert_includes frame["class"], "aspect-[430/368]"
+    assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
+    assert_select "#presskits-kit-cover [data-cover-fallback]"
     sections = css_select("#presskits-editor-sections").first
     assert_includes sections["class"], "flex"
     assert_includes sections["class"], "gap-6"

@@ -30,7 +30,7 @@ module RecordingStudioPresskits
 
     def press_kit_params
       params.fetch(:press_kit, {}).permit(
-        :title, :subtitle, :description, :cover_style, :cover_color, :cover_text_color, :cover_text_swatch
+        :title, :subtitle, :description, :brand_color, :font_family, :brand_source
       )
     end
 
@@ -66,7 +66,7 @@ module RecordingStudioPresskits
 
     def revise_header(fields)
       current_presskits_root.revise(@press_kit_recording) do |press_kit|
-        press_kit.assign_attributes(fields)
+        press_kit.assign_attributes(fields.slice(:title, :subtitle, :description, :brand_color, :font_family))
       end
     end
 
@@ -88,7 +88,7 @@ module RecordingStudioPresskits
     def assign_header_fields(overrides = {})
       recordable = @press_kit_recording.recordable
       assign_header_copy(overrides, recordable)
-      assign_header_cover(overrides, recordable)
+      assign_header_brand(overrides, recordable)
       @header_location = kit_location_recording&.recordable || RecordingStudio::Location::Location.new
     end
 
@@ -98,10 +98,11 @@ module RecordingStudioPresskits
       @header_description = field_or_saved(overrides, :description, recordable.description)
     end
 
-    def assign_header_cover(overrides, recordable)
-      @header_cover_style = field_or_saved(overrides, :cover_style, recordable.cover_style)
-      @header_cover_color = field_or_saved(overrides, :cover_color, recordable.cover_color)
-      @header_cover_text_color = field_or_saved(overrides, :cover_text_color, recordable.cover_text_color)
+    def assign_header_brand(overrides, recordable)
+      @header_brand_color = field_or_saved(overrides, :brand_color, recordable.brand_color)
+      @header_font_family = field_or_saved(overrides, :font_family, recordable.font_family)
+      saved_source = recordable.brand_color.present? || recordable.font_family.present? ? "custom" : "press_center"
+      @header_brand_source = field_or_saved(overrides, :brand_source, saved_source)
     end
 
     def field_or_saved(overrides, key, saved)

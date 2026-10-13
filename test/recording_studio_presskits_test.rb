@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.42.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.43.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -18,6 +18,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261008120000_create_recording_studio_credits.rb",
       "db/migrate/20261008180000_create_recording_studio_facts.rb",
       "db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
+      "db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
       "db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "db/migrate/20261010150000_create_recording_studio_location_sections.rb",
       "test/dummy/db/migrate/20261010000013_create_recording_studio_access_constraints.rb",
@@ -30,6 +31,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261008180000_create_recording_studio_facts.rb",
       "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
       "test/dummy/db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "test/dummy/db/migrate/20261010150000_create_recording_studio_location_sections.rb",
       "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
@@ -215,8 +217,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "capability_actions: %i[create_section reorder_sections]"
     assert_includes source, "capability_actions: %i[remove_section]"
     assert_includes source, "operations: %i[show update]"
-    assert_includes source, "output_keys: %i[title description cover_style cover_color cover_text_color]"
-    assert_includes source, "writable_attributes: %i[cover_style cover_color cover_text_color]"
+    assert_includes source, "output_keys: %i[title description brand_color font_family]"
+    assert_includes source, "writable_attributes: %i[brand_color font_family]"
     assert_includes source, "operations: %i[index show update]"
     assert_includes source, "register_section_actions"
     refute_includes source, "operations: %i[create"
@@ -418,7 +420,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "--mount-path /"
     assert_includes readme, "Companies.to(allow: :one)"
     assert_includes readme, "Capabilities::Location.to"
-    assert_includes readme, "recording_studio_company_logo"
+    assert_includes readme, "KitBranding"
     assert_includes readme, "recording_studio_location_search_fields"
     assert_includes readme, "recording_studio_location_display"
     assert_includes readme, "LocationSection"
@@ -441,9 +443,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes readme, "Choose from the library"
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
-    assert_includes readme, "aspect-[1440/640]"
+    assert_includes readme, "aspect-[430/368]"
     assert_includes readme, 'gem "flat_pack", ">= 0.1.228"'
-    assert_includes readme, "size: :display"
+    assert_includes readme, "FlatPack::FontSwatch"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
     assert_includes readme, "flat_pack_modal_screen"
@@ -465,10 +467,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "icon: :plus"
     assert_includes readme, "p-8 md:p-10 lg:p-12"
     assert_includes readme, "overflow-hidden"
-    assert_includes readme, "rounded-none"
+    assert_includes readme, "rounded-tr-none"
     assert_includes readme, 'offset: "1rem"'
     refute_includes readme, "p-4 -m-4"
-    assert_includes readme, "variant: :swatches"
+    assert_includes readme, "variant: :inline"
     refute_includes readme, "named radios"
     assert_includes readme, "content screen"
     refute_includes readme, "Section settings"
@@ -637,33 +639,21 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, "size: :card"
     cover = File.read(File.expand_path("cover/component.rb", components))
     cover_html = File.read(File.expand_path("cover/component.html.erb", components))
-    assert_includes cover, "9 / 16"
-    refute_includes cover, "21 / 9"
-    assert_includes cover, "aspect-[9/16]"
-    refute_includes cover, "aspect-[21/9]"
-    assert_includes cover, "justify-start rounded-none p-12 md:p-24"
-    refute_includes cover, "justify-end rounded-none"
-    assert_includes cover, "hero_copy_classes"
-    assert_includes cover, "max-w-3xl"
-    assert_includes cover, "recording_studio_presskits.cover.eyebrow"
-    assert_includes cover_html, "<% if hero? %>"
-    refute_includes cover_html.split("<% else %>").first, "FlatPack::Card::Component"
-    assert_includes cover_html.split("<% else %>").first, "FlatPack::PageTitle::Component"
-    assert_includes cover_html.split("<% else %>").first, "size: :display"
-    refute_includes cover_html.split("<% else %>").first, "subtitle: description"
-    assert_includes cover_html.split("<% else %>").first, "data-cover-eyebrow"
-    refute_includes cover_html.split("<% else %>").first, "--hero-headline-size"
-    assert_includes cover_html.split("<% else %>").first, "data-cover-company"
-    assert_includes cover_html.split("<% else %>").first, "recording_studio_company_logo"
-    assert_includes cover_html.split("<% else %>").first, "data-cover-location"
-    assert_includes cover_html.split("<% else %>").first, "location_recordable.display_name"
+    assert_includes cover, "def brand_color"
+    assert_includes cover, "def pill_style"
+    refute_includes cover, "def hero?"
+    refute_includes cover_html, "<% if hero? %>"
+    refute_includes cover_html, "size: :display"
+    assert_includes cover_html, "data-cover-eyebrow"
+    assert_includes cover_html, "data-cover-company"
+    assert_includes cover_html, "data-cover-location"
+    assert_includes cover_html, "location_recordable.display_name"
+    assert_includes cover_html, "pill_style"
     company = File.read(File.expand_path("../lib/recording_studio_presskits/cover/company.rb", __dir__))
     assert_includes company, "RecordingStudioCompany.company"
     assert_includes company, "RecordingStudioCompany.allowance"
     image = File.read(File.expand_path("../lib/recording_studio_presskits/cover/image.rb", __dir__))
-    assert_includes image, "aspect-[1440/640]"
     assert_includes image, "CoverImage.url_for"
-    assert_includes cover_html, "hero_copy_classes"
     grid_card = File.read(File.expand_path("../lib/recording_studio_presskits/cover/grid_card.rb", __dir__))
     assert_includes grid_card, "cover_card: true"
     assert_includes grid_card, "@container"
@@ -678,8 +668,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "@min-[640px]:rounded-tr-none"
     assert_includes cover_html, "flex flex-1 flex-col px-8 pt-7"
     refute_includes cover_html.split("<% if card? %>").first, "@min-[640px]"
-    preview_markup = cover_html.split('data-recording-studio-presskits--cover-preview-target="surface"').last
-    refute_includes preview_markup, "@min-[640px]"
+    refute_includes cover_html, 'cover-preview-target="surface"'
     assert_includes cover_html, "data-cover-fallback"
     assert_includes cover_html, "data-cover-list"
     assert_includes cover_html, "recording_studio_add_to_list"
@@ -753,7 +742,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes kit_header, "offset: fab_offset"
     refute_includes kit_header, "ellipsis_vertical"
     assert_includes kit_header, "edit_heading_label"
-    assert_includes kit_header, "cover_colours_label"
+    assert_includes kit_header, "style_label"
     assert_includes kit_header, "cover_image_label"
     assert_includes kit_header, "cover_image_path"
     refute_includes kit_header, "arrows-up-down"
@@ -813,16 +802,22 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, "cover_remove_path"
     refute_includes header, "Choose from the library"
     refute_includes header, "recording_placements_path"
-    assert_includes header, 'name: "press_kit[cover_color]"'
-    assert_includes header, 'name: "press_kit[cover_text_color]"'
-    assert_includes header, "Text colour"
-    assert_includes header, "FlatPack::RadioGroup::Component"
-    assert_includes header, "variant: :swatches"
-    assert_includes header, "size: :md"
-    assert_includes header, "cover_text_swatch_options"
-    assert_includes header, "variant: :inline"
-    assert_includes header, "FlatPack::ColorSwatch::Component"
-    assert_includes header, 'id="presskits-header-colours"'
+    assert_includes header, "brand_swatches"
+    assert_includes header, "FlatPack::Tabs::Component"
+    assert_includes header, 'label: "Press center"'
+    assert_includes header, 'label: "Custom"'
+    assert_includes header, "variant: :pills"
+    refute_includes header, "Inherit from press center"
+    refute_includes header, "Cover::Component"
+    swatches = File.read(File.expand_path("../app/views/recording_studio_presskits/press_kits/_brand_swatches.html.erb", __dir__))
+    assert_includes swatches, 'name: "press_kit[brand_color]"'
+    assert_includes swatches, 'name: "press_kit[font_family]"'
+    assert_includes swatches, "FlatPack::FontSwatch::Component"
+    assert_includes swatches, "FlatPack::ColorSwatch::Component"
+    header_rb = File.read(File.expand_path("press_kits/header_editor_component.rb", components))
+    assert_includes header_rb, "def press_center_tab?"
+    assert_includes header_rb, "brand_source"
+    assert_includes header, 'id="presskits-header-brand"'
     chrome = File.read(File.expand_path("press_kits/editor_chrome.rb", components))
     assert_includes chrome, "--surface-muted-background-color"
     refute_includes chrome, "hover:bg-[var(--surface-muted-background-color)]"
@@ -885,20 +880,21 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome_js, "data-pk-edit-active"
     assert_includes chrome_js, "data-presskits-editor-region"
     refute_includes chrome_js, "opacity-100"
-    assert_includes header, "auto_text_value"
+    refute_includes header, "inherit_font_label"
     assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
     assert_includes header, "flat-pack--unsaved-changes"
     refute_includes header, 'text: "Cancel"'
     refute_includes header, "cols: 2"
-    assert_includes header, 'id: "presskits-header-edit-preview"'
-    assert_includes header, "Cover::Component"
-    preview_js = File.read(File.expand_path(
-                             "../app/javascript/recording_studio_presskits/controllers/cover_preview_controller.js",
-                             __dir__
-                           ))
-    assert_includes preview_js, "heading.style.color = textColor"
-    assert_includes preview_js, "subtitle.style.color = textColor"
-    assert_operator header.index('name: "press_kit[title]"'), :<, header.index('id: "presskits-header-edit-preview"')
+    refute_includes header, 'id: "presskits-header-edit-preview"'
+    brand_js = File.read(File.expand_path(
+                           "../app/javascript/recording_studio_presskits/controllers/kit_brand_controller.js",
+                           __dir__
+                         ))
+    assert_includes brand_js, "chooseSource"
+    assert_includes brand_js, "press_center"
+    refute_includes brand_js, "chooseFont"
+    refute_includes brand_js, "presskits-header-edit-preview"
+    assert_operator header.index('name: "press_kit[title]"'), :<, header.index("presskits-header-brand")
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
     refute_includes show, "FlatPack::Picker::Component"

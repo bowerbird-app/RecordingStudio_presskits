@@ -47,29 +47,9 @@ class ConfigurationTest < Minitest::Test
     assert_equal({}, configuration.download_audience_icons)
     refute_respond_to configuration, :section_library_keys
     refute_respond_to configuration, :library_key_for
-    assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_COLORS, configuration.cover_palette.colors
-    assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_COLOR, configuration.cover_palette.default_color
-    refute configuration.any_cover_color?
-    assert_equal RecordingStudioPresskits::Cover::Palette::DEFAULT_TEXT_COLORS, configuration.cover_text_palette.colors
-    refute configuration.any_cover_text_color?
-    assert configuration.cover_text_auto?
+    refute_respond_to configuration, :cover_colors
+    refute configuration.to_h.key?(:cover_colors)
     assert_instance_of RecordingStudio::Hooks, configuration.hooks
-  end
-
-  def test_cover_colors_any_is_exported
-    @configuration.merge!(cover_colors: :any, default_cover_color: "#112233")
-
-    assert @configuration.any_cover_color?
-    assert_equal :any, @configuration.to_h.fetch(:cover_colors)
-    assert_equal "#112233", @configuration.to_h.fetch(:default_cover_color)
-  end
-
-  def test_cover_text_colors_any_and_auto_are_exported
-    @configuration.merge!(cover_text_colors: :any, cover_text_auto: false)
-
-    assert @configuration.any_cover_text_color?
-    assert_equal :any, @configuration.to_h.fetch(:cover_text_colors)
-    refute @configuration.to_h.fetch(:cover_text_auto)
   end
 
   def test_merge_accepts_string_keys

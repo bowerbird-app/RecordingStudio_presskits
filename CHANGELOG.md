@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.43.0] - 2026-10-13
+
+### Added
+- A press kit stores nullable `brand_color` (`#RRGGBB`) and `font_family` (`sans`, `serif`, or `mono`). Nil means inherit. `KitBranding` resolves each field on its own: kit value, then the parent press center when `RecordingStudioPressCenters` is loaded, then `#333333` and `sans`. An explicit `#333333` or `sans` is stored, so a kit can force the default over a branded center.
+- `RecordingStudioPresskits.branding_style_for` always returns a style string. When `RecordingStudioPressCenters::Branding` is loaded it calls `Branding.new(brand_color:, font_family:).style_attribute`. Otherwise `BrandStyle` emits the same tokens.
+- The header screen uses Flatpack tabs, **Press center** and **Custom**, when press centers is loaded. **Press center** stores both fields as nil. **Custom** shows the font and colour swatches, prefilled with the resolved press center values, and saving stores both. Without press centers, the tabs stay off and the swatches show on their own.
+- Version `0.43.0`
+
+### Changed
+- The coloured header is gone. `Cover::Component` only renders `:card`. That card keeps the wide container-query layout, and it is the header on the public page, owner preview, audience preview, and the kit editor. Sections stay in their own cards. The pill and **View** use the resolved brand colour, with contrast text. A missing photo is a muted surface. The short description sits on the card. Kit location sits under the company.
+- The kit header FAB action is **Style**, and it opens `#presskits-header-brand`. The header form has no kit preview. Grid cards and the public kit still show the list heart when Lists is loaded.
+
+### Removed
+- `cover_style`, `cover_color`, and `cover_text_color`. `config.cover_colors`, `config.default_cover_color`, `config.cover_text_colors`, and `config.cover_text_auto` are gone. `:hero` and `:preview` are gone.
+
+### Upgrade notes
+- Bump to `0.43.0`. Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate`. The new migration drops `cover_style`, `cover_color`, and `cover_text_color` and adds nullable `brand_color` and `font_family`. There is no copy from the old columns. Kits that should keep a colour need `brand_color` set again.
+- Drop `cover_colors`, `default_cover_color`, `cover_text_colors`, and `cover_text_auto` from the host initializer and `config/recording_studio_presskits.yml`.
+- Hosts that called `Cover::Component` with `cover_color:`, `cover_style:`, `cover_text_color:`, `size: :hero`, or `size: :preview` should pass `brand_color:` and `font_family:` and render `:card`. An unknown size renders the wide card.
+- `branding_style_for` no longer returns nil. A kit with no brand and no press center still paints `#333333` and `sans` on `#presskits-public-page` and `#presskits-kit-embed`.
+- API show and update use `brand_color` and `font_family`. Nil means inherit. `cover_style`, `cover_color`, and `cover_text_color` are gone.
+- Press kits still does not depend on press centers. The wide card and the section-card stack stay.
+
 ## [0.42.0] - 2026-10-13
 
 ### Changed

@@ -7,7 +7,8 @@
   <%= render RecordingStudioPresskits::Cover::Component.new(
     recording: @press_kit_recording,
     size: :card,
-    heading: :h1
+    heading: :h1,
+    id: "presskits-kit-cover"
   ) %>
 
   <%= render FlatPack::Fab::Component.new(
@@ -28,8 +29,8 @@
     ) %>
     <% fab.with_action(
       icon: :swatch,
-      label: cover_colours_label,
-      href: "#{@header_edit_path}#presskits-header-colours",
+      label: style_label,
+      href: "#{@header_edit_path}#presskits-header-brand",
       data: helpers.presskits_editor_open_data
     ) %>
     <% if cover_image_path %>

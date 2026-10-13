@@ -49,7 +49,7 @@ en:
       text_body: "Section text"
       section_actions: "Section actions"
       header_actions: "Header actions"
-      cover_colours: "Cover colours"
+      style: "Style"
       cover_image: "Cover image"
       upload_cover_image: "Upload"
       change_cover_image: "Change"

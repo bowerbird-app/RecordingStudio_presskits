@@ -36,14 +36,14 @@ module RecordingStudioPresskits
       end
 
       def grid_card_data
-        { cover_card: true, cover_color: cover_color, cover_style: cover_style }
+        { cover_card: true, brand_color: brand_color, brand_text_color: brand_text_color }
       end
 
       def view_button_theme
         {
-          primary: cover_color,
-          primary_hover: cover_color,
-          primary_text: Contrast.text_on(cover_color)
+          primary: brand_color,
+          primary_hover: brand_color,
+          primary_text: brand_text_color
         }
       end
 
@@ -53,6 +53,7 @@ module RecordingStudioPresskits
 
       def show_add_to_list?
         return false unless card?
+        return false unless @add_to_list
         return false unless lists_installed?
         return false if current_actor.blank?
         return false if @recording.blank?
