@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - On the kit editor, a section title and subtitle use `FlatPack::InlineEdit::Component` (`mode: :text`). Hover shows the text is editable. Click edits it in place. An empty subtitle shows **Add a subtitle** and stays clickable. Saves PATCH `kit_section[title]` or `kit_section[subtitle]` on the section. A save that sends only one leaves the other.
-- The section FAB and its menu are gone, including per-section **Add new section**. Hover shows **Order**, **Edit**, and an icon-only `FlatPack::TrashButton::Component`. **Order** opens Reorder. **Edit** opens the content screen. Trash confirms with the button's own animation and deletes through Trashable. Below `sm`, and on touch, the row stays visible.
+- The section FAB and its menu are gone, including per-section **Add new section**. Hover shows **Edit**, **Order**, and an icon-only `FlatPack::TrashButton::Component` at `size: :sm`. A text section skips **Edit**. **Edit** opens the content screen. **Order** opens Reorder. Trash confirms with the button's own animation and deletes through Trashable. The trash control clears `--hit-target-min` so its height matches those labeled buttons. A section does not take a hover background. Below `sm`, and on touch, the row stays visible.
 - A text section hides **Edit**. Its body uses inline edit `mode: :rich` (the bubble toolbar) and saves `text[body]` on the section update path.
 - Flatpack is `>= 0.1.228` (dummy tag `v0.1.228`) for Inline Edit and Trash Button.
 - Version `0.42.0`

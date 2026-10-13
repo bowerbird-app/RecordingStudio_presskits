@@ -769,6 +769,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section, "data-presskits-section-actions"
     assert_includes section, "order_label"
     assert_includes section, "edit_label"
+    assert_operator section.index("edit_label"), :<, section.index("order_label")
+    assert_operator section.index("order_label"), :<, section.index("FlatPack::TrashButton::Component")
     assert_includes section, "show_content_edit?"
     assert_includes section, "FlatPack::TrashButton::Component"
     assert_includes section, "expand: :left"
@@ -776,6 +778,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes section, "method: :delete"
     assert_includes section, "text_section?"
     assert_includes section, "text_inline"
+    assert_includes section_ruby, "TRASH_SIZE_STYLE = \"--hit-target-min: 0px\""
     assert_includes section_ruby, "max-sm:opacity-100"
     assert_includes section_ruby, "[@media(hover:none)]:opacity-100"
     assert_includes section_ruby, "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
@@ -812,6 +815,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, 'id="presskits-header-colours"'
     chrome = File.read(File.expand_path("press_kits/editor_chrome.rb", components))
     assert_includes chrome, "--surface-muted-background-color"
+    refute_includes chrome, "hover:bg-[var(--surface-muted-background-color)]"
     assert_includes chrome, "focus-visible:outline"
     assert_includes chrome, "[@media(hover:hover)]"
     assert_includes chrome, "data-[pk-edit-active]"

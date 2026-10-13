@@ -106,8 +106,8 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_response :success
     remove = recording_studio_presskits.press_kit_section_path(kit, section)
     body = css_select("#presskits-section-#{section.id}-body").first
-    assert_includes body["class"], "hover:bg-[var(--surface-muted-background-color)]"
-    assert_includes body["class"], "[@media(hover:hover)]"
+    refute_includes body["class"], "hover:bg-[var(--surface-muted-background-color)]"
+    refute_includes body["class"], "[@media(hover:hover)]"
     assert_includes body["class"], "data-[pk-edit-active]"
     refute_includes body["class"], "[@media(hover:none)]:opacity-100"
     assert_includes body["class"], "focus-visible:outline"
@@ -129,6 +129,9 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes actions["class"], "max-sm:opacity-100"
     assert_includes actions["class"], "[@media(hover:none)]:opacity-100"
     assert_includes actions["class"], "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
+    text_actions = css_select("#presskits-section-#{section.id}-actions").first.to_html
+    assert_operator text_actions.index(">Order<"), :<, text_actions.index("fp-trash-button")
+    assert_select "#presskits-section-#{section.id} .fp-trash-button[data-fp-size='sm'][style*='--hit-target-min: 0px']"
     assert_select "#presskits-section-#{section.id}-actions a[href='##{section.id}']", text: "Order"
     assert_select "#presskits-section-#{section.id}-actions a[data-modal-id='presskits-sections-modal']", text: "Order"
     refute_select "#presskits-section-#{section.id}-actions a", text: "Edit"
@@ -149,6 +152,9 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
          params: { type: "RecordingStudioPresskits::Images" }
     images = content_section(kit, RecordingStudioPresskits::Images)
     follow_redirect!
+    image_actions = css_select("#presskits-section-#{images.id}-actions").first.to_html
+    assert_operator image_actions.index(">Edit<"), :<, image_actions.index(">Order<")
+    assert_operator image_actions.index(">Order<"), :<, image_actions.index("fp-trash-button")
     assert_select "#presskits-section-#{images.id}-actions a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, images)}']",
                   text: "Edit"
     assert_select "#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor'][data-turbo-frame='pk-editor-screen']",

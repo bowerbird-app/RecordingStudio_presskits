@@ -14,14 +14,6 @@
       </div>
 
       <div id="<%= actions_id %>" class="<%= action_row_classes %>" data-presskits-section-actions>
-        <%= render FlatPack::Button::Component.new(
-          text: order_label,
-          icon: "bars-3-bottom-left",
-          style: :default,
-          size: :sm,
-          href: reorder_focus_href,
-          data: { modal_id: "presskits-sections-modal" }
-        ) %>
         <% if show_content_edit? %>
           <%= render FlatPack::Button::Component.new(
             text: edit_label,
@@ -32,11 +24,20 @@
             data: helpers.presskits_editor_open_data
           ) %>
         <% end %>
+        <%= render FlatPack::Button::Component.new(
+          text: order_label,
+          icon: "bars-3-bottom-left",
+          style: :default,
+          size: :sm,
+          href: reorder_focus_href,
+          data: { modal_id: "presskits-sections-modal" }
+        ) %>
         <%= render FlatPack::TrashButton::Component.new(
           url: @remove_path,
           method: :delete,
           size: :sm,
-          expand: :left
+          expand: :left,
+          style: trash_size_style
         ) %>
       </div>
     </div>

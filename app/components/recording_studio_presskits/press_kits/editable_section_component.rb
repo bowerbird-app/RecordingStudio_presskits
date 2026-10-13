@@ -72,8 +72,17 @@ module RecordingStudioPresskits
         ACTION_ROW_CLASSES
       end
 
+      # TrashButton :sm matches a labeled :sm button's padding and icon, then
+      # floors the box at --hit-target-min (2.75rem). Order and Edit do not.
+      # Drop that floor so this control is the same height.
+      TRASH_SIZE_STYLE = "--hit-target-min: 0px"
+
       def order_label
         I18n.t("recording_studio_presskits.editor.order")
+      end
+
+      def trash_size_style
+        TRASH_SIZE_STYLE
       end
 
       def edit_label
