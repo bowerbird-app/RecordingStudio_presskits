@@ -31,6 +31,10 @@ module RecordingStudioPresskits
         "flex flex-1 flex-col px-8 pt-7 @min-[640px]:min-w-0"
       end
 
+      def title_tag
+        @title_tag || :h2
+      end
+
       def grid_card_data
         { cover_card: true, cover_color: cover_color, cover_style: cover_style }
       end

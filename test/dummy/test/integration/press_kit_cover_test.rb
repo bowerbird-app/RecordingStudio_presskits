@@ -93,7 +93,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-color='#DB2777']", count: 2
+    assert_select "[data-cover-color='#DB2777']", count: 1
     assert_includes css_select("[data-cover-color='#DB2777']").first.to_html, "Spring launch"
   end
 
@@ -344,10 +344,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-feature] [data-cover-card][data-cover-color='#BFDBFE']", count: 1
-    assert_select "[data-cover-grid] [data-cover-card][data-cover-color='#BFDBFE']", count: 1
+    assert_select "[data-cover-card][data-cover-color='#BFDBFE']", count: 1
     assert_select "[data-cover-card][data-cover-color='#D97706']", count: 1
-    assert_select "[data-cover-fallback]", count: 3
+    assert_select "[data-cover-fallback]", count: 2
     assert_select "[data-cover-company]", count: 0
     assert_select "[data-cover-subtitle]", text: "Collection released"
     assert_select "[data-cover-description]", text: "A longer line that should clamp on the card."
@@ -368,63 +367,70 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
 
     RecordingStudioCompany.create(@root, actor: @user, name: "Harbour Studio")
     get recording_studio_presskits.press_kits_path
-    assert_select "[data-cover-company]", text: "Harbour Studio", count: 3
+    assert_select "[data-cover-company]", text: "Harbour Studio", count: 2
     harbour = css_select("[data-cover-card][data-cover-color='#BFDBFE']").first.to_html
     assert_operator harbour.index("data-cover-company"), :<, harbour.index("data-cover-title")
     assert_operator harbour.index("gap-[14px]"), :<, harbour.index("data-cover-title")
-    assert_select "[data-cover-verification]", count: 3
+    assert_select "[data-cover-verification]", count: 2
     assert_select "[data-cover-company]", text: "HARBOUR STUDIO", count: 0
   end
 
-  test "a full-width card uses container queries and the grid stays stacked markup" do
+  test "the kit editor header is the wide card and the grid keeps the same markup" do
     first = record_kit("Spring launch")
+    @root.revise(first) do |press_kit|
+      press_kit.subtitle = "Collection released"
+      press_kit.description = "Doors at noon."
+    end
     record_kit("Autumn recap")
     sign_in @user
     switch_to_root(@root)
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-feature]", count: 1
-    assert_select "[data-cover-grid] [data-cover-feature]", count: 0
-    assert_select "[data-cover-feature] [data-cover-card]", count: 1
-    assert_select "[data-cover-grid] [data-cover-card]", count: 2
-
-    feature = css_select("[data-cover-feature]").first
-    assert_includes feature["class"], "w-full"
-    feature_card = css_select("[data-cover-feature] [data-cover-card]").first
-    assert_includes feature_card["class"], "@container"
-    row = css_select("[data-cover-feature] [data-cover-row]").first
-    assert_includes row["class"], "flex-col"
-    assert_includes row["class"], "@min-[640px]:flex-row"
-    assert_includes row["class"], "@min-[640px]:min-h-[50cqw]"
-    frame = css_select("[data-cover-feature] [data-cover-frame]").first
-    assert_includes frame["class"], "aspect-[430/368]"
-    assert_includes frame["class"], "@min-[640px]:w-1/2"
-    assert_includes frame["class"], "@min-[640px]:aspect-auto"
-    body = css_select("[data-cover-feature] [data-cover-row] > div").last
-    assert_includes body["class"], "flex flex-1 flex-col"
-    assert_includes body["class"], "@min-[640px]:min-w-0"
-    assert_includes feature.to_html, "mt-auto"
-    refute_includes feature.to_html, "Share"
-    refute_includes feature.to_html, "RELEASE DATE"
-    refute_includes feature.to_html, "24 files"
-
-    grid_card = css_select("[data-cover-grid] [data-cover-card]").first
+    assert_select "[data-cover-feature]", count: 0
+    assert_select "[data-cover-card]", count: 2
+    grid_card = css_select("[data-cover-card]").first
     assert_includes grid_card["class"], "@container"
     assert_includes grid_card.to_html, "aspect-[430/368]"
-
-    get recording_studio_presskits.press_kits_path(view: "table")
-    assert_response :success
-    assert_select "[data-cover-feature]", count: 0
-    assert_select "[data-cover-card]", count: 0
+    assert_includes grid_card.to_html, "@min-[640px]:flex-row"
 
     get recording_studio_presskits.edit_press_kit_path(first)
     assert_response :success
-    hero = css_select("#presskits-kit-header").first.to_html
-    refute_includes hero, "@container"
-    refute_includes hero, "@min-[640px]"
-    assert_includes hero, "aspect-[1440/640]" if hero.include?("data-cover-image")
-    refute_includes hero, "aspect-[430/368]"
+    header = css_select("#presskits-kit-header").first
+    card = css_select("#presskits-kit-header [data-cover-card]").first
+    assert_includes card["class"], "@container"
+    row = css_select("#presskits-kit-header [data-cover-row]").first
+    assert_includes row["class"], "flex-col"
+    assert_includes row["class"], "@min-[640px]:flex-row"
+    assert_includes row["class"], "@min-[640px]:min-h-[50cqw]"
+    frame = css_select("#presskits-kit-header [data-cover-frame]").first
+    assert_includes frame["class"], "aspect-[430/368]"
+    assert_includes frame["class"], "@min-[640px]:w-1/2"
+    assert_includes frame["class"], "@min-[640px]:aspect-auto"
+    body = css_select("#presskits-kit-header [data-cover-row] > div").last
+    assert_includes body["class"], "flex flex-1 flex-col"
+    assert_includes body["class"], "@min-[640px]:min-w-0"
+    assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
+    assert_select "#presskits-kit-header h1[data-cover-title]", text: "Spring launch"
+    assert_select "#presskits-kit-header [data-cover-subtitle]", text: "Collection released"
+    assert_select "#presskits-kit-header [data-cover-description]", text: "Doors at noon."
+    refute_includes frame.to_html, "Doors at noon."
+    assert_select "#presskits-kit-header a[data-cover-view]", count: 0
+    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Edit heading']"
+    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Cover colours']"
+    refute_includes header.to_html, "Share"
+    refute_includes header.to_html, "RELEASE DATE"
+    refute_select "#presskits-cover-hero"
+    section = css_select("#presskits-editor-sections").first
+    refute_includes section.to_html, "@min-[640px]:flex-row"
+  end
+
+  test "the card heading is h1 or h2" do
+    kit = record_kit("Spring launch")
+
+    assert_equal :h2, RecordingStudioPresskits::Cover::Component.new(recording: kit).title_tag
+    assert_equal :h2, RecordingStudioPresskits::Cover::Component.new(recording: kit, heading: :h3).title_tag
+    assert_equal :h1, RecordingStudioPresskits::Cover::Component.new(recording: kit, heading: :h1).title_tag
   end
 
   test "the grid heart stays off without an actor" do

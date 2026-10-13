@@ -62,7 +62,9 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "#presskits-kit-header #presskits-cover-image img[alt='A white gallery hall']"
+    assert_select "#presskits-kit-header [data-cover-image] img[alt='A white gallery hall']"
+    assert_select "#presskits-kit-header [data-cover-card]"
+    refute_select "#presskits-kit-header #presskits-cover-image"
     assert_includes response.body, "Cover image"
     assert_select "a[href='#{header_cover_path(kit)}']"
     refute_includes response.body, recording_studio_attachable.recording_placements_path(kit)

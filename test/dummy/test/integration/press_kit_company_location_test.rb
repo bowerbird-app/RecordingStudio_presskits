@@ -63,7 +63,7 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "#presskits-kit-header [data-cover-company]", text: /Harbour Studio/
-    assert_select "#presskits-kit-header [data-cover-location]", text: /Harbour Gallery/
+    assert_select "#presskits-kit-header [data-cover-location]", count: 0
   end
 
   test "header editor shows location search fields and can create revise and clear a place" do
