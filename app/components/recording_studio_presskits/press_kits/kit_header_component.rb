@@ -13,28 +13,20 @@ module RecordingStudioPresskits
         EditorChrome.region_classes(header: true)
       end
 
-      def fab_classes
-        EditorChrome::FAB_CLASSES
+      def action_row_classes
+        EditorChrome::ACTION_ROW_CLASSES
       end
 
-      def fab_offset
-        EditorChrome::FAB_OFFSET
+      def image_action_classes
+        EditorChrome::IMAGE_ACTION_CLASSES
       end
 
-      def header_actions_label
-        I18n.t("recording_studio_presskits.editor.header_actions")
+      def edit_label
+        I18n.t("recording_studio_presskits.editor.edit")
       end
 
-      def location_label
-        I18n.t("recording_studio_presskits.editor.location")
-      end
-
-      def style_label
-        I18n.t("recording_studio_presskits.editor.style")
-      end
-
-      def cover_image_label
-        I18n.t("recording_studio_presskits.editor.cover_image")
+      def edit_image_label
+        I18n.t("recording_studio_presskits.editor.edit_image")
       end
 
       def cover_image_path

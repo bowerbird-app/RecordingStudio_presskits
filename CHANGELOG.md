@@ -11,12 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - On the kit editor, the kit title, subtitle, and short description use `FlatPack::InlineEdit::Component` (`mode: :text`) on the cover card. Hover shows they can be edited. Click edits in place. An empty title shows **Add a title** and cannot be saved empty. An empty subtitle shows **Add a subtitle**. An empty short description shows **Add a short description** and stays clickable. Each save PATCHes one field on the header update path. A request that includes only one leaves the others, including brand and location.
-- The header FAB's first action is **Location**. It opens the header screen at the kit location. **Style** and **Cover image** stay. The header screen is kit location, **Brand**, and **Cover image**.
+- The header FAB is gone. Hover shows **Edit** at the top right of the card body, the same `FlatPack::Button::Component` (`size: :sm`) as a section's **Edit**. It opens the header screen (kit location and **Brand**). **Edit image** sits in the cover's top bar, opposite the **Press kit** badge, and opens **Cover image**. Below `sm`, and on touch, both stay visible and show only their icons. Index cards, the public kit, and the owner preview do not get those buttons.
 - Kit location on the cover card sits under the short description. A blank short description puts it under the title and subtitle. Index cards, the public kit, the owner preview, the audience preview, and the kit editor use that order.
 - Version `0.45.0`
 
 ### Upgrade notes
 - No migration. Bump to `0.45.0`. `0.44.0` already shipped the embargo dependency. On the kit editor, title, subtitle, and short description are no longer fields on the header form. They save from the card, one field at a time, on the same header update path. A PATCH that omits a field leaves the stored value. A blank title is still rejected. Index cards, the public kit, and the owner preview stay static.
+- The header plus FAB is gone. Hosts that replaced `KitHeaderComponent` should drop it. On the editor card only, pass `body_actions` and `image_actions` into `Cover::Component`. **Edit** and **Edit image** are `EditorActionButtonComponent` (a Flatpack button, `size: :sm`), the same control as a section's **Edit** and **Order**.
 
 ## [0.44.0] - 2026-10-13
 

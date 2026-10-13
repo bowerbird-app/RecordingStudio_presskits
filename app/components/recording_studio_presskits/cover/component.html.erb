@@ -21,7 +21,8 @@
             data-cover-fallback
           ></div>
         <% end %>
-        <div class="absolute left-5 top-5">
+        <%# Tailwind scans these literals: "absolute inset-x-0 top-0" "items-start" "justify-between" "gap-3" "p-5" %>
+        <div class="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-5">
           <span class="inline-flex" style="<%= pill_style %>" data-cover-tag data-cover-eyebrow>
             <%= render FlatPack::Badge::Component.new(
               text: eyebrow,
@@ -30,10 +31,14 @@
               class: "!border-transparent !px-4 !py-2.5 !text-[15px] !font-bold shadow-[0px_4px_16px_0px_rgba(26,20,10,0.12)]"
             ) %>
           </span>
+          <% if image_actions? %>
+            <%= image_actions %>
+          <% end %>
         </div>
       </div>
 
       <div class="<%= grid_card_body_classes %>">
+        <% brand_row = capture do %>
         <div class="flex items-start gap-3"<% if show_brand_row? %> data-cover-brand<% end %>>
           <div class="flex min-w-0 flex-1 flex-col gap-[14px]">
             <% if company_name.present? %>
@@ -86,6 +91,19 @@
             </div>
           <% end %>
         </div>
+        <% end %>
+
+        <% if body_actions? %>
+          <%# Same row as a section: actions sit at the trailing edge, above the copy below sm. %>
+          <div class="flex flex-col-reverse gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0 flex-1">
+              <%= brand_row %>
+            </div>
+            <%= body_actions %>
+          </div>
+        <% else %>
+          <%= brand_row %>
+        <% end %>
 
         <% if href.present? %>
           <div class="mt-auto flex justify-end pb-8 pt-6">

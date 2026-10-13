@@ -1,8 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Flatpack FAB has no tap-to-activate or hover-only visibility API.
-// Desktop uses CSS hover / focus-within. Touch (`hover: none`) uses this
-// controller so tint and FAB appear only on the active region.
+// Desktop uses CSS hover / focus-within for the header wash and section tint.
+// Touch (`hover: none`) uses this controller so that tint follows the active region.
 export default class extends Controller {
   connect() {
     this.releaseTrashFocusGuard = this.holdTrashArmFocus()

@@ -163,9 +163,15 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-editor-grid"
     refute_includes response.body, "md:grid-cols-2"
     header_path = recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_select "#presskits-kit-header [role='menuitem'][href='#{header_path}'][aria-label='Location']"
-    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Style']"
-    assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
+    assert_select "#presskits-kit-header [data-presskits-header-actions] a[href='#{header_path}'][aria-label='Edit']"
+    assert_select "#presskits-kit-header [data-presskits-header-image-actions] a[href='#{header_path}#press_kit_cover_image'][aria-label='Edit image']"
+    edit = css_select("#presskits-kit-header [data-presskits-header-actions] a[aria-label='Edit']").first
+    assert_includes edit["class"], "px-[var(--button-padding-x-sm)]"
+    assert_includes edit["class"], "text-xs"
+    assert_includes edit["class"], "max-sm:[&>span]:sr-only"
+    refute_select "#presskits-kit-header .fp-fab"
+    refute_select "#presskits-kit-header [role='menuitem'][aria-label='Location']"
+    refute_select "#presskits-kit-header [role='menuitem'][aria-label='Style']"
     refute_select "#presskits-editor-toolbar a[href='#{header_path}']"
     refute_select "#presskits-editor-toolbar a", text: "Header"
     assert_select "#presskits-kit-header input[name='press_kit[title]'][value='Spring launch']"
@@ -238,7 +244,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "Empty launch"
     header_path = recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_select "#presskits-kit-header [role='menuitem'][href='#{header_path}'][aria-label='Location']"
+    assert_select "#presskits-kit-header [data-presskits-header-actions] a[href='#{header_path}'][aria-label='Edit']"
     assert_select "#presskits-kit-header input[name='press_kit[title]'][value='Empty launch']"
     assert_select "#presskits-kit-header [data-placeholder='Add a short description']"
     assert_select "#presskits-kit-header textarea", count: 0
@@ -935,7 +941,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header [data-placeholder='Add a short description']"
     assert_select "#presskits-kit-header [data-cover-description] .fp-inline-edit__surface.is-empty"
     assert_select "#presskits-editor-preview"
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_header_path(kit)}'][role='menuitem'][aria-label='Location']"
+    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_header_path(kit)}'][aria-label='Edit']"
   end
 
   test "saving one header field leaves the others" do

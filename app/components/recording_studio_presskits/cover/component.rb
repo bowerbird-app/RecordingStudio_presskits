@@ -11,6 +11,10 @@ module RecordingStudioPresskits
 
       SIZES = %i[card].freeze
 
+      # Editor-only. Index, public, and preview cards leave both empty.
+      renders_one :body_actions
+      renders_one :image_actions
+
       def initialize(recording: nil, title: nil, description: nil, subtitle: nil, brand_color: nil, inline_path: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
                      font_family: nil, size: :card, href: nil, id: nil, heading: :h2, add_to_list: true,
                      show_image: true)

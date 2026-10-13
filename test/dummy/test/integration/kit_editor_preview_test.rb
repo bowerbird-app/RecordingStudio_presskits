@@ -85,11 +85,23 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes sections["class"], "p-5"
     refute_includes sections["class"], "md:p-8"
     refute_includes sections["class"], "lg:p-10"
-    assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
-    header_fab = css_select("#presskits-kit-header .fp-fab").first
-    assert_includes header_fab["style"].to_s, "--fp-fab-offset: 1rem"
-    assert_select "#presskits-kit-header button.fp-fab__trigger[aria-label='Header actions']"
-    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Location']"
+    refute_select "#presskits-kit-header .fp-fab"
+    header_actions = css_select("#presskits-kit-header [data-presskits-header-actions]").first
+    assert_includes header_actions["class"], "max-sm:opacity-100"
+    assert_includes header_actions["class"], "self-end"
+    assert_includes header_actions["class"], "[@media(hover:none)]:opacity-100"
+    assert_includes header_actions["class"], "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
+    assert_includes header_actions.parent["class"], "flex-col-reverse"
+    assert_includes header_actions.parent["class"], "sm:justify-between"
+    edit = css_select("#presskits-kit-header [data-presskits-header-actions] a[aria-label='Edit']").first
+    assert_includes edit["class"], "px-[var(--button-padding-x-sm)]"
+    assert_includes edit["class"], "text-xs"
+    assert_includes edit["class"], "max-sm:[&>span]:sr-only"
+    image_actions = css_select("#presskits-kit-header [data-presskits-header-image-actions]").first
+    assert_includes image_actions["class"], "[@media(hover:none)]:opacity-100"
+    refute_includes image_actions["class"], "self-end"
+    assert_includes image_actions.parent["class"], "justify-between"
+    assert_includes image_actions.parent["class"], "p-5"
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"
@@ -103,7 +115,8 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     editor = css_select("[data-controller='recording-studio-presskits--editor-chrome']").first
     assert editor
     assert_includes editor["data-action"], "onPointerDown"
-    assert_select "#presskits-kit-header button.fp-fab__trigger [data-flat-pack--icon-name-value='plus']"
+    assert_select "#presskits-kit-header [data-presskits-header-actions] [data-flat-pack--icon-name-value='pencil']"
+    assert_select "#presskits-kit-header [data-presskits-header-image-actions] [data-flat-pack--icon-name-value='photo']"
   end
 
   test "each section has heading and content controls" do
