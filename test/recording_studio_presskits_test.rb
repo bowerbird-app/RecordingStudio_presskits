@@ -660,6 +660,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "data-cover-fallback"
     assert_includes cover_html, "data-cover-list"
     assert_includes cover_html, "recording_studio_add_to_list"
+    heart_call = cover_html[/recording_studio_add_to_list\(.*?\)/m]
+    assert_includes heart_call, "size: :lg"
     assert_includes cover_html, "cover_view: true"
     assert_includes cover_html, "line-clamp-3"
     assert_includes cover_html, "arrow-right"

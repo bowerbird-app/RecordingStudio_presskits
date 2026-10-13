@@ -11,7 +11,7 @@ bin/rails db:migrate
 
 `Cover::Component` at `:card` is the grid card for a press center. The top is the cover photo (`object-cover`, rounded top corners) or the cover colour when the kit has no photo. A **Press kit** pill sits on that image. The white body is a flex column. The company name (from `Cover::Company`, hidden when the root has no company) sits 14px above the title. The heart stays on that company row. The subtitle and the short description, clamped to three lines, follow. **View** links to `href` and uses `mt-auto`, so it stays at the bottom of a card that fills its grid cell. Host grids should use `align: :stretch`. Its background is `resolved_cover_color`, or the default cover colour. The label uses `Cover::Contrast.text_on`.
 
-The heart is Lists' `recording_studio_add_to_list` (`icon: "heart"`, `show_chevron: false`). It renders when Lists is loaded, the card has a recording, and `Current.actor` is present. The card is not itself a link, and the heart stops the click, so it does not open the kit. A press kit page still renders when Lists is not loaded.
+The heart is Lists' `recording_studio_add_to_list` (`icon: "heart"`, `size: :lg`, `show_chevron: false`). It renders when Lists is loaded, the card has a recording, and `Current.actor` is present. The card is not itself a link, and the heart stops the click, so it does not open the kit. A press kit page still renders when Lists is not loaded.
 
 `:preview` stays a 9/16 colour tile and skips the photo. A subtitle, when present, is the preview line under the title, and the short description sits under that. `:hero` keeps the eyebrow, the display title, the company, and the location. The subtitle sits under the title. The short description stays off the hero.
 

@@ -360,7 +360,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes css_select("a[data-cover-view]").first.parent["class"], "mt-auto"
     assert_select ".grid.items-stretch"
     assert_select "a[data-cover-card]", count: 0
-    assert_select "[data-cover-list] button[type=button]"
+    assert_select "[data-cover-list] button[type=button] svg.w-6.h-6"
     list = css_select("[data-cover-card][data-cover-color='#BFDBFE'] [data-cover-list]").first
     refute_includes list.to_html, recording_studio_presskits.edit_press_kit_path(first)
     assert_includes response.body, "recording-studio-lists--add-to-list"
