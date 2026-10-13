@@ -256,9 +256,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}'][role='menuitem'][aria-label='Edit content']"
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}'][role='menuitem'][aria-label='Edit content']"
-    assert_select "a[href='#{recording_studio_presskits.heading_press_kit_section_path(kit, hero)}'][role='menuitem'][aria-label='Edit title']"
+    assert_select "#presskits-section-#{hero.id}-actions a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}']",
+                  text: "Edit"
+    assert_select "#presskits-section-#{quotes.id}-actions a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}']",
+                  text: "Edit"
+    refute_select "#presskits-section-#{hero.id} a[href='#{recording_studio_presskits.heading_press_kit_section_path(kit, hero)}']"
     refute_includes response.body, "Fake block: Hero"
     refute_includes response.body, "Fake block: Quotes"
     assert_select "button", text: "Move up", count: 0
@@ -548,12 +550,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes text_row.to_html, 'data-flat-pack--icon-name-value="document-text"'
     refute_includes text_row.to_html, "arrows-up-down"
     assert_includes text_row["class"], "!items-center"
-    assert_select ".fp-section-title#launch-notes h2", text: "Launch notes"
-    assert_select ".fp-section-title#launch-notes" do |titles|
-      refute_includes titles.first.parent["class"].to_s, "gap-4"
-    end
-    assert_select "a[href='#launch-notes'][aria-label='Copy link to Launch notes']"
-    assert_select "[data-controller='flat-pack--section-title-anchor']"
+    assert_select ".fp-section-title h2", text: "Launch notes"
+    assert_select "#presskits-section-#{section.id} p", text: "Doors at noon"
+    refute_select "#presskits-editor-preview a[href='#launch-notes']"
+    refute_select "#presskits-editor-preview [data-controller='flat-pack--section-title-anchor']"
+    refute_select "#presskits-section-#{section.id}-actions a", text: "Edit"
     assert_select "h2", text: "Set list"
     assert_select "p", text: "Line two"
 
@@ -1116,7 +1117,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-editor-preview img[alt='The stage']"
     assert_select "#presskits-editor-preview .fp-section-title h2", text: "Press photos"
     assert_select "#presskits-editor-preview .fp-section-title", text: /Doors at noon/
-    assert_select "#presskits-editor-preview a[href='#press-photos'][aria-label='Copy link to Press photos']"
+    refute_select "#presskits-editor-preview a[href='#press-photos']"
 
     publish_images_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-images"
@@ -1382,7 +1383,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     RecordingStudioPresskits::Text.where(id: section_content(text).recordable.id).update_all(body: "<p><br></p>")
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "#presskits-section-#{text.id} #presskits-section-placeholder"
+    refute_select "#presskits-section-#{text.id} #presskits-section-placeholder"
+    assert_select "#presskits-section-#{text.id} [data-flat-pack--inline-edit-mode-value='rich']"
+    assert_select "#presskits-section-#{text.id} [data-placeholder='Add some copy']"
     get recording_studio_presskits.edit_press_kit_section_path(kit, text)
     refute_section_preview_card
   end

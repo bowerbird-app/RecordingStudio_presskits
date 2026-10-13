@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.41.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.42.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -63,7 +63,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.224"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.228"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
@@ -83,7 +83,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.224"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.228"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
@@ -242,6 +242,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes default_layout, "root_switch"
     assert_includes default_layout, '<html data-theme="rounded">'
     assert_includes default_layout, 'stylesheet_link_tag "flat_pack/application"'
+    assert_includes default_layout, 'stylesheet_link_tag "flat_pack/inline_edit"'
     assert_includes default_layout, "page_nav_options[:anchor_href]"
     refute_includes default_layout, "secondary_anchor_href"
     assert_includes default_layout, "One back control from this layout"
@@ -407,7 +408,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "v0.8.0"
     assert_includes readme, "tag: \"v0.5.0\""
-    assert_includes readme, "tag: \"v0.1.224\""
+    assert_includes readme, "tag: \"v0.1.228\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
     assert_includes readme, 'gem "recording_studio_lists", "~> 0.5"'
@@ -441,7 +442,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[1440/640]"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.224"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.228"'
     assert_includes readme, "size: :display"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
@@ -454,8 +455,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "KitQuery.discoverable_for"
     assert_includes readme, 'data-turbo-frame="_top"'
     assert_includes readme, "Edit heading"
-    assert_includes readme, "Edit title"
+    assert_includes readme, "FlatPack::InlineEdit::Component"
+    assert_includes readme, "Add a subtitle"
     assert_includes readme, "Section actions"
+    assert_includes readme, "FlatPack::TrashButton::Component"
+    assert_includes readme, "mode: :rich"
     assert_includes readme, "FlatPack::Fab::Component"
     assert_includes readme, "recording-studio-presskits--editor-chrome"
     assert_includes readme, "icon: :plus"
@@ -466,7 +470,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes readme, "p-4 -m-4"
     assert_includes readme, "variant: :swatches"
     refute_includes readme, "named radios"
-    assert_includes readme, "Edit content"
+    assert_includes readme, "content screen"
     refute_includes readme, "Section settings"
     refute_includes readme, "FlatPack::Fieldset::Component"
     assert_includes readme, "unsaved-changes controller"
@@ -755,22 +759,47 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes kit_header, "arrows-up-down"
     refute_includes kit_header, "trash"
     section = File.read(File.expand_path("press_kits/editable_section_component.html.erb", components))
-    assert_includes section, "FlatPack::Fab::Component"
-    assert_includes section, "contained: true"
-    assert_includes section, "position: :top_right"
-    assert_includes section, "backdrop: false"
+    section_ruby = File.read(File.expand_path("press_kits/editable_section_component.rb", components))
+    inline_heading = File.read(File.expand_path("press_kits/section_inline_heading_component.html.erb", components))
+    text_inline = File.read(File.expand_path("text/inline_component.html.erb", components))
+    refute_includes section, "FlatPack::Fab::Component"
+    refute_includes section, "SectionPickerComponent"
+    refute_includes section, "turbo_confirm"
+    refute_includes section, "add_new_section_label"
+    assert_includes section, "data-presskits-section-actions"
+    assert_includes section, "flex-col-reverse"
+    assert_includes section, "sm:flex-row"
+    assert_includes section, "mobile_icon_classes"
+    assert_includes section, "aria: { label: edit_label }"
+    assert_includes section, "aria: { label: order_label }"
+    refute_includes section, "icon_only:"
+    assert_includes section, "order_label"
+    assert_includes section, "edit_label"
+    assert_operator section.index("edit_label"), :<, section.index("order_label")
+    assert_operator section.index("order_label"), :<, section.index("FlatPack::TrashButton::Component")
+    assert_includes section, "show_content_edit?"
+    assert_includes section, "FlatPack::TrashButton::Component"
+    assert_includes section, "expand: :left"
     assert_includes section, "size: :sm"
-    assert_includes section, "icon: :plus"
-    assert_includes section, "offset: fab_offset"
-    refute_includes section, "ellipsis_vertical"
-    assert_includes section, "style: :danger"
-    assert_includes section, "edit_title_label"
-    assert_includes section, "edit_content_label"
-    assert_includes section, "reorder_label"
-    assert_includes section, "trash_label"
-    assert_includes section, "add_new_section_label"
-    assert_includes section, "turbo_confirm"
-    assert_includes section, "SectionPickerComponent"
+    assert_includes section, "method: :delete"
+    assert_includes section, "text_section?"
+    assert_includes section, "text_inline"
+    assert_includes section_ruby, "TRASH_SIZE_STYLE = \"--hit-target-min: 0px\""
+    assert_includes section_ruby, "max-sm:px-[var(--button-icon-only-padding-sm)]"
+    assert_includes section_ruby, "max-sm:[&>span]:sr-only"
+    assert_includes section_ruby, "self-end sm:self-auto"
+    assert_includes section_ruby, "max-sm:opacity-100"
+    assert_includes section_ruby, "[@media(hover:none)]:opacity-100"
+    assert_includes section_ruby, "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
+    assert_includes inline_heading, "FlatPack::InlineEdit::Component"
+    assert_includes inline_heading, 'name: "kit_section[title]"'
+    assert_includes inline_heading, 'name: "kit_section[subtitle]"'
+    assert_includes inline_heading, "mode: :text"
+    assert_includes inline_heading, "tag: :h2"
+    assert_includes inline_heading, "tag: :p"
+    assert_includes inline_heading, "max-sm:mt-0"
+    assert_includes text_inline, "mode: :rich"
+    assert_includes text_inline, 'name: "text[body]"'
     refute_includes section, "SectionDropdownComponent"
     refute_includes section, "hover:outline-[var(--color-primary)]"
     refute_includes section, "p-4 -mx-4"
@@ -796,6 +825,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes header, 'id="presskits-header-colours"'
     chrome = File.read(File.expand_path("press_kits/editor_chrome.rb", components))
     assert_includes chrome, "--surface-muted-background-color"
+    refute_includes chrome, "hover:bg-[var(--surface-muted-background-color)]"
     assert_includes chrome, "focus-visible:outline"
     assert_includes chrome, "[@media(hover:hover)]"
     assert_includes chrome, "data-[pk-edit-active]"
@@ -850,6 +880,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
                             __dir__
                           ))
     assert_includes chrome_js, "(hover: none)"
+    assert_includes chrome_js, "fp-trash-button__arm"
+    assert_includes chrome_js, "preventScroll: true"
     assert_includes chrome_js, "data-pk-edit-active"
     assert_includes chrome_js, "data-presskits-editor-region"
     refute_includes chrome_js, "opacity-100"

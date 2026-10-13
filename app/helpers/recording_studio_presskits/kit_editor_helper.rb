@@ -71,11 +71,8 @@ module RecordingStudioPresskits
     def editable_section_for(recording, highlight: false)
       RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
         section_recording: recording,
-        heading_path: heading_press_kit_section_path(@press_kit_recording, recording),
         content_path: edit_press_kit_section_path(@press_kit_recording, recording),
-        add_path: press_kit_sections_path(@press_kit_recording),
         remove_path: press_kit_section_path(@press_kit_recording, recording),
-        picker_items: editor_picker_items,
         highlight: highlight
       )
     end

@@ -1,0 +1,22 @@
+<div class="fp-section-title min-w-0 my-6 max-sm:mt-0">
+  <%= render FlatPack::InlineEdit::Component.new(
+    tag: :h2,
+    mode: :text,
+    value: title,
+    name: "kit_section[title]",
+    update_url: @update_path,
+    label: title_label,
+    placeholder: title_placeholder,
+    class: title_classes
+  ) %>
+  <%= render FlatPack::InlineEdit::Component.new(
+    tag: :p,
+    mode: :text,
+    value: subtitle,
+    name: "kit_section[subtitle]",
+    update_url: @update_path,
+    label: subtitle_label,
+    placeholder: subtitle_placeholder,
+    class: subtitle_classes
+  ) %>
+</div>
