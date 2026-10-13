@@ -7,13 +7,15 @@ module RecordingStudioPresskits
       FAB_OFFSET = "1rem"
       FAB_RESERVE_CLASS = "pr-20 md:pr-20 lg:pr-20"
       KIT_CARD_CLASSES = "w-full overflow-hidden"
-      PREVIEW_CLASSES = "flex w-full flex-col overflow-hidden rounded-[var(--radius-lg)]"
-      KIT_SECTIONS_CLASSES = "flex w-full flex-col"
-      # Split so pr-20 still wins on the right. Vertical pad is the only gap between sections.
+      # Tailwind scans this literal: "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
+      SECTION_CARD_CLASSES = "w-full shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
+      PREVIEW_CLASSES = "flex w-full flex-col gap-6"
+      KIT_SECTIONS_CLASSES = "flex w-full flex-col gap-6"
+      # Pad stays inside each card. The stack gap is the space between cards.
       SECTION_PAD_CLASSES = "pt-8 pb-8 px-8 md:pt-10 md:pb-10 md:px-10 lg:pt-12 lg:pb-12 lg:px-12"
 
       REGION_CLASSES = [
-        "group/pk-edit relative w-full rounded-none bg-transparent",
+        "group/pk-edit relative w-full rounded-[var(--radius-lg)] bg-transparent",
         SECTION_PAD_CLASSES,
         "transition-colors duration-[var(--duration-base)]",
         "[@media(hover:hover)]:hover:bg-[var(--surface-muted-background-color)]",

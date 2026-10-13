@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.41.0
+
+No migration. Each section is a Flatpack card (`SectionCardComponent`) on the kit editor, the public kit, and the owner preview. The card is white and rounded, with the same soft shadow as the editor header (`shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]`). `gap-6` separates the header from each section, and each section from the next. Padding inside a section stays `pt-8 pb-8 px-8`, then `md:pt-10`, then `lg:pt-12`.
+
+The public hero and the limited-preview hero stay in their own card. The limited preview's explanation sits in a section card under that hero. Download stays on the hero card. Section menus, the reorder list, and trash are unchanged.
+
 ## 0.40.0
 
 No migration and no new card content. `:card` now switches on its own width, not the viewport.

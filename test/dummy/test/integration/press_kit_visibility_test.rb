@@ -62,6 +62,11 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     refute_select "[role='alert']"
     refute_includes response.body, "Secret notes"
     assert_select "#presskits-public-sections", count: 0
+    preview_details = css_select("#presskits-preview-details").first
+    preview_card = preview_details.parent
+    assert_equal "true", preview_card["data-section-card"]
+    assert_includes preview_card["class"], "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
+    assert_includes preview_card["class"], "rounded-[var(--radius-lg)]"
     assert_equal "private, no-store", response.headers["Cache-Control"]
     assert_select "meta[name='robots'][content='noindex, nofollow']"
     refute_select "meta[name='description']"

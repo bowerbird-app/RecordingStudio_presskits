@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.41.0] - 2026-10-13
+
+### Changed
+- Each press kit section is its own Flatpack card on the kit editor, the public kit, and the owner preview. The cards are white, rounded, and use the same soft shadow as the editor header. A gap sits between the header and each section. The limited preview puts its explanation in that same card under the hero.
+- Version `0.41.0`
+
+### Upgrade notes
+- Bump to `0.41.0`. There is no migration. Adding, editing, reordering, and removing sections works as before.
+- The editor, public kit, and preview no longer wrap the header and every section in one card. Hosts that styled `#presskits-editor-preview` or `#presskits-public-preview` as a single clipped card should follow the stack: `gap-6` between cards, with each section in `SectionCardComponent`.
+
 ## [0.40.0] - 2026-10-13
 
 ### Changed

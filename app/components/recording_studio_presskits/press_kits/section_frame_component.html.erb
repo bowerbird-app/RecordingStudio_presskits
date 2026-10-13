@@ -1,7 +1,9 @@
-<div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
-  <%= render heading_component %>
+<%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>
+  <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
+    <%= render heading_component %>
 
-  <% if (view = content_view) %>
-    <%= render view %>
-  <% end %>
-</div>
+    <% if (view = content_view) %>
+      <%= render view %>
+    <% end %>
+  </div>
+<% end %>

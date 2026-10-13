@@ -45,31 +45,27 @@
     <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
   </div>
 
-  <%= render FlatPack::Card::Component.new(
-    style: :default,
-    class: RecordingStudioPresskits::PressKits::EditorChrome::KIT_CARD_CLASSES,
-    padding: :none
-  ) do %>
-    <div id="presskits-editor-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>">
-      <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
-        press_kit_recording: @press_kit_recording,
-        header_edit_path: @header_edit_path
-      ) %>
+  <div id="presskits-editor-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>">
+    <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
+      press_kit_recording: @press_kit_recording,
+      header_edit_path: @header_edit_path
+    ) %>
 
-      <div id="presskits-editor-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
-        <% if @section_recordings.any? %>
-          <% @section_recordings.each do |recording| %>
-            <%= render RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
-              section_recording: recording,
-              heading_path: @heading_path.call(recording),
-              content_path: @edit_path.call(recording),
-              add_path: @add_path,
-              remove_path: @remove_path.call(recording),
-              picker_items: picker_items,
-              highlight: highlight?(recording)
-            ) %>
-          <% end %>
-        <% else %>
+    <div id="presskits-editor-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
+      <% if @section_recordings.any? %>
+        <% @section_recordings.each do |recording| %>
+          <%= render RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
+            section_recording: recording,
+            heading_path: @heading_path.call(recording),
+            content_path: @edit_path.call(recording),
+            add_path: @add_path,
+            remove_path: @remove_path.call(recording),
+            picker_items: picker_items,
+            highlight: highlight?(recording)
+          ) %>
+        <% end %>
+      <% else %>
+        <%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>
           <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
             <%= render FlatPack::EmptyState::Component.new(
               title: I18n.t("recording_studio_presskits.editor.empty_kit"),
@@ -78,9 +74,9 @@
             ) %>
           </div>
         <% end %>
-      </div>
+      <% end %>
     </div>
-  <% end %>
+  </div>
 
   <div id="presskits-toasts" class="pointer-events-none fixed right-4 bottom-4 z-[60] flex flex-col gap-3"></div>
 
