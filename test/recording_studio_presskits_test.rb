@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.40.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.41.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -708,7 +708,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "SectionPickerComponent"
     assert_includes show, "render_publishable_quick_actions"
     assert_includes show, "SectionsOrderComponent"
-    assert_includes show, "FlatPack::Card::Component"
+    assert_includes show, "SectionCardComponent"
+    refute_includes show, "FlatPack::Card::Component"
     assert_includes show, 'id="presskits-editor-toolbar"'
     assert_includes show, 'id: "presskits-visibility"'
     assert_includes show, 'id: "presskits-downloads"'
@@ -811,28 +812,36 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome, "PREVIEW_CLASSES"
     assert_includes chrome, "overflow-hidden"
     assert_includes chrome, "SECTION_PAD_CLASSES"
-    assert_includes chrome, "KIT_SECTIONS_CLASSES = \"flex w-full flex-col\""
+    assert_includes chrome, "KIT_SECTIONS_CLASSES = \"flex w-full flex-col gap-6\""
+    assert_includes chrome, "SECTION_CARD_CLASSES"
+    assert_includes chrome, "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
     refute_includes chrome, "p-5 md:p-8 lg:p-10"
     refute_includes chrome, "md:p-4 lg:p-6"
-    refute_includes chrome, "gap-6"
     assert_includes chrome, 'FAB_OFFSET = "1rem"'
     refute_includes chrome, "-m-4"
-    assert_includes chrome, "rounded-none"
+    refute_includes chrome, "rounded-none"
     assert_includes chrome, "rounded-[var(--radius-lg)]"
     editor = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
     assert_includes editor, "recording-studio-presskits--editor-chrome"
     assert_includes editor, "onPointerDown"
     assert_includes editor, "EditorChrome::PREVIEW_CLASSES"
-    assert_includes editor, "EditorChrome::KIT_CARD_CLASSES"
-    assert_includes editor, "padding: :none"
+    assert_includes editor, "SectionCardComponent"
+    refute_includes editor, "EditorChrome::KIT_CARD_CLASSES"
     public_kit = File.read(File.expand_path("press_kits/public_show_component.html.erb", components))
     assert_includes public_kit, "EditorChrome::PREVIEW_CLASSES"
     assert_includes public_kit, "EditorChrome::KIT_CARD_CLASSES"
     assert_includes public_kit, "EditorChrome::KIT_SECTIONS_CLASSES"
     assert_includes public_kit, "EditorChrome::SECTION_PAD_CLASSES"
     assert_includes public_kit, "padding: :none"
+    assert_includes public_kit, "SectionCardComponent"
+    assert_includes public_kit, "BrandedFrameComponent"
+    assert_includes public_kit, "branding: branding?"
     frame = File.read(File.expand_path("press_kits/section_frame_component.html.erb", components))
     assert_includes frame, "EditorChrome::SECTION_PAD_CLASSES"
+    assert_includes frame, "SectionCardComponent"
+    preview_show = File.read(File.expand_path("press_kits/preview_show_component.html.erb", components))
+    assert_includes preview_show, "SectionCardComponent"
+    assert_includes preview_show, "EditorChrome::PREVIEW_CLASSES"
     kit_header_rb = File.read(File.expand_path("press_kits/kit_header_component.rb", components))
     assert_includes kit_header_rb, "header: true"
     assert_includes chrome, 'CONTROLLER = "recording-studio-presskits--editor-chrome"'

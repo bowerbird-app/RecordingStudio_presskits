@@ -246,8 +246,8 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
     refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
     public_preview = css_select("#presskits-public-preview").first
-    assert_includes public_preview["class"], "overflow-hidden"
-    assert_includes public_preview["class"], "rounded-[var(--radius-lg)]"
+    assert_includes public_preview["class"], "gap-6"
+    refute_includes public_preview["class"], "overflow-hidden"
     public_hero = css_select("#presskits-cover-hero").first
     assert_includes public_hero["class"], "rounded-none"
     assert_includes public_hero["class"], "justify-start"
@@ -266,9 +266,12 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes eyebrow["class"], "md:text-4xl"
     assert_includes eyebrow["style"].to_s, "70%"
     public_sections = css_select("#presskits-public-sections").first
-    refute_includes public_sections["class"], "gap-6"
+    assert_includes public_sections["class"], "gap-6"
     refute_includes public_sections["class"], "p-5"
-    section_pad = css_select("#presskits-public-sections > div").first
+    section_card = css_select("#presskits-public-sections [data-section-card]").first
+    assert_includes section_card["class"], "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
+    assert_includes section_card["class"], "rounded-[var(--radius-lg)]"
+    section_pad = css_select("#presskits-public-sections [data-section-card] > div").first
     assert_includes section_pad["class"], "pt-8"
     assert_includes section_pad["class"], "md:pt-10"
     assert_includes section_pad["class"], "lg:pt-12"
@@ -282,8 +285,11 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-cover-hero[data-cover-text-color='#111827']"
     assert_select "#presskits-cover-hero[data-cover-ratio='auto']"
     preview = css_select("#presskits-public-preview").first
-    assert_includes preview["class"], "overflow-hidden"
-    assert_includes preview["class"], "rounded-[var(--radius-lg)]"
+    assert_includes preview["class"], "gap-6"
+    refute_includes preview["class"], "overflow-hidden"
+    owner_card = css_select("#presskits-public-sections [data-section-card]").first
+    assert_includes owner_card["class"], "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
+    assert_includes owner_card["class"], "rounded-[var(--radius-lg)]"
   end
 
   test "hosts can override the hero eyebrow" do

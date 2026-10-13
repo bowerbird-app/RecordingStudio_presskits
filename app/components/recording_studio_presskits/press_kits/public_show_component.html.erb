@@ -3,12 +3,12 @@
   id: "presskits-kit-embed",
   branding: branding?
 ) do %>
-<%= render FlatPack::Card::Component.new(
-  style: :default,
-  class: RecordingStudioPresskits::PressKits::EditorChrome::KIT_CARD_CLASSES,
-  padding: :none
-) do %>
-  <div id="presskits-public-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>" data-presskits-presentation="full">
+<div id="presskits-public-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>" data-presskits-presentation="full">
+  <%= render FlatPack::Card::Component.new(
+    style: :default,
+    class: RecordingStudioPresskits::PressKits::EditorChrome::KIT_CARD_CLASSES,
+    padding: :none
+  ) do %>
     <%= render RecordingStudioPresskits::Cover::Component.new(
       recording: @press_kit_recording,
       size: :hero
@@ -19,9 +19,11 @@
         <%= helpers.recording_studio_downloadable_button(@press_kit_recording, **download_button_options) %>
       </div>
     <% end %>
+  <% end %>
 
-    <div id="presskits-public-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
-      <% if preview? && !live? %>
+  <div id="presskits-public-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
+    <% if preview? && !live? %>
+      <%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>
         <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
           <%= render FlatPack::Alert::Component.new(
             description: "This is just for you. Nobody else can see it yet.",
@@ -29,8 +31,10 @@
           ) %>
         </div>
       <% end %>
+    <% end %>
 
-      <% if visible_section_recordings.empty? %>
+    <% if visible_section_recordings.empty? %>
+      <%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>
         <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
           <%= render FlatPack::EmptyState::Component.new(
             title: "Nothing to show yet",
@@ -38,12 +42,12 @@
             icon: :inbox
           ) %>
         </div>
-      <% else %>
-        <% visible_section_recordings.each do |recording| %>
-          <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: recording) %>
-        <% end %>
       <% end %>
-    </div>
+    <% else %>
+      <% visible_section_recordings.each do |recording| %>
+        <%= render RecordingStudioPresskits::PressKits::SectionFrameComponent.new(section_recording: recording) %>
+      <% end %>
+    <% end %>
   </div>
-<% end %>
+</div>
 <% end %>
