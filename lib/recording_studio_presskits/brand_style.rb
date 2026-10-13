@@ -22,15 +22,27 @@ module RecordingStudioPresskits
       "mono" => "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
     }.freeze
 
+    # Flatpack resolves hover, the focus ring, and the primary button aliases on
+    # the theme root. A child that only sets --color-primary keeps Flatpack's
+    # pressed, hovered, and focused colours. These aliases have to sit on the
+    # same element as --color-primary. Relative colour keeps the same lightness
+    # step Flatpack uses (l - 0.1, and a further step for the pressed fill).
     TOKEN_ALIASES = [
       "--color-primary-hover: oklch(from var(--color-primary) calc(l - 0.1) c h)",
+      "--color-primary-active: oklch(from var(--color-primary) calc(l - 0.16) c h)",
       "--button-primary-background-color: var(--color-primary)",
       "--button-primary-hover-background-color: var(--color-primary-hover)",
+      "--button-primary-active-background-color: var(--color-primary-active)",
+      "--button-primary-active-border-color: var(--color-primary-active)",
       "--button-primary-text-color: var(--color-primary-text)",
       "--button-primary-border-color: var(--color-primary)",
       "--color-ring: var(--color-primary)",
       "--button-focus-ring-color: var(--color-primary)"
     ].freeze
+
+    # Editor controls that sit inside a branded preview. Restores Flatpack's
+    # primary from the theme's brand knobs, which the kit style does not touch.
+    NEUTRAL_CLASS = "presskits-neutral-controls"
 
     def self.swatch_options
       [
@@ -72,6 +84,21 @@ module RecordingStudioPresskits
 
     def self.swatch_css_for(font_family)
       SWATCH_CSS[font_family.to_s] || SWATCH_CSS.fetch(DEFAULT_FONT)
+    end
+
+    # Hover, pressed fill, and focus ring. Pair with --color-primary on the
+    # same element. The card theme cannot carry the relative colour: Flatpack
+    # only accepts a plain colour in that hash.
+    def self.button_state_attribute
+      TOKEN_ALIASES.join("; ")
+    end
+
+    def self.neutral_style_attribute
+      [
+        "--color-primary: oklch(var(--brand-lightness) var(--brand-chroma) var(--brand-hue))",
+        "--color-primary-text: #fff",
+        *TOKEN_ALIASES
+      ].join("; ")
     end
 
     def initialize(brand_color:, font_family:)

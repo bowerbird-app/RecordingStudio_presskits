@@ -1,0 +1,22 @@
+/*
+ * Flatpack's primary button changes shadow on :active and leaves the fill on
+ * the hover token, which is resolved on the theme root. Inside a kit brand
+ * wrapper the pressed fill follows --button-primary-active-background-color,
+ * derived from the kit colour on that wrapper.
+ */
+
+[data-presskits-brand] :is(a, button).fp-button[data-fp-style="primary"]:hover:not(:disabled) {
+  background-color: var(--button-primary-hover-background-color);
+  border-color: var(--button-primary-hover-background-color);
+  color: var(--button-primary-text-color);
+}
+
+[data-presskits-brand] :is(a, button).fp-button[data-fp-style="primary"]:active:not(:disabled) {
+  background-color: var(--button-primary-active-background-color);
+  border-color: var(--button-primary-active-background-color);
+  color: var(--button-primary-text-color);
+}
+
+[data-presskits-brand] :is(a, button).fp-button[data-fp-style="primary"]:focus-visible {
+  outline-color: var(--button-focus-ring-color);
+}

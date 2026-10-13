@@ -11,6 +11,7 @@
     id: "presskits-kit-cover"
   ) %>
 
+  <div class="<%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>" style="display: contents; <%= RecordingStudioPresskits::BrandStyle.neutral_style_attribute %>">
   <%= render FlatPack::Fab::Component.new(
     contained: true,
     position: :top_right,
@@ -42,4 +43,5 @@
       ) %>
     <% end %>
   <% end %>
+  </div>
 </div>

@@ -5,9 +5,14 @@
   close_url: press_kits_path
 ) %>
 
-<%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
+<%= render RecordingStudioPresskits::PressKits::BrandedFrameComponent.new(
   press_kit_recording: @press_kit_recording,
-  section_recordings: @section_recordings,
-  preview: true,
-  branding: false
-) %>
+  id: "presskits-owner-preview"
+) do %>
+  <%= render RecordingStudioPresskits::PressKits::PublicShowComponent.new(
+    press_kit_recording: @press_kit_recording,
+    section_recordings: @section_recordings,
+    preview: true,
+    branding: false
+  ) %>
+<% end %>

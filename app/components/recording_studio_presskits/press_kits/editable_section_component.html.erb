@@ -13,7 +13,12 @@
         <%= render inline_heading %>
       </div>
 
-      <div id="<%= actions_id %>" class="<%= action_row_classes %>" data-presskits-section-actions>
+      <div
+        id="<%= actions_id %>"
+        class="<%= action_row_classes %> <%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>"
+        style="<%= RecordingStudioPresskits::BrandStyle.neutral_style_attribute %>"
+        data-presskits-section-actions
+      >
         <% if show_content_edit? %>
           <%= render FlatPack::Button::Component.new(
             text: edit_label,

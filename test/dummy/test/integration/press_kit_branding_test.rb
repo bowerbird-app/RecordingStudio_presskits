@@ -90,7 +90,7 @@ class PressKitBrandingTest < ActionDispatch::IntegrationTest
     assert_default_frame("presskits-kit-embed")
   end
 
-  test "the kit editor and owner preview do not wrap with the public brand frame" do
+  test "kit previews carry the brand style and editor chrome does not" do
     install_center(brand_color: "#0F766E", font_family: "serif")
     sign_in @user
     switch_to_root(@root)
@@ -99,11 +99,58 @@ class PressKitBrandingTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#presskits-public-page", count: 0
     assert_select "#presskits-kit-embed", count: 0
+    assert_branded_preview("presskits-editor-preview")
+    assert_select "#presskits-editor-toolbar[data-presskits-brand]", count: 0
+    assert_nil css_select("#presskits-editor-toolbar").first["style"]
+    assert_select "#presskits-editor-toolbar #presskits-section-picker"
+    assert_neutral_controls("#presskits-kit-header .#{RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS}")
+    assert_select "[data-presskits-section-actions].#{RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS}"
+    refute_includes css_select("#presskits-editor-toolbar").first.to_html, "--color-primary: #0F766E"
+
+    get recording_studio_presskits.edit_press_kit_header_path(@kit)
+    assert_response :success
+    assert_select "[data-presskits-brand]", count: 0
+    assert_select "#presskits-header-form"
+    assert_select "#presskits-header-actions"
+    refute_includes css_select("#presskits-header-form").first.to_html, "--color-primary: #0F766E"
 
     get recording_studio_presskits.preview_press_kit_path(@kit)
     assert_response :success
     assert_select "#presskits-public-page", count: 0
     assert_select "#presskits-kit-embed", count: 0
+    assert_branded_preview("presskits-owner-preview")
+  end
+
+  test "a light brand uses dark text on the public page and the audience preview" do
+    @root.revise(@kit) { |press_kit| press_kit.brand_color = "#FDE68A" }
+    publish_kit!(@kit.reload, slug: "spring-launch-brand")
+    text = RecordingStudioPresskits::Cover::Contrast::DARK
+
+    get @kit.publishable_public_path
+    assert_response :success
+    frame = css_select("#presskits-public-page").first
+    assert_includes frame["style"], "--color-primary: #FDE68A"
+    assert_includes frame["style"], "--color-primary-text: #{text}"
+    assert_includes frame["style"], "--button-primary-text-color: var(--color-primary-text)"
+    assert_includes response.body, "recording_studio_presskits/brand_buttons"
+
+    RecordingStudioPresskits::Visibility.set_audience!(
+      recording: @kit,
+      actor: @user,
+      audience: :signed_in
+    )
+    RecordingStudioPresskits::KitSettings.save_fallback!(
+      recording: @kit,
+      fallback: :preview,
+      actor: @user
+    )
+    get @kit.publishable_public_path
+    assert_response :success
+    preview = css_select("#presskits-public-preview").first
+    assert_equal "true", preview["data-presskits-brand"]
+    assert_includes preview["style"], "--color-primary: #FDE68A"
+    assert_includes preview["style"], "--color-primary-text: #{text}"
+    assert_select "#presskits-public-preview a[data-fp-style='primary']", text: "Sign in"
   end
 
   test "header brand tabs follow the stored source and save both fields together" do
@@ -160,20 +207,47 @@ class PressKitBrandingTest < ActionDispatch::IntegrationTest
 
   private
 
+  def assert_branded_preview(id)
+    assert_select "##{id}[data-presskits-brand='true']", count: 1
+    frame = css_select("##{id}").first
+    assert_includes frame["style"], "--color-primary: #0F766E"
+    assert_includes frame["style"], "--color-primary-hover: oklch(from var(--color-primary) calc(l - 0.1) c h)"
+    assert_includes frame["style"], "--color-primary-active: oklch(from var(--color-primary) calc(l - 0.16) c h)"
+    assert_includes frame["style"], "--button-primary-active-background-color: var(--color-primary-active)"
+    assert_includes frame["style"], "--button-focus-ring-color: var(--color-primary)"
+    assert_includes frame["style"], "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast.text_on('#0F766E')}"
+  end
+
+  def assert_neutral_controls(selector)
+    control = css_select(selector).first
+    assert control, "expected #{selector}"
+    assert_includes control["class"], RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS
+    assert_includes control["style"], "--color-primary: oklch(var(--brand-lightness) var(--brand-chroma) var(--brand-hue))"
+    refute_includes control["style"], "#0F766E"
+  end
+
   def assert_inherited_frame(id)
     assert_select "##{id}", count: 1
     frame = css_select("##{id}").first
+    assert_equal "true", frame["data-presskits-brand"]
     assert_includes frame["style"], "--color-primary: #0F766E"
     assert_includes frame["style"], "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast.text_on('#0F766E')}"
+    assert_includes frame["style"], "--color-primary-hover: oklch(from var(--color-primary) calc(l - 0.1) c h)"
+    assert_includes frame["style"], "--color-primary-active: oklch(from var(--color-primary) calc(l - 0.16) c h)"
+    assert_includes frame["style"], "--button-primary-active-background-color: var(--color-primary-active)"
+    assert_includes frame["style"], "--button-focus-ring-color: var(--color-primary)"
     assert_includes frame["style"], "--button-primary-background-color: var(--color-primary)"
     assert_includes frame["style"], "font-family: ui-serif, Georgia, Cambria, Times New Roman, serif"
     assert_select "##{id} #presskits-kit-cover"
+    assert_nil css_select("html").first["style"]
   end
 
   def assert_default_frame(id)
     assert_select "##{id}", count: 1
     frame = css_select("##{id}").first
+    assert_equal "true", frame["data-presskits-brand"]
     assert_includes frame["style"], "--color-primary: #333333"
+    assert_includes frame["style"], "--color-primary-active: oklch(from var(--color-primary) calc(l - 0.16) c h)"
     assert_includes frame["style"], "font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
     refute_includes frame["style"], "#0F766E"
     assert_nil css_select("html").first["style"]

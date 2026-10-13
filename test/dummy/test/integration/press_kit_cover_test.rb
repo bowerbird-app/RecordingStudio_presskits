@@ -221,6 +221,13 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes sky["style"], "--button-primary-background-color: #BFDBFE"
     assert_includes sky["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#BFDBFE')}"
     assert_includes amber["style"], "--button-primary-background-color: #D97706"
+    sky_brand = sky.parent
+    assert_equal "true", sky_brand["data-presskits-brand"]
+    assert_includes sky_brand["style"], "--color-primary: #BFDBFE"
+    assert_includes sky_brand["style"], "--color-primary-hover: oklch(from var(--color-primary) calc(l - 0.1) c h)"
+    assert_includes sky_brand["style"], "--button-primary-active-background-color: var(--color-primary-active)"
+    assert_includes sky_brand["style"], "--button-focus-ring-color: var(--color-primary)"
+    refute_includes sky_brand["style"], "--button-primary-hover-background-color: #BFDBFE"
     assert_includes amber.to_html, "font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
     sky_pill = css_select("[data-brand-color='#BFDBFE'] [data-cover-eyebrow]").first
     assert_includes sky_pill["style"], "background-color: #BFDBFE"

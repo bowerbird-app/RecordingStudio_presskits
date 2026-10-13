@@ -272,7 +272,10 @@ module RecordingStudioPresskits
     end
 
     initializer "recording_studio_presskits.assets" do |app|
-      app.config.assets.paths << root.join("app/javascript") if app.config.respond_to?(:assets)
+      next unless app.config.respond_to?(:assets)
+
+      app.config.assets.paths << root.join("app/javascript")
+      app.config.assets.paths << root.join("app/assets/stylesheets")
     end
 
     initializer "recording_studio_presskits.publishable_views" do

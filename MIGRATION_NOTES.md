@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.44.0
+
+No migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` on every layout that renders a kit, next to `flat_pack/application`. That sheet paints the pressed fill of a primary button from `--button-primary-active-background-color`. Without it, hover and the focus ring still follow the brand, and the pressed fill stays on Flatpack's hover.
+
+`RecordingStudioPresskits.branding_style_for` now also sets `--color-primary-active`, `--button-primary-active-background-color`, and `--button-primary-active-border-color`. Hover and the pressed fill use `oklch(from var(--color-primary) …)` on the wrapper, so they follow the kit colour instead of the theme root.
+
+The same string is on `#presskits-editor-preview` (header card and section cards), `#presskits-owner-preview`, and the audience preview's `#presskits-public-preview`. `#presskits-public-page` and `#presskits-kit-embed` stay. It still never goes on `<html>`.
+
+Editor chrome stays on Flatpack. Toolbar, page nav, the header form, and tabs are outside those wrappers. Section edit, order, and remove, the empty-section action, and the header FAB use `presskits-neutral-controls`, which puts Flatpack's primary tokens back.
+
 ## 0.43.0
 
 Run the new migration. It drops `cover_style`, `cover_color`, and `cover_text_color` from `recording_studio_press_kits` and adds nullable `brand_color` and `font_family`. Nothing is copied across. A kit that should keep a colour needs `brand_color` written again.
