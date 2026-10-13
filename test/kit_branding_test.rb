@@ -56,6 +56,11 @@ class KitBrandingTest < Minitest::Test
 
     assert_includes style, "--color-primary: #0F766E"
     assert_includes style, "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast.text_on('#0F766E')}"
+    assert_includes style, "--color-primary-hover: oklch(from var(--color-primary) calc(l - 0.1) c h)"
+    assert_includes style, "--color-primary-active: oklch(from var(--color-primary) calc(l - 0.16) c h)"
+    assert_includes style, "--button-primary-hover-background-color: var(--color-primary-hover)"
+    assert_includes style, "--button-primary-active-background-color: var(--color-primary-active)"
+    assert_includes style, "--button-focus-ring-color: var(--color-primary)"
     assert_includes style, "--button-primary-text-color: var(--color-primary-text)"
     assert_includes style, "font-family: ui-serif, Georgia, Cambria, Times New Roman, serif"
     refute defined?(RecordingStudioPressCenters::Branding)
@@ -70,6 +75,26 @@ class KitBrandingTest < Minitest::Test
     assert_nil RecordingStudioPresskits::BrandStyle.normalize_color("")
     assert_equal :invalid, RecordingStudioPresskits::BrandStyle.normalize_color("blue")
     assert_equal :invalid, RecordingStudioPresskits::BrandStyle.normalize_font("comic")
+  end
+
+  def test_neutral_controls_restore_flatpack_primary_tokens
+    style = RecordingStudioPresskits::BrandStyle.neutral_style_attribute
+
+    assert_equal "presskits-neutral-controls", RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS
+    assert_includes style, "--color-primary: oklch(var(--brand-lightness) var(--brand-chroma) var(--brand-hue))"
+    assert_includes style, "--color-primary-text: #fff"
+    assert_includes style, "--button-primary-background-color: var(--color-primary)"
+    assert_includes style, "--button-focus-ring-color: var(--color-primary)"
+    refute_includes style, "#0F766E"
+    refute_includes style, "#FDE68A"
+  end
+
+  def test_a_light_brand_picks_dark_button_text
+    style = RecordingStudioPresskits::BrandStyle.new(brand_color: "#FDE68A", font_family: "sans").style_attribute
+
+    assert_includes style, "--color-primary: #FDE68A"
+    assert_includes style, "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast::DARK}"
+    assert_includes style, "--button-primary-text-color: var(--color-primary-text)"
   end
 
   def test_presskits_does_not_depend_on_press_centers

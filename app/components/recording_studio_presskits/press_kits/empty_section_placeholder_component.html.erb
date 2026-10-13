@@ -4,10 +4,12 @@
     description: add_label,
     icon: :inbox
   ) %>
-  <%= render FlatPack::Button::Component.new(
-    text: add_label,
-    style: :default,
-    href: @edit_path,
-    data: helpers.presskits_editor_open_data
-  ) %>
+  <div class="<%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>" style="display: contents; <%= RecordingStudioPresskits::BrandStyle.neutral_style_attribute %>">
+    <%= render FlatPack::Button::Component.new(
+      text: add_label,
+      style: :default,
+      href: @edit_path,
+      data: helpers.presskits_editor_open_data
+    ) %>
+  </div>
 </div>

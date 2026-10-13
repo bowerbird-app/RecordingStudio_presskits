@@ -34,6 +34,10 @@ module RecordingStudioPresskits
         recording.id.to_s == @highlight_id.to_s
       end
 
+      def preview_brand_style
+        RecordingStudioPresskits.branding_style_for(@press_kit_recording)
+      end
+
       def visibility_edit_path
         return unless helpers.respond_to?(:edit_press_kit_visibility_path)
         return unless manage_visibility?

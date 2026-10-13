@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.45.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.46.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -65,7 +65,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.228"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.231"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
@@ -85,7 +85,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.228"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.231"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
@@ -420,7 +420,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "v0.8.0"
     assert_includes readme, "tag: \"v0.5.0\""
-    assert_includes readme, "tag: \"v0.1.228\""
+    assert_includes readme, "tag: \"v0.1.231\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
     assert_includes readme, 'gem "recording_studio_lists", "~> 0.5"'
@@ -454,7 +454,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[430/368]"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.228"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.231"'
     assert_includes readme, "FlatPack::FontSwatch"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
@@ -652,17 +652,22 @@ class RecordingStudioPresskitsTest < Minitest::Test
     cover = File.read(File.expand_path("cover/component.rb", components))
     cover_html = File.read(File.expand_path("cover/component.html.erb", components))
     assert_includes cover, "def brand_color"
-    assert_includes cover, "def pill_style"
+    refute_includes cover, "def pill_style"
     refute_includes cover, "def hero?"
     refute_includes cover_html, "<% if hero? %>"
     refute_includes cover_html, "size: :display"
-    assert_includes cover_html, "data-cover-eyebrow"
+    assert_includes cover_html, "FlatPack::Overlay::Component"
+    assert_includes cover_html, "with_media"
+    assert_includes cover_html, "with_item(placement: :top_left, inset: :md)"
+    assert_includes cover_html, "style: :default"
+    refute_includes cover_html, "pill_style"
+    refute_includes cover_html, "--badge-primary"
+    assert_includes cover_html, "cover_eyebrow: true"
     assert_includes cover_html, "data-cover-company"
     assert_includes cover_html, "data-cover-location"
     assert_includes cover_html, "location_recordable.display_name"
     assert_operator cover_html.index("data-cover-description"), :<, cover_html.index("data-cover-location")
     assert_operator cover_html.index("data-cover-company"), :<, cover_html.index("data-cover-location")
-    assert_includes cover_html, "pill_style"
     company = File.read(File.expand_path("../lib/recording_studio_presskits/cover/company.rb", __dir__))
     assert_includes company, "RecordingStudioCompany.company"
     assert_includes company, "RecordingStudioCompany.allowance"
@@ -768,8 +773,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes kit_header_rb, "EditorChrome::IMAGE_ACTION_CLASSES"
     cover = File.read(File.expand_path("cover/component.html.erb", components))
     assert_includes cover, "body_actions?"
-    assert_includes cover, "image_actions"
-    assert_includes cover, "inset-x-0 top-0 flex items-start justify-between gap-3 p-5"
+    assert_includes cover, "image_actions?"
+    assert_includes cover, "with_item(placement: :top_left, inset: :md)"
+    assert_includes cover, "with_item(placement: :top_right, inset: :md)"
+    refute_includes cover, "inset-x-0 top-0"
     refute_includes cover, "left-5 top-5"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
     assert_includes locales, 'edit_image: "Edit image"'

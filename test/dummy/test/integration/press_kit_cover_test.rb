@@ -102,7 +102,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_nil kit.recordable.font_family
   end
 
-  test "public kit and owner preview use the card, and brand paints the pill" do
+  test "public kit and owner preview use the card, and the badge stays default" do
     kit = record_kit("Spring launch")
     @root.revise(kit) do |press_kit|
       press_kit.description = "Doors at noon."
@@ -122,9 +122,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     refute_select "[data-presskits-header-image-actions]"
     refute_includes css_select("#presskits-kit-cover [data-cover-frame]").first.to_html, "Doors at noon."
     refute_select "#presskits-cover-hero"
-    pill = css_select("#presskits-kit-cover [data-cover-eyebrow]").first
-    assert_includes pill["style"], "background-color: #059669"
-    assert_includes pill["style"], "color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#059669')}"
+    assert_default_eyebrow("#presskits-kit-cover [data-cover-eyebrow]", absent: "#059669")
     frame = css_select("#presskits-public-page").first
     assert_includes frame["style"], "--color-primary: #059669"
     assert_includes frame["style"], "font-family: ui-serif, Georgia, Cambria, Times New Roman, serif"
@@ -199,7 +197,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     )
   end
 
-  test "grid cards paint the view button and pill from the kit brand" do
+  test "grid cards paint the view button from the kit brand and keep a default badge" do
     first = record_kit("Spring launch")
     second = record_kit("Autumn recap")
     @root.revise(first) do |press_kit|
@@ -226,10 +224,16 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes sky["style"], "--button-primary-background-color: #BFDBFE"
     assert_includes sky["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#BFDBFE')}"
     assert_includes amber["style"], "--button-primary-background-color: #D97706"
+    sky_brand = sky.parent
+    assert_equal "true", sky_brand["data-presskits-brand"]
+    assert_includes sky_brand["style"], "--color-primary: #BFDBFE"
+    assert_includes sky_brand["style"], "--color-primary-hover: oklch(from var(--color-primary) calc(l - 0.1) c h)"
+    assert_includes sky_brand["style"], "--button-primary-active-background-color: var(--color-primary-active)"
+    assert_includes sky_brand["style"], "--button-focus-ring-color: var(--color-primary)"
+    refute_includes sky_brand["style"], "--button-primary-hover-background-color: #BFDBFE"
     assert_includes amber.to_html, "font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-    sky_pill = css_select("[data-brand-color='#BFDBFE'] [data-cover-eyebrow]").first
-    assert_includes sky_pill["style"], "background-color: #BFDBFE"
-    assert_includes sky_pill["style"], "color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#BFDBFE')}"
+    assert_default_eyebrow("[data-brand-color='#BFDBFE'] [data-cover-eyebrow]", absent: "#BFDBFE")
+    assert_default_eyebrow("[data-brand-color='#D97706'] [data-cover-eyebrow]", absent: "#D97706")
     assert_select "a[data-cover-view][href='#{recording_studio_presskits.edit_press_kit_path(first)}']", text: /View/
     assert_includes css_select("a[data-cover-view]").first.parent["class"], "mt-auto"
     assert_select ".grid.items-stretch"
@@ -249,6 +253,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     @root.revise(first) do |press_kit|
       press_kit.subtitle = "Collection released"
       press_kit.description = "Doors at noon."
+      press_kit.brand_color = "#0F766E"
     end
     record_kit("Autumn recap")
     sign_in @user
@@ -284,6 +289,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "flex flex-1 flex-col"
     assert_includes body["class"], "@min-[640px]:min-w-0"
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
+    assert_default_eyebrow("#presskits-kit-header [data-cover-eyebrow]", absent: "#0F766E")
     assert_select "#presskits-kit-header [data-cover-title] h1", text: "Spring launch"
     assert_select "#presskits-kit-header [data-cover-subtitle]", text: "Collection released"
     assert_select "#presskits-kit-header [data-cover-description]", text: "Doors at noon."
@@ -294,9 +300,10 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header [data-presskits-header-actions] a[aria-label='Edit']"
     assert_select "#presskits-kit-header [data-presskits-header-image-actions] a[aria-label='Edit image']"
     badge = css_select("#presskits-kit-header [data-cover-tag]").first
-    assert_includes badge.parent["class"], "justify-between"
-    assert_operator badge.parent.to_html.index("data-cover-tag"), :<,
-                    badge.parent.to_html.index("data-presskits-header-image-actions")
+    assert_equal "top_left", badge.parent["data-fp-placement"]
+    image_actions = css_select("#presskits-kit-header [data-presskits-header-image-actions]").first
+    assert_equal "top_right", image_actions.parent["data-fp-placement"]
+    assert_equal "md", image_actions.parent["data-fp-inset"]
     refute_includes header.to_html, "Share"
     refute_includes header.to_html, "RELEASE DATE"
     refute_select "#presskits-cover-hero"
@@ -355,6 +362,25 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_default_eyebrow(selector, absent:)
+    badge = css_select(selector).first
+    assert badge, "expected #{selector}"
+    item = badge.parent
+    assert_equal "top_left", item["data-fp-placement"]
+    assert_equal "md", item["data-fp-inset"]
+    assert_includes badge["class"], "bg-[var(--badge-default-background-color)]"
+    assert_includes badge["class"], "text-[var(--badge-default-text-color)]"
+    refute_includes badge["class"], "badge-primary"
+    style = badge["style"].to_s
+    refute_includes style, "background-color"
+    refute_includes style, "--badge-primary"
+    refute_includes style, absent
+    refute_includes badge.to_html, absent
+    frame = badge.ancestors.find { |node| node["data-cover-frame"] }
+    assert frame, "expected the badge inside the cover frame"
+    assert_includes frame["class"], "fp-overlay"
+  end
 
   def record_kit(title)
     @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = title }

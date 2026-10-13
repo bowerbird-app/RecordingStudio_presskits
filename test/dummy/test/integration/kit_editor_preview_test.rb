@@ -100,8 +100,8 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     image_actions = css_select("#presskits-kit-header [data-presskits-header-image-actions]").first
     assert_includes image_actions["class"], "[@media(hover:none)]:opacity-100"
     refute_includes image_actions["class"], "self-end"
-    assert_includes image_actions.parent["class"], "justify-between"
-    assert_includes image_actions.parent["class"], "p-5"
+    assert_equal "top_right", image_actions.parent["data-fp-placement"]
+    assert_equal "md", image_actions.parent["data-fp-inset"]
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"

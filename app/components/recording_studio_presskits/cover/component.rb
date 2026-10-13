@@ -72,10 +72,6 @@ module RecordingStudioPresskits
         "font-family: #{css};"
       end
 
-      def pill_style
-        "#{pill_declarations.join('; ')};"
-      end
-
       def card?
         @size == :card
       end
@@ -101,16 +97,6 @@ module RecordingStudioPresskits
       end
 
       private
-
-      def pill_declarations
-        [
-          "background-color: #{brand_color}",
-          "color: #{brand_text_color}",
-          "--badge-primary-background-color: #{brand_color}",
-          "--badge-primary-text-color: #{brand_text_color}",
-          "--badge-primary-border-color: transparent"
-        ]
-      end
 
       def kit_branding
         @kit_branding ||= KitBranding.for(@recording)

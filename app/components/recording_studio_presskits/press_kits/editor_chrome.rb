@@ -64,8 +64,8 @@ module RecordingStudioPresskits
         ACTION_VISIBILITY_CLASSES
       ].join(" ").freeze
 
-      # On the cover image. The bar already aligns to the top, so self-end would
-      # drop this row to the bottom of the badge.
+      # On the cover image. Overlay places this at the top right. self-end is for
+      # a row beside a title, and would not belong on this control.
       IMAGE_ACTION_CLASSES = [
         "flex shrink-0 flex-wrap items-center justify-end gap-2",
         ACTION_VISIBILITY_CLASSES

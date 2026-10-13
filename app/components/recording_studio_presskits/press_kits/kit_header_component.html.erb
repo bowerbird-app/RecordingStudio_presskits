@@ -12,7 +12,11 @@
     inline_path: helpers.press_kit_header_path(@press_kit_recording)
   ) do |cover| %>
     <% cover.with_body_actions do %>
-      <div class="<%= action_row_classes %>" data-presskits-header-actions>
+      <div
+        class="<%= action_row_classes %> <%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>"
+        style="<%= RecordingStudioPresskits::BrandStyle.neutral_style_attribute %>"
+        data-presskits-header-actions
+      >
         <%= render RecordingStudioPresskits::PressKits::EditorActionButtonComponent.new(
           text: edit_label,
           icon: "pencil",
@@ -23,7 +27,11 @@
     <% end %>
     <% if cover_image_path %>
       <% cover.with_image_actions do %>
-        <div class="<%= image_action_classes %>" data-presskits-header-image-actions>
+        <div
+          class="<%= image_action_classes %> <%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>"
+          style="<%= RecordingStudioPresskits::BrandStyle.neutral_style_attribute %>"
+          data-presskits-header-image-actions
+        >
           <%= render RecordingStudioPresskits::PressKits::EditorActionButtonComponent.new(
             text: edit_image_label,
             icon: "photo",

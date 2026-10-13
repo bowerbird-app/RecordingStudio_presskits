@@ -1,5 +1,17 @@
 # Upgrade notes
 
+## 0.46.0
+
+No migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` on every layout that renders a kit, next to `flat_pack/application`. That sheet paints the pressed fill of a primary button from `--button-primary-active-background-color`. Without it, hover and the focus ring still follow the brand, and the pressed fill stays on Flatpack's hover.
+
+`RecordingStudioPresskits.branding_style_for` now also sets `--color-primary-active`, `--button-primary-active-background-color`, and `--button-primary-active-border-color`. Hover and the pressed fill use `oklch(from var(--color-primary) …)` on the wrapper, so they follow the kit colour instead of the theme root.
+
+The same string is on `#presskits-editor-preview` (header card and section cards), `#presskits-owner-preview`, and the audience preview's `#presskits-public-preview`. `#presskits-public-page` and `#presskits-kit-embed` stay. It still never goes on `<html>`.
+
+Editor chrome stays on Flatpack. Toolbar, page nav, the header form, and tabs are outside those wrappers. Section edit, order, and remove, the empty-section action, header **Edit**, and **Edit image** use `presskits-neutral-controls`, which puts Flatpack's primary tokens back.
+
+Bump Flatpack to `>= 0.1.231` and rebuild Tailwind. The cover uses `FlatPack::Overlay`: the photo is `with_media`, and the **Press kit** badge is `with_item(placement: :top_left, inset: :md)` with `FlatPack::Badge` `style: :default`. On the editor card, **Edit image** is `with_item(placement: :top_right, inset: :md)`. Overlay only places those pieces. The badge follows `--badge-default-background-color` and `--badge-default-text-color` (muted surface `#e5e5e5` and `#333` on the rounded theme). It does not follow the brand, and Presskits does not override those colours. **View** and other primary buttons still use the brand.
+
 ## 0.45.0
 
 No migration.
@@ -21,7 +33,6 @@ This repo vendors that gem at `vendor/gems/recording_studio_embargo` (tag `v0.1.
 Press kits include `RecordingStudio::Capabilities::Embargo.to` for `presskits.kit_view_full` and `presskits.kit_download`. `RecordingStudioEmbargo.restriction_for` returns `:allow`, `:deny`, or `:not_applicable`. Publishable still wins for a kit that is not live. `:deny` uses the kit's visibility fallback (`preview` or `hidden`) and blocks package generate, fetch, and status through `downloadable_available_for?`. Downloadable already calls that hook from `Authorization.allowed?` after the standing audience check, on show, create, and status, so that gem does not need a code change. A signed Active Storage URL that was already issued stays valid until it expires. `:not_applicable` after `lifts_at` needs no job.
 
 Early access is one switch on the embargo gem. It allows an actor who already satisfies Accessible's `:granted` audience for that action. Download's granted roles stay `download`, `edit`, and `admin`, so a view grant does not include the zip. The toolbar uses `render_embargo_button`. The editor is the gem's screen. Override `recording_studio_embargo.editor.subtitle`, `enable_help`, and `early_access_help` to change its copy. The public **Embargoed** badge stays in `recording_studio_presskits.embargo`. Copying a kit runs `RecordingStudioEmbargo.attributes_for_duplicate`, which clears the window.
-
 
 ## 0.43.0
 

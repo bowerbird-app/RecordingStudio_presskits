@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.46.0] - 2026-10-13
+
+### Changed
+- `RecordingStudioPresskits.branding_style_for` drives Flatpack primary buttons on the kit itself. The string now includes `--color-primary-active` and the pressed-fill button tokens. Hover, focus, and the pressed fill are `oklch(from var(--color-primary) …)`, so they follow the resolved brand (kit, then press center, then `#333333`) instead of the colour Flatpack resolved on the theme root. `--color-primary-text` is still auto contrast.
+- That string sits on `#presskits-public-page`, `#presskits-kit-embed`, `#presskits-owner-preview`, the audience preview (`#presskits-public-preview`), and `#presskits-editor-preview` (the header card and the section cards). It does not sit on `<html>`.
+- Editor chrome keeps Flatpack's primary. The toolbar, page nav, header form, and tabs are outside the preview wrapper. Section edit, order, and remove, the empty-section action, header **Edit**, and **Edit image** use `presskits-neutral-controls`, which restores the theme's primary tokens.
+- Layouts that render a kit link `recording_studio_presskits/brand_buttons`.
+- The cover photo and the **Press kit** badge use `FlatPack::Overlay`. The photo is `with_media`. The badge is `with_item(placement: :top_left, inset: :md)` and `FlatPack::Badge` `style: :default`. On the editor, **Edit image** is `with_item(placement: :top_right, inset: :md)`. Overlay only places them. The default badge uses the muted surface and content text (`#e5e5e5` and `#333` on the rounded theme), not the brand and not a forced white chip. **View** and other primary buttons still use the brand. Flatpack is `>= 0.1.231`.
+- Version `0.46.0`
+
+### Upgrade notes
+- Bump to `0.46.0`. There is no migration. Bump Flatpack to `>= 0.1.231` and rebuild Tailwind so the overlay placement utilities generate. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` next to `flat_pack/application` on the public layout and the authenticated layout.
+- Hosts that wrapped only `#presskits-public-page` or `#presskits-kit-embed` now also get the style on the editor preview, owner preview, and audience preview. Do not copy it onto the toolbar, the header form, or `<html>`.
+- Hosts that replaced the section action row, header **Edit**, or **Edit image** should wrap those controls with `presskits-neutral-controls` and `BrandStyle.neutral_style_attribute` so they stay on Flatpack's primary.
+
 ## [0.45.0] - 2026-10-13
 
 ### Changed
@@ -31,7 +46,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Upgrade notes
 - Bump to `0.44.0`. There is no press kit migration. Hosts install `recording_studio_embargo` and run its migration (`recording_studio_embargo_embargoes`, plus the one-child index on recordings). This repo vendors tag `v0.1.0` at `vendor/gems/recording_studio_embargo` until CI can fetch the private git source.
 - Mount `RecordingStudioEmbargo::Engine` (the dummy uses `/recording_studio_embargo`). The toolbar button needs that mount. Preview and hidden stay on the kit's visibility screen.
-
 
 ## [0.43.0] - 2026-10-13
 

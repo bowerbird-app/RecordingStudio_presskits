@@ -91,6 +91,10 @@ module RecordingStudioPresskits
         I18n.t("recording_studio_presskits.visibility.preview.register_action")
       end
 
+      def branding_style
+        RecordingStudioPresskits.branding_style_for(@press_kit_recording)
+      end
+
       private
 
       def recordable

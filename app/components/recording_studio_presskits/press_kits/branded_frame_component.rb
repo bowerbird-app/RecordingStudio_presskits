@@ -2,10 +2,10 @@
 
 module RecordingStudioPresskits
   module PressKits
-    # One element around a public kit or a host embed. The style string
-    # redeclares Flatpack's primary, button, and ring tokens, which are
-    # resolved on the theme root, so they have to sit on this wrapper.
-    # Never on <html>. A nil style leaves the theme as it is.
+    # One element around kit content: the public page, a host embed, or a
+    # preview. The style string redeclares Flatpack's primary, button, and
+    # ring tokens, which are resolved on the theme root, so they have to sit
+    # on this wrapper. Never on <html>. Editor chrome stays outside it.
     class BrandedFrameComponent < ViewComponent::Base
       def initialize(press_kit_recording:, id:, branding: true)
         super()
@@ -23,7 +23,7 @@ module RecordingStudioPresskits
       private
 
       def wrapper_options
-        options = { id: @id }
+        options = { id: @id, data: { presskits_brand: "true" } }
         style = RecordingStudioPresskits.branding_style_for(@press_kit_recording)
         options[:style] = style if style.present?
         options

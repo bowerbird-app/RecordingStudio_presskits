@@ -49,7 +49,12 @@
     <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
   </div>
 
-  <div id="presskits-editor-preview" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>">
+  <div
+    id="presskits-editor-preview"
+    class="<%= RecordingStudioPresskits::PressKits::EditorChrome::PREVIEW_CLASSES %>"
+    data-presskits-brand="true"
+    style="<%= preview_brand_style %>"
+  >
     <%= render RecordingStudioPresskits::PressKits::KitHeaderComponent.new(
       press_kit_recording: @press_kit_recording,
       header_edit_path: @header_edit_path
