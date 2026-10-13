@@ -10,6 +10,14 @@ The published page puts that string on `#presskits-public-page`, around the full
 
 Cover tiles keep their own `cover_color` and `cover_text_color`. The brand is not written onto the kit. Flatpack defines the primary button tokens and the ring tokens on the theme root, so the press center string redeclares those tokens, plus `--color-primary`, `--color-primary-text`, `--color-primary-hover`, and `font-family`, on the wrapper.
 
+## 0.38.1
+
+No migration and no config change. The visibility screen in `pk-editor` keeps one heading: PageTitle **Visibility**. The small chrome title is blank, the same way Downloads does it. **Update** has `mt-4` above it.
+
+Audience is an inline RadioGroup. Anyone uses `globe-alt`, Signed in uses `user`, People with access uses `lock-closed`, and a custom audience uses `user-group`. **Who can view the full press kit?** stays on the page for screen readers (`sr-only`) and is not shown.
+
+Hosts that copied `app/views/recording_studio_presskits/visibilities/edit.html.erb` should pass `presskits_editor_blank_chrome_title` into `flat_pack_modal_screen` and keep the PageTitle. The Update row stays `#presskits-visibility-actions`. Hosts that replaced the visibility editor should use that RadioGroup and the `sr-only` label.
+
 ## 0.38.0
 
 Press kits gain an optional `subtitle` column. Blank lines become nil. The limit is 120 characters.

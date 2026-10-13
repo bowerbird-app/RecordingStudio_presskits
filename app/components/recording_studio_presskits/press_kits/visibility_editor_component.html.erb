@@ -17,13 +17,22 @@
       ) %>
     <% end %>
 
-    <%= render FlatPack::Select::Component.new(
-      name: "visibility[audience]",
-      label: I18n.t("recording_studio_presskits.visibility.audience_label"),
-      value: audience_value,
-      options: select_options,
-      required: true
-    ) %>
+    <div
+      id="presskits-visibility-audience"
+      role="group"
+      aria-labelledby="presskits-visibility-audience-label"
+    >
+      <p id="presskits-visibility-audience-label" class="sr-only">
+        <%= I18n.t("recording_studio_presskits.visibility.audience_label") %>
+      </p>
+      <%= render FlatPack::RadioGroup::Component.new(
+        name: "visibility[audience]",
+        value: audience_value,
+        options: radio_options,
+        variant: :inline,
+        required: true
+      ) %>
+    </div>
 
     <div
       data-recording-studio-presskits--visibility-fallback-target="fallback"
@@ -38,7 +47,7 @@
       ) %>
     </div>
 
-    <div id="presskits-visibility-actions" class="flex flex-wrap items-center gap-3">
+    <div id="presskits-visibility-actions" class="mt-4 flex flex-wrap items-center gap-3">
       <%= render FlatPack::Button::Component.new(
         text: I18n.t("recording_studio_presskits.visibility.save"),
         style: :default,

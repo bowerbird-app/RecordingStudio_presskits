@@ -3,6 +3,13 @@
 module RecordingStudioPresskits
   module PressKits
     class VisibilityEditorComponent < ViewComponent::Base
+      AUDIENCE_ICONS = {
+        "public" => "globe-alt",
+        "signed_in" => "user",
+        "granted" => "lock-closed"
+      }.freeze
+      CUSTOM_AUDIENCE_ICON = "user-group"
+
       def initialize(press_kit_recording:, audience:, options:, fallback:, constrained: false)
         super()
         @press_kit_recording = press_kit_recording
@@ -28,8 +35,11 @@ module RecordingStudioPresskits
         @constrained
       end
 
-      def select_options
-        @options.map { |option| { label: option[:label], value: option[:audience].to_s } }
+      def radio_options
+        @options.map do |option|
+          audience = option[:audience].to_s
+          { label: option[:label], value: audience, icon: audience_icon(audience) }
+        end
       end
 
       def fallback_options
@@ -48,6 +58,10 @@ module RecordingStudioPresskits
 
       def fallback_icon(name)
         name.to_sym == :hidden ? "eye-slash" : "eye"
+      end
+
+      def audience_icon(audience)
+        AUDIENCE_ICONS.fetch(audience, CUSTOM_AUDIENCE_ICON)
       end
     end
   end
