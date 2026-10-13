@@ -303,11 +303,12 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     kit = record_kit("Spring launch")
 
     assert_equal(
-      { title: "Spring launch", description: nil, cover_style: "color", cover_color: "#1F2937", cover_text_color: "#F8FAFC" },
+      { title: "Spring launch", subtitle: nil, description: nil, cover_style: "color", cover_color: "#1F2937", cover_text_color: "#F8FAFC" },
       RecordingStudioPresskits::Api::PressKitPayload.for(kit.recordable)
     )
 
     @root.revise(kit) do |press_kit|
+      press_kit.subtitle = "Collection released"
       press_kit.description = "Doors at noon."
       press_kit.cover_style = "color"
       press_kit.cover_color = "#BFDBFE"
@@ -317,6 +318,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_equal(
       {
         title: "Spring launch",
+        subtitle: "Collection released",
         description: "Doors at noon.",
         cover_style: "color",
         cover_color: "#BFDBFE",
@@ -326,10 +328,13 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     )
   end
 
-  test "grid cards keep a shared 9 by 16 height" do
+  test "grid cards show the cover, the subtitle, and a brand-coloured view link" do
     first = record_kit("Spring launch")
     second = record_kit("Autumn recap")
-    @root.revise(first) { |press_kit| press_kit.cover_color = "#BFDBFE" }
+    @root.revise(first) do |press_kit|
+      press_kit.subtitle = "Collection released"
+      press_kit.cover_color = "#BFDBFE"
+    end
     @root.revise(second) do |press_kit|
       press_kit.description = "A longer line that should clamp on the card."
       press_kit.cover_color = "#D97706"
@@ -339,11 +344,51 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-color='#BFDBFE']", count: 1
-    assert_select "[data-cover-color='#D97706']", count: 1
-    assert_select "[data-cover-text-color='#111827']", count: 2
-    assert_select "[data-cover-ratio='9 / 16']", count: 2
-    assert_includes css_select("[data-cover-color='#BFDBFE']").first.to_html, "--page-title-h1-size"
+    assert_select "[data-cover-card][data-cover-color='#BFDBFE']", count: 1
+    assert_select "[data-cover-card][data-cover-color='#D97706']", count: 1
+    assert_select "[data-cover-fallback]", count: 2
+    assert_select "[data-cover-company]", count: 0
+    assert_select "[data-cover-subtitle]", text: "Collection released"
+    assert_select "[data-cover-description]", text: "A longer line that should clamp on the card."
+    sky = css_select("[data-cover-color='#BFDBFE']").first
+    amber = css_select("[data-cover-color='#D97706']").first
+    assert_includes sky["style"], "--button-primary-background-color: #BFDBFE"
+    assert_includes sky["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#BFDBFE')}"
+    assert_includes amber["style"], "--button-primary-background-color: #D97706"
+    assert_includes amber["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#D97706')}"
+    assert_select "a[data-cover-view][href='#{recording_studio_presskits.edit_press_kit_path(first)}']", text: /View/
+    assert_includes css_select("a[data-cover-view]").first.parent["class"], "mt-auto"
+    assert_select ".grid.items-stretch"
+    assert_select "a[data-cover-card]", count: 0
+    assert_select "[data-cover-list] button[type=button] svg.w-6.h-6"
+    list = css_select("[data-cover-card][data-cover-color='#BFDBFE'] [data-cover-list]").first
+    refute_includes list.to_html, recording_studio_presskits.edit_press_kit_path(first)
+    assert_includes response.body, "recording-studio-lists--add-to-list"
+
+    RecordingStudioCompany.create(@root, actor: @user, name: "Harbour Studio")
+    get recording_studio_presskits.press_kits_path
+    assert_select "[data-cover-company]", text: "Harbour Studio", count: 2
+    harbour = css_select("[data-cover-card][data-cover-color='#BFDBFE']").first.to_html
+    assert_operator harbour.index("data-cover-company"), :<, harbour.index("data-cover-title")
+    assert_operator harbour.index("gap-[14px]"), :<, harbour.index("data-cover-title")
+    assert_select "[data-cover-verification]", count: 2
+    assert_select "[data-cover-company]", text: "HARBOUR STUDIO", count: 0
+  end
+
+  test "the grid heart stays off without an actor" do
+    kit = record_kit("Spring launch")
+    component = RecordingStudioPresskits::Cover::Component.new(
+      recording: kit,
+      size: :card,
+      href: "/kits/spring"
+    )
+
+    Current.actor = nil
+    refute component.show_add_to_list?
+
+    component.define_singleton_method(:lists_installed?) { false }
+    Current.actor = @user
+    refute component.show_add_to_list?
   end
 
   private

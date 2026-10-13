@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-10-12
+
+### Added
+- Optional press kit `subtitle`. It normalises like the short description, shows on the grid card, and sits under the title on the hero and the header preview.
+- Version `0.38.0`
+
+### Changed
+- `Cover::Component` at `:card` is a white rounded card. The top is the cover photo, or the cover colour when there is no photo, with a **Press kit** pill. The body shows the company name, the title, the subtitle, and the short description. **View** uses the cover colour and `Cover::Contrast` for the label. The link is that button.
+- When Lists is loaded and `Current.actor` is present, the card shows Lists' `recording_studio_add_to_list` heart at `size: :lg`. The heart does not open the kit. Without Lists, or without an actor, the card still renders.
+- The kit index grid is two columns and stretches each card to the row height. The header screen has a Subtitle field.
+- The company name sits 14px above the title. The heart stays on that row. **View** uses `mt-auto`, so the buttons line up when titles and descriptions differ.
+
+### Upgrade notes
+- Bump to `0.38.0`. Run `bin/rails generate recording_studio_presskits:migrations` and `bin/rails db:migrate` for `subtitle` on `recording_studio_press_kits`.
+- Hosts that replaced `Cover::Component` at `:card` should follow the new card: photo or colour block, company 14px above the title, heart on that row, subtitle, clamped description, and a **View** button with `mt-auto` whose background is `resolved_cover_color`. Stretch the grid (`align: :stretch`) so the buttons share a baseline. `:hero` and `:preview` stay.
+- The heart is `recording_studio_add_to_list` with `icon: "heart"` and `size: :lg`. It renders only when Lists is available and there is a current actor. Pass the kit recording so the menu can target it.
+
+## [0.37.0] - 2026-10-12
+
+### Added
+- Runtime dependency `recording_studio_lists` `~> 0.5` (GitHub tag `v0.5.0`).
+- Dummy registers `RecordingStudio::Lists::List` and `RecordingStudio::Lists::ListItem`, enables `:lists` on Workspace, mounts `RecordingStudioLists::Engine` at `/` after the host routes, copies the lists migrations, and scans lists views in the Tailwind bundle.
+- Version `0.37.0`
+
+### Upgrade notes
+- Add `recording_studio_lists` `~> 0.5` (tag `v0.5.0`). Run `bin/rails generate recording_studio_lists:install --mount-path /` and `bin/rails generate recording_studio_lists:migrations`, then `bin/rails db:migrate`.
+- Register `"RecordingStudio::Lists::List"` and `"RecordingStudio::Lists::ListItem"`. Enable `:lists` on the host root. The screens are `/lists`, `/lists/new`, and `/lists/:id`.
+- The lists install generator defaults the mount to `/recording_studio_lists`. `--mount-path /` matches the lists README. Skip the optional YAML prompt.
+- The engine pins `controllers/recording_studio_lists`. Eager-load that path if the host already eager-loads other engine controllers. Rebuild Tailwind so lists views are scanned.
+- Press kits do not call the lists API. This release only installs the gem.
+
 ## [0.36.1] - 2026-10-12
 
 ### Added

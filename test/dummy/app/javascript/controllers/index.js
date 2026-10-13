@@ -5,5 +5,6 @@ import { eagerLoadControllersFrom, lazyLoadControllersFrom } from "@hotwired/sti
 lazyLoadControllersFrom("controllers", application)
 eagerLoadControllersFrom("controllers/recording_studio_attachable", application)
 eagerLoadControllersFrom("controllers/recording_studio_location", application)
+eagerLoadControllersFrom("controllers/recording_studio_lists", application)
 eagerLoadControllersFrom("controllers/recording_studio_presskits", application)
 lazyLoadControllersFrom("controllers/recording_studio_downloadable", application)

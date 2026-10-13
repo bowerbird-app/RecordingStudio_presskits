@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  VERSION = "0.36.1"
+  VERSION = "0.38.0"
 end

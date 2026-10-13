@@ -189,6 +189,21 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert press_kit.errors[:description].any?
   end
 
+  test "press kit subtitle is optional and capped at 120 characters" do
+    press_kit = RecordingStudioPresskits::PressKit.new(title: unique_name("Named kit"))
+
+    press_kit.subtitle = "  \n"
+    assert press_kit.valid?
+    assert_nil press_kit.subtitle
+
+    press_kit.subtitle = "a" * RecordingStudioPresskits::PressKit::SUBTITLE_LIMIT
+    assert press_kit.valid?
+
+    press_kit.subtitle = "a" * (RecordingStudioPresskits::PressKit::SUBTITLE_LIMIT + 1)
+    assert_not press_kit.valid?
+    assert press_kit.errors[:subtitle].any?
+  end
+
   test "press kit cannot be created as a root" do
     press_kit = RecordingStudioPresskits::PressKit.create!(
       title: unique_name("Root Rejected Press Kit")

@@ -19,10 +19,13 @@
         <p class="<%= eyebrow_classes %>" style="<%= eyebrow_style %>" data-cover-eyebrow><%= eyebrow %></p>
         <%= render FlatPack::PageTitle::Component.new(
           title: title,
-          variant: heading_variant,
+          variant: :h1,
           size: :display,
           title_color: text_color
         ) %>
+        <% if subtitle.present? %>
+          <p class="text-2xl font-normal leading-tight md:text-3xl" style="color: <%= text_color %>;" data-cover-subtitle><%= subtitle %></p>
+        <% end %>
         <% if company_recording %>
           <div class="mt-4 flex items-center gap-2" data-cover-company>
             <%= recording_studio_company_logo(company_recording, size: :sm, shape: :circle) %>
@@ -41,31 +44,102 @@
     </div>
   </div>
 <% else %>
-  <%= render FlatPack::Card::Component.new(
-    style: card_style,
-    clickable: href.present?,
-    href: href,
-    padding: :none,
-    theme: image_card? ? nil : { background: cover_color, text: text_color },
-    id: wrapper_id,
-    class: wrapper_classes
-  ) do |card| %>
-    <% card.body do %>
-      <% if image_card? %>
-        <div class="flex h-full w-full flex-col" data-cover-color="<%= cover_color %>" data-cover-style="<%= cover_style %>" data-cover-image-card>
-          <div class="<%= image_frame_classes %>" data-cover-image>
+  <% if card? %>
+    <%= render FlatPack::Card::Component.new(
+      style: :default,
+      hover: :none,
+      padding: :none,
+      theme: view_button_theme,
+      id: wrapper_id,
+      class: grid_card_classes,
+      data: grid_card_data
+    ) do %>
+      <div class="relative aspect-[430/368] w-full overflow-hidden rounded-t-[var(--radius-lg)]" data-cover-frame>
+        <% if cover_image? %>
+          <div class="absolute inset-0" data-cover-image>
             <%= image_tag cover_image_url, alt: cover_image_alt, class: "h-full w-full object-cover" %>
           </div>
-          <div class="flex flex-col gap-2 p-5">
-            <h1 class="font-bold leading-tight tracking-tight text-balance" style="font-size: var(--page-title-h1-size);">
-              <%= title %>
-            </h1>
+        <% else %>
+          <div
+            class="absolute inset-0"
+            style="background-color: <%= cover_color %>;"
+            data-cover-fallback
+            data-cover-style="<%= cover_style %>"
+          ></div>
+        <% end %>
+        <div class="absolute left-5 top-5">
+          <%= render FlatPack::Badge::Component.new(
+            text: eyebrow,
+            size: :md,
+            class: "!border-transparent !bg-[var(--card-background-color)] !px-4 !py-2.5 !text-[15px] !font-bold !text-[var(--surface-content-color)] shadow-[0px_4px_16px_0px_rgba(26,20,10,0.12)]",
+            data: { cover_tag: true }
+          ) %>
+        </div>
+      </div>
+
+      <div class="flex flex-1 flex-col px-8 pt-7">
+        <div class="flex items-start gap-3"<% if show_brand_row? %> data-cover-brand<% end %>>
+          <div class="flex min-w-0 flex-1 flex-col gap-[14px]">
+            <% if company_name.present? %>
+              <div class="flex min-w-0 items-center gap-1.5" data-cover-brand-name>
+                <p class="truncate text-[13px] font-medium uppercase leading-[normal] tracking-[0.22em]" data-cover-company><%= company_name %></p>
+                <span class="inline-flex shrink-0" data-cover-verification></span>
+              </div>
+            <% end %>
+
+            <div class="flex flex-col gap-0.5">
+              <h2 class="text-[30px] font-bold leading-[38px] tracking-[-0.45px] text-balance" data-cover-title><%= title %></h2>
+              <% if subtitle.present? %>
+                <p class="text-[30px] font-normal leading-[38px] tracking-[-0.45px]" data-cover-subtitle><%= subtitle %></p>
+              <% end %>
+            </div>
+
             <% if description.present? %>
-              <p class="line-clamp-2 text-base text-pretty"><%= description %></p>
+              <p class="line-clamp-3 text-base leading-6 text-[var(--surface-muted-content-color)]" data-cover-description><%= description %></p>
             <% end %>
           </div>
+          <% if show_add_to_list? %>
+            <div class="shrink-0" data-cover-list onclick="event.stopPropagation()">
+              <%= helpers.recording_studio_add_to_list(
+                @recording,
+                text: "",
+                icon: "heart",
+                style: :ghost,
+                size: :lg,
+                show_chevron: false,
+                placement: :bottom_right,
+                parent: list_parent
+              ) %>
+            </div>
+          <% end %>
         </div>
-      <% else %>
+
+        <% if href.present? %>
+          <div class="mt-auto flex justify-end pb-8 pt-6">
+            <%= render FlatPack::Button::Component.new(
+              text: view_label,
+              icon: "arrow-right",
+              style: :primary,
+              size: :lg,
+              href: href,
+              class: "rounded-full [&>svg]:order-last",
+              data: { cover_view: true }
+            ) %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <%= render FlatPack::Card::Component.new(
+      style: card_style,
+      clickable: href.present?,
+      href: href,
+      padding: :none,
+      theme: { background: cover_color, text: text_color },
+      id: wrapper_id,
+      class: wrapper_classes
+    ) do |card| %>
+      <% card.body do %>
         <div
           class="<%= surface_classes %>"
           style="<%= surface_style %>"
@@ -75,21 +149,15 @@
           data-cover-ratio="<%= cover_ratio %>"
           data-recording-studio-presskits--cover-preview-target="surface"
         >
-          <% if card? %>
-            <h1 class="font-bold leading-tight tracking-tight text-balance" style="font-size: var(--page-title-h1-size); color: <%= text_color %>;">
-              <%= title %>
-            </h1>
-            <% if description.present? %>
-              <p class="mt-2 line-clamp-2 text-base text-pretty" style="color: <%= text_color %>;"><%= description %></p>
-            <% end %>
-          <% else %>
-            <%= render FlatPack::PageTitle::Component.new(
-              title: title,
-              subtitle: description,
-              variant: heading_variant,
-              title_color: text_color,
-              subtitle_color: text_color
-            ) %>
+          <%= render FlatPack::PageTitle::Component.new(
+            title: title,
+            subtitle: subtitle.presence || description,
+            variant: :h1,
+            title_color: text_color,
+            subtitle_color: text_color
+          ) %>
+          <% if subtitle.present? && description.present? %>
+            <p class="line-clamp-3 text-base text-pretty" style="color: <%= text_color %>;" data-cover-description><%= description %></p>
           <% end %>
         </div>
       <% end %>

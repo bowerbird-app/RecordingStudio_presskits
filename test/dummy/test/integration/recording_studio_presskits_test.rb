@@ -67,6 +67,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.table_exists?(:admin_roots)
     assert connection.column_exists?(:recording_studio_press_kits, :title)
     assert connection.column_exists?(:recording_studio_press_kits, :description)
+    assert connection.column_exists?(:recording_studio_press_kits, :subtitle)
     refute connection.column_exists?(:recording_studio_press_kits, :updated_at)
     assert connection.table_exists?(:recording_studio_texts)
     assert connection.column_exists?(:recording_studio_texts, :body)
@@ -132,6 +133,14 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.table_exists?(:recording_studio_companies)
     assert connection.column_exists?(:recording_studio_companies, :name)
     refute connection.column_exists?(:recording_studio_companies, :updated_at)
+    assert connection.table_exists?(:recording_studio_lists)
+    assert connection.column_exists?(:recording_studio_lists, :name)
+    assert connection.column_exists?(:recording_studio_lists, :description)
+    refute connection.column_exists?(:recording_studio_lists, :updated_at)
+    assert connection.table_exists?(:recording_studio_list_items)
+    assert connection.column_exists?(:recording_studio_list_items, :item_recording_id)
+    assert connection.column_exists?(:recording_studio_list_items, :position)
+    refute connection.column_exists?(:recording_studio_list_items, :updated_at)
     assert connection.table_exists?(:recording_studio_locations)
     assert connection.column_exists?(:recording_studio_locations, :title)
     assert connection.column_exists?(:recording_studio_locations, :location_type)
@@ -155,7 +164,8 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     members_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Members only launch")
     invite_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Invite only launch")
     quiet_kit = RecordingStudioPresskits::PressKit.find_by!(title: "Quiet launch")
-    assert_equal "Doors at noon. The one-sheet is inside.", press_kit.description
+    assert_equal "Doors at noon. The one-sheet is inside, with the photos, the credits, and the facts.", press_kit.description
+    assert_equal "Collection released", press_kit.subtitle
     assert_equal "A kit for people who have an account.", members_kit.description
     assert_equal "A kit for invited guests.", invite_kit.description
     assert_equal "This stays off the public list.", quiet_kit.description

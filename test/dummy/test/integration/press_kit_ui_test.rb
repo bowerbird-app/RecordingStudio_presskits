@@ -55,7 +55,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_library_sidebar
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-cover-color='#1F2937']", count: 1
-    assert_includes response.body, "aspect-[9/16]"
+    assert_select "[data-cover-fallback]"
+    assert_select "a[data-cover-view][href='#{edit_href}']", text: /View/
+    assert_includes response.body, "aspect-[430/368]"
     refute_includes response.body, "data-flat-pack--icon-name-value='photo'"
     assert_select "a[aria-label='Cards'] [data-flat-pack--icon-name-value='squares-2x2']", count: 1
     assert_select "a[aria-label='Table'] [data-flat-pack--icon-name-value='table-cells']", count: 1
@@ -79,7 +81,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, ">Table<"
   end
 
-  test "card view paints the kit colour with the title on top" do
+  test "card view paints the kit colour on the image block and the view button" do
     kit = record_kit("Spring launch")
     @root.revise(kit) { |press_kit| press_kit.cover_color = "#DB2777" }
     sign_in @user
@@ -87,9 +89,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-color='#DB2777']", count: 1
+    assert_select "[data-cover-card][data-cover-color='#DB2777']", count: 1
     cover = css_select("[data-cover-color='#DB2777']").first
     assert_includes cover.to_html, "Spring launch"
+    assert_includes cover.to_html, "background-color: #DB2777"
+    assert_includes cover["style"], "--button-primary-background-color: #DB2777"
+    assert_includes cover["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#DB2777')}"
     refute_includes response.body, "https://cdn.example/cover.jpg"
   end
 
@@ -760,6 +765,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_layout_back_button(label: "Back to kit", href: recording_studio_presskits.edit_press_kit_path(kit))
     assert_page_nav_without_access
     assert_select "input[name='press_kit[title]'][value='Spring launch']"
+    assert_select "input[name='press_kit[subtitle]']"
     assert_select "textarea[name='press_kit[description]']", text: "Doors at noon."
     assert_select "input[name='press_kit[cover_style]'][value='color']"
     assert_select "input[name='press_kit[cover_color]'][value='#1F2937'][type='radio'][checked]"
@@ -775,7 +781,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes form_html, "flat-pack--unsaved-changes"
     assert_includes form_html, 'name="press_kit[cover_color]"'
     assert_includes form_html, 'name="press_kit[cover_text_color]"'
-    assert_operator form_html.index('name="press_kit[title]"'), :<, form_html.index('name="press_kit[description]"')
+    assert_operator form_html.index('name="press_kit[title]"'), :<, form_html.index('name="press_kit[subtitle]"')
+    assert_operator form_html.index('name="press_kit[subtitle]"'), :<, form_html.index('name="press_kit[description]"')
     assert_operator form_html.index('name="press_kit[description]"'), :<, form_html.index("Update")
     refute_includes response.body, "md:grid-cols-2"
     refute_select "a", text: "Cancel"
@@ -801,6 +808,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     patch recording_studio_presskits.press_kit_header_path(kit), params: {
       press_kit: {
         title: "Spring launch, take two",
+        subtitle: "Collection released",
         description: "Doors at noon.",
         cover_style: "color",
         cover_color: "#BFDBFE",
@@ -814,10 +822,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "p", text: "Saved. That's what people see first."
     assert_select "h1", text: "Header"
     assert_select "input[name='press_kit[title]'][value='Spring launch, take two']"
+    assert_select "input[name='press_kit[subtitle]'][value='Collection released']"
     assert_select "textarea[name='press_kit[description]']", text: "Doors at noon."
+    assert_includes css_select("#presskits-header-edit-preview").first.text, "Collection released"
+    assert_includes css_select("#presskits-header-edit-preview").first.text, "Doors at noon."
     kit.reload
     assert_not_equal original_id, kit.recordable_id
     assert_equal "Spring launch, take two", kit.recordable.title
+    assert_equal "Collection released", kit.recordable.subtitle
     assert_equal "Doors at noon.", kit.recordable.description
     assert_equal "color", kit.recordable.cover_style
     assert_equal "#BFDBFE", kit.recordable.cover_color
@@ -831,6 +843,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "Spring launch, take two"
     assert_select "#presskits-kit-header [data-cover-eyebrow]", text: "Press kit"
+    assert_select "#presskits-kit-header [data-cover-subtitle]", text: "Collection released"
     refute_includes css_select("#presskits-kit-header").text, "Doors at noon"
     assert_select "#presskits-editor-preview", count: 1
     assert_select "#presskits-kit-header input", count: 0
@@ -852,6 +865,21 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     kit.reload
     assert_equal "Spring launch", kit.recordable.title
     assert_equal "Keep this.", kit.recordable.description
+  end
+
+  test "a subtitle past 120 characters stays unsaved" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.subtitle = "Keep this." }
+    too_long = "a" * 121
+    sign_in @user
+    switch_to_root(@root)
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { title: "Spring launch", subtitle: too_long }
+    }
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Keep that subtitle short. 120 characters is the limit."
+    assert_equal "Keep this.", kit.reload.recordable.subtitle
   end
 
   test "a description past 280 characters stays unsaved" do

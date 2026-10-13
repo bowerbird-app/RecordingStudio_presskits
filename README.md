@@ -20,6 +20,7 @@ gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publi
 gem "recording_studio_downloadable", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
 gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"
+gem "recording_studio_lists", github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"
 gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
@@ -40,6 +41,7 @@ gem "recording_studio_publishable", "~> 0.8"
 gem "recording_studio_downloadable", "~> 0.3"
 gem "recording_studio_attachable", "~> 0.15"
 gem "recording_studio_company", "~> 0.3"
+gem "recording_studio_lists", "~> 0.5"
 gem "recording_studio_location", "~> 0.4"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.1.0"
@@ -70,6 +72,8 @@ bin/rails generate recording_studio_company:install
 bin/rails generate recording_studio_company:migrations
 bin/rails generate recording_studio_location:install
 bin/rails generate recording_studio_location:migrations
+bin/rails generate recording_studio_lists:install --mount-path /
+bin/rails generate recording_studio_lists:migrations
 bin/rails generate recording_studio_video:install
 bin/rails generate recording_studio_video:migrations
 bin/rails active_storage:install
@@ -78,6 +82,8 @@ bin/rails db:migrate
 ```
 
 The install generator mounts the user slice, writes `parent_root_type`, and enables `section :press_kits` when an `AdminRoot` model is already there. Duplicatable has no engine-owned schema. Publishable's install mounts that engine at `/` so live kits use `/published/:uuid/:slug`.
+
+Lists ships with the gem. Register `RecordingStudio::Lists::List` and `RecordingStudio::Lists::ListItem`, and enable `:lists` on the host root (`RecordingStudio.enable_capability(:lists, on: Workspace)`). Mount `RecordingStudioLists::Engine` at `/` after the host routes so `/` stays the host home and the screens are `/lists`, `/lists/new`, and `/lists/:id`. The lists install generator defaults to `/recording_studio_lists`; pass `--mount-path /`. Decline its optional `config/recording_studio_lists.yml` prompt. Dummy enables `:lists` on Workspace only. The grid card renders `recording_studio_add_to_list` when Lists is loaded and `Current.actor` is present. Press kits do not create lists themselves.
 
 Point the host root at the mounted slice, or redirect `/` there. Dummy redirects `/` to `/recording_studio_presskits`.
 
@@ -104,6 +110,8 @@ RecordingStudio.configure do |config|
     "RecordingStudio::AccessConstraint",
     "RecordingStudio::AccessRule",
     "RecordingStudioCompany::Company",
+    "RecordingStudio::Lists::List",
+    "RecordingStudio::Lists::ListItem",
     "RecordingStudio::Location::Location"
   ]
   config.require_recordable_declarations = true
@@ -211,13 +219,13 @@ end
 kit_recording.log_event!(action: "noted")
 ```
 
-The header is the press kit. `title` is required. `description` is an optional short line, 280 characters at most, and a blank one is stored as nothing. The cover is also on the kit: `cover_style` is `color` for now (`nil` means colour with the default), `cover_color` is a hex string, and `cover_text_color` is an optional hex for the title and description. A blank colour uses `default_cover_color` (`#1F2937`). A blank text colour uses Auto: light or dark, whichever has the better WCAG contrast on that background. Hosts set `cover_colors` and `cover_text_colors` to a palette, or `:any` for any hex. `cover_text_auto` (default true) adds an Auto choice on the header screen. Writes must be a valid hex, and in palette mode they must be one of those colours. A stored colour that later leaves the palette still renders. A low-contrast pair is allowed; the editor may hint. Cover colour is stored on the kit. It is not a child, so it cannot be trashed or reordered. The cover photo is a separate direct image attachment on the kit, the same shape as a quote image. The kit editor lists Header and links to the header screen, which saves title, description, cover colour, and the optional kit location with `revise`. Upload and remove for the cover photo are their own forms on that screen. Creating a kit still sets the title only.
+The header is the press kit. `title` is required. `subtitle` is an optional line, 120 characters at most. `description` is an optional short line, 280 characters at most. A blank subtitle or description is stored as nothing. The cover is also on the kit: `cover_style` is `color` for now (`nil` means colour with the default), `cover_color` is a hex string, and `cover_text_color` is an optional hex for the title and description. A blank colour uses `default_cover_color` (`#1F2937`). A blank text colour uses Auto: light or dark, whichever has the better WCAG contrast on that background. Hosts set `cover_colors` and `cover_text_colors` to a palette, or `:any` for any hex. `cover_text_auto` (default true) adds an Auto choice on the header screen. Writes must be a valid hex, and in palette mode they must be one of those colours. A stored colour that later leaves the palette still renders. A low-contrast pair is allowed; the editor may hint. Cover colour is stored on the kit. It is not a child, so it cannot be trashed or reordered. The cover photo is a separate direct image attachment on the kit, the same shape as a quote image. The kit editor lists Header and links to the header screen, which saves title, subtitle, description, cover colour, and the optional kit location with `revise`. Upload and remove for the cover photo are their own forms on that screen. Creating a kit still sets the title only.
 
 When the host root enables companies (`allow: :one`), `Cover::Company` looks up `RecordingStudioCompany.company(root)` and the hero shows `recording_studio_company_logo` plus the name. No capability, or no company, hides that row. One optional Location child on the kit (not a section) shows its icon and `display_name` under the company. `KitLocation` looks that child up and writes it. The header screen edits that place with `recording_studio_location_search_fields`. Blank fields clear it. Flatpack `PageTitle` has no byline slot, and Location's display helper is a Card, so the hero uses Avatar + Icon + text. A Location section is a different parent: places there hang off `LocationSection`, not the kit.
 
 An optional cover image sits above the colour header. PressKit includes `Attachable.to` for one `image/*` file. `CoverImage` resolves the first direct image through `DirectImages`. `Cover::Image` paints it. The header screen uploads and removes that file itself. There is no library picker and no second photo model. Flatpack has no full-bleed crop image, so the hero uses `aspect-[1440/640]` and `object-cover` on a plain `image_tag`.
 
-`RecordingStudioPresskits::Cover::Component` is the reusable card. Pass a kit recording or the title, description, colour, and text colour. Sizes are `:card` (9/16 colour tile, or an image card with the title below the photo), `:preview` (9/16 colour tile in the header editor, no image), and `:hero` (optional full-width image above the colour header). Hero height comes from padding plus content (`p-12` on a phone, `md:p-24` on a desktop), not a fixed ratio. A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). The title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. The hero does not show the short description; cards and the header editor still do. Colour grid cards stay 9/16. Text colour is the chosen hex, or Auto. A host page that renders this card, or the full kit, follows [Displaying press kits in a host](#displaying-press-kits-in-a-host).
+`RecordingStudioPresskits::Cover::Component` is the reusable card. Pass a kit recording or the title, subtitle, description, colour, and text colour. Sizes are `:card` (white grid card: cover photo or colour block, company, title, subtitle, description, and **View**), `:preview` (9/16 colour tile in the header editor, no image), and `:hero` (optional full-width image above the colour header). Hero height comes from padding plus content (`p-12` on a phone, `md:p-24` on a desktop), not a fixed ratio. A muted **Press kit** eyebrow sits above the title (`recording_studio_presskits.cover.eyebrow`). The title is `FlatPack::PageTitle::Component` with `size: :display`, top-left, wrapping in `max-w-3xl`. The hero does not show the short description; the subtitle sits under the title when the kit has one. Cards and the header editor still show the short description. Text colour is the chosen hex, or Auto. A host page that renders this card, or the full kit, follows [Displaying press kits in a host](#displaying-press-kits-in-a-host).
 
 Create a section with `RecordingStudioPresskits.create_section!`. That call records a kit section under the kit, then records the chosen content type under the kit section, in one transaction. A failed content write leaves no kit section behind. Title and subtitle belong to the kit section. A content default belongs to the registered `prepare` hook.
 
@@ -433,17 +441,19 @@ On a host page, `:full` renders `PublicShowComponent`, `:preview` renders `Previ
 ```
 
 ```ruby
-initialize(recording: nil, title: nil, description: nil, cover_color: nil,
+initialize(recording: nil, title: nil, description: nil, subtitle: nil, cover_color: nil,
            cover_style: nil, cover_text_color: nil, size: :card, href: nil, id: nil)
 ```
 
-Every argument is optional. An unknown `size` becomes `:card`. Title uses the argument, then the recordable title, then `"Press kit"`. Description uses the argument. Pass `description: nil` (the default) to read the recordable. Colours use the argument, then `resolved_cover_color` / `resolved_cover_style` / `resolved_cover_text_color`, then the gem default. A blank text colour uses Auto (WCAG contrast on that background).
+Every argument is optional. An unknown `size` becomes `:card`. Title uses the argument, then the recordable title, then `"Press kit"`. Description and subtitle use the argument. Pass `description: nil` or `subtitle: nil` (the defaults) to read the recordable. Colours use the argument, then `resolved_cover_color` / `resolved_cover_style` / `resolved_cover_text_color`, then the gem default. A blank text colour uses Auto (WCAG contrast on that background).
 
-`:card` is the grid card. With no cover image it is a 9/16 colour tile, a large title, and a short description clamped to two lines when one is present. With a cover image (`Cover::Image` through `CoverImage` and `DirectImages`) the photo sits on top at `aspect-[1440/640]` and the title and description sit below. `href` makes the Flatpack card interactive, so the whole card is that link. Sections stay off the card.
+`:card` is the grid card for a host press center. It is a Flatpack card with a soft shadow, not a link. The top is the cover photo (`Cover::Image` through `CoverImage` and `DirectImages`, `object-cover`, rounded top corners) or the cover colour when the kit has no photo. A **Press kit** pill sits on that image. The body is a flex column. The company name from `Cover::Company` sits in small uppercase type 14px above the title (hidden when there is no company). The heart stays on that company row, top-aligned, so it does not push the title down. The subtitle and the short description, clamped to three lines, follow the title. **View** is a rounded Flatpack button in a footer with `mt-auto`, so it sits on the bottom of the card. The card is `h-full` and fills its grid cell. Its background is `resolved_cover_color` (or the default cover colour) and its label uses `Cover::Contrast.text_on`. `href` is that button's link. Sections stay off the card.
 
-`:preview` is the header-editor tile. It stays 9/16, skips the cover image, and renders the title and description in `FlatPack::PageTitle::Component`. `href` still makes that card interactive.
+When `RecordingStudioLists::AddToListHelper` is loaded, the card has a recording, and `Current.actor` is present, the company row shows `recording_studio_add_to_list` with `icon: "heart"` and `size: :lg`. That control does not follow `href`. Without Lists, or without an actor, the card still renders and the heart stays off.
 
-`:hero` is the kit header. It is a full-width stack, not a Flatpack card link, and `href` is unused. An attached cover image renders first at `aspect-[1440/640]`. Under it, a flush colour band (`p-12`, `md:p-24`) holds the **Press kit** eyebrow (`recording_studio_presskits.cover.eyebrow`), `PageTitle` at `size: :display`, then the company logo and name when the root has a company, then the kit location icon and `display_name` when that child exists. The short description stays off this band.
+`:preview` is the header-editor tile. It stays 9/16, skips the cover image, and renders the title in `FlatPack::PageTitle::Component`. A subtitle, when present, is the line under the title, and the short description sits under that. With no subtitle, the description is that line. `href` still makes that card interactive.
+
+`:hero` is the kit header. It is a full-width stack, not a Flatpack card link, and `href` is unused. An attached cover image renders first at `aspect-[1440/640]`. Under it, a flush colour band (`p-12`, `md:p-24`) holds the **Press kit** eyebrow (`recording_studio_presskits.cover.eyebrow`), `PageTitle` at `size: :display`, the subtitle when the kit has one, then the company logo and name when the root has a company, then the kit location icon and `display_name` when that child exists. The short description stays off this band.
 
 ### Full kit
 
@@ -510,7 +520,7 @@ The center page lists cards. `for_root` is every live kit in the workspace root,
 ```erb
 <% kits = RecordingStudioPresskits::KitQuery.for_root(center_recording.root_recording) %>
 
-<%= render FlatPack::Grid::Component.new(cols: 3, gap: :md) do %>
+<%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :stretch) do %>
   <% kits.each do |kit| %>
     <% presentation = RecordingStudioPresskits::Visibility.presentation_for(
          actor: current_user,

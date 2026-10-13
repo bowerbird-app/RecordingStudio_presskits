@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.36.1", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.38.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -68,6 +68,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.3"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_lists", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_location", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.1.0"'
@@ -90,6 +91,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
@@ -263,6 +265,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, 'mount RecordingStudioDownloadable::Engine, at: "/recording_studio_downloadable"'
     assert_includes routes, 'mount RecordingStudioCompany::Engine, at: "/recording_studio_company"'
     assert_includes routes, 'mount RecordingStudioLocation::Engine, at: "/recording_studio_location"'
+    assert_includes routes, 'mount RecordingStudioLists::Engine, at: "/"'
+    assert_operator routes.index('root to: redirect("/recording_studio_presskits")'), :<,
+                    routes.index('mount RecordingStudioLists::Engine, at: "/"')
     assert_includes routes, 'recording_studio_admin_for :admin, at: "/admin", root_section: :press_kits'
   end
 
@@ -299,6 +304,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes sources_task, '"recording_studio_downloadable"'
     assert_includes sources_task, '"recording_studio_company"'
     assert_includes sources_task, '"recording_studio_location"'
+    assert_includes sources_task, '"recording_studio_lists"'
     refute_includes tailwind_source, "@theme"
     refute_includes tailwind_source, ":root {"
     refute_includes tailwind_source, "--color-fp-primary"
@@ -328,6 +334,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer_source, '"RecordingStudioAttachable::Library"'
     assert_includes initializer_source, '"RecordingStudioAttachable::Placement"'
     assert_includes initializer_source, '"RecordingStudioCompany::Company"'
+    assert_includes initializer_source, '"RecordingStudio::Lists::List"'
+    assert_includes initializer_source, '"RecordingStudio::Lists::ListItem"'
     assert_includes initializer_source, '"RecordingStudio::Location::Location"'
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
@@ -397,6 +405,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.1.224\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
+    assert_includes readme, 'gem "recording_studio_lists", "~> 0.5"'
+    assert_includes readme, 'tag: "v0.5.0"'
+    assert_includes readme, "RecordingStudio::Lists::List"
+    assert_includes readme, "enable_capability(:lists, on: Workspace)"
+    assert_includes readme, "--mount-path /"
     assert_includes readme, "Companies.to(allow: :one)"
     assert_includes readme, "Capabilities::Location.to"
     assert_includes readme, "recording_studio_company_logo"
@@ -642,10 +655,26 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes image, "aspect-[1440/640]"
     assert_includes image, "CoverImage.url_for"
     assert_includes cover_html, "hero_copy_classes"
-    assert_includes cover_html, "--page-title-h1-size"
+    grid_card = File.read(File.expand_path("../lib/recording_studio_presskits/cover/grid_card.rb", __dir__))
+    assert_includes grid_card, "cover_card: true"
+    assert_includes cover_html, "data-cover-fallback"
+    assert_includes cover_html, "data-cover-list"
+    assert_includes cover_html, "recording_studio_add_to_list"
+    heart_call = cover_html[/recording_studio_add_to_list\(.*?\)/m]
+    assert_includes heart_call, "size: :lg"
+    assert_includes cover_html, "cover_view: true"
+    assert_includes cover_html, "line-clamp-3"
+    assert_includes cover_html, "arrow-right"
+    assert_includes cover_html, "data-cover-subtitle"
+    assert_includes cover_html, "gap-[14px]"
+    assert_includes cover_html, "mt-auto"
+    assert_includes cover_html, "flex flex-1 flex-col"
+    assert_includes index, "align: :stretch"
+    refute_includes index, "align: :start"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
     assert_includes locales, "cover:"
     assert_includes locales, 'eyebrow: "Press kit"'
+    assert_includes locales, 'view: "View"'
     refute_includes index, "card.media"
     refute_includes index, 'name: "photo"'
     refute_includes index, "presskits_cover_url_for"
@@ -1158,6 +1187,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.1.0"'
+    assert_includes gemfile, 'gem "recording_studio_lists", "~> 0.5"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'

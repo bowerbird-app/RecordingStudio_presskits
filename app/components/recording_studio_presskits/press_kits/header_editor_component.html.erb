@@ -17,6 +17,12 @@
       value: header_title,
       required: true
     ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "press_kit[subtitle]",
+      label: "Subtitle",
+      value: header_subtitle,
+      placeholder: "One line under the title."
+    ) %>
     <%= render FlatPack::TextArea::Component.new(
       name: "press_kit[description]",
       label: "Short description",
@@ -130,6 +136,7 @@
 
     <%= render RecordingStudioPresskits::Cover::Component.new(
       title: header_title,
+      subtitle: header_subtitle,
       description: header_description,
       cover_style: header_cover_style,
       cover_color: header_cover_color,
