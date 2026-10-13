@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.38.1] - 2026-10-13
+
+### Changed
+- The visibility screen in `pk-editor` has one heading: PageTitle **Visibility**. The small chrome title stays blank, the same way Downloads does.
+- **Update** on that screen sits clear of the fields.
+- Version `0.38.1`
+
+### Upgrade notes
+- Bump to `0.38.1`. There is no migration and no config change. Hosts that replaced the visibility edit view keep their own heading and button spacing.
+
 ## [0.38.0] - 2026-10-12
 
 ### Added

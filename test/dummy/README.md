@@ -42,7 +42,7 @@ Then open the app and sign in with:
 - `/recording_studio_presskits/press_kits/:id` - redirects to the kit editor (edit access)
 - `/recording_studio_presskits/press_kits/:id/edit` - kit editor
 - `/recording_studio_presskits/press_kits/:id/header/edit` - header title, short description, kit location, cover image, colour, and text colour
-- `/recording_studio_presskits/press_kits/:id/visibility/edit` - Visibility: who can view the full kit, and what other visitors see
+- `/recording_studio_presskits/press_kits/:id/visibility/edit` - Visibility: who can view the full kit, and what other visitors see. In the kit editor modal the only heading is PageTitle Visibility, and Update sits clear of the fields
 - `/recording_studio_presskits/press_kits/:id/downloads/edit` - who can download the kit zip
 - `/published/:uuid/:slug` - public show of a live kit (full, limited preview, or 404 when hidden)
 - `/recording_studio_downloadable` - Downloadable engine mount for kit zip builds and fetches

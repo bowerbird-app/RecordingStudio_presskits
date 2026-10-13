@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.38.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.38.1", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -1263,12 +1263,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes locales, "See full press kit"
     assert_includes locales, "You must be signed in to"
     assert_includes editor, "max-w-xl"
+    assert_includes editor, 'id="presskits-visibility-actions" class="mt-6 flex flex-wrap items-center gap-3"'
     assert_includes editor, "variant: :inline"
     refute_includes editor, "variant: :cards"
     refute_includes preview, "FlatPack::Alert"
     refute_includes preview, "formatted_date"
     refute_includes preview, "data-presskits-preview-description"
     refute_includes preview, "description.present?"
+    screen = File.read(File.join(root, "app/views/recording_studio_presskits/visibilities/edit.html.erb"))
+    assert_includes screen, "presskits_editor_blank_chrome_title"
+    refute_includes screen, "flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: I18n.t"
+    assert_includes screen, "visibility.title"
     editor_kit = File.read(File.join(components, "kit_editor_component.html.erb"))
     header = File.read(File.join(components, "kit_header_component.html.erb"))
     assert_includes editor_kit, 'id: "presskits-visibility"'
