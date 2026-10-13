@@ -38,16 +38,16 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_company.git
-  revision: 10337c178e1e7ca0b2d0883296398b1e529a54fc
-  tag: v0.3.0
+  revision: d534362552a608df3358138c3a173a4223709663
+  tag: v0.4.0
   specs:
-    recording_studio_company (0.3.0)
+    recording_studio_company (0.4.0)
       flat_pack (>= 0.1.200)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
-      recording_studio_accessible (~> 0.13)
-      recording_studio_attachable (~> 0.13)
-      recording_studio_trashable (~> 0.6)
+      recording_studio_accessible (~> 0.15)
+      recording_studio_attachable (~> 0.15)
+      recording_studio_trashable (~> 0.8)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_downloadable.git
@@ -171,7 +171,7 @@ PATH
       recording_studio_accessible (~> 0.15)
       recording_studio_admin (~> 2.0)
       recording_studio_attachable (~> 0.15)
-      recording_studio_company (~> 0.3)
+      recording_studio_company (~> 0.4)
       recording_studio_downloadable (~> 0.3)
       recording_studio_duplicatable (~> 0.5)
       recording_studio_external_embed (~> 0.1.1)
@@ -485,7 +485,7 @@ DEPENDENCIES
   recording_studio_accessible (~> 0.15)!
   recording_studio_admin (~> 2.0)!
   recording_studio_attachable (~> 0.15)!
-  recording_studio_company (~> 0.3)!
+  recording_studio_company (~> 0.4)!
   recording_studio_downloadable (~> 0.3)!
   recording_studio_duplicatable (~> 0.5)!
   recording_studio_external_embed (~> 0.1.1)!
@@ -582,7 +582,7 @@ CHECKSUMS
   recording_studio_accessible (0.15.0)
   recording_studio_admin (2.1.0)
   recording_studio_attachable (0.15.0)
-  recording_studio_company (0.3.0)
+  recording_studio_company (0.4.0)
   recording_studio_downloadable (0.3.0)
   recording_studio_duplicatable (0.5.0)
   recording_studio_external_embed (0.1.1)
