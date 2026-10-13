@@ -28,6 +28,8 @@ class TextSectionPresentationTest < Minitest::Test
     assert_includes show, "recording-studio-presskits--text-collapse"
     assert_includes show, 'aria: { expanded: "false"'
     assert_includes show, "show_more_label"
+    assert_includes show, "style: :default"
+    refute_includes show, "style: :ghost"
     assert_includes heading, "data-presskits-text-copy-slot"
     assert_includes heading, "justify-between"
     refute_includes heading, "Copy text"

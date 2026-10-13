@@ -94,6 +94,10 @@ class TextSectionPresentationTest < ActionDispatch::IntegrationTest
     toggle = css_select("[data-presskits-text-collapse] button").first
     assert_equal "false", toggle["aria-expanded"]
     assert_equal collapsed["id"], toggle["aria-controls"]
+    assert_equal "default", toggle["data-fp-style"]
+    assert_includes toggle["class"], "fp-button"
+    assert_includes toggle["class"], "fp-button-raised"
+    refute_includes toggle["class"], "fp-button-flat"
     assert_includes toggle.to_html, "Show more"
     refute_includes toggle.to_html, "Show less"
     assert_includes toggle["data-action"], "recording-studio-presskits--text-collapse#toggle"

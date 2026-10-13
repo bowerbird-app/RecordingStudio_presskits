@@ -6,7 +6,7 @@ No migration. Rebuild Tailwind so the text-section utilities generate.
 
 On the public kit and the owner preview, a text section heading is `TextSectionHeadingComponent`: bold, `text-[2rem]`, `--surface-content-color`, with an empty `data-presskits-text-copy-slot` on the right. Do not put a copy button there yet. Other section types still render `SectionTitle` with its anchor, including the Images count badge and **Download all images**. Section cards stay `rounded-[var(--radius-lg)]` (1.5rem / 24px).
 
-The public text body uses `--surface-muted-content-color`, `text-base`, `leading-7`, and `max-w-[65ch]`. It does not use `.ProseMirror`. Copy longer than 700 characters clamps to eight lines (`max-h-[14rem]`) with a fade and **Show more** / **Show less** (`aria-expanded`). Shorter copy has no toggle. The kit editor always shows the full body and still edits it with `FlatPack::InlineEdit` `mode: :rich` (the bubble toolbar). A text section's editor title uses the same bold classes. Other sections stay semibold `text-2xl`.
+The public text body uses `--surface-muted-content-color`, `text-base`, `leading-7`, and `max-w-[65ch]`. It does not use `.ProseMirror`. Copy longer than 700 characters clamps to eight lines (`max-h-[14rem]`) with a fade and **Show more** / **Show less** (`aria-expanded`). That control is `FlatPack::Button` `style: :default`. Shorter copy has no toggle. The kit editor always shows the full body and still edits it with `FlatPack::InlineEdit` `mode: :rich` (the bubble toolbar). A text section's editor title uses the same bold classes. Other sections stay semibold `text-2xl`.
 
 `FlatPack::Collapse` hides a whole region behind a title. It is not this clamp.
 
