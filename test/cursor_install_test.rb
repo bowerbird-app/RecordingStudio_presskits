@@ -26,6 +26,15 @@ class CursorInstallTest < Minitest::Test
     assert File.executable?(fetch)
   end
 
+  def test_git_wrapper_retries_local_clones_without_hardlinks
+    source = File.read(File.join(ROOT, ".github/scripts/prefer-git-copies.sh"))
+
+    assert_includes source, "flock"
+    assert_includes source, "clone --no-hardlinks"
+    assert_includes source, 'while [ "\$attempt" -le 3 ]'
+    assert_includes source, 'rm -rf "\$dest"'
+  end
+
   def test_start_sh_only_starts_postgres
     start = File.read(File.join(ROOT, ".cursor/start.sh"))
 

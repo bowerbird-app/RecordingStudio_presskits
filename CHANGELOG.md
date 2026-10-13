@@ -19,6 +19,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rebuild Tailwind so `@container`, `@min-[640px]:flex-row`, `@min-[640px]:w-1/2`, and `@min-[640px]:min-h-[50cqw]` generate. This dummy uses Tailwind 4, which includes container queries. `:hero` and `:preview` stay as they are.
 - A grid cell narrower than 640px keeps the stacked card. The kit editor places the same card across the preview, so that header is the wide row. The short description shows in the card body. Kit location stays on the public hero and on the header form.
 
+## [0.39.0] - 2026-10-13
+
+### Added
+- The published kit and a host embed of `PublicShowComponent` pick up the parent press center's brand when `RecordingStudioPressCenters` is loaded. `RecordingStudioPresskits.branding_style_for` calls `RecordingStudioPressCenters.branding_for(kit_recording)&.style_attribute`. That string goes on one wrapper: `#presskits-public-page` on the published page, and `#presskits-kit-embed` around a host embed. It is never on `<html>`.
+- Version `0.39.0`
+
+### Upgrade notes
+- Bump to `0.39.0`. There is no migration and no new dependency. Press kits does not require press centers. When that gem is absent, or `branding_for` returns nil, the Flatpack theme stays as it is.
+- The published page passes `branding: false` into `PublicShowComponent`, so the style sits on `#presskits-public-page` only. A host that renders `PublicShowComponent` on its own page gets `#presskits-kit-embed` (the default). Pass `branding: false` to skip that wrapper. Owner preview already does.
+- Cover tiles keep `cover_color` and `cover_text_color`. Nothing from the center brand is copied onto the kit. The style string has to live on the wrapper, because Flatpack resolves the primary button tokens and the ring tokens on the theme root.
+
+## [0.38.1] - 2026-10-13
+
+### Changed
+- The visibility screen in `pk-editor` has one heading: PageTitle **Visibility**, subtitle "Who can view this press kit". The small chrome title is blank, the same way Downloads does it.
+- **Update** on that screen has `mt-4` above it, so the button is not flush with the last field.
+- Audience is an inline RadioGroup with the same icons as Downloads: Anyone `globe-alt`, Signed in `user`, People with access `lock-closed`, and custom audiences `user-group`. The field label stays available to screen readers (`sr-only`).
+- Version `0.38.1`
+
+### Upgrade notes
+- Bump to `0.38.1`. There is no migration and no config change.
+- Hosts that copied `visibilities/edit` should pass `presskits_editor_blank_chrome_title` to `flat_pack_modal_screen` and keep the PageTitle. The Update row is `#presskits-visibility-actions` with `mt-4`.
+- Hosts that replaced the visibility editor should render audience as `FlatPack::RadioGroup` `variant: :inline` and keep **Who can view the full press kit?** in an `sr-only` label. Icons match Downloads.
+
 ## [0.38.0] - 2026-10-12
 
 ### Added

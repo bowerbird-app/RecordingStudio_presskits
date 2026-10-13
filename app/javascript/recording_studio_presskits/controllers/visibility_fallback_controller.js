@@ -16,7 +16,7 @@ export default class extends Controller {
   }
 
   selectedAudience() {
-    const named = this.element.querySelector("[name='visibility[audience]']")
-    return `${named?.value || ""}`.trim()
+    const checked = this.element.querySelector("[name='visibility[audience]']:checked")
+    return `${checked?.value || ""}`.trim()
   }
 }
