@@ -176,6 +176,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes query, "parent_recording: root_recording"
   end
 
+  def test_acme_desk_stand_in_stays_out_of_the_autoload_path
+    root = File.expand_path("..", __dir__)
+    refute File.exist?(File.join(root, "test/dummy/lib/acme_desk_branding.rb"))
+    initializer = File.read(File.join(root, "test/dummy/config/initializers/acme_desk_branding.rb"))
+    assert_includes initializer, "Rails.env.development?"
+    assert_includes initializer, "stand_in/acme_desk_branding"
+    stand_in = File.read(File.join(root, "test/dummy/stand_in/acme_desk_branding.rb"))
+    assert_includes stand_in, "module RecordingStudioPressCenters"
+  end
+
   def test_gem_does_not_name_a_press_center_or_extra_parent_list
     root = File.expand_path("..", __dir__)
     files = Dir.chdir(root) do
