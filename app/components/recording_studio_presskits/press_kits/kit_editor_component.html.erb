@@ -60,11 +60,8 @@
         <% @section_recordings.each do |recording| %>
           <%= render RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
             section_recording: recording,
-            heading_path: @heading_path.call(recording),
             content_path: @edit_path.call(recording),
-            add_path: @add_path,
             remove_path: @remove_path.call(recording),
-            picker_items: picker_items,
             highlight: highlight?(recording)
           ) %>
         <% end %>

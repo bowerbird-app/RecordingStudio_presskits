@@ -1,85 +1,39 @@
-<% if hero? %>
-  <div class="w-full" data-cover-stack>
-    <% if cover_image? %>
-      <div id="presskits-cover-image" class="<%= image_frame_classes %>" data-cover-image>
-        <%= image_tag cover_image_url, alt: cover_image_alt, class: "h-full w-full object-cover" %>
-      </div>
-    <% end %>
-    <div
-      id="<%= wrapper_id %>"
-      class="<%= surface_classes %>"
-      style="<%= surface_style %>"
-      data-cover-color="<%= cover_color %>"
-      data-cover-text-color="<%= text_color %>"
-      data-cover-style="<%= cover_style %>"
-      data-cover-ratio="<%= cover_ratio %>"
-      data-recording-studio-presskits--cover-preview-target="surface"
-    >
-      <div class="<%= hero_copy_classes %>">
-        <p class="<%= eyebrow_classes %>" style="<%= eyebrow_style %>" data-cover-eyebrow><%= eyebrow %></p>
-        <%= render FlatPack::PageTitle::Component.new(
-          title: title,
-          variant: :h1,
-          size: :display,
-          title_color: text_color
-        ) %>
-        <% if subtitle.present? %>
-          <p class="text-2xl font-normal leading-tight md:text-3xl" style="color: <%= text_color %>;" data-cover-subtitle><%= subtitle %></p>
-        <% end %>
-        <% if company_recording %>
-          <div class="mt-4 flex items-center gap-2" data-cover-company>
-            <%= recording_studio_company_logo(company_recording, size: :sm, shape: :circle) %>
-            <span class="text-base font-medium"><%= company_name %></span>
+<% if card? %>
+  <%= render FlatPack::Card::Component.new(
+    style: :default,
+    hover: :none,
+    padding: :none,
+    theme: view_button_theme,
+    id: wrapper_id,
+    class: grid_card_classes,
+    data: grid_card_data
+  ) do %>
+    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" %>
+    <div class="<%= grid_card_row_classes %>" style="<%= font_style %>" data-cover-row>
+      <div class="<%= grid_card_frame_classes %>" data-cover-frame>
+        <% if cover_image? %>
+          <div class="absolute inset-0" data-cover-image>
+            <%= image_tag cover_image_url, alt: cover_image_alt, class: "h-full w-full object-cover" %>
           </div>
+        <% else %>
+          <div
+            class="absolute inset-0 bg-[var(--surface-muted-background-color)]"
+            data-cover-fallback
+          ></div>
         <% end %>
-        <% if location_recordable %>
-          <div class="flex items-center gap-2" data-cover-location>
-            <% if location_recordable.resolved_icon.present? %>
-              <%= render FlatPack::Shared::IconComponent.new(name: location_recordable.resolved_icon, size: :sm) %>
-            <% end %>
-            <span class="text-base"><%= location_recordable.display_name %></span>
-          </div>
-        <% end %>
-      </div>
-    </div>
-  </div>
-<% else %>
-  <% if card? %>
-    <%= render FlatPack::Card::Component.new(
-      style: :default,
-      hover: :none,
-      padding: :none,
-      theme: view_button_theme,
-      id: wrapper_id,
-      class: grid_card_classes,
-      data: grid_card_data
-    ) do %>
-      <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" %>
-      <div class="<%= grid_card_row_classes %>" data-cover-row>
-        <div class="<%= grid_card_frame_classes %>" data-cover-frame>
-          <% if cover_image? %>
-            <div class="absolute inset-0" data-cover-image>
-              <%= image_tag cover_image_url, alt: cover_image_alt, class: "h-full w-full object-cover" %>
-            </div>
-          <% else %>
-            <div
-              class="absolute inset-0"
-              style="background-color: <%= cover_color %>;"
-              data-cover-fallback
-              data-cover-style="<%= cover_style %>"
-            ></div>
-          <% end %>
-          <div class="absolute left-5 top-5">
+        <div class="absolute left-5 top-5">
+          <span class="inline-flex" style="<%= pill_style %>" data-cover-tag data-cover-eyebrow>
             <%= render FlatPack::Badge::Component.new(
               text: eyebrow,
               size: :md,
-              class: "!border-transparent !bg-[var(--card-background-color)] !px-4 !py-2.5 !text-[15px] !font-bold !text-[var(--surface-content-color)] shadow-[0px_4px_16px_0px_rgba(26,20,10,0.12)]",
-              data: { cover_tag: true }
+              style: :primary,
+              class: "!border-transparent !px-4 !py-2.5 !text-[15px] !font-bold shadow-[0px_4px_16px_0px_rgba(26,20,10,0.12)]"
             ) %>
-          </div>
+          </span>
         </div>
+      </div>
 
-        <div class="<%= grid_card_body_classes %>">
+      <div class="<%= grid_card_body_classes %>">
         <div class="flex items-start gap-3"<% if show_brand_row? %> data-cover-brand<% end %>>
           <div class="flex min-w-0 flex-1 flex-col gap-[14px]">
             <% if company_name.present? %>
@@ -89,8 +43,17 @@
               </div>
             <% end %>
 
+            <% if location_recordable %>
+              <div class="flex items-center gap-2 text-sm" data-cover-location>
+                <% if location_recordable.resolved_icon.present? %>
+                  <%= render FlatPack::Shared::IconComponent.new(name: location_recordable.resolved_icon, size: :sm) %>
+                <% end %>
+                <span><%= location_recordable.display_name %></span>
+              </div>
+            <% end %>
+
             <div class="flex flex-col gap-0.5">
-              <%= content_tag(title_tag, title, class: "text-[30px] font-bold leading-[38px] tracking-[-0.45px] text-balance", data: { cover_title: true }) %>
+              <%= content_tag title_tag, title, class: "text-[30px] font-bold leading-[38px] tracking-[-0.45px] text-balance", data: { cover_title: true } %>
               <% if subtitle.present? %>
                 <p class="text-[30px] font-normal leading-[38px] tracking-[-0.45px]" data-cover-subtitle><%= subtitle %></p>
               <% end %>
@@ -129,41 +92,7 @@
             ) %>
           </div>
         <% end %>
-        </div>
       </div>
-    <% end %>
-  <% else %>
-    <%= render FlatPack::Card::Component.new(
-      style: card_style,
-      clickable: href.present?,
-      href: href,
-      padding: :none,
-      theme: { background: cover_color, text: text_color },
-      id: wrapper_id,
-      class: wrapper_classes
-    ) do |card| %>
-      <% card.body do %>
-        <div
-          class="<%= surface_classes %>"
-          style="<%= surface_style %>"
-          data-cover-color="<%= cover_color %>"
-          data-cover-text-color="<%= text_color %>"
-          data-cover-style="<%= cover_style %>"
-          data-cover-ratio="<%= cover_ratio %>"
-          data-recording-studio-presskits--cover-preview-target="surface"
-        >
-          <%= render FlatPack::PageTitle::Component.new(
-            title: title,
-            subtitle: subtitle.presence || description,
-            variant: :h1,
-            title_color: text_color,
-            subtitle_color: text_color
-          ) %>
-          <% if subtitle.present? && description.present? %>
-            <p class="line-clamp-3 text-base text-pretty" style="color: <%= text_color %>;" data-cover-description><%= description %></p>
-          <% end %>
-        </div>
-      <% end %>
-    <% end %>
+    </div>
   <% end %>
 <% end %>

@@ -68,8 +68,8 @@ module RecordingStudioPresskits
         return if headings.nil?
 
         root_recording.revise(section_recording) do |section|
-          section.title = headings[:title]
-          section.subtitle = headings[:subtitle]
+          section.title = headings[:title] if headings.key?(:title)
+          section.subtitle = headings[:subtitle] if headings.key?(:subtitle)
         end
       end
 

@@ -44,8 +44,8 @@ module RecordingStudioPresskits
         I18n.t("recording_studio_presskits.editor.edit_heading")
       end
 
-      def cover_colours_label
-        I18n.t("recording_studio_presskits.editor.cover_colours")
+      def style_label
+        I18n.t("recording_studio_presskits.editor.style")
       end
 
       def cover_image_label

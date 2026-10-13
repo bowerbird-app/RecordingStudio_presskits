@@ -6,19 +6,6 @@ require "devise/test/integration_helpers"
 class PressKitBrandingTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
-  BRANDED_STYLE = [
-    "--color-primary: #0F766E",
-    "--color-primary-text: #F8FAFC",
-    "--color-primary-hover: #115E59",
-    "--button-primary-background-color: #0F766E",
-    "--button-primary-hover-background-color: #115E59",
-    "--button-primary-text-color: #F8FAFC",
-    "--button-primary-border-color: #0F766E",
-    "--color-ring: #0F766E",
-    "--button-focus-ring-color: #0F766E",
-    "font-family: Georgia, serif"
-  ].join("; ").freeze
-
   setup do
     @previous_actor = Current.actor
     @user = User.create!(
@@ -33,8 +20,6 @@ class PressKitBrandingTest < ActionDispatch::IntegrationTest
     raise result.error if result.failure?
 
     @kit = record_kit("Spring launch")
-    @root.revise(@kit) { |press_kit| press_kit.cover_color = "#BFDBFE" }
-    @kit.reload
     record_block(@kit, "Hero")
     publish_kit!(@kit, slug: "spring-launch-brand")
   end
@@ -44,105 +29,166 @@ class PressKitBrandingTest < ActionDispatch::IntegrationTest
     Current.actor = @previous_actor
   end
 
-  test "a branded public page and kit embed use one wrapper each" do
-    install_press_centers(BRANDED_STYLE)
+  test "a public page and kit embed inherit the press center one field at a time" do
+    install_center(brand_color: "#0F766E", font_family: "serif")
 
     get @kit.publishable_public_path
     assert_response :success
-    assert_branded_frame("presskits-public-page")
+    assert_inherited_frame("presskits-public-page")
     assert_select "#presskits-kit-embed", count: 0
-    assert_cover_keeps_its_own_colours
+    assert_nil css_select("html").first["style"]
     assert_equal @kit.id, RecordingStudioPressCenters.kit_recording.id
+    assert_nil @kit.reload.recordable.brand_color
+    assert_nil @kit.recordable.font_family
 
     get kit_embed_path(@kit)
     assert_response :success
-    assert_branded_frame("presskits-kit-embed")
+    assert_inherited_frame("presskits-kit-embed")
     assert_select "body[data-recording-studio-default-layout]"
     assert_select "[data-presskits-blank-layout]", count: 0
     assert_select "#presskits-public-page", count: 0
-    assert_cover_keeps_its_own_colours
   end
 
-  test "nil branding leaves the flatpack theme on the public page and the embed" do
-    install_press_centers(nil)
+  test "an explicit kit default beats the press center on the public page" do
+    install_center(brand_color: "#0F766E", font_family: "serif")
+    @root.revise(@kit) do |press_kit|
+      press_kit.brand_color = "#333333"
+      press_kit.font_family = "sans"
+    end
+    publish_kit!(@kit.reload, slug: "spring-launch-brand")
 
     get @kit.publishable_public_path
     assert_response :success
-    assert_unbranded_frame("presskits-public-page")
+    frame = css_select("#presskits-public-page").first
+    assert_includes frame["style"], "--color-primary: #333333"
+    assert_includes frame["style"], "font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
+    refute_includes frame["style"], "#0F766E"
+    refute_includes frame["style"], "Georgia"
+  end
+
+  test "a blank center still paints the flatpack default" do
+    install_center(brand_color: nil, font_family: nil)
+
+    get @kit.publishable_public_path
+    assert_response :success
+    assert_default_frame("presskits-public-page")
 
     get kit_embed_path(@kit)
     assert_response :success
-    assert_unbranded_frame("presskits-kit-embed")
+    assert_default_frame("presskits-kit-embed")
   end
 
-  test "a public page and embed stay on the flatpack theme when press centers is not loaded" do
+  test "a public page and embed use the local tokens when press centers is not loaded" do
     remove_press_centers
 
     get @kit.publishable_public_path
     assert_response :success
-    assert_unbranded_frame("presskits-public-page")
+    assert_default_frame("presskits-public-page")
 
     get kit_embed_path(@kit)
     assert_response :success
-    assert_unbranded_frame("presskits-kit-embed")
+    assert_default_frame("presskits-kit-embed")
   end
 
-  test "the kit editor and owner preview do not take the press center brand" do
-    install_press_centers(BRANDED_STYLE)
+  test "the kit editor and owner preview do not wrap with the public brand frame" do
+    install_center(brand_color: "#0F766E", font_family: "serif")
     sign_in @user
     switch_to_root(@root)
 
     get recording_studio_presskits.edit_press_kit_path(@kit)
     assert_response :success
-    refute_includes response.body, BRANDED_STYLE
     assert_select "#presskits-public-page", count: 0
     assert_select "#presskits-kit-embed", count: 0
 
     get recording_studio_presskits.preview_press_kit_path(@kit)
     assert_response :success
-    refute_includes response.body, BRANDED_STYLE
     assert_select "#presskits-public-page", count: 0
     assert_select "#presskits-kit-embed", count: 0
   end
 
+  test "header brand tabs follow the stored source and save both fields together" do
+    install_center(brand_color: "#0F766E", font_family: "serif")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_header_path(@kit)
+    assert_response :success
+    assert_select "button#presskits-brand-press-center-tab[aria-selected='true']", text: "Press center"
+    assert_select "button#presskits-brand-custom-tab[aria-selected='false']", text: "Custom"
+    assert_select "input#press_kit_brand_source[value='press_center']"
+    assert_select "[data-presskits-brand-inherited]", text: "Serif · #0F766E"
+    assert_equal "#0F766E", css_select("input[name='press_kit[brand_color]']").first["value"].upcase
+    assert_equal(
+      RecordingStudioPresskits::BrandStyle.swatch_css_for("serif"),
+      css_select("input[name='press_kit[font_family]']").first["value"]
+    )
+    refute_select "#presskits-header-edit-preview"
+
+    @root.revise(@kit) { |press_kit| press_kit.brand_color = "#DB2777" }
+    get recording_studio_presskits.edit_press_kit_header_path(@kit)
+    assert_response :success
+    assert_select "button#presskits-brand-custom-tab[aria-selected='true']"
+    assert_select "input#press_kit_brand_source[value='custom']"
+    assert_equal "#DB2777", css_select("input[name='press_kit[brand_color]']").first["value"].upcase
+    assert_equal(
+      RecordingStudioPresskits::BrandStyle.swatch_css_for("serif"),
+      css_select("input[name='press_kit[font_family]']").first["value"]
+    )
+
+    patch recording_studio_presskits.press_kit_header_path(@kit), params: {
+      press_kit: {
+        title: "Spring launch",
+        brand_source: "custom",
+        brand_color: "#333333",
+        font_family: RecordingStudioPresskits::BrandStyle::SWATCH_CSS.fetch("sans")
+      }
+    }
+    assert_equal "#333333", @kit.reload.recordable.brand_color
+    assert_equal "sans", @kit.recordable.font_family
+
+    patch recording_studio_presskits.press_kit_header_path(@kit), params: {
+      press_kit: {
+        title: "Spring launch",
+        brand_source: "press_center",
+        brand_color: "#DB2777",
+        font_family: RecordingStudioPresskits::BrandStyle::SWATCH_CSS.fetch("mono")
+      }
+    }
+    assert_nil @kit.reload.recordable.brand_color
+    assert_nil @kit.recordable.font_family
+  end
+
   private
 
-  def assert_branded_frame(id)
+  def assert_inherited_frame(id)
     assert_select "##{id}", count: 1
     frame = css_select("##{id}").first
-    assert_equal BRANDED_STYLE, frame["style"]
-    assert_nil css_select("html").first["style"]
-    assert_select "##{id} #presskits-cover-hero"
+    assert_includes frame["style"], "--color-primary: #0F766E"
+    assert_includes frame["style"], "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast.text_on('#0F766E')}"
+    assert_includes frame["style"], "--button-primary-background-color: var(--color-primary)"
+    assert_includes frame["style"], "font-family: ui-serif, Georgia, Cambria, Times New Roman, serif"
+    assert_select "##{id} #presskits-kit-cover"
   end
 
-  def assert_unbranded_frame(id)
+  def assert_default_frame(id)
     assert_select "##{id}", count: 1
-    assert_nil css_select("##{id}").first["style"]
+    frame = css_select("##{id}").first
+    assert_includes frame["style"], "--color-primary: #333333"
+    assert_includes frame["style"], "font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
+    refute_includes frame["style"], "#0F766E"
     assert_nil css_select("html").first["style"]
-    refute_includes response.body, BRANDED_STYLE
-    refute_includes response.body, "#0F766E"
-    assert_cover_keeps_its_own_colours
   end
 
-  def assert_cover_keeps_its_own_colours
-    hero = css_select("#presskits-cover-hero").first
-    assert_equal "#BFDBFE", hero["data-cover-color"]
-    refute_includes hero["style"].to_s, "#0F766E"
-    refute_includes hero["style"].to_s, "font-family"
-    assert_equal "#BFDBFE", @kit.reload.recordable.cover_color
-    assert_nil @kit.recordable.cover_text_color
-  end
-
-  def install_press_centers(style)
+  def install_center(brand_color:, font_family:)
     remove_press_centers
+    center = Struct.new(:brand_color, :font_family).new(brand_color, font_family)
     mod = Module.new
     mod.define_singleton_method(:branding_for) do |kit_recording|
       mod.instance_variable_set(:@kit_recording, kit_recording)
-      return if style.nil?
-
-      Struct.new(:style_attribute).new(style)
+      center
     end
     mod.define_singleton_method(:kit_recording) { instance_variable_get(:@kit_recording) }
+    mod.const_set(:Branding, Class.new(RecordingStudioPresskits::BrandStyle))
     Object.const_set(:RecordingStudioPressCenters, mod)
   end
 

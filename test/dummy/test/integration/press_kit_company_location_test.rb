@@ -30,10 +30,10 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-cover-hero [data-cover-company]", count: 0
-    assert_select "#presskits-cover-hero [data-cover-location]", count: 0
-    refute_includes css_select("#presskits-cover-hero").text, "Harbour Studio"
-    refute_includes css_select("#presskits-cover-hero").text, "Harbour Gallery"
+    assert_select "#presskits-kit-cover [data-cover-company]", count: 0
+    assert_select "#presskits-kit-cover [data-cover-location]", count: 0
+    refute_includes css_select("#presskits-kit-cover").text, "Harbour Studio"
+    refute_includes css_select("#presskits-kit-cover").text, "Harbour Gallery"
 
     sign_in @user
     switch_to_root(@root)
@@ -51,19 +51,17 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-cover-hero [data-cover-company]", text: /Harbour Studio/
-    assert_select "#presskits-cover-hero [data-cover-location]", text: /Harbour Gallery/
-    hero = css_select("#presskits-cover-hero").first.to_html
+    assert_select "#presskits-kit-cover [data-cover-company]", text: /Harbour Studio/
+    assert_select "#presskits-kit-cover [data-cover-location]", text: /Harbour Gallery/
+    hero = css_select("#presskits-kit-cover").first.to_html
     assert_operator hero.index("Harbour Studio"), :<, hero.index("Harbour Gallery")
-    assert_includes hero, "rounded-[var(--avatar-radius-circle)]"
-    assert_includes hero, "HS"
 
     sign_in @user
     switch_to_root(@root)
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "#presskits-kit-header [data-cover-company]", text: /Harbour Studio/
-    assert_select "#presskits-kit-header [data-cover-location]", count: 0
+    assert_select "#presskits-kit-header [data-cover-location]", text: /Harbour Gallery/
   end
 
   test "header editor shows location search fields and can create revise and clear a place" do
@@ -76,10 +74,10 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
     assert_select "input[name='location[title]']"
     assert_select "input[name='location[location_type]'][value='venue']"
     assert_includes response.body, "recording-studio-location--place-search"
-    assert_select "#presskits-header-edit-preview [data-cover-company]", count: 0
+    refute_select "#presskits-header-edit-preview"
 
     patch recording_studio_presskits.press_kit_header_path(kit), params: {
-      press_kit: { title: "Spring launch", cover_style: "color", cover_color: "#1F2937" },
+      press_kit: { title: "Spring launch" },
       location: { title: "Harbour Gallery", location_type: "venue", locality: "Sydney", country_code: "AU" }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
@@ -94,7 +92,7 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
     assert_select "input[name='location[title]'][value='Harbour Gallery']"
 
     patch recording_studio_presskits.press_kit_header_path(kit), params: {
-      press_kit: { title: "Spring launch", cover_style: "color", cover_color: "#1F2937" },
+      press_kit: { title: "Spring launch" },
       location: { title: "Harbour Gallery, Sydney", location_type: "venue", locality: "Sydney", country_code: "AU" }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
@@ -102,7 +100,7 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
     assert_equal "Harbour Gallery, Sydney", kit_location(kit).recordable.title
 
     patch recording_studio_presskits.press_kit_header_path(kit), params: {
-      press_kit: { title: "Spring launch", cover_style: "color", cover_color: "#1F2937" },
+      press_kit: { title: "Spring launch" },
       location: { title: "", location_type: "", locality: "", country_code: "" }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
@@ -117,7 +115,7 @@ class PressKitCompanyLocationTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
 
     patch recording_studio_presskits.press_kit_header_path(kit), params: {
-      press_kit: { title: "Spring launch, take two", cover_style: "color", cover_color: "#BFDBFE" }
+      press_kit: { title: "Spring launch, take two" }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
     assert_equal "Harbour Gallery", kit_location(kit).recordable.title

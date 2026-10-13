@@ -41,7 +41,7 @@ module RecordingStudioPresskits
       )
     end
     include RecordingStudio::Capabilities::Location.to
-    include CoverAttributes
+    include BrandAttributes
 
     RecordingStudio.enable_capability(:action_audiences, on: self) if defined?(RecordingStudio)
 
@@ -63,13 +63,10 @@ module RecordingStudioPresskits
     # can be blank. It is not a child, so it cannot be trashed or reordered.
     SHORT_DESCRIPTION_LIMIT = 280
     SUBTITLE_LIMIT = 120
-    COVER_STYLES = %w[color].freeze
-    AUTO_COVER_TEXT = CoverAttributes::AUTO_COVER_TEXT
 
     validates :title, presence: true
     validates :description, length: { maximum: SHORT_DESCRIPTION_LIMIT }, allow_nil: true
     validates :subtitle, length: { maximum: SUBTITLE_LIMIT }, allow_nil: true
-    validates :cover_style, inclusion: { in: COVER_STYLES }, allow_nil: true
 
     before_validation :normalize_header
 
@@ -78,7 +75,6 @@ module RecordingStudioPresskits
     def normalize_header
       self.description = description.to_s.strip.presence
       self.subtitle = subtitle.to_s.strip.presence
-      normalize_cover
     end
   end
 end

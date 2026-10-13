@@ -8,77 +8,54 @@
     data-presskits-editor-region="section"
     tabindex="0"
   >
-    <%= render frame.heading_component %>
+    <div class="flex flex-col-reverse gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div class="min-w-0 flex-1">
+        <%= render inline_heading %>
+      </div>
 
-    <% if content_visible? %>
+      <div id="<%= actions_id %>" class="<%= action_row_classes %>" data-presskits-section-actions>
+        <% if show_content_edit? %>
+          <%= render FlatPack::Button::Component.new(
+            text: edit_label,
+            icon: "pencil",
+            style: :default,
+            size: :sm,
+            href: @content_path,
+            class: mobile_icon_classes,
+            aria: { label: edit_label },
+            data: helpers.presskits_editor_open_data
+          ) %>
+        <% end %>
+        <%= render FlatPack::Button::Component.new(
+          text: order_label,
+          icon: "bars-3-bottom-left",
+          style: :default,
+          size: :sm,
+          href: reorder_focus_href,
+          class: mobile_icon_classes,
+          aria: { label: order_label },
+          data: { modal_id: "presskits-sections-modal" }
+        ) %>
+        <%= render FlatPack::TrashButton::Component.new(
+          url: @remove_path,
+          method: :delete,
+          size: :sm,
+          expand: :left,
+          style: trash_size_style
+        ) %>
+      </div>
+    </div>
+
+    <% if text_section? %>
+      <%= render text_inline %>
+    <% elsif content_visible? %>
       <%= render frame.content_view %>
     <% else %>
       <%= render RecordingStudioPresskits::PressKits::EmptySectionPlaceholderComponent.new(
-        content_type: content_type,
+        content_type: frame.content_recording&.recordable_type,
         edit_path: @content_path
       ) %>
     <% end %>
-
-    <%= render FlatPack::Fab::Component.new(
-      contained: true,
-      position: :top_right,
-      backdrop: false,
-      size: :sm,
-      icon: :plus,
-      offset: fab_offset,
-      label: section_actions_label,
-      class: fab_classes
-    ) do |fab| %>
-      <% fab.with_action(
-        icon: :pencil,
-        label: edit_title_label,
-        href: @heading_path,
-        data: helpers.presskits_editor_open_data
-      ) %>
-      <% fab.with_action(
-        icon: :document_text,
-        label: edit_content_label,
-        href: @content_path,
-        data: helpers.presskits_editor_open_data
-      ) %>
-      <% fab.with_action(
-        icon: :bars_3_bottom_left,
-        label: reorder_label,
-        href: reorder_focus_href,
-        data: { modal_id: "presskits-sections-modal" }
-      ) %>
-      <% fab.with_action(
-        icon: :trash,
-        label: trash_label,
-        style: :danger,
-        href: @remove_path,
-        data: {
-          turbo_method: :delete,
-          turbo_stream: true,
-          turbo_confirm: trash_confirm
-        }
-      ) %>
-      <% fab.with_action(
-        icon: :plus,
-        label: add_new_section_label,
-        data: { modal_id: picker_modal_id }
-      ) %>
-    <% end %>
   </section>
-  <% end %>
-
-  <%= render FlatPack::Modal::Component.new(
-    id: picker_modal_id,
-    title: I18n.t("recording_studio_presskits.editor.picker_title"),
-    size: :md,
-    scroll: :page
-  ) do |modal| %>
-    <% modal.body do %>
-      <%= render RecordingStudioPresskits::PressKits::SectionPickerComponent.new(
-        items: @picker_items,
-        add_path: @add_path,
-        after_recording_id: @section_recording.id
-      ) %>
-    <% end %>
   <% end %>
 <% end %>

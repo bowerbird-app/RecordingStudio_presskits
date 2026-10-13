@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.42.0
+## 0.44.0
 
 No press kit migration. Embargo rows belong to `recording_studio_embargo` 0.1.0.
 
@@ -9,6 +9,42 @@ This repo vendors that gem at `vendor/gems/recording_studio_embargo` (tag `v0.1.
 Press kits include `RecordingStudio::Capabilities::Embargo.to` for `presskits.kit_view_full` and `presskits.kit_download`. `RecordingStudioEmbargo.restriction_for` returns `:allow`, `:deny`, or `:not_applicable`. Publishable still wins for a kit that is not live. `:deny` uses the kit's visibility fallback (`preview` or `hidden`) and blocks package generate, fetch, and status through `downloadable_available_for?`. Downloadable already calls that hook from `Authorization.allowed?` after the standing audience check, on show, create, and status, so that gem does not need a code change. A signed Active Storage URL that was already issued stays valid until it expires. `:not_applicable` after `lifts_at` needs no job.
 
 Early access is one switch on the embargo gem. It allows an actor who already satisfies Accessible's `:granted` audience for that action. Download's granted roles stay `download`, `edit`, and `admin`, so a view grant does not include the zip. The toolbar uses `render_embargo_button`. The editor is the gem's screen. Override `recording_studio_embargo.editor.subtitle`, `enable_help`, and `early_access_help` to change its copy. The public **Embargoed** badge stays in `recording_studio_presskits.embargo`. Copying a kit runs `RecordingStudioEmbargo.attributes_for_duplicate`, which clears the window.
+
+
+## 0.43.0
+
+Run the new migration. It drops `cover_style`, `cover_color`, and `cover_text_color` from `recording_studio_press_kits` and adds nullable `brand_color` and `font_family`. Nothing is copied across. A kit that should keep a colour needs `brand_color` written again.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+Remove `cover_colors`, `default_cover_color`, `cover_text_colors`, and `cover_text_auto` from the initializer and from `config/recording_studio_presskits.yml`.
+
+`brand_color` is `#RRGGBB` or nil. `font_family` is `sans`, `serif`, `mono`, or nil. Nil means inherit. `KitBranding` resolves each field on its own: the kit value, then `RecordingStudioPressCenters.branding_for` when that gem is loaded, then `#333333` and `sans`. Saving `sans` or `#333333` on the **Custom** tab keeps that value. It does not collapse back to nil. The **Press center** tab stores both fields as nil. Without press centers, the header form shows the swatches and stores both values.
+
+`RecordingStudioPresskits.branding_style_for(kit_recording)` always returns a style string. With `RecordingStudioPressCenters::Branding` loaded, that string is `Branding.new(brand_color:, font_family:).style_attribute`. Without it, `BrandStyle` emits the same tokens: `--color-primary`, `--color-primary-text`, the primary button tokens, the ring tokens, and `font-family`. The published page puts it on `#presskits-public-page`. A host embed puts it on `#presskits-kit-embed`. It never goes on `<html>` or on the kit editor.
+
+`Cover::Component` only has `:card`. `:hero` and `:preview` render that card. The card keeps the wide container-query layout from 0.40.0. It is the header on the public page, the owner preview, the audience preview, and the kit editor. Sections stay in `SectionCardComponent`. The pill and **View** use the resolved brand, with contrast text. A missing photo is a muted surface. The short description is on the card. The company row is the name. The kit location sits under it. The header form does not render a second preview of the card.
+
+The header screen uses `FlatPack::Tabs` (**Press center** and **Custom**) when press centers is loaded. **Custom** shows `FlatPack::FontSwatch` and `FlatPack::ColorSwatch` on one line, prefilled with the resolved press center values. Those tabs stay off when the constant is missing.
+
+API show and update keys are `title`, `description`, `brand_color`, and `font_family`. Duplicating a kit copies the brand columns.
+
+## 0.42.0
+
+No migration. Bump Flatpack to `>= 0.1.228` (dummy tag `v0.1.228`) and reload its CSS and JavaScript. Rebuild Tailwind so inline-edit and trash-button classes generate. Link `stylesheet_link_tag "flat_pack/inline_edit"` on the kit editor layout, next to `flat_pack/application`. Propshaft fingerprints that file, and the `@import` inside `flat_pack/application` does not resolve it. Without the link, the empty-subtitle placeholder and the hover cue do not paint.
+
+On the kit editor, section title and subtitle are `FlatPack::InlineEdit::Component` with `mode: :text`. Hover shows they can be edited. Click edits in place. An empty subtitle shows **Add a subtitle**. Each save PATCHes `kit_section[title]` or `kit_section[subtitle]` on the section. A request that includes only one of those leaves the other stored value.
+
+`TrashButton` focuses its arm when it connects. The kit editor stops that focus from scrolling the page, then blurs it, so the editor opens at the top and the action row stays hidden until hover.
+
+The section plus FAB is gone. There is no per-section **Add new section**. The toolbar **Section** control is the only add. Hover (or focus) shows **Edit**, **Order**, and an icon-only `FlatPack::TrashButton::Component` (`size: :sm`, `expand: :left`). A text section skips **Edit**. **Edit** opens the content screen for images, credits, quotes, facts, video, and location. It does not edit the title or subtitle. **Order** opens the existing Reorder modal. Trash deletes with Trashable. The button's own confirm animation is the only confirm. `:sm` is the same size as the labeled buttons. The editor clears `--hit-target-min` on that control so the icon-only box is not floored at 2.75rem. Below `sm`, and on touch (`hover: none`), the row stays visible. Below `sm` the row sits above the title and lines up with the top-right corner of the section. **Edit** and **Order** show only their icons at that width. Each keeps `aria-label`, and the label span is `sr-only`. They do not use `icon_only:`, which would add `fp-hit-target` and grow them to 2.75rem. From `sm` up they stay labeled and sit beside the title. A section does not paint a hover background. Focus and a touch tap still use the muted tint.
+
+A text section hides **Edit**. Its body is inline edit with `mode: :rich` (the bubble toolbar) and saves `text[body]` on that same section path. The public kit and the owner preview still use `SectionTitle`.
+
+`EditableSectionComponent` now takes `section_recording`, `content_path`, `remove_path`, and `highlight`. `KitEditorComponent` no longer takes `heading_path`. The heading screen is still there for a direct visit.
 
 ## 0.41.0
 

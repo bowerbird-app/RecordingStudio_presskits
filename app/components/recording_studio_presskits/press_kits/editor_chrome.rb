@@ -18,7 +18,6 @@ module RecordingStudioPresskits
         "group/pk-edit relative w-full rounded-[var(--radius-lg)] bg-transparent",
         SECTION_PAD_CLASSES,
         "transition-colors duration-[var(--duration-base)]",
-        "[@media(hover:hover)]:hover:bg-[var(--surface-muted-background-color)]",
         "focus-within:bg-[var(--surface-muted-background-color)]",
         "[@media(hover:none)]:data-[pk-edit-active]:bg-[var(--surface-muted-background-color)]",
         "outline-none focus-visible:outline focus-visible:outline-2",

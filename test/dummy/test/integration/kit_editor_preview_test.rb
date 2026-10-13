@@ -70,6 +70,15 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header [data-cover-title]", text: "Spring launch"
     refute_includes card.to_html, "aspect-[1440/640]"
     refute_includes card.to_html, "fp-display"
+    cover = css_select("#presskits-kit-cover").first
+    assert_includes cover["class"], "w-full"
+    assert_includes cover["class"], "h-full"
+    title = css_select("#presskits-kit-cover [data-cover-title]").first
+    assert_equal "h1", title.name
+    frame = css_select("#presskits-kit-cover [data-cover-frame]").first
+    assert_includes frame["class"], "aspect-[430/368]"
+    assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
+    assert_select "#presskits-kit-cover [data-cover-fallback]"
     sections = css_select("#presskits-editor-sections").first
     assert_includes sections["class"], "flex"
     assert_includes sections["class"], "gap-6"
@@ -105,12 +114,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    heading = recording_studio_presskits.heading_press_kit_section_path(kit, section)
-    content = recording_studio_presskits.edit_press_kit_section_path(kit, section)
     remove = recording_studio_presskits.press_kit_section_path(kit, section)
     body = css_select("#presskits-section-#{section.id}-body").first
-    assert_includes body["class"], "hover:bg-[var(--surface-muted-background-color)]"
-    assert_includes body["class"], "[@media(hover:hover)]"
+    refute_includes body["class"], "hover:bg-[var(--surface-muted-background-color)]"
+    refute_includes body["class"], "[@media(hover:hover)]"
     assert_includes body["class"], "data-[pk-edit-active]"
     refute_includes body["class"], "[@media(hover:none)]:opacity-100"
     assert_includes body["class"], "focus-visible:outline"
@@ -118,36 +125,66 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "pt-8"
     assert_includes body["class"], "md:pt-10"
     assert_includes body["class"], "lg:pt-12"
-    assert_includes body["class"], "pr-20"
+    refute_includes body["class"], "pr-20"
     refute_includes body["class"], "-m-4"
     assert_includes body["class"], "rounded-[var(--radius-lg)]"
     section_card = css_select("#presskits-section-#{section.id} [data-section-card]").first
     assert_includes section_card["class"], "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
     assert_includes section_card["class"], "bg-[var(--card-background-color)]"
     refute_includes body["class"], "hover:outline-[var(--color-primary)]"
-    assert_select "#presskits-section-#{section.id} .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
-    section_fab = css_select("#presskits-section-#{section.id} .fp-fab").first
-    assert_includes section_fab["style"].to_s, "--fp-fab-offset: 1rem"
-    assert_select "#presskits-section-#{section.id} button.fp-fab__trigger[aria-label='Section actions']"
-    assert_select "#presskits-section-#{section.id} button.fp-fab__trigger [data-flat-pack--icon-name-value='plus']"
-    fab = css_select("#presskits-section-#{section.id} .fp-fab").first
-    assert_includes fab["class"], "group-data-[pk-edit-active]/pk-edit"
-    refute_includes fab["class"], "[@media(hover:none)]:opacity-100"
-    refute_select "#presskits-section-#{section.id} .fp-fab__backdrop"
-    assert_select "a[href='#{heading}'][role='menuitem'][aria-label='Edit title']"
-    assert_select "a[href='#{content}'][role='menuitem'][aria-label='Edit content']"
-    assert_select "a[href='##{section.id}'][role='menuitem'][aria-label='Reorder'][data-modal-id='presskits-sections-modal']"
-    assert_select "a[href='#{remove}'][role='menuitem'][aria-label='Trash'][data-turbo-method='delete'][data-turbo-confirm][data-fp-style='danger']"
-    assert_select "[role='menuitem'][aria-label='Add new section'][data-modal-id='presskits-section-picker-after-#{section.id}']"
-    assert_select "a[href='#{heading}'][data-turbo-frame='pk-editor-screen'][data-modal-id='pk-editor']"
-    assert_select "a[href='#{content}'][data-turbo-frame='pk-editor-screen'][data-modal-id='pk-editor']"
-    assert_select "#presskits-section-picker-after-#{section.id}"
-    assert_select "#presskits-section-picker-after-#{section.id} a[href*='after_recording_id=#{section.id}']"
-    refute_select "#presskits-section-#{section.id} a", text: "Edit heading"
-    refute_select "#presskits-section-dropdown-after-#{section.id}"
-    heading = css_select("#presskits-section-#{section.id} .fp-section-title h2").first
-    assert heading
-    assert_includes heading["class"], "text-2xl"
+    refute_select "#presskits-section-#{section.id} .fp-fab"
+    refute_select "#presskits-section-picker-after-#{section.id}"
+    refute_select "#presskits-section-#{section.id} [data-turbo-confirm]"
+    actions = css_select("#presskits-section-#{section.id}-actions").first
+    assert_includes actions["class"], "max-sm:opacity-100"
+    assert_includes actions["class"], "self-end"
+    assert_includes actions["class"], "sm:self-auto"
+    assert_includes actions["class"], "[@media(hover:none)]:opacity-100"
+    assert_includes actions["class"], "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
+    assert_includes actions.parent["class"], "flex-col-reverse"
+    assert_includes actions.parent["class"], "sm:flex-row"
+    assert_includes css_select("#presskits-section-#{section.id} .fp-section-title").first["class"], "max-sm:mt-0"
+    text_actions = css_select("#presskits-section-#{section.id}-actions").first.to_html
+    assert_operator text_actions.index(">Order<"), :<, text_actions.index("fp-trash-button")
+    assert_select "#presskits-section-#{section.id} .fp-trash-button[data-fp-size='sm'][style*='--hit-target-min: 0px']"
+    assert_select "#presskits-section-#{section.id}-actions a[href='##{section.id}']", text: "Order"
+    assert_select "#presskits-section-#{section.id}-actions a[data-modal-id='presskits-sections-modal']", text: "Order"
+    order_link = css_select("#presskits-section-#{section.id}-actions a[href='##{section.id}']").first
+    assert_equal "Order", order_link["aria-label"]
+    assert_includes order_link["class"], "max-sm:[&>span]:sr-only"
+    assert_includes order_link["class"], "max-sm:px-[var(--button-icon-only-padding-sm)]"
+    refute_includes order_link["class"], "fp-hit-target"
+    assert_select "#presskits-section-#{section.id}-actions a span", text: "Order"
+    refute_select "#presskits-section-#{section.id}-actions a", text: "Edit"
+    assert_select "#presskits-section-#{section.id} .fp-trash-button form[action='#{remove}']"
+    assert_select "#presskits-section-#{section.id} .fp-trash-button input[name='_method'][value='delete']"
+    assert_select "#presskits-section-#{section.id} .fp-inline-edit input[name='kit_section[title]']"
+    assert_select "#presskits-section-#{section.id} [data-placeholder='Add a subtitle']"
+    assert_select "#presskits-section-#{section.id} [data-flat-pack--inline-edit-mode-value='rich']"
+    assert_select "#presskits-section-#{section.id} .flat-pack-richtext-bubble-menu"
+    assert_select "#presskits-section-#{section.id} input[name='text[body]']"
+    title = css_select("#presskits-section-#{section.id} .fp-inline-edit--text h2").first
+    assert title
+    assert_includes title["class"], "text-2xl"
+    title_edit = css_select("#presskits-section-#{section.id} .fp-inline-edit").find { |node| node.at_css("h2") }
+    assert_equal remove, title_edit["data-flat-pack--inline-edit-update-url-value"]
+
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::Images" }
+    images = content_section(kit, RecordingStudioPresskits::Images)
+    follow_redirect!
+    image_actions = css_select("#presskits-section-#{images.id}-actions").first.to_html
+    assert_operator image_actions.index(">Edit<"), :<, image_actions.index(">Order<")
+    assert_operator image_actions.index(">Order<"), :<, image_actions.index("fp-trash-button")
+    assert_select "#presskits-section-#{images.id}-actions a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, images)}']",
+                  text: "Edit"
+    assert_select "#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor'][data-turbo-frame='pk-editor-screen']",
+                  text: "Edit"
+    edit_link = css_select("#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor']").first
+    assert_equal "Edit", edit_link["aria-label"]
+    assert_includes edit_link["class"], "max-sm:[&>span]:sr-only"
+    refute_includes edit_link["class"], "fp-hit-target"
+    refute_select "#presskits-section-#{images.id} [data-flat-pack--inline-edit-mode-value='rich']"
   end
 
   test "adding a section saves the type title and returns to the kit" do
@@ -205,6 +242,31 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_select "input[name='kit_section[title]']"
     refute_select "#presskits-section-preview"
     refute_select "#presskits-section-tabs"
+  end
+
+  test "a title save leaves the subtitle when the request omits it" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::Images" }
+    section = content_section(kit, RecordingStudioPresskits::Images)
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      kit_section: { title: "Press photos", subtitle: "Doors at noon" }
+    }
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      kit_section: { title: "Night photos" }
+    }
+    section.reload
+    assert_equal "Night photos", section.recordable.title
+    assert_equal "Doors at noon", section.recordable.subtitle
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      kit_section: { subtitle: "Bring a coat" }
+    }
+    section.reload
+    assert_equal "Night photos", section.recordable.title
+    assert_equal "Bring a coat", section.recordable.subtitle
   end
 
   test "heading save stays on the heading and updates the stored title" do

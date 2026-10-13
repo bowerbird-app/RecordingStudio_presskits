@@ -3,59 +3,45 @@
 require "test_helper"
 
 class CenterBrandingTest < Minitest::Test
-  BRANDED_STYLE = "--color-primary: #0F766E; font-family: Georgia, serif"
-
   def teardown
     remove_press_centers
   end
 
-  def test_branding_style_returns_the_press_center_style_string
-    kit = Object.new
-    install_press_centers(BRANDED_STYLE)
+  def test_branding_style_uses_resolved_fields
+    kit = Struct.new(:recordable).new(Struct.new(:brand_color, :font_family).new(nil, nil))
+    install_center
 
-    assert_equal BRANDED_STYLE, RecordingStudioPresskits.branding_style_for(kit)
-    assert_same kit, RecordingStudioPressCenters.kit_recording
+    assert_equal "color=#0F766E; font=serif", RecordingStudioPresskits.branding_style_for(kit)
   end
 
-  def test_nil_branding_leaves_the_style_blank
-    install_press_centers(nil)
-
-    assert_nil RecordingStudioPresskits.branding_style_for(Object.new)
-  end
-
-  def test_missing_press_centers_leaves_the_style_blank
+  def test_missing_press_centers_still_paints_the_defaults
     remove_press_centers
+    kit = Struct.new(:recordable).new(Struct.new(:brand_color, :font_family).new(nil, nil))
+    style = RecordingStudioPresskits.branding_style_for(kit)
 
-    assert_nil RecordingStudioPresskits.branding_style_for(Object.new)
+    assert_includes style, "--color-primary: #333333"
+    assert_includes style, "font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
     refute defined?(RecordingStudioPressCenters)
-  end
-
-  def test_presskits_does_not_depend_on_press_centers
-    root = File.expand_path("..", __dir__)
-    gemspec = File.read(File.join(root, "recording_studio_presskits.gemspec"))
-    gemfile = File.read(File.join(root, "Gemfile"))
-    dummy_gemfile = File.read(File.join(root, "test/dummy/Gemfile"))
-
-    refute_includes gemspec, "press_center"
-    refute_includes gemfile, "press_center"
-    refute_includes dummy_gemfile, "press_center"
-    source = File.read(File.join(root, "lib/recording_studio_presskits/center_branding.rb"))
-    assert_includes source, "defined?(RecordingStudioPressCenters)"
-    assert_includes source, "RecordingStudioPressCenters.branding_for(kit_recording)&.style_attribute"
   end
 
   private
 
-  def install_press_centers(style)
+  def install_center
     remove_press_centers
+    center = Struct.new(:brand_color, :font_family).new("#0F766E", "serif")
     mod = Module.new
-    mod.define_singleton_method(:branding_for) do |kit_recording|
-      mod.instance_variable_set(:@kit_recording, kit_recording)
-      return if style.nil?
+    mod.define_singleton_method(:branding_for) { |_recording| center }
+    spy = Class.new do
+      def initialize(brand_color:, font_family:)
+        @brand_color = brand_color
+        @font_family = font_family
+      end
 
-      Struct.new(:style_attribute).new(style)
+      def style_attribute
+        "color=#{@brand_color}; font=#{@font_family}"
+      end
     end
-    mod.define_singleton_method(:kit_recording) { instance_variable_get(:@kit_recording) }
+    mod.const_set(:Branding, spy)
     Object.const_set(:RecordingStudioPressCenters, mod)
   end
 

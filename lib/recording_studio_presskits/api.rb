@@ -54,8 +54,8 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::PressKit",
           operations: %i[show update],
           serializer: ->(recordable, context: nil, **) { PressKitPayload.for(recordable, context: context) },
-          output_keys: %i[title description cover_style cover_color cover_text_color],
-          writable_attributes: %i[cover_style cover_color cover_text_color],
+          output_keys: %i[title description brand_color font_family],
+          writable_attributes: %i[brand_color font_family],
           capability_actions: %i[create_section reorder_sections]
         )
       end

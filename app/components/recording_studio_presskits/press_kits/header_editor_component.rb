@@ -3,16 +3,16 @@
 module RecordingStudioPresskits
   module PressKits
     class HeaderEditorComponent < ViewComponent::Base
-      def initialize(press_kit_recording:, title:, description:, subtitle: nil, cover_style: nil, # rubocop:disable Metrics/ParameterLists
-                     cover_color: nil, cover_text_color: nil, location: nil)
+      def initialize(press_kit_recording:, title:, description:, subtitle: nil, brand_color: nil, # rubocop:disable Metrics/ParameterLists
+                     font_family: nil, brand_source: nil, location: nil)
         super()
         @press_kit_recording = press_kit_recording
         @title = title
         @description = description
         @subtitle = subtitle
-        @cover_style = cover_style
-        @cover_color = cover_color
-        @cover_text_color = cover_text_color
+        @brand_color = brand_color
+        @font_family = font_family
+        @brand_source = brand_source
         @location = location
       end
 
@@ -32,39 +32,46 @@ module RecordingStudioPresskits
         @subtitle.to_s
       end
 
-      def header_cover_style
-        @cover_style.to_s.strip.presence || "color"
+      def inherit_available?
+        kit_branding.inherit_available?
       end
 
-      def header_cover_color
-        Cover::Hex.normalize(@cover_color).presence ||
-          @press_kit_recording&.recordable&.try(:resolved_cover_color) ||
-          RecordingStudioPresskits.default_cover_color
+      def press_center_tab?
+        return false unless inherit_available?
+
+        source = @brand_source.to_s
+        return source == "press_center" if source.present?
+
+        explicit_color.blank? && explicit_font_key.blank?
       end
 
-      def header_cover_text_color
-        Cover::Hex.normalize(@cover_text_color)
+      def default_tab
+        press_center_tab? ? 0 : 1
       end
 
-      def header_cover_text_value
-        header_cover_text_color.presence || auto_text_value
+      def brand_source_value
+        press_center_tab? ? "press_center" : "custom"
       end
 
-      def auto_text_value
-        RecordingStudioPresskits::Cover::Palette::AUTO_VALUE
+      def font_options
+        if defined?(RecordingStudioPressCenters::Branding) &&
+           RecordingStudioPressCenters::Branding.respond_to?(:swatch_options)
+          return RecordingStudioPressCenters::Branding.swatch_options
+        end
+
+        BrandStyle.swatch_options
       end
 
-      def header_text_swatch_color
-        header_cover_text_color.presence ||
-          Cover::Contrast.text_on(header_cover_color)
+      def custom_font_swatch
+        BrandStyle.swatch_css_for(explicit_font_key || inherited_font_family)
       end
 
-      def auto_text_color?
-        header_cover_text_color.blank?
+      def custom_color
+        explicit_color || inherited_brand_color
       end
 
-      def low_contrast_text?
-        Cover::Contrast.low_contrast?(header_cover_color, header_text_swatch_color)
+      def press_center_summary
+        "#{inherited_font_family.capitalize} · #{inherited_brand_color}"
       end
 
       def cancel_path
@@ -75,45 +82,28 @@ module RecordingStudioPresskits
         @cover_controls ||= HeaderCoverControls.new(helpers, @press_kit_recording)
       end
 
-      def any_cover_color?
-        RecordingStudioPresskits.any_cover_color?
-      end
-
-      def any_cover_text_color?
-        RecordingStudioPresskits.any_cover_text_color?
-      end
-
-      def cover_text_auto?
-        RecordingStudioPresskits.cover_text_auto?
-      end
-
-      def cover_options
-        with_orphaned_colour(
-          swatch_options(RecordingStudioPresskits.cover_palette),
-          header_cover_color,
-          RecordingStudioPresskits.cover_palette
-        )
-      end
-
-      def cover_text_swatch_options
-        with_orphaned_colour(
-          swatch_options(RecordingStudioPresskits.cover_text_palette),
-          header_cover_text_color,
-          RecordingStudioPresskits.cover_text_palette
-        )
-      end
-
       private
 
-      def swatch_options(palette)
-        palette.colors.map { |hex| { label: palette.label_for(hex), value: hex } }
+      def kit_branding
+        @kit_branding ||= KitBranding.for(@press_kit_recording)
       end
 
-      def with_orphaned_colour(options, current, palette)
-        return options if current.blank?
-        return options if options.any? { |option| option[:value] == current }
+      def inherited_font_family
+        kit_branding.inherited_font_family
+      end
 
-        options + [{ label: palette.label_for(current), value: current }]
+      def inherited_brand_color
+        kit_branding.inherited_brand_color
+      end
+
+      def explicit_font_key
+        key = BrandStyle.normalize_font(@font_family)
+        key.is_a?(String) ? key : nil
+      end
+
+      def explicit_color
+        color = BrandStyle.normalize_color(@brand_color)
+        color.is_a?(String) ? color : nil
       end
     end
   end

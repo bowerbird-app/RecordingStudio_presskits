@@ -1,0 +1,11 @@
+<%= render FlatPack::InlineEdit::Component.new(
+  tag: :div,
+  mode: :rich,
+  value: body_html,
+  name: "text[body]",
+  update_url: @update_path,
+  label: body_label,
+  placeholder: body_placeholder,
+  required: true,
+  class: "flat-pack-richtext--view-mode flat-pack-richtext-editor ProseMirror min-w-0"
+) %>

@@ -1,0 +1,20 @@
+<div class="flex flex-wrap items-center gap-3">
+  <%= render FlatPack::FontSwatch::Component.new(
+    font: editor.custom_font_swatch,
+    options: editor.font_options,
+    name: "press_kit[font_family]",
+    text: "Font",
+    selected: true,
+    size: :lg,
+    id: "press_kit_font_family"
+  ) %>
+  <%= render FlatPack::ColorSwatch::Component.new(
+    color: editor.custom_color,
+    name: "press_kit[brand_color]",
+    value: editor.custom_color,
+    text: "Brand colour",
+    selected: true,
+    size: :lg,
+    id: "press_kit_brand_color"
+  ) %>
+</div>

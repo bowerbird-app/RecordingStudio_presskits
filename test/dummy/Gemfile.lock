@@ -17,10 +17,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_admin.git
-  revision: 78c13a7df6e69e0d2b05e7c0218572b7a6296134
-  tag: v2.1.0
+  revision: 3568969c82cd393fce38c2f788785fa42aa188bc
+  tag: v2.2.0
   specs:
-    recording_studio_admin (2.1.0)
+    recording_studio_admin (2.2.0)
       flat_pack (~> 0.1.207)
       rails (~> 8.1.0)
       recording_studio_accessible (~> 0.6)
@@ -38,23 +38,23 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_company.git
-  revision: 10337c178e1e7ca0b2d0883296398b1e529a54fc
-  tag: v0.3.0
+  revision: d534362552a608df3358138c3a173a4223709663
+  tag: v0.4.0
   specs:
-    recording_studio_company (0.3.0)
+    recording_studio_company (0.4.0)
       flat_pack (>= 0.1.200)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
-      recording_studio_accessible (~> 0.13)
-      recording_studio_attachable (~> 0.13)
-      recording_studio_trashable (~> 0.6)
+      recording_studio_accessible (~> 0.15)
+      recording_studio_attachable (~> 0.15)
+      recording_studio_trashable (~> 0.8)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_downloadable.git
-  revision: 0c7693dedb6cc18b82d7b6301ca2c481dc93f9b4
-  tag: v0.3.0
+  revision: 79162dc151facd8144920d760140bca32d868665
+  tag: v0.4.0
   specs:
-    recording_studio_downloadable (0.3.0)
+    recording_studio_downloadable (0.4.0)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
       recording_studio_accessible
@@ -63,13 +63,13 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_duplicatable.git
-  revision: ca6477378462b0bd8659b86551cba52b561abf54
-  tag: v0.4.5
+  revision: 5c976d3abf16d1f21c0dd8ee3504c2d2d4d5d30a
+  tag: v0.5.0
   specs:
-    recording_studio_duplicatable (0.4.1)
+    recording_studio_duplicatable (0.5.0)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
-      recording_studio_accessible (~> 0.11)
+      recording_studio_accessible (~> 0.15)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_external_embed.git
@@ -110,10 +110,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_orderable.git
-  revision: eaf5fea3194686f5af0928f17f731f50c7df2473
-  tag: v0.2.7
+  revision: f14f2376b8db792b5aba2cc29189c98a2ebadaaa
+  tag: v0.3.0
   specs:
-    recording_studio_orderable (0.2.3)
+    recording_studio_orderable (0.3.0)
       flat_pack (>= 0.1.74)
       rails (~> 8.1.0)
       recording_studio (~> 4.1)
@@ -164,10 +164,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/flatpack.git
-  revision: 66317c5445cf7540795bb53151f00b471c2fae4f
-  tag: v0.1.224
+  revision: 6467835948892078a9e837c7800836c1db7db171
+  tag: v0.1.228
   specs:
-    flat_pack (0.1.224)
+    flat_pack (0.1.228)
       pagy (~> 9.0)
       rails (>= 7.1, < 9)
       tailwind_merge (~> 0.13)
@@ -183,22 +183,22 @@ PATH
 PATH
   remote: ../..
   specs:
-    recording_studio_presskits (0.42.0)
-      flat_pack (>= 0.1.224)
+    recording_studio_presskits (0.44.0)
+      flat_pack (>= 0.1.228)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
       recording_studio_accessible (~> 0.15)
       recording_studio_admin (~> 2.0)
       recording_studio_attachable (~> 0.15)
-      recording_studio_company (~> 0.3)
-      recording_studio_downloadable (~> 0.3)
-      recording_studio_duplicatable (~> 0.4)
+      recording_studio_company (~> 0.4)
+      recording_studio_downloadable (~> 0.4)
+      recording_studio_duplicatable (~> 0.5)
       recording_studio_embargo (~> 0.1.0)
       recording_studio_external_embed (~> 0.1.1)
       recording_studio_lists (~> 0.5)
       recording_studio_location (~> 0.4)
       recording_studio_metrics (~> 0.2)
-      recording_studio_orderable (~> 0.2)
+      recording_studio_orderable (~> 0.3)
       recording_studio_publishable (~> 0.8)
       recording_studio_trashable (~> 0.8)
       recording_studio_video (~> 0.1.0)
@@ -379,7 +379,7 @@ GEM
       drb (~> 2.0)
       prism (~> 1.5)
     msgpack (1.8.3)
-    net-imap (0.6.7)
+    net-imap (0.6.8)
       date
       net-protocol
     net-pop (0.1.2)
@@ -698,7 +698,7 @@ CHECKSUMS
   ffi (1.17.2-x86_64-darwin) sha256=981f2d4e32ea03712beb26e55e972797c2c5a7b0257955d8667ba58f2da6440e
   ffi (1.17.2-x86_64-linux-gnu) sha256=05d2026fc9dbb7cfd21a5934559f16293815b7ce0314846fee2ac8efbdb823ea
   ffi (1.17.2-x86_64-linux-musl) sha256=97c0eb3981414309285a64dc4d466bd149e981c279a56371ef811395d68cb95c
-  flat_pack (0.1.224)
+  flat_pack (0.1.228)
   fugit (1.12.1) sha256=5898f478ede9b415f0804e42b8f3fd53f814bd85eebffceebdbc34e1107aaf68
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
@@ -719,7 +719,7 @@ CHECKSUMS
   mini_mime (1.1.5) sha256=8681b7e2e4215f2a159f9400b5816d85e9d8c6c6b491e96a12797e798f8bccef
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   msgpack (1.8.3) sha256=8bda4a6428d3244e50d6bd55854d354edbada88a4e1f4f5731a39a0f86bee6a1
-  net-imap (0.6.7) sha256=b5c9573be975d856de252ee851871724da66aa2d449b2482d5690bd12bc23660
+  net-imap (0.6.8) sha256=eb30bb62227b64a3af6b518b04b2375113d69f68f15de59b0193b07d98acf6d9
   net-pop (0.1.2) sha256=848b4e982013c15b2f0382792268763b748cce91c9e91e36b0f27ed26420dff3
   net-protocol (0.4.0) sha256=f9f90c8c6f64794a45160bf422177a336db12809de3beeeaa26b88fcd2e8c853
   net-scp (4.1.0) sha256=a99b0b92a1e5d360b0de4ffbf2dc0c91531502d3d4f56c28b0139a7c093d1a5d
@@ -768,18 +768,18 @@ CHECKSUMS
   rdoc (8.1.0) sha256=befc37880a5cfd36dcb176c748b5fd5ee39dd3536a75e81824e4972ce230f60a
   recording_studio (4.5.0)
   recording_studio_accessible (0.15.0)
-  recording_studio_admin (2.1.0)
+  recording_studio_admin (2.2.0)
   recording_studio_attachable (0.15.0)
-  recording_studio_company (0.3.0)
-  recording_studio_downloadable (0.3.0)
-  recording_studio_duplicatable (0.4.1)
+  recording_studio_company (0.4.0)
+  recording_studio_downloadable (0.4.0)
+  recording_studio_duplicatable (0.5.0)
   recording_studio_embargo (0.1.0)
   recording_studio_external_embed (0.1.1)
   recording_studio_lists (0.5.0)
   recording_studio_location (0.6.0)
   recording_studio_metrics (0.2.0)
-  recording_studio_orderable (0.2.3)
-  recording_studio_presskits (0.42.0)
+  recording_studio_orderable (0.3.0)
+  recording_studio_presskits (0.44.0)
   recording_studio_publishable (0.8.0)
   recording_studio_root_switchable (0.8.0)
   recording_studio_trashable (0.8.0)

@@ -56,7 +56,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-cover-card]", count: 1
     assert_select "[data-cover-feature]", count: 0
-    assert_select "[data-cover-color='#1F2937']", count: 1
+    assert_select "[data-brand-color='#333333']", count: 1
     assert_select "[data-cover-fallback]"
     assert_select "a[data-cover-view][href='#{edit_href}']", text: /View/
     assert_select "[data-cover-card] h2[data-cover-title]", text: "Spring launch"
@@ -80,25 +80,27 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_library_sidebar
     assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-cover-card]", count: 0
-    assert_select "[data-cover-color]", count: 0
+    assert_select "[data-brand-color]", count: 0
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
   end
 
-  test "card view paints the kit colour on the image block and the view button" do
+  test "card view paints the kit brand on the pill and the view button" do
     kit = record_kit("Spring launch")
-    @root.revise(kit) { |press_kit| press_kit.cover_color = "#DB2777" }
+    @root.revise(kit) { |press_kit| press_kit.brand_color = "#DB2777" }
     sign_in @user
     switch_to_root(@root)
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-card][data-cover-color='#DB2777']", count: 1
-    cover = css_select("[data-cover-color='#DB2777']").first
+    assert_select "[data-cover-card][data-brand-color='#DB2777']", count: 1
+    cover = css_select("[data-brand-color='#DB2777']").first
     assert_includes cover.to_html, "Spring launch"
-    assert_includes cover.to_html, "background-color: #DB2777"
     assert_includes cover["style"], "--button-primary-background-color: #DB2777"
     assert_includes cover["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#DB2777')}"
+    pill = css_select("[data-brand-color='#DB2777'] [data-cover-eyebrow]").first
+    assert_includes pill["style"], "background-color: #DB2777"
+    assert_select "[data-cover-fallback]"
     refute_includes response.body, "https://cdn.example/cover.jpg"
   end
 
@@ -162,7 +164,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "md:grid-cols-2"
     header_path = recording_studio_presskits.edit_press_kit_header_path(kit)
     assert_select "#presskits-kit-header [role='menuitem'][href='#{header_path}'][aria-label='Edit heading']"
-    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Cover colours']"
+    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Style']"
     assert_select "#presskits-kit-header .fp-fab.fp-fab--contained[data-fp-position='top_right'][data-fp-size='sm']"
     refute_select "#presskits-editor-toolbar a[href='#{header_path}']"
     refute_select "#presskits-editor-toolbar a", text: "Header"
@@ -258,9 +260,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}'][role='menuitem'][aria-label='Edit content']"
-    assert_select "a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}'][role='menuitem'][aria-label='Edit content']"
-    assert_select "a[href='#{recording_studio_presskits.heading_press_kit_section_path(kit, hero)}'][role='menuitem'][aria-label='Edit title']"
+    assert_select "#presskits-section-#{hero.id}-actions a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, hero)}']",
+                  text: "Edit"
+    assert_select "#presskits-section-#{quotes.id}-actions a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, quotes)}']",
+                  text: "Edit"
+    refute_select "#presskits-section-#{hero.id} a[href='#{recording_studio_presskits.heading_press_kit_section_path(kit, hero)}']"
     refute_includes response.body, "Fake block: Hero"
     refute_includes response.body, "Fake block: Quotes"
     assert_select "button", text: "Move up", count: 0
@@ -550,12 +554,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes text_row.to_html, 'data-flat-pack--icon-name-value="document-text"'
     refute_includes text_row.to_html, "arrows-up-down"
     assert_includes text_row["class"], "!items-center"
-    assert_select ".fp-section-title#launch-notes h2", text: "Launch notes"
-    assert_select ".fp-section-title#launch-notes" do |titles|
-      refute_includes titles.first.parent["class"].to_s, "gap-4"
-    end
-    assert_select "a[href='#launch-notes'][aria-label='Copy link to Launch notes']"
-    assert_select "[data-controller='flat-pack--section-title-anchor']"
+    assert_select ".fp-section-title h2", text: "Launch notes"
+    assert_select "#presskits-section-#{section.id} p", text: "Doors at noon"
+    refute_select "#presskits-editor-preview a[href='#launch-notes']"
+    refute_select "#presskits-editor-preview [data-controller='flat-pack--section-title-anchor']"
+    refute_select "#presskits-section-#{section.id}-actions a", text: "Edit"
     assert_select "h2", text: "Set list"
     assert_select "p", text: "Line two"
 
@@ -774,10 +777,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[name='press_kit[title]'][value='Spring launch']"
     assert_select "input[name='press_kit[subtitle]']"
     assert_select "textarea[name='press_kit[description]']", text: "Doors at noon."
-    assert_select "input[name='press_kit[cover_style]'][value='color']"
-    assert_select "input[name='press_kit[cover_color]'][value='#1F2937'][type='radio'][checked]"
-    assert_select "input[name='press_kit[cover_text_color]'][value='auto'][type='radio'][checked]"
-    assert_includes response.body, "Colour"
+    assert_select "input[name='press_kit[font_family]']"
+    assert_select "input[name='press_kit[brand_color]']"
+    refute_select "input[name='press_kit[font_mode]']"
+    refute_select "input[name='press_kit[brand_source]']"
+    refute_select "[role='tab']"
+    refute_includes response.body, "Inherit from press center"
+    assert_includes response.body, "Brand"
     assert_includes response.body, "/280 characters"
     update = css_select("#presskits-header-actions button[type=submit]").first
     assert_equal "Update", update.text.squish
@@ -786,17 +792,16 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     form = css_select("form[action='#{recording_studio_presskits.press_kit_header_path(kit)}']").first
     form_html = form.to_html
     assert_includes form_html, "flat-pack--unsaved-changes"
-    assert_includes form_html, 'name="press_kit[cover_color]"'
-    assert_includes form_html, 'name="press_kit[cover_text_color]"'
+    assert_includes form_html, 'name="press_kit[brand_color]"'
+    assert_includes form_html, 'name="press_kit[font_family]"'
     assert_operator form_html.index('name="press_kit[title]"'), :<, form_html.index('name="press_kit[subtitle]"')
     assert_operator form_html.index('name="press_kit[subtitle]"'), :<, form_html.index('name="press_kit[description]"')
     assert_operator form_html.index('name="press_kit[description]"'), :<, form_html.index("Update")
     refute_includes response.body, "md:grid-cols-2"
     refute_select "a", text: "Cancel"
-    preview = css_select("#presskits-header-edit-preview").first
-    assert_includes preview["class"], "border-[var(--card-border-color)]"
-    assert_select "#presskits-header-edit-preview h1", text: "Spring launch"
-    assert_select "#presskits-header-edit-preview p", text: "Doors at noon."
+    refute_select "#presskits-header-edit-preview"
+    refute_select "#presskits-header-form [data-cover-list]"
+    refute_select "#presskits-header-form input[name='list[name]']"
     assert_select "button", text: "Remove", count: 0
   end
 
@@ -817,9 +822,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
         title: "Spring launch, take two",
         subtitle: "Collection released",
         description: "Doors at noon.",
-        cover_style: "color",
-        cover_color: "#BFDBFE",
-        cover_text_color: "#111827",
+        brand_color: "#BFDBFE",
+        font_family: "serif",
         decoy: "nope"
       }
     }
@@ -831,16 +835,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[name='press_kit[title]'][value='Spring launch, take two']"
     assert_select "input[name='press_kit[subtitle]'][value='Collection released']"
     assert_select "textarea[name='press_kit[description]']", text: "Doors at noon."
-    assert_includes css_select("#presskits-header-edit-preview").first.text, "Collection released"
-    assert_includes css_select("#presskits-header-edit-preview").first.text, "Doors at noon."
+    refute_select "#presskits-header-edit-preview"
     kit.reload
     assert_not_equal original_id, kit.recordable_id
     assert_equal "Spring launch, take two", kit.recordable.title
     assert_equal "Collection released", kit.recordable.subtitle
     assert_equal "Doors at noon.", kit.recordable.description
-    assert_equal "color", kit.recordable.cover_style
-    assert_equal "#BFDBFE", kit.recordable.cover_color
-    assert_equal "#111827", kit.recordable.cover_text_color
+    assert_equal "#BFDBFE", kit.recordable.brand_color
+    assert_equal "serif", kit.recordable.font_family
     refute_includes kit.recordable.attributes.values, "nope"
     original = RecordingStudioPresskits::PressKit.find(original_id)
     assert_equal "Spring launch", original.title
@@ -964,6 +966,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal "Doors at noon.", kit.reload.recordable.description
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
+    assert_select "#presskits-kit-header [data-cover-eyebrow]", text: "Press kit"
     assert_select "#presskits-kit-header [data-cover-description]", text: "Doors at noon."
     refute_includes css_select("#presskits-kit-header [data-cover-frame]").first.to_html, "Doors at noon"
     refute_includes css_select("#presskits-section-list").to_html, "Doors at noon."
@@ -1118,7 +1121,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-editor-preview img[alt='The stage']"
     assert_select "#presskits-editor-preview .fp-section-title h2", text: "Press photos"
     assert_select "#presskits-editor-preview .fp-section-title", text: /Doors at noon/
-    assert_select "#presskits-editor-preview a[href='#press-photos'][aria-label='Copy link to Press photos']"
+    refute_select "#presskits-editor-preview a[href='#press-photos']"
 
     publish_images_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-images"
@@ -1384,7 +1387,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     RecordingStudioPresskits::Text.where(id: section_content(text).recordable.id).update_all(body: "<p><br></p>")
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "#presskits-section-#{text.id} #presskits-section-placeholder"
+    refute_select "#presskits-section-#{text.id} #presskits-section-placeholder"
+    assert_select "#presskits-section-#{text.id} [data-flat-pack--inline-edit-mode-value='rich']"
+    assert_select "#presskits-section-#{text.id} [data-placeholder='Add some copy']"
     get recording_studio_presskits.edit_press_kit_section_path(kit, text)
     refute_section_preview_card
   end

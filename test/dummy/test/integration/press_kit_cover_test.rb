@@ -21,161 +21,59 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   end
 
   teardown do
+    remove_press_centers
     Current.actor = @previous_actor
-    RecordingStudioPresskits.configuration.cover_colors = RecordingStudioPresskits::Cover::Palette::DEFAULT_COLORS.dup
-    RecordingStudioPresskits.configuration.default_cover_color = RecordingStudioPresskits::Cover::Palette::DEFAULT_COLOR
-    RecordingStudioPresskits.configuration.cover_text_colors = RecordingStudioPresskits::Cover::Palette::DEFAULT_TEXT_COLORS.dup
-    RecordingStudioPresskits.configuration.cover_text_auto = true
   end
 
-  test "nil cover style and colour render as the default colour cover" do
+  test "a new kit inherits and resolves to the flatpack default" do
     kit = record_kit("Spring launch")
 
-    assert_nil kit.recordable.cover_style
-    assert_nil kit.recordable.cover_color
-    assert_equal "color", kit.recordable.resolved_cover_style
-    assert_equal "#1F2937", kit.recordable.resolved_cover_color
-    assert_equal "#F8FAFC", kit.recordable.overlay_text_color
-    assert_nil kit.recordable.cover_text_color
-    assert_equal "#F8FAFC", kit.recordable.resolved_cover_text_color
+    assert_nil kit.recordable.brand_color
+    assert_nil kit.recordable.font_family
+    branding = RecordingStudioPresskits::KitBranding.for(kit)
+    assert_equal "#333333", branding.brand_color
+    assert_equal "sans", branding.font_family
   end
 
-  test "cover colour must be hex and in the palette when the colour changes" do
+  test "brand colour and font must be usable and explicit defaults are stored" do
     kit = record_kit("Spring launch")
 
     assert_raises(ActiveRecord::RecordInvalid) do
-      @root.revise(kit) { |press_kit| press_kit.cover_color = "blue" }
+      @root.revise(kit) { |press_kit| press_kit.brand_color = "blue" }
     end
-
     assert_raises(ActiveRecord::RecordInvalid) do
-      @root.revise(kit) { |press_kit| press_kit.cover_color = "#FFFFFF" }
+      @root.revise(kit) { |press_kit| press_kit.font_family = "comic" }
     end
 
-    @root.revise(kit) { |press_kit| press_kit.cover_color = "#bfdbfe" }
-    assert_equal "#BFDBFE", kit.reload.recordable.cover_color
-    assert_equal "#111827", kit.recordable.resolved_cover_text_color
-
-    assert_raises(ActiveRecord::RecordInvalid) do
-      @root.revise(kit) { |press_kit| press_kit.cover_style = "media" }
+    @root.revise(kit) do |press_kit|
+      press_kit.brand_color = "#333333"
+      press_kit.font_family = "sans"
     end
+    kit.reload
+    assert_equal "#333333", kit.recordable.brand_color
+    assert_equal "sans", kit.recordable.font_family
 
-    assert_raises(ActiveRecord::RecordInvalid) do
-      @root.revise(kit) { |press_kit| press_kit.cover_text_color = "white" }
-    end
-
-    @root.revise(kit) { |press_kit| press_kit.cover_text_color = "#f8fafc" }
-    assert_equal "#F8FAFC", kit.reload.recordable.cover_text_color
-    assert_equal "#F8FAFC", kit.recordable.resolved_cover_text_color
+    @root.revise(kit) { |press_kit| press_kit.brand_color = "#abc" }
+    assert_equal "#AABBCC", kit.reload.recordable.brand_color
   end
 
-  test "a stored colour stays after the host drops it from the palette" do
+  test "header editor shows font and colour swatches without inherit wording" do
     kit = record_kit("Spring launch")
-    @root.revise(kit) { |press_kit| press_kit.cover_color = "#DB2777" }
-    kit.reload
-    RecordingStudioPresskits.configuration.cover_colors = %w[#1F2937 #7C3AED]
-
-    @root.revise(kit) { |press_kit| press_kit.description = "Still rose." }
-    kit.reload
-
-    assert_equal "#DB2777", kit.recordable.cover_color
-    assert_equal "#DB2777", kit.recordable.resolved_cover_color
-
-    @root.revise(kit) { |press_kit| press_kit.cover_text_color = "#111827" }
-    kit.reload
-    RecordingStudioPresskits.configuration.cover_text_colors = %w[#F8FAFC #E5E7EB]
-    @root.revise(kit) { |press_kit| press_kit.description = "Still ink text." }
-    kit.reload
-
-    assert_equal "#111827", kit.recordable.cover_text_color
-    assert_equal "#111827", kit.recordable.resolved_cover_text_color
-
-    sign_in @user
-    switch_to_root(@root)
-    get recording_studio_presskits.press_kits_path
-    assert_response :success
-    assert_select "[data-cover-color='#DB2777']", count: 1
-    assert_includes css_select("[data-cover-color='#DB2777']").first.to_html, "Spring launch"
-  end
-
-  test "any colour mode accepts a hex that is not on the default palette" do
-    RecordingStudioPresskits.configuration.cover_colors = :any
-    kit = record_kit("Spring launch")
-
-    @root.revise(kit) { |press_kit| press_kit.cover_color = "#ABCDEF" }
-    assert_equal "#ABCDEF", kit.reload.recordable.cover_color
-
-    RecordingStudioPresskits.configuration.cover_text_colors = :any
-    @root.revise(kit) { |press_kit| press_kit.cover_text_color = "#010101" }
-    assert_equal "#010101", kit.reload.recordable.cover_text_color
-  end
-
-  test "header editor shows colour swatch radios and a live preview card" do
-    kit = record_kit("Spring launch")
-    @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
     sign_in @user
     switch_to_root(@root)
 
     get recording_studio_presskits.edit_press_kit_header_path(kit)
     assert_response :success
-    assert_select "input[type=radio][name='press_kit[cover_color]']", count: 5
-    assert_select "input[type=radio][name='press_kit[cover_color]'][value='#1F2937'][checked]"
-    assert_select "input[type=radio][name='press_kit[cover_text_color]'][value='auto'][checked]"
-    assert_select "input[type=radio][name='press_kit[cover_text_color]'][value='#F8FAFC']"
-    assert_select ".flat-pack-radio-swatch", minimum: 9
-    assert_select ".flat-pack-radio-swatch input[value='auto']", count: 0
-    assert_includes response.body, "Ink"
-    assert_includes response.body, "Honey"
-    assert_includes response.body, "Text colour"
-    assert_includes response.body, "Auto"
-    assert_includes response.body, "Snow"
-    refute_includes response.body, "flat-pack-color-swatch"
-    refute_includes response.body, "flat-pack--color-swatch"
-    assert_select "#presskits-header-edit-preview h1", text: "Spring launch"
-    assert_select "#presskits-header-edit-preview [data-cover-ratio='9 / 16']"
-    assert_select "#presskits-header-edit-preview [data-recording-studio-presskits--cover-preview-target=surface]"
-    assert_includes response.body, "recording-studio-presskits--cover-preview"
+    assert_select "input[name='press_kit[font_family]']"
+    assert_select "input[name='press_kit[brand_color]'][type='color']"
+    refute_includes response.body, "Inherit from press center"
+    refute_select "[role='tab']"
+    refute_select "input[name='press_kit[brand_source]']"
+    refute_select "#presskits-header-edit-preview"
+    refute_select "#presskits-cover-hero"
   end
 
-  test "header editor uses a colour swatch when the host allows any colour" do
-    RecordingStudioPresskits.configuration.cover_colors = :any
-    RecordingStudioPresskits.configuration.cover_text_colors = :any
-    kit = record_kit("Spring launch")
-    @root.revise(kit) { |press_kit| press_kit.cover_color = "#ABCDEF" }
-    sign_in @user
-    switch_to_root(@root)
-
-    get recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_response :success
-    assert_select "input[type=color][name='press_kit[cover_color]'][value='#ABCDEF']"
-    assert_select "input[type=radio][name='press_kit[cover_color]']", count: 0
-    assert_includes response.body, "flat-pack--color-swatch"
-    assert_includes response.body, "Colour"
-    assert_includes response.body, "Text colour"
-    assert_select "input[type=radio][name='press_kit[cover_text_color]'][value='auto']"
-    assert_select "input[type=color][name='press_kit[cover_text_swatch]']"
-  end
-
-  test "header save refuses a colour that is not on the palette" do
-    kit = record_kit("Spring launch")
-    sign_in @user
-    switch_to_root(@root)
-
-    patch recording_studio_presskits.press_kit_header_path(kit), params: {
-      press_kit: { title: "Spring launch", cover_style: "color", cover_color: "#FFFFFF" }
-    }
-    assert_response :unprocessable_entity
-    assert_includes response.body, "Pick a colour we can actually paint."
-    assert_nil kit.reload.recordable.cover_color
-
-    patch recording_studio_presskits.press_kit_header_path(kit), params: {
-      press_kit: { title: "Spring launch", cover_style: "color", cover_color: "#1F2937", cover_text_color: "#FFFFFF" }
-    }
-    assert_response :unprocessable_entity
-    assert_includes response.body, "Pick a text colour we can actually paint."
-    assert_nil kit.reload.recordable.cover_text_color
-  end
-
-  test "header save stores a text colour and auto clears it" do
+  test "header save stores an explicit brand and inherit clears it" do
     kit = record_kit("Spring launch")
     sign_in @user
     switch_to_root(@root)
@@ -183,88 +81,53 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     patch recording_studio_presskits.press_kit_header_path(kit), params: {
       press_kit: {
         title: "Spring launch",
-        cover_style: "color",
-        cover_color: "#1F2937",
-        cover_text_color: "#E5E7EB"
+        brand_source: "custom",
+        brand_color: "#333333",
+        font_family: RecordingStudioPresskits::BrandStyle::SWATCH_CSS.fetch("sans")
       }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_equal "#E5E7EB", kit.reload.recordable.cover_text_color
-    refute kit.recordable.cover_text_low_contrast?
+    assert_equal "#333333", kit.reload.recordable.brand_color
+    assert_equal "sans", kit.recordable.font_family
 
     patch recording_studio_presskits.press_kit_header_path(kit), params: {
       press_kit: {
         title: "Spring launch",
-        cover_style: "color",
-        cover_color: "#1F2937",
-        cover_text_color: "auto"
+        brand_source: "press_center",
+        brand_color: "#DB2777",
+        font_family: RecordingStudioPresskits::BrandStyle::SWATCH_CSS.fetch("mono")
       }
     }
-    assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_nil kit.reload.recordable.cover_text_color
-    assert_equal "#F8FAFC", kit.recordable.resolved_cover_text_color
+    assert_nil kit.reload.recordable.brand_color
+    assert_nil kit.recordable.font_family
   end
 
-  test "header save keeps a low-contrast text colour" do
-    kit = record_kit("Spring launch")
-    sign_in @user
-    switch_to_root(@root)
-
-    patch recording_studio_presskits.press_kit_header_path(kit), params: {
-      press_kit: {
-        title: "Spring launch",
-        cover_style: "color",
-        cover_color: "#D97706",
-        cover_text_color: "#E5E7EB"
-      }
-    }
-    assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_equal "#E5E7EB", kit.reload.recordable.cover_text_color
-    assert kit.recordable.cover_text_low_contrast?
-
-    get recording_studio_presskits.edit_press_kit_header_path(kit)
-    assert_response :success
-    assert_includes response.body, "That text may be hard to read on this colour."
-  end
-
-  test "public kit and owner preview use the hero cover" do
+  test "public kit and owner preview use the card, and brand paints the pill" do
     kit = record_kit("Spring launch")
     @root.revise(kit) do |press_kit|
       press_kit.description = "Doors at noon."
-      press_kit.cover_color = "#059669"
-      press_kit.cover_text_color = "#111827"
+      press_kit.brand_color = "#059669"
+      press_kit.font_family = "serif"
     end
     record_block(kit, "Hero")
     publish_kit!(kit)
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    assert_select "#presskits-cover-hero[data-cover-color='#059669']"
-    assert_select "#presskits-cover-hero[data-cover-text-color='#111827']"
-    assert_select "#presskits-cover-hero[data-cover-ratio='auto']"
-    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
-    refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
+    assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
+    assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
+    assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    refute_includes css_select("#presskits-kit-cover [data-cover-frame]").first.to_html, "Doors at noon."
+    refute_select "#presskits-cover-hero"
+    pill = css_select("#presskits-kit-cover [data-cover-eyebrow]").first
+    assert_includes pill["style"], "background-color: #059669"
+    assert_includes pill["style"], "color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#059669')}"
+    frame = css_select("#presskits-public-page").first
+    assert_includes frame["style"], "--color-primary: #059669"
+    assert_includes frame["style"], "font-family: ui-serif, Georgia, Cambria, Times New Roman, serif"
     public_preview = css_select("#presskits-public-preview").first
     assert_includes public_preview["class"], "gap-6"
     refute_includes public_preview["class"], "overflow-hidden"
-    public_hero = css_select("#presskits-cover-hero").first
-    assert_includes public_hero["class"], "rounded-none"
-    assert_includes public_hero["class"], "justify-start"
-    refute_includes public_hero["class"], "justify-end"
-    refute_includes public_hero["class"], "aspect-[21/9]"
-    assert_includes public_hero["class"], "p-12"
-    assert_includes public_hero["class"], "md:p-24"
-    public_title = css_select("#presskits-cover-hero h1").first
-    assert_includes public_title["class"], "fp-display"
-    assert_includes public_title["class"], "fp-text-balance"
-    assert_includes public_title["style"].to_s, "--display-size"
-    refute_includes public_title["style"].to_s, "--hero-headline-size"
-    refute_includes public_title["style"].to_s, "--page-title-h1-size"
-    assert_includes css_select("#presskits-cover-hero > div").first["class"], "max-w-3xl"
-    eyebrow = css_select("#presskits-cover-hero [data-cover-eyebrow]").first
-    assert_includes eyebrow["class"], "md:text-4xl"
-    assert_includes eyebrow["style"].to_s, "70%"
     public_sections = css_select("#presskits-public-sections").first
     assert_includes public_sections["class"], "gap-6"
     refute_includes public_sections["class"], "p-5"
@@ -280,10 +143,10 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.preview_press_kit_path(kit)
     assert_response :success
-    assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    assert_select "#presskits-cover-hero[data-cover-color='#059669']"
-    assert_select "#presskits-cover-hero[data-cover-text-color='#111827']"
-    assert_select "#presskits-cover-hero[data-cover-ratio='auto']"
+    assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
+    assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    refute_select "#presskits-public-page"
+    refute_select "#presskits-cover-hero"
     preview = css_select("#presskits-public-preview").first
     assert_includes preview["class"], "gap-6"
     refute_includes preview["class"], "overflow-hidden"
@@ -292,33 +155,31 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes owner_card["class"], "rounded-[var(--radius-lg)]"
   end
 
-  test "hosts can override the hero eyebrow" do
-    I18n.t("recording_studio_presskits.cover.eyebrow")
+  test "hosts can override the card eyebrow" do
     I18n.backend.store_translations(:en, recording_studio_presskits: { cover: { eyebrow: "Media kit" } })
     kit = record_kit("Spring launch")
     publish_kit!(kit)
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Media kit"
+    assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Media kit"
   ensure
     I18n.backend.store_translations(:en, recording_studio_presskits: { cover: { eyebrow: "Press kit" } })
   end
 
-  test "press kit payload reads resolved cover fields" do
+  test "press kit payload reads stored brand fields and leaves nil as inherit" do
     kit = record_kit("Spring launch")
 
     assert_equal(
-      { title: "Spring launch", subtitle: nil, description: nil, cover_style: "color", cover_color: "#1F2937", cover_text_color: "#F8FAFC" },
+      { title: "Spring launch", subtitle: nil, description: nil, brand_color: nil, font_family: nil },
       RecordingStudioPresskits::Api::PressKitPayload.for(kit.recordable)
     )
 
     @root.revise(kit) do |press_kit|
       press_kit.subtitle = "Collection released"
       press_kit.description = "Doors at noon."
-      press_kit.cover_style = "color"
-      press_kit.cover_color = "#BFDBFE"
-      press_kit.cover_text_color = "#111827"
+      press_kit.brand_color = "#BFDBFE"
+      press_kit.font_family = "serif"
     end
 
     assert_equal(
@@ -326,59 +187,56 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
         title: "Spring launch",
         subtitle: "Collection released",
         description: "Doors at noon.",
-        cover_style: "color",
-        cover_color: "#BFDBFE",
-        cover_text_color: "#111827"
+        brand_color: "#BFDBFE",
+        font_family: "serif"
       },
       RecordingStudioPresskits::Api::PressKitPayload.for(kit.reload.recordable)
     )
   end
 
-  test "grid cards show the cover, the subtitle, and a brand-coloured view link" do
+  test "grid cards paint the view button and pill from the kit brand" do
     first = record_kit("Spring launch")
     second = record_kit("Autumn recap")
     @root.revise(first) do |press_kit|
       press_kit.subtitle = "Collection released"
-      press_kit.cover_color = "#BFDBFE"
+      press_kit.brand_color = "#BFDBFE"
     end
     @root.revise(second) do |press_kit|
       press_kit.description = "A longer line that should clamp on the card."
-      press_kit.cover_color = "#D97706"
+      press_kit.brand_color = "#D97706"
+      press_kit.font_family = "mono"
     end
     sign_in @user
     switch_to_root(@root)
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_select "[data-cover-card][data-cover-color='#BFDBFE']", count: 1
-    assert_select "[data-cover-card][data-cover-color='#D97706']", count: 1
+    assert_select "[data-cover-card][data-brand-color='#BFDBFE']", count: 1
+    assert_select "[data-cover-card][data-brand-color='#D97706']", count: 1
     assert_select "[data-cover-fallback]", count: 2
-    assert_select "[data-cover-company]", count: 0
     assert_select "[data-cover-subtitle]", text: "Collection released"
     assert_select "[data-cover-description]", text: "A longer line that should clamp on the card."
-    sky = css_select("[data-cover-color='#BFDBFE']").first
-    amber = css_select("[data-cover-color='#D97706']").first
+    sky = css_select("[data-brand-color='#BFDBFE']").first
+    amber = css_select("[data-brand-color='#D97706']").first
     assert_includes sky["style"], "--button-primary-background-color: #BFDBFE"
     assert_includes sky["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#BFDBFE')}"
     assert_includes amber["style"], "--button-primary-background-color: #D97706"
-    assert_includes amber["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#D97706')}"
+    assert_includes amber.to_html, "font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+    sky_pill = css_select("[data-brand-color='#BFDBFE'] [data-cover-eyebrow]").first
+    assert_includes sky_pill["style"], "background-color: #BFDBFE"
+    assert_includes sky_pill["style"], "color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#BFDBFE')}"
     assert_select "a[data-cover-view][href='#{recording_studio_presskits.edit_press_kit_path(first)}']", text: /View/
     assert_includes css_select("a[data-cover-view]").first.parent["class"], "mt-auto"
     assert_select ".grid.items-stretch"
     assert_select "a[data-cover-card]", count: 0
     assert_select "[data-cover-list] button[type=button] svg.w-6.h-6"
-    list = css_select("[data-cover-card][data-cover-color='#BFDBFE'] [data-cover-list]").first
-    refute_includes list.to_html, recording_studio_presskits.edit_press_kit_path(first)
-    assert_includes response.body, "recording-studio-lists--add-to-list"
 
     RecordingStudioCompany.create(@root, actor: @user, name: "Harbour Studio")
     get recording_studio_presskits.press_kits_path
     assert_select "[data-cover-company]", text: "Harbour Studio", count: 2
-    harbour = css_select("[data-cover-card][data-cover-color='#BFDBFE']").first.to_html
+    harbour = css_select("[data-cover-card][data-brand-color='#BFDBFE']").first.to_html
     assert_operator harbour.index("data-cover-company"), :<, harbour.index("data-cover-title")
     assert_operator harbour.index("gap-[14px]"), :<, harbour.index("data-cover-title")
-    assert_select "[data-cover-verification]", count: 2
-    assert_select "[data-cover-company]", text: "HARBOUR STUDIO", count: 0
   end
 
   test "the kit editor header is the wide card and the grid keeps the same markup" do
@@ -423,7 +281,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     refute_includes frame.to_html, "Doors at noon."
     assert_select "#presskits-kit-header a[data-cover-view]", count: 0
     assert_select "#presskits-kit-header [role='menuitem'][aria-label='Edit heading']"
-    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Cover colours']"
+    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Style']"
     refute_includes header.to_html, "Share"
     refute_includes header.to_html, "RELEASE DATE"
     refute_select "#presskits-cover-hero"
@@ -453,6 +311,32 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     component.define_singleton_method(:lists_installed?) { false }
     Current.actor = @user
     refute component.show_add_to_list?
+  end
+
+  test "the header preview can leave the list heart off" do
+    kit = record_kit("Spring launch")
+    Current.actor = @user
+    component = RecordingStudioPresskits::Cover::Component.new(recording: kit, add_to_list: false)
+
+    refute component.show_add_to_list?
+  end
+
+  test "a kit brand wins over the press center one field at a time" do
+    kit = record_kit("Spring launch")
+    install_center(brand_color: "#0F766E", font_family: "serif")
+    branding = RecordingStudioPresskits::KitBranding.for(kit)
+    assert_equal "#0F766E", branding.brand_color
+    assert_equal "serif", branding.font_family
+
+    @root.revise(kit) { |press_kit| press_kit.font_family = "sans" }
+    branding = RecordingStudioPresskits::KitBranding.for(kit.reload)
+    assert_equal "#0F766E", branding.brand_color
+    assert_equal "sans", branding.font_family
+
+    @root.revise(kit) { |press_kit| press_kit.brand_color = "#333333" }
+    branding = RecordingStudioPresskits::KitBranding.for(kit.reload)
+    assert_equal "#333333", branding.brand_color
+    assert_equal "sans", branding.font_family
   end
 
   private
@@ -490,5 +374,19 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
       }
     }
     follow_redirect! if response.redirect?
+  end
+
+  def install_center(brand_color:, font_family:)
+    remove_press_centers
+    center = Struct.new(:brand_color, :font_family).new(brand_color, font_family)
+    mod = Module.new
+    mod.define_singleton_method(:branding_for) { |_recording| center }
+    Object.const_set(:RecordingStudioPressCenters, mod)
+  end
+
+  def remove_press_centers
+    return unless defined?(RecordingStudioPressCenters)
+
+    Object.send(:remove_const, :RecordingStudioPressCenters)
   end
 end

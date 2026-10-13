@@ -24,14 +24,15 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     Current.actor = @previous_actor
   end
 
-  test "hero and grid hide a cover image when the kit has no attachment" do
+  test "card and grid hide a cover image when the kit has no attachment" do
     kit = record_kit("Spring launch")
     publish_kit!(kit)
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-cover-image", count: 0
-    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
+    assert_select "#presskits-kit-cover [data-cover-image]", count: 0
+    assert_select "#presskits-kit-cover [data-cover-fallback]"
+    assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
 
     sign_in @user
     switch_to_root(@root)
@@ -42,21 +43,22 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     assert_select "[data-cover-card] [data-cover-tag]", text: "Press kit"
   end
 
-  test "public kit and editor show a direct cover attachment above the colour header" do
+  test "public kit and editor show a direct cover attachment on the card" do
     kit = record_kit("Spring launch")
     photo = attach_cover!(kit)
     publish_kit!(kit)
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-cover-image[data-cover-image] img[alt='A white gallery hall']"
-    hero = css_select("[data-cover-stack]").first.to_html
-    assert_operator hero.index("presskits-cover-image"), :<, hero.index("presskits-cover-hero")
-    refute_includes hero, "@container"
-    refute_includes hero, "@min-[640px]"
-    assert_includes css_select("#presskits-cover-image").first["class"], "aspect-[1440/640]"
-    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
-    assert_select "#presskits-cover-hero h1", text: "Spring launch"
+    assert_select "#presskits-kit-cover [data-cover-image] img[alt='A white gallery hall']"
+    card = css_select("#presskits-kit-cover").first.to_html
+    assert_operator card.index("data-cover-image"), :<, card.index("Spring launch")
+    assert_includes card, "@container"
+    assert_includes css_select("#presskits-kit-cover [data-cover-frame]").first["class"], "aspect-[430/368]"
+    refute_includes card, "aspect-[1440/640]"
+    refute_select "#presskits-cover-hero"
+    assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
+    assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
 
     sign_in @user
     switch_to_root(@root)
@@ -87,12 +89,8 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_header_path(kit)
     assert_response :success
     assert_select "#press_kit_cover_image button", text: "Upload"
-    assert_select "#presskits-header-edit-preview [data-cover-image]", count: 0
-    assert_select "#presskits-header-edit-preview [data-cover-ratio='9 / 16']"
-    preview = css_select("#presskits-header-edit-preview").first.to_html
-    refute_includes preview, "@container"
-    refute_includes preview, "@min-[640px]"
-    refute_includes preview, "aspect-[430/368]"
+    refute_select "#presskits-header-edit-preview"
+    refute_select "[data-cover-ratio='9 / 16']"
     refute_includes response.body, "Choose from the library"
     refute_includes response.body, "recording-studio-attachable--library-placement"
 
@@ -106,6 +104,7 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "#press_kit_cover_image button", text: "Change"
     assert_select "#press_kit_cover_image a", text: "Remove"
+    refute_select "#presskits-header-edit-preview"
     photo = RecordingStudioPresskits::DirectImages.list(kit.reload).first
     assert_equal "harbour-gallery.jpg", photo.recordable.original_filename
 
