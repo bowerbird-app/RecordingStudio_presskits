@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.39.0
+
+No migration and no new gem. Press kits still does not depend on press centers.
+
+When `RecordingStudioPressCenters` is loaded, `RecordingStudioPresskits.branding_style_for(kit_recording)` returns `RecordingStudioPressCenters.branding_for(kit_recording)&.style_attribute`. A missing constant, or nil branding, leaves the Flatpack theme as it is.
+
+The published page puts that string on `#presskits-public-page`, around the full kit and the audience preview. It does not go on `<html>`. A host embed of `PublicShowComponent` puts the same string on `#presskits-kit-embed`. The published page passes `branding: false` so the two wrappers are not nested. Owner preview passes `branding: false`. The kit editor does not use either wrapper.
+
+Cover tiles keep their own `cover_color` and `cover_text_color`. The brand is not written onto the kit. Flatpack defines the primary button tokens and the ring tokens on the theme root, so the press center string redeclares those tokens, plus `--color-primary`, `--color-primary-text`, `--color-primary-hover`, and `font-family`, on the wrapper.
+
 ## 0.38.1
 
 No migration and no config change. The visibility screen in `pk-editor` keeps one heading: PageTitle **Visibility**. The small chrome title is blank, the same way Downloads does it. **Update** has `mt-4` above it.

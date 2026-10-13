@@ -3,11 +3,12 @@
 module RecordingStudioPresskits
   module PressKits
     class PublicShowComponent < ViewComponent::Base
-      def initialize(press_kit_recording:, section_recordings: nil, preview: false)
+      def initialize(press_kit_recording:, section_recordings: nil, preview: false, branding: true)
         super()
         @press_kit_recording = press_kit_recording
         @section_recordings = section_recordings
         @preview = preview
+        @branding = branding
       end
 
       def section_recordings
@@ -20,6 +21,10 @@ module RecordingStudioPresskits
 
       def preview?
         @preview
+      end
+
+      def branding?
+        @branding
       end
 
       def live?
