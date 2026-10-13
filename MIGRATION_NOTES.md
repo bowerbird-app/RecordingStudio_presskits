@@ -14,9 +14,9 @@ Hosts that replaced `SectionFrameComponent` should render `TextSectionHeadingCom
 
 ## 0.47.0
 
-No migration. Rebuild Tailwind so `@min-[640px]:pt-7` generates.
+No migration. Rebuild Tailwind so `@min-[640px]:pt-16` generates.
 
-On a cover card whose container is at least 640px wide, the company name, title, subtitle, list heart, and description sit lower. The body still has `pt-7`. The copy adds the same amount again. A narrower card keeps only the body's `pt-7`.
+On a cover card whose container is at least 640px wide, the company name, title, subtitle, list heart, and description sit lower. The body still has `pt-7`. The copy adds `pt-16`, so the company name starts about 6rem from the top of the card. A narrower card keeps only the body's `pt-7`.
 
 **View** stays in the footer with `mt-auto`. On the kit editor, **Edit** stays at the top right of the body, outside that extra padding. **Edit image** stays on the cover overlay.
 

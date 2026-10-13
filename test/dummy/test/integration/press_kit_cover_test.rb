@@ -119,10 +119,10 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
     assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
     public_copy = css_select("#presskits-kit-cover [data-cover-copy]").first
-    assert_includes public_copy["class"], "@min-[640px]:pt-7"
+    assert_includes public_copy["class"], "@min-[640px]:pt-16"
     public_body = css_select("#presskits-kit-cover [data-cover-row] > div").last
     assert_includes public_body["class"], "pt-7"
-    refute_includes public_body["class"], "@min-[640px]:pt-7"
+    refute_includes public_body["class"], "@min-[640px]:pt-16"
     refute_select "[data-presskits-header-actions]"
     refute_select "[data-presskits-header-image-actions]"
     refute_includes css_select("#presskits-kit-cover [data-cover-frame]").first.to_html, "Doors at noon."
@@ -246,11 +246,11 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes view.parent["class"], "pb-8"
     refute view.ancestors.any? { |node| node["data-cover-copy"] }
     copy = css_select("[data-cover-copy]").first
-    assert_includes copy["class"], "@min-[640px]:pt-7"
+    assert_includes copy["class"], "@min-[640px]:pt-16"
     assert_includes copy["class"], "flex items-start gap-3"
     body = css_select("[data-cover-row] > div").last
     assert_includes body["class"], "pt-7"
-    refute_includes body["class"], "@min-[640px]:pt-7"
+    refute_includes body["class"], "@min-[640px]:pt-16"
     assert_select ".grid.items-stretch"
     assert_select "a[data-cover-card]", count: 0
     assert_select "[data-cover-list] button[type=button] svg.w-6.h-6"
@@ -304,9 +304,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "flex flex-1 flex-col"
     assert_includes body["class"], "pt-7"
     assert_includes body["class"], "@min-[640px]:min-w-0"
-    refute_includes body["class"], "@min-[640px]:pt-7"
+    refute_includes body["class"], "@min-[640px]:pt-16"
     copy = css_select("#presskits-kit-header [data-cover-copy]").first
-    assert_includes copy["class"], "@min-[640px]:pt-7"
+    assert_includes copy["class"], "@min-[640px]:pt-16"
     actions = css_select("#presskits-kit-header [data-presskits-header-actions]").first
     refute actions.ancestors.any? { |node| node["data-cover-copy"] }
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"

@@ -24,12 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.47.0] - 2026-10-13
 
 ### Changed
-- On `Cover::Component` at `:card`, a container at least 640px wide adds another `pt-7` above the copy (`@min-[640px]:pt-7` on the company, title, subtitle, heart, and description). The body keeps `pt-7`, so that block sits twice as far from the top of the body as on a stacked card. Below 640px of container width the extra padding stays off.
+- On `Cover::Component` at `:card`, a container at least 640px wide adds `pt-16` above the copy (`@min-[640px]:pt-16` on the company, title, subtitle, heart, and description). The body keeps `pt-7`, so that block starts about 6rem from the top of the card. Below 640px of container width the extra padding stays off.
 - **View** stays in the `mt-auto` footer. On the editor card, **Edit** stays at the body's top-right inset, outside the extra padding. **Edit image** stays on the cover overlay.
 - Version `0.47.0`
 
 ### Upgrade notes
-- Bump to `0.47.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-7` generates. Stacked cards, the **View** footer, and the editor **Edit** inset stay as they are.
+- Bump to `0.47.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16` generates. Stacked cards, the **View** footer, and the editor **Edit** inset stay as they are.
 
 ## [0.46.0] - 2026-10-13
 
