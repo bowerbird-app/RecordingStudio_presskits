@@ -72,7 +72,7 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     cover = css_select("#presskits-kit-cover").first
     assert_includes cover["class"], "w-full"
     assert_includes cover["class"], "h-full"
-    title = css_select("#presskits-kit-cover [data-cover-title]").first
+    title = css_select("#presskits-kit-cover [data-cover-title] h1").first
     assert_equal "h1", title.name
     frame = css_select("#presskits-kit-cover [data-cover-frame]").first
     assert_includes frame["class"], "aspect-[430/368]"
@@ -88,7 +88,7 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     header_fab = css_select("#presskits-kit-header .fp-fab").first
     assert_includes header_fab["style"].to_s, "--fp-fab-offset: 1rem"
     assert_select "#presskits-kit-header button.fp-fab__trigger[aria-label='Header actions']"
-    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Edit heading']"
+    assert_select "#presskits-kit-header [role='menuitem'][aria-label='Location']"
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"

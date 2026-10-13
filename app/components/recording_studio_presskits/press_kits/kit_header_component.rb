@@ -9,21 +9,6 @@ module RecordingStudioPresskits
         @header_edit_path = header_edit_path
       end
 
-      def page_title_options
-        options = { title: kit_title, variant: :h1 }
-        options[:subtitle] = kit_description if kit_description.present?
-        options
-      end
-
-      def kit_title
-        recordable = @press_kit_recording.recordable
-        recordable&.try(:title).presence || @press_kit_recording.try(:name).presence || "Press kit"
-      end
-
-      def kit_description
-        @press_kit_recording.recordable.try(:description).to_s.strip.presence
-      end
-
       def region_classes
         EditorChrome.region_classes(header: true)
       end
@@ -40,8 +25,8 @@ module RecordingStudioPresskits
         I18n.t("recording_studio_presskits.editor.header_actions")
       end
 
-      def edit_heading_label
-        I18n.t("recording_studio_presskits.editor.edit_heading")
+      def location_label
+        I18n.t("recording_studio_presskits.editor.location")
       end
 
       def style_label

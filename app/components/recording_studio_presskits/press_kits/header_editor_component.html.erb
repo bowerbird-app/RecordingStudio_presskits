@@ -5,29 +5,7 @@
         data: helpers.presskits_editor_save_data.merge(controller: "flat-pack--unsaved-changes") do %>
     <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
 
-    <div class="order-1 flex flex-col gap-6">
-    <%= render FlatPack::TextInput::Component.new(
-      name: "press_kit[title]",
-      label: "Title",
-      value: header_title,
-      required: true
-    ) %>
-    <%= render FlatPack::TextInput::Component.new(
-      name: "press_kit[subtitle]",
-      label: "Subtitle",
-      value: header_subtitle,
-      placeholder: "One line under the title."
-    ) %>
-    <%= render FlatPack::TextArea::Component.new(
-      name: "press_kit[description]",
-      label: "Short description",
-      value: header_description,
-      placeholder: "One or two lines for the people who open this.",
-      character_count: true,
-      max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT,
-      class: "w-full"
-    ) %>
-
+    <div id="presskits-header-location" class="order-1 flex flex-col gap-6">
     <%= fields_for :location, header_location do |location_form| %>
       <%= helpers.recording_studio_location_search_fields(location_form) %>
     <% end %>

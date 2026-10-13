@@ -8,7 +8,8 @@
     recording: @press_kit_recording,
     size: :card,
     heading: :h1,
-    id: "presskits-kit-cover"
+    id: "presskits-kit-cover",
+    inline_path: helpers.press_kit_header_path(@press_kit_recording)
   ) %>
 
   <%= render FlatPack::Fab::Component.new(
@@ -22,8 +23,8 @@
     class: fab_classes
   ) do |fab| %>
     <% fab.with_action(
-      icon: :pencil,
-      label: edit_heading_label,
+      icon: "map-pin",
+      label: location_label,
       href: @header_edit_path,
       data: helpers.presskits_editor_open_data
     ) %>

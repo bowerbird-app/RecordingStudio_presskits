@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.43.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.44.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -466,7 +466,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Who can view this press kit"
     assert_includes readme, "KitQuery.discoverable_for"
     assert_includes readme, 'data-turbo-frame="_top"'
-    assert_includes readme, "Edit heading"
+    assert_includes readme, "**Location**, **Style**, or **Cover image**"
+    assert_includes readme, "Add a short description"
+    refute_includes readme, "Edit heading"
     assert_includes readme, "FlatPack::InlineEdit::Component"
     assert_includes readme, "Add a subtitle"
     assert_includes readme, "Section actions"
@@ -751,7 +753,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes kit_header, "icon: :plus"
     assert_includes kit_header, "offset: fab_offset"
     refute_includes kit_header, "ellipsis_vertical"
-    assert_includes kit_header, "edit_heading_label"
+    assert_includes kit_header, "location_label"
+    assert_includes kit_header, "inline_path:"
     assert_includes kit_header, "style_label"
     assert_includes kit_header, "cover_image_label"
     assert_includes kit_header, "cover_image_path"
@@ -802,8 +805,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes section, "SectionDropdownComponent"
     refute_includes section, "hover:outline-[var(--color-primary)]"
     refute_includes section, "p-4 -mx-4"
-    assert_includes header, 'name: "press_kit[title]"'
-    assert_includes header, 'name: "press_kit[description]"'
+    refute_includes header, 'name: "press_kit[title]"'
+    refute_includes header, 'name: "press_kit[subtitle]"'
+    refute_includes header, 'name: "press_kit[description]"'
+    assert_includes header, 'id="presskits-header-location"'
     assert_includes header, "fields_for :location"
     assert_includes header, "recording_studio_location_search_fields"
     assert_includes header, 'id="press_kit_cover_image"'
@@ -894,7 +899,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes chrome_js, "data-presskits-editor-region"
     refute_includes chrome_js, "opacity-100"
     refute_includes header, "inherit_font_label"
-    assert_includes header, "max_characters: RecordingStudioPresskits::PressKit::SHORT_DESCRIPTION_LIMIT"
+    refute_includes header, "max_characters:"
     assert_includes header, "flat-pack--unsaved-changes"
     refute_includes header, 'text: "Cancel"'
     refute_includes header, "cols: 2"
@@ -907,7 +912,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes brand_js, "press_center"
     refute_includes brand_js, "chooseFont"
     refute_includes brand_js, "presskits-header-edit-preview"
-    assert_operator header.index('name: "press_kit[title]"'), :<, header.index("presskits-header-brand")
+    assert_operator header.index("fields_for :location"), :<, header.index("presskits-header-brand")
+    inline_copy = File.read(File.expand_path("press_kits/header_inline_copy_component.html.erb", components))
+    assert_includes inline_copy, "FlatPack::InlineEdit::Component"
+    assert_includes inline_copy, 'name: "press_kit[title]"'
+    assert_includes inline_copy, 'name: "press_kit[subtitle]"'
+    assert_includes inline_copy, 'name: "press_kit[description]"'
+    assert_includes inline_copy, "required: true"
+    assert_includes inline_copy, "mode: :text"
+    assert_includes inline_copy, "data-presskits-inline-copy"
+    assert_includes inline_copy, "relative z-20"
+    assert_includes inline_copy, "event.stopPropagation()"
+    cover = File.read(File.expand_path("cover/component.html.erb", components))
+    assert_operator cover.index("inline_edit?"), :<, cover.index("HeaderInlineCopyComponent")
+    assert_operator cover.index("HeaderInlineCopyComponent"), :<, cover.index("cover_title: true")
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
     refute_includes show, "FlatPack::Picker::Component"

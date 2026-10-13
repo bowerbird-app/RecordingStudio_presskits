@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## 0.44.0
+
+No migration.
+
+On the kit editor, the cover card edits the kit title, subtitle, and short description in place with `FlatPack::InlineEdit::Component` (`mode: :text`). Hover shows the words can be edited. Click edits them in place. An empty title shows **Add a title**. An empty save is blocked on the card and the stored title stays. An empty subtitle shows **Add a subtitle**. An empty short description shows **Add a short description** and stays clickable. Each save PATCHes `press_kit[title]`, `press_kit[subtitle]`, or `press_kit[description]` on the header update path. A request that includes only one of those leaves the others, and leaves `brand_color`, `font_family`, and the kit location.
+
+The header screen is kit location, **Brand**, and **Cover image**. The header FAB is **Location**, **Style**, and **Cover image**. **Style** still opens `#presskits-header-brand`. **Cover image** is still its own upload and remove. Index cards, the public kit, and the owner preview do not pass `inline_path`, so they keep the static title, subtitle, and clamped short description.
+
 ## 0.43.0
 
 Run the new migration. It drops `cover_style`, `cover_color`, and `cover_text_color` from `recording_studio_press_kits` and adds nullable `brand_color` and `font_family`. Nothing is copied across. A kit that should keep a colour needs `brand_color` written again.

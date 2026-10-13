@@ -11,7 +11,7 @@ module RecordingStudioPresskits
 
       SIZES = %i[card].freeze
 
-      def initialize(recording: nil, title: nil, description: nil, subtitle: nil, brand_color: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
+      def initialize(recording: nil, title: nil, description: nil, subtitle: nil, brand_color: nil, inline_path: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
                      font_family: nil, size: :card, href: nil, id: nil, heading: :h2, add_to_list: true)
         super()
         @recording = recording
@@ -23,7 +23,7 @@ module RecordingStudioPresskits
         @size = SIZES.include?(size&.to_sym) ? size.to_sym : :card
         @href = href
         @id = id
-        @title_tag = %i[h1 h2].include?(heading&.to_sym) ? heading.to_sym : :h2
+        assign_inline_heading(heading, inline_path)
         @add_to_list = add_to_list
       end
 
