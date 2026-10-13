@@ -57,6 +57,8 @@ class PressKitBrandingTest < ActionDispatch::IntegrationTest
     get kit_embed_path(@kit)
     assert_response :success
     assert_branded_frame("presskits-kit-embed")
+    assert_select "body[data-recording-studio-default-layout]"
+    assert_select "[data-presskits-blank-layout]", count: 0
     assert_select "#presskits-public-page", count: 0
     assert_cover_keeps_its_own_colours
   end

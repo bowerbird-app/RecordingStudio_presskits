@@ -3,7 +3,9 @@
 # Host page that drops a kit onto its own screen. This is the kit embed.
 # The published page is a different document and uses its own wrapper.
 class KitEmbedsController < RecordingStudioPresskits::PublicPressKitsController
-  layout "recording_studio_presskits/blank"
+  # Host screen. The published kit uses the blank public document, so this
+  # page is the embed sitting in the dummy app.
+  layout "recording_studio/default_layout"
 
   def show
     set_public_actor
