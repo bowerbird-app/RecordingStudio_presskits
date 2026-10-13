@@ -17,8 +17,8 @@ require "recording_studio_presskits/version"
 require "recording_studio_presskits/engine"
 require "recording_studio_presskits/cover/hex"
 require "recording_studio_presskits/cover/contrast"
-require "recording_studio_presskits/cover/palette"
-require "recording_studio_presskits/cover_settings"
+require "recording_studio_presskits/brand_style"
+require "recording_studio_presskits/kit_branding"
 require "recording_studio_presskits/center_branding"
 require "recording_studio_presskits/direct_images"
 require "recording_studio_presskits/attachment_copy"
@@ -49,7 +49,6 @@ require "recording_studio_presskits/credit_line_batch/sync"
 
 module RecordingStudioPresskits
   class << self
-    include CoverSettings
     include CenterBranding
 
     def configuration

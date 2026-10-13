@@ -1,5 +1,26 @@
 # Upgrade notes
 
+## 0.43.0
+
+Run the new migration. It drops `cover_style`, `cover_color`, and `cover_text_color` from `recording_studio_press_kits` and adds nullable `brand_color` and `font_family`. Nothing is copied across. A kit that should keep a colour needs `brand_color` written again.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+Remove `cover_colors`, `default_cover_color`, `cover_text_colors`, and `cover_text_auto` from the initializer and from `config/recording_studio_presskits.yml`.
+
+`brand_color` is `#RRGGBB` or nil. `font_family` is `sans`, `serif`, `mono`, or nil. Nil means inherit. `KitBranding` resolves each field on its own: the kit value, then `RecordingStudioPressCenters.branding_for` when that gem is loaded, then `#333333` and `sans`. Saving `sans` or `#333333` on the **Custom** tab keeps that value. It does not collapse back to nil. The **Press center** tab stores both fields as nil. Without press centers, the header form shows the swatches and stores both values.
+
+`RecordingStudioPresskits.branding_style_for(kit_recording)` always returns a style string. With `RecordingStudioPressCenters::Branding` loaded, that string is `Branding.new(brand_color:, font_family:).style_attribute`. Without it, `BrandStyle` emits the same tokens: `--color-primary`, `--color-primary-text`, the primary button tokens, the ring tokens, and `font-family`. The published page puts it on `#presskits-public-page`. A host embed puts it on `#presskits-kit-embed`. It never goes on `<html>` or on the kit editor.
+
+`Cover::Component` only has `:card`. `:hero` and `:preview` render that card. The card keeps the wide container-query layout from 0.40.0. It is the header on the public page, the owner preview, the audience preview, and the kit editor. Sections stay in `SectionCardComponent`. The pill and **View** use the resolved brand, with contrast text. A missing photo is a muted surface. The short description is on the card. The company row is the name. The kit location sits under it. The header form does not render a second preview of the card.
+
+The header screen uses `FlatPack::Tabs` (**Press center** and **Custom**) when press centers is loaded. **Custom** shows `FlatPack::FontSwatch` and `FlatPack::ColorSwatch` on one line, prefilled with the resolved press center values. Those tabs stay off when the constant is missing.
+
+API show and update keys are `title`, `description`, `brand_color`, and `font_family`. Duplicating a kit copies the brand columns.
+
 ## 0.42.0
 
 No migration. Bump Flatpack to `>= 0.1.228` (dummy tag `v0.1.228`) and reload its CSS and JavaScript. Rebuild Tailwind so inline-edit and trash-button classes generate. Link `stylesheet_link_tag "flat_pack/inline_edit"` on the kit editor layout, next to `flat_pack/application`. Propshaft fingerprints that file, and the `@import` inside `flat_pack/application` does not resolve it. Without the link, the empty-subtitle placeholder and the hover cue do not paint.

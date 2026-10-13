@@ -15,7 +15,7 @@ find_or_record_child = lambda do |recordable, root_recording, parent_recording|
   ).recording
 end
 
-find_or_record_named_child = lambda do |type, title, root_recording, parent_recording, description: nil, subtitle: nil, cover_style: nil, cover_color: nil|
+find_or_record_named_child = lambda do |type, title, root_recording, parent_recording, description: nil, subtitle: nil, brand_color: nil, font_family: nil|
   existing = RecordingStudio::Recording.recording_studio_trashable_active
                                        .where(root_recording: root_recording, parent_recording: parent_recording,
                                               recordable_type: type.name)
@@ -26,8 +26,8 @@ find_or_record_named_child = lambda do |type, title, root_recording, parent_reco
     recordable.title = title
     recordable.description = description if description.present?
     recordable.subtitle = subtitle if subtitle.present? && recordable.respond_to?(:subtitle=)
-    recordable.cover_style = cover_style if cover_style.present?
-    recordable.cover_color = cover_color if cover_color.present?
+    recordable.brand_color = brand_color if brand_color.present? && recordable.respond_to?(:brand_color=)
+    recordable.font_family = font_family if font_family.present? && recordable.respond_to?(:font_family=)
   end
 end
 
@@ -76,9 +76,7 @@ begin
     root_recording,
     root_recording,
     description: "Doors at noon. The one-sheet is inside, with the photos, the credits, and the facts.",
-    subtitle: "Collection released",
-    cover_style: "color",
-    cover_color: "#BFDBFE"
+    subtitle: "Collection released"
   )
   [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
     bootstrap_owner_access.call(recording, user)
@@ -137,12 +135,8 @@ begin
   attach_harbour_photo.call(press_kit_recording, source: "press_kit_cover")
   spring_cover = press_kit_recording.recordable
   spring_description = "Doors at noon. The one-sheet is inside, with the photos, the credits, and the facts."
-  if spring_cover.cover_color != "#BFDBFE" || spring_cover.cover_text_color.present? ||
-     spring_cover.subtitle != "Collection released" || spring_cover.description != spring_description
+  if spring_cover.subtitle != "Collection released" || spring_cover.description != spring_description
     root_recording.revise(press_kit_recording) do |press_kit|
-      press_kit.cover_style = "color"
-      press_kit.cover_color = "#BFDBFE"
-      press_kit.cover_text_color = nil
       press_kit.subtitle = "Collection released"
       press_kit.description = spring_description
     end
@@ -158,15 +152,7 @@ begin
     unpublished_kit_recording = root_recording.record(RecordingStudioPresskits::PressKit) do |press_kit|
       press_kit.title = "Autumn recap"
       press_kit.description = "What we shipped, on one page."
-      press_kit.cover_style = "color"
-      press_kit.cover_color = "#D97706"
     end
-  elsif unpublished_kit_recording.recordable.cover_color.blank?
-    root_recording.revise(unpublished_kit_recording) do |press_kit|
-      press_kit.cover_style = "color"
-      press_kit.cover_color = "#D97706"
-    end
-    unpublished_kit_recording.reload
   end
 
   trash_named_child = lambda do |parent_recording, type, title|
@@ -372,33 +358,25 @@ begin
     ]
   )
 
-  ensure_kit_description = lambda do |kit_recording, description, cover_color: nil|
+  ensure_kit_description = lambda do |kit_recording, description|
     recordable = kit_recording.recordable
-    needs_description = recordable.description != description
-    needs_color = cover_color.present? && recordable.cover_color != cover_color
-    return unless needs_description || needs_color
+    return if recordable.description == description
 
     root_recording.revise(kit_recording, actor: user) do |press_kit|
       press_kit.description = description
-      if cover_color.present?
-        press_kit.cover_style = "color"
-        press_kit.cover_color = cover_color
-      end
     end
     kit_recording.reload
   end
 
-  ensure_visibility_kit = lambda do |title, description:, cover_color:, audience:, fallback:, slug:|
+  ensure_visibility_kit = lambda do |title, description:, audience:, fallback:, slug:|
     kit = find_or_record_named_child.call(
       RecordingStudioPresskits::PressKit,
       title,
       root_recording,
       root_recording,
-      description: description,
-      cover_style: "color",
-      cover_color: cover_color
+      description: description
     )
-    ensure_kit_description.call(kit, description, cover_color: cover_color)
+    ensure_kit_description.call(kit, description)
     publish_kit.call(kit, slug: slug, status: "published")
     RecordingStudioPresskits::Visibility.set_audience!(
       recording: kit,
@@ -416,7 +394,6 @@ begin
   ensure_visibility_kit.call(
     "Members only launch",
     description: "A kit for people who have an account.",
-    cover_color: "#1F2937",
     audience: :signed_in,
     fallback: :preview,
     slug: "members-only-launch"
@@ -424,7 +401,6 @@ begin
   ensure_visibility_kit.call(
     "Invite only launch",
     description: "A kit for invited guests.",
-    cover_color: "#1F2937",
     audience: :granted,
     fallback: :preview,
     slug: "invite-only-launch"
@@ -432,11 +408,39 @@ begin
   ensure_visibility_kit.call(
     "Quiet launch",
     description: "This stays off the public list.",
-    cover_color: "#1F2937",
     audience: :granted,
     fallback: :hidden,
     slug: "quiet-launch"
   )
+
+  acme = Showcase.find_or_create_by!(name: "ACME desk")
+  acme_recording = find_or_record_child.call(acme, root_recording, root_recording)
+  spring_film = find_or_record_named_child.call(
+    RecordingStudioPresskits::PressKit,
+    "Spring film",
+    root_recording,
+    acme_recording,
+    description: "Logos, bios, and the spring film.",
+    subtitle: "From the ACME desk"
+  )
+  house_style = find_or_record_named_child.call(
+    RecordingStudioPresskits::PressKit,
+    "House style",
+    root_recording,
+    acme_recording,
+    description: "This kit picks its own colour and font.",
+    subtitle: "Not the desk",
+    brand_color: "#DB2777",
+    font_family: "mono"
+  )
+  if house_style.recordable.brand_color != "#DB2777" || house_style.recordable.font_family != "mono"
+    root_recording.revise(house_style, actor: user) do |press_kit|
+      press_kit.brand_color = "#DB2777"
+      press_kit.font_family = "mono"
+    end
+  end
+  publish_kit.call(spring_film, slug: "spring-film", status: "published")
+  publish_kit.call(house_style, slug: "house-style", status: "published")
 
   [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
     bootstrap_owner_access.call(recording, user)

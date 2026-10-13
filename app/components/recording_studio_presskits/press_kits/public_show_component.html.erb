@@ -11,7 +11,9 @@
   ) do %>
     <%= render RecordingStudioPresskits::Cover::Component.new(
       recording: @press_kit_recording,
-      size: :hero
+      size: :card,
+      heading: :h1,
+      id: "presskits-kit-cover"
     ) %>
 
     <% if show_download? %>

@@ -113,12 +113,12 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_blank_public_layout
-    assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    assert_select "#presskits-cover-hero[data-cover-color='#1F2937']"
-    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
-    refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
-    hero_html = css_select("#presskits-cover-hero").first.to_html
-    assert_operator hero_html.index("Press kit"), :<, hero_html.index("Spring launch")
+    assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
+    assert_select "#presskits-kit-cover[data-brand-color='#333333']"
+    assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
+    assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    cover_html = css_select("#presskits-kit-cover").first.to_html
+    assert_operator cover_html.index("Press kit"), :<, cover_html.index("Spring launch")
     assert_operator response.body.index("Spring launch"), :<, response.body.index("Hero")
 
     sign_in @user
@@ -126,9 +126,9 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.preview_press_kit_path(kit)
     assert_response :success
     assert_rounded_default_layout
-    assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    assert_select "#presskits-cover-hero [data-cover-eyebrow]", text: "Press kit"
-    refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
+    assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
+    assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
+    assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
     assert_includes response.body, "Hero"
   end
 
@@ -138,8 +138,8 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-cover-hero h1", text: "Spring launch"
-    refute_includes css_select("#presskits-cover-hero").first.to_html, "Doors at noon."
+    assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
+    refute_includes css_select("#presskits-kit-cover").first.to_html, "Doors at noon."
   end
 
   test "logged-out visitors cannot read an unpublished kit" do

@@ -2,11 +2,9 @@
 
 module RecordingStudioPresskits
   class HeaderAttributes
-    AUTO_TEXT = "auto"
-
     class << self
       def from(submitted)
-        copy(submitted).merge(cover(submitted))
+        copy(submitted).merge(brand(submitted)).merge(source(submitted))
       end
 
       def copy(submitted)
@@ -17,31 +15,38 @@ module RecordingStudioPresskits
         }
       end
 
-      def cover(submitted)
+      def brand(submitted)
+        return {} unless apply_brand?(submitted)
+        return { brand_color: nil, font_family: nil } if press_center?(submitted)
+
         {
-          cover_style: submitted[:cover_style].to_s.strip.presence,
-          cover_color: submitted[:cover_color].to_s.strip.presence,
-          cover_text_color: text_color(submitted)
+          brand_color: submitted[:brand_color],
+          font_family: submitted[:font_family]
         }
+      end
+
+      def apply_brand?(submitted)
+        submitted.key?(:brand_color) || submitted.key?(:font_family) || submitted.key?(:brand_source)
+      end
+
+      def press_center?(submitted)
+        submitted[:brand_source].to_s == "press_center"
+      end
+
+      def source(submitted)
+        value = submitted[:brand_source].to_s.presence
+        return {} if value.blank?
+
+        { brand_source: value }
       end
 
       def alert_for(error)
         messages = error.record.errors
-        return "Pick a colour we can actually paint." if messages[:cover_color].any?
-        return "Pick a text colour we can actually paint." if messages[:cover_text_color].any?
-        return "That cover style is not ready yet." if messages[:cover_style].any?
+        return messages.full_messages.to_sentence if messages[:base].any?
         return "Check the place. Something there is off." if error.record.is_a?(RecordingStudio::Location::Location)
         return "Keep that subtitle short. 120 characters is the limit." if messages[:subtitle].any?
 
         "Keep that description short. 280 characters is the limit."
-      end
-
-      def text_color(submitted)
-        choice = submitted[:cover_text_color].to_s.strip
-        return if choice == AUTO_TEXT
-        return submitted[:cover_text_swatch].to_s.strip.presence if choice.blank?
-
-        choice.presence
       end
     end
   end

@@ -6,7 +6,10 @@
   ) do %>
     <%= render RecordingStudioPresskits::Cover::Component.new(
       recording: @press_kit_recording,
-      size: :hero
+      description: "",
+      size: :card,
+      heading: :h1,
+      id: "presskits-kit-cover"
     ) %>
   <% end %>
 
