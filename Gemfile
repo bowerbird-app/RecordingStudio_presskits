@@ -13,7 +13,7 @@ gem "recording_studio_admin", "~> 2.0", github: "bowerbird-app/RecordingStudio_a
 gem "recording_studio_attachable", "~> 0.15", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
 gem "recording_studio_company", "~> 0.3", github: "bowerbird-app/RecordingStudio_company", tag: "v0.3.0"
 gem "recording_studio_downloadable", "~> 0.3", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"
-gem "recording_studio_duplicatable", "~> 0.4", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"
+gem "recording_studio_duplicatable", "~> 0.5", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"
 gem "recording_studio_external_embed", "~> 0.1.1", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
 gem "recording_studio_lists", "~> 0.5", github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"
 gem "recording_studio_location", "~> 0.4", github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"

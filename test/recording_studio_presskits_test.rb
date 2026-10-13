@@ -62,7 +62,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.8"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.4"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.224"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
@@ -86,7 +86,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.224"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.2.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.4.5"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"'
@@ -401,7 +401,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.2.7\""
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "v0.8.0"
-    assert_includes readme, "tag: \"v0.4.5\""
+    assert_includes readme, "tag: \"v0.5.0\""
     assert_includes readme, "tag: \"v0.1.224\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
