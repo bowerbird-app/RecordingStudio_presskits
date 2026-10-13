@@ -17,6 +17,9 @@ en:
         credit: "Credit"
         alt: "Alt"
         fact: "Fact"
+    images:
+      download_all: "Download all images"
+      show_more: "Show more images (%{count})"
     downloads:
       title: "Downloads"
       subtitle: "Who can download this press kit"

@@ -166,6 +166,67 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert_empty RecordingStudioPresskits::DirectImages.list(content.reload)
   end
 
+  test "the public gallery keeps natural ratios and reveals the rest in the frame" do
+    kit = record_kit("Spring launch")
+    section = add_images_section(kit, title: "Images", subtitle: "Credit the studio.")
+    content = section_content(section)
+    13.times { |index| attach_image!(content, "shot-#{index}.jpg", alt: "Shot #{index}") }
+    publish_kit!(kit)
+
+    get kit.publishable_public_path
+    assert_response :success
+    frame = "turbo-frame[id='presskits-images-#{content.id}']"
+    masonry = css_select("#{frame} .fp-masonry").first
+    assert_includes masonry["class"], "columns-1"
+    assert_includes masonry["class"], "md:columns-2"
+    assert_includes masonry["class"], "lg:columns-4"
+    assert_includes masonry["class"], "fp-masonry--columns"
+    assert_select "#{frame} img", count: 12
+    assert_select "a", text: "Download all images"
+    assert_select "a", text: "Show more images (13)"
+    assert_includes response.body, "JPG · 64×28 · 16:7"
+    assert_includes response.body, "Credit the studio."
+    refute_includes response.body, "aspect-video"
+
+    get kit.publishable_public_path, params: { images: content.id }
+    assert_response :success
+    assert_select "#{frame} img", count: 13
+    assert_select "a", text: "Show more images (13)", count: 0
+
+    sign_in @user
+    switch_to_root(@root)
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-editor-preview .fp-masonry img", count: 12
+    assert_select "#presskits-editor-preview a", text: "Show more images (13)"
+  end
+
+  test "download all images zips this section only" do
+    kit = record_kit("Spring launch")
+    section = add_images_section(kit, title: "Images")
+    content = section_content(section)
+    attach_image!(content, "section-only.jpg", alt: "Section only")
+    attach_image!(kit, "cover-only.jpg", alt: "Cover only")
+    publish_kit!(kit)
+
+    get recording_studio_presskits.image_archive_path(content)
+    assert_response :success
+    assert_equal "application/zip", response.media_type
+    assert_includes response.headers["Content-Disposition"], "images.zip"
+    names = Zip::File.open_buffer(response.body).map(&:name)
+    assert_equal ["section-only.jpg"], names
+  end
+
+  test "a draft kit does not hand out the section zip" do
+    kit = record_kit("Spring launch")
+    section = add_images_section(kit)
+    content = section_content(section)
+    attach_image!(content, "draft.jpg", alt: "Draft")
+
+    get recording_studio_presskits.image_archive_path(content)
+    assert_response :not_found
+  end
+
   test "a duplicated kit gets independent image copies" do
     kit = record_kit("Spring launch")
     section = add_images_section(kit, title: "Press photos")
@@ -206,12 +267,13 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = title }
   end
 
-  def add_images_section(kit, title: "Images")
+  def add_images_section(kit, title: "Images", subtitle: nil)
     RecordingStudioPresskits.create_section!(
       press_kit_recording: kit,
       content_type: "RecordingStudioPresskits::Images",
       actor: @user,
-      title: title
+      title: title,
+      subtitle: subtitle
     )
   end
 
