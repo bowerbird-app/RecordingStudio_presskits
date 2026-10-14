@@ -1,5 +1,10 @@
 # Upgrade notes
 
+
+## 0.59.0
+
+No migration. Update the host `recording_studio_metrics` pin to `~> 0.3` (tag `v0.3.1`).
+
 ## 0.58.0
 
 `0.57.0` already shipped. Bump to `0.58.0`.

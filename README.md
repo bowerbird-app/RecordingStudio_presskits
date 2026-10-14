@@ -24,7 +24,7 @@ gem "recording_studio_lists", github: "bowerbird-app/RecordingStudio_lists", tag
 gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"
 gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.0"
-gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
+gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.3.1"
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.235"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
 ```
@@ -45,7 +45,7 @@ gem "recording_studio_lists", "~> 0.5"
 gem "recording_studio_location", "~> 0.4"
 gem "recording_studio_external_embed", "~> 0.1.1"
 gem "recording_studio_video", "~> 0.2.0"
-gem "recording_studio_metrics", "~> 0.2"
+gem "recording_studio_metrics", "~> 0.3"
 gem "flat_pack", ">= 0.1.235"
 ```
 
@@ -639,7 +639,7 @@ Dummy kit pins:
 | Downloadable | `v0.4.0` |
 | External Embed | `v0.1.4` |
 | Video | `v0.2.0` |
-| Metrics | `v0.2.0` |
+| Metrics | `v0.3.1` |
 
 Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.4 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Downloadable, Attachable, Company, Location, the vendored embargo gem, and this gem so that layout is not an unstyled box.
 
@@ -653,6 +653,28 @@ bin/dev
 
 Seeds one published kit titled **Spring launch**, with a short description, a sky cover (`#BFDBFE`, Auto dark text), a Harbour Gallery cover photo attached on the kit, **Harbour Studio** as the workspace company, **Harbour Gallery** as the kit location, credits, company statistics as cards, and project specifications as a list, and one unpublished kit titled **Autumn recap**. Dummy Workspace enables Orderable with `allows: ["RecordingStudioPresskits::PressKit"]` so kits under the root can be reordered in tests. It also enables `Companies.to(allow: :one)`. Dummy `Showcase` includes `RecordingStudio::Capabilities::PressKits.to` so a kit can sit under a showcase as well as the workspace. It is a test recordable, not a screen. Dummy `FakeBlock` stays test-only. Its parent is a kit section. It enables Trashable so remove is testable, it is excluded from the add dropdown, and it does not enable Publishable. Its `prepare` hook sets the block title from the create heading, or to Block when that heading is blank. The seeded admin user gets Accessible owner access on the workspace and the admin root.
 
+
+## Operations metrics
+
+`RecordingStudioPresskits::Metrics.register!` registers `:press_kits` with
+Recording Studio Metrics (`~> 0.3`): site-wide (`blast_radius: :site`), on the
+`:operations` API only, and visible only to actors with `:view` on the Admin
+root (`Api::Access.can_view?`).
+
+| Metric | Type | Unit | Window | `group_by` | Filters |
+| --- | --- | --- | --- | --- | --- |
+| `press_kits.total` | count of live kits | count | none | none | none |
+| `press_kits.created_over_time` | time series on `created_at` | count | `from` / `to` / `interval` | none | none |
+| `press_kits.published_over_time` | time series on the current Publishable `publish_at` | count | `from` / `to` / `interval` | none | none |
+| `press_kits.by_section_type` | breakdown | count | none | not supported | none |
+
+`published_over_time` counts live (not trashed) kits whose current publish
+settings are in the published state, in the period of their `publish_at`.
+Publish sets `publish_at` to now; Schedule keeps the chosen time. A kit
+unpublished since then drops out, and republishing moves it to the new
+`publish_at`. There is no `group_by`: the only per-kit fields are the
+workspace, title and slug, which identify the kit. There are no filters
+because the press kit list has none.
 ## Cloud Agent boot
 
 Cloud Agent Builds run `.cursor/install.sh`, then `.cursor/fetch-skills.sh`.

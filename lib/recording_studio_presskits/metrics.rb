@@ -8,6 +8,10 @@ module RecordingStudioPresskits
     RESOURCE = :press_kits
     API = :operations
     EXPOSE = { api: [API] }.freeze
+    PUBLISHABLE_TYPE = "RecordingStudioPublishable::Publishable"
+    PUBLISHED_DESCRIPTION = "Live press kits by the publish_at of their current publish settings " \
+                            "(set to now on Publish, or the scheduled time). " \
+                            "Kits unpublished since then are not counted."
 
     module_function
 
@@ -30,6 +34,17 @@ module RecordingStudioPresskits
                      title: "Press kits created over time",
                      field: :created_at,
                      expose: EXPOSE
+      define_published(dsl)
+    end
+
+    def define_published(dsl)
+      dsl.timeseries :published_over_time,
+                     title: "Press kits published over time",
+                     description: PUBLISHED_DESCRIPTION,
+                     unit: "count",
+                     field: :published_at,
+                     scope: RecordingStudioPresskits::Metrics.method(:published_kits),
+                     expose: EXPOSE
     end
 
     def define_section_types(dsl)
@@ -44,6 +59,29 @@ module RecordingStudioPresskits
       relation.where(RecordingStudio::Recording.recording_studio_trashable_kept_sql).where(
         recordable_type: RecordingStudioPresskits.press_kit_type_name
       )
+    end
+
+    # Live kits whose current Publishable child is in the published state, with
+    # that row's publish_at exposed as published_at so the stock timeseries
+    # calculator can bucket and window on it.
+    def published_kits(relation)
+      table = RecordingStudio::Recording.table_name
+      sql = live_kits(relation.unscope(:select))
+            .joins(publishable_join_sql(table))
+            .where("publishables.status = 'published' AND publishables.publish_at IS NOT NULL")
+            .select("#{table}.*", "publishables.publish_at AS published_at")
+      RecordingStudio::Recording.unscoped.from("(#{sql.to_sql}) #{table}")
+    end
+
+    def publishable_join_sql(table)
+      children = RecordingStudio::Recording.unscoped
+                                           .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                                           .where(recordable_type: PUBLISHABLE_TYPE)
+                                           .select(:parent_recording_id, :recordable_id)
+      "INNER JOIN (#{children.to_sql}) publishable_children " \
+        "ON publishable_children.parent_recording_id = #{table}.id " \
+        "INNER JOIN recording_studio_publishable_publishables publishables " \
+        "ON publishables.id = publishable_children.recordable_id"
     end
 
     def section_type_calculator

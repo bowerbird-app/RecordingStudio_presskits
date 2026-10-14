@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.59.0] - 2026-10-14
+
+### Added
+- `press_kits.published_over_time` (timeseries, unit `count`): live kits by the `publish_at` of their current publish settings. Takes `from` / `to` and `interval`. No `group_by` (kit fields identify the kit) and no filters (the press kit list has none). Same site scope, `:operations` exposure and Admin root `:view` check as the other press kit metrics.
+
+### Changed
+- Requires `recording_studio_metrics` `~> 0.3`. Development and dummy Gemfiles pin tag `v0.3.1`.
+
 ## [0.58.0] - 2026-10-14
 
 ### Added
