@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.55.0
+
+Bump to `0.55.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds a nullable `release_date` date column on `recording_studio_press_kits`. There is no backfill. Existing kits keep a blank date, and the card hides the line. Flatpack stays `>= 0.1.235`.
+
+Rebuild Tailwind so `@min-[640px]:flex`, `flex-wrap`, `gap-x-4`, `gap-y-1.5`, `w-full`, and `@min-[640px]:w-auto` generate.
+
+Hosts that replaced the header editor should add `FlatPack::DateInput` named `press_kit[release_date]`. The kit location is still the Location child (`KitLocation`), not a string column. On a cover at least 640px wide, the date and that place share one wrapping muted line under the description. Each shows only when it is present. Both blank hides the line. Below 640px the date stays off and the place stays on its own line.
+
+`Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action` (`renders_many :actions`). An empty slot hides the row. The public page no longer renders `recording_studio_downloadable_button` under the header. **Download kit** on the cover links to `recording_package_path` when that route exists, otherwise the first images section. It shows when `KitDownload.allowed?`. **Contact** shows for a Press contact credit or a section titled Contact. The index passes **View**. The header does not.
+
 ## 0.53.0
 
 No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.

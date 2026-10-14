@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.54.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.55.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -406,7 +406,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "publishable_public_path"
     assert_includes readme, "RecordingStudio::Capabilities::PressKits.to"
     assert_includes readme, "does not call `Visibility.presentation_for`"
-    assert_includes readme, "recording_studio_downloadable_button"
+    assert_includes readme, "recording_package_path"
     assert_includes readme, "### Planned"
     assert_includes readme, "presskit_card"
     assert_includes readme, "presskit_public_url(recording)"
@@ -720,12 +720,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "recording_studio_add_to_list"
     heart_call = cover_html[/recording_studio_add_to_list\(.*?\)/m]
     assert_includes heart_call, "size: :lg"
-    assert_includes cover_html, "cover_view: true"
+    assert_includes cover, "renders_many :actions"
+    assert_includes cover_html, "data-cover-actions"
+    actions = File.read(File.expand_path("cover/default_actions_component.rb", components))
+    assert_includes actions, "cover_view: true"
+    assert_includes actions, "arrow-right"
+    assert_includes actions, "cover_download: true"
+    assert_includes actions, "cover_contact: true"
+    assert_includes actions, "w-full @min-[640px]:w-auto"
     assert_includes cover_html, "line-clamp-3"
-    assert_includes cover_html, "arrow-right"
     assert_includes cover_html, "data-cover-subtitle"
     assert_includes cover_html, "gap-[14px]"
-    assert_includes cover_html, "mt-auto"
+    refute_includes cover_html, "mt-auto"
     refute_includes index, "featured_card?"
     refute_includes index, "data-cover-feature"
     refute_includes index, "featured_recording"
@@ -735,6 +741,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes locales, "cover:"
     assert_includes locales, 'eyebrow: "Press kit"'
     assert_includes locales, 'view: "View"'
+    assert_includes locales, 'contact: "Contact"'
     refute_includes index, "card.media"
     refute_includes index, 'name: "photo"'
     refute_includes index, "presskits_cover_url_for"

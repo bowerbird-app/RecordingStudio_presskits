@@ -14,12 +14,13 @@
       size: :card,
       heading: :h1,
       id: "presskits-kit-cover"
-    ) %>
-
-    <% if show_download? %>
-      <div id="presskits-kit-download" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
-        <%= helpers.recording_studio_downloadable_button(@press_kit_recording, **download_button_options) %>
-      </div>
+    ) do |cover| %>
+      <%= render RecordingStudioPresskits::Cover::DefaultActionsComponent.new(
+        cover: cover,
+        recording: @press_kit_recording,
+        context: :header,
+        preview: preview?
+      ) %>
     <% end %>
   <% end %>
 

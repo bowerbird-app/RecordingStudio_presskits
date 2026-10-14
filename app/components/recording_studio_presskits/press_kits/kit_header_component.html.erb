@@ -11,6 +11,11 @@
     id: "presskits-kit-cover",
     inline_path: helpers.press_kit_header_path(@press_kit_recording)
   ) do |cover| %>
+    <%= render RecordingStudioPresskits::Cover::DefaultActionsComponent.new(
+      cover: cover,
+      recording: @press_kit_recording,
+      context: :header
+    ) %>
     <% cover.with_body_actions do %>
       <div
         class="<%= action_row_classes %> <%= RecordingStudioPresskits::BrandStyle::NEUTRAL_CLASS %>"

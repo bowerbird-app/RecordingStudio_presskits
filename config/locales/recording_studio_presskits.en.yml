@@ -3,6 +3,7 @@ en:
     cover:
       eyebrow: "Press kit"
       view: "View"
+      contact: "Contact"
       released: "Released %{date}"
     download:
       button: "Download kit"

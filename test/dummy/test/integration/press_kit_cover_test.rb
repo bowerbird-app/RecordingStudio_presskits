@@ -243,9 +243,18 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_default_eyebrow("[data-brand-color='#D97706'] [data-cover-eyebrow]", absent: "#D97706")
     assert_select "a[data-cover-view][href='#{recording_studio_presskits.edit_press_kit_path(first)}']", text: /View/
     view = css_select("a[data-cover-view]").first
-    assert_includes view.parent["class"], "mt-auto"
-    assert_includes view.parent["class"], "pb-8"
-    refute view.ancestors.any? { |node| node["data-cover-copy"] }
+    actions = css_select("[data-cover-actions]").first
+    assert_equal actions, view.parent
+    assert_includes actions["class"], "flex"
+    assert_includes actions["class"], "w-full"
+    assert_includes actions["class"], "flex-col"
+    assert_includes actions["class"], "@min-[640px]:flex-row"
+    assert_includes actions["class"], "pb-8"
+    assert_includes view["class"], "w-full"
+    assert_includes view["class"], "@min-[640px]:w-auto"
+    assert view.ancestors.any? { |node| node["data-cover-copy"] }
+    refute_select "[data-cover-download]"
+    refute_select "[data-cover-contact]"
     copy = css_select("[data-cover-copy]").first
     assert_equal "min-w-0 @min-[640px]:pt-16", copy["class"]
     refute_includes copy["class"], "gap-3"
@@ -506,6 +515,69 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_release_line("#presskits-kit-header")
     refute_select "#presskits-kit-header [data-cover-wide-location]"
     refute_select "#presskits-kit-header [data-cover-location]"
+  end
+
+  test "header actions follow assets and a press contact, and the row hides when both are blank" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    record_block(kit, "Notes")
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    refute_select "#presskits-kit-header [data-cover-actions]"
+
+    publish_kit!(kit, slug: "spring-launch-actions")
+
+    get kit.publishable_public_path
+    assert_response :success
+    download = css_select("a[data-cover-download]").first
+    assert download
+    assert_equal recording_studio_downloadable.recording_package_path(kit), download["href"]
+    refute_select "[data-cover-contact]"
+    refute_select "[data-cover-view]"
+
+    RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::Text",
+      actor: @user,
+      title: "Contact"
+    )
+    get kit.publishable_public_path
+    contact = css_select("a[data-cover-contact]").first
+    assert contact
+    assert_equal "#contact", contact["href"]
+    assert_equal "secondary", contact["data-fp-style"]
+    assert_includes contact["class"], "w-full"
+    assert_select "a[data-cover-download]", count: 1
+    refute_select "[data-cover-view]"
+
+    credit = RecordingStudioPresskits::Credits.create!(
+      root_recording: @root,
+      name: "Harbour press",
+      url: "press@harbour.studio",
+      usual_role: "Press contact",
+      actor: @user
+    )
+    credits = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::CreditsSection",
+      actor: @user,
+      title: "Credits"
+    )
+    RecordingStudioPresskits::Credits.add!(
+      credits_section_recording: RecordingStudioPresskits::KitQuery.section_content(credits),
+      credit_recording: credit,
+      role: "Press contact",
+      actor: @user
+    )
+    get kit.publishable_public_path
+    assert_equal "mailto:press@harbour.studio", css_select("a[data-cover-contact]").first["href"]
+
+    get recording_studio_presskits.press_kits_path
+    assert_select "a[data-cover-view]", count: 1
+    refute_select "[data-cover-contact]"
+    refute_select "[data-cover-download]"
   end
 
   test "the header preview can leave the list heart off" do
