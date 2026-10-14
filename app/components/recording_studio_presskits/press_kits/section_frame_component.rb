@@ -34,10 +34,17 @@ module RecordingStudioPresskits
           title: title,
           subtitle: subtitle,
           size: :lg,
-          spacing: :md,
+          spacing: images_download_button ? :none : :md,
           level: :h2,
-          anchor_link: true
+          anchor_link: true,
+          trailing: images_count_badge
         )
+      end
+
+      def images_download_button
+        return @images_download_button if defined?(@images_download_button)
+
+        @images_download_button = build_images_download_button
       end
 
       def content_view
@@ -57,6 +64,42 @@ module RecordingStudioPresskits
         return true unless view.respond_to?(:render?)
 
         view.render?
+      end
+
+      private
+
+      def image_archive_href(content)
+        presskits_routes.image_archive_path(content)
+      end
+
+      def presskits_routes
+        return helpers.recording_studio_presskits if helpers.respond_to?(:recording_studio_presskits)
+
+        helpers
+      end
+
+      def images_count_badge
+        content = @content_recording
+        return unless content&.recordable.is_a?(Images)
+
+        count = DirectImages.list(content).size
+        return if count.zero?
+
+        FlatPack::Badge::Component.new(text: count.to_s, size: :sm)
+      end
+
+      def build_images_download_button
+        content = @content_recording
+        return unless content&.recordable.is_a?(Images)
+        return if DirectImages.list(content).empty?
+
+        FlatPack::Button::Component.new(
+          text: I18n.t("recording_studio_presskits.images.download_all"),
+          style: :default,
+          icon: "arrow-down-tray",
+          href: image_archive_href(content),
+          data: { turbo: false }
+        )
       end
     end
   end

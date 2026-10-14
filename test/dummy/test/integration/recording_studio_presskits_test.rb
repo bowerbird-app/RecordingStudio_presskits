@@ -200,15 +200,20 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     spring_sections = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
     autumn_sections = RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
     assert_equal(
-      ["Project credits", "Press photos", "Company statistics", "Project specifications", "Where to find us"],
+      ["Project credits", "Images", "Company statistics", "Project specifications", "Where to find us"],
       spring_sections.map { |section| section.recordable.title }
     )
     assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
-    press_photos = spring_sections.find { |section| section.recordable.title == "Press photos" }
+    press_photos = spring_sections.find { |section| section.recordable.title == "Images" }
+    assert_equal(
+      RecordingStudioPresskits::ImagesCredit.line_for("Harbour Studio"),
+      press_photos.recordable.subtitle
+    )
     press_photo_content = RecordingStudioPresskits::KitQuery.section_content(press_photos)
     photos = RecordingStudioPresskits::DirectImages.list(press_photo_content)
-    assert_equal 1, photos.size
-    assert_equal "harbour-gallery.jpg", photos.first.recordable.original_filename
+    assert_equal 14, photos.size
+    assert_equal "hero-pendant.jpg", photos.first.recordable.original_filename
+    assert photos.all? { |photo| photo.recordable.file.blob.metadata["width"].to_i.positive? }
     cover = RecordingStudioPresskits::DirectImages.list(press_kit_recording)
     assert_equal 1, cover.size
     assert_equal "harbour-gallery.jpg", cover.first.recordable.original_filename

@@ -17,6 +17,18 @@ The editor asks for length as `m:ss` (`1:24`) and stores seconds. A blank length
 
 The video payload adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the poster the card would show, not only the override. The kit text file adds a `Provider · m:ss` line between the title and the URL.
 
+## 0.47.0
+
+No migration. Bump to `0.47.0`. Flatpack is `>= 0.1.233` (dummy tag `v0.1.233`). Rebuild Tailwind so the masonry column classes (`columns-1`, `md:columns-2`, `lg:columns-4`) and the Section Title trailing-row utilities (`flex-wrap`, `flex-1`, `max-w-max`, `break-words`, `shrink-0`) are generated.
+
+The public Images section uses `FlatPack::Masonry::Component` (`order: :columns`) and `FlatPack::Masonry::Image`. Photos keep their natural ratio. The first 12 render. **Show more images (N)** replaces the gallery Turbo frame (`presskits-images-<id>`) with the rest. N is the number of photos in the section.
+
+The public Images heading passes a `FlatPack::Badge` (`size: :sm`, text is the photo count) through `FlatPack::SectionTitle` `with_trailing`. The badge is outside the heading and outside the copy-link anchor. The editor still edits the title with `FlatPack::InlineEdit`. `SectionTitle` `title:` is a string, and Inline Edit has no trailing slot, so the count badge stays off the editor.
+
+**Download all images** is on the public heading row. It zips that section's photos only, from `GET /recording_studio_presskits/image_archives/:id` (the images content recording). The kit zip still includes the cover, every images section, and `kit.txt`. The section zip is sent only when `Visibility.presentation_for` is `:full`.
+
+Width and height are not columns. `ImagePixelSize` writes them onto the blob metadata for JPEG and PNG when ActiveStorage's analyzer left them out. The caption is one `FlatPack::Masonry::Image` `caption:` string: attachment name, then `JPG · width×height · ratio`. That component paints the whole string in muted `text-sm`. A primary title and a smaller meta line need `meta:` on `FlatPack::Masonry::Image`. Presskits does not restyle the figcaption.
+
 ## 0.46.0
 
 No migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` on every layout that renders a kit, next to `flat_pack/application`. That sheet paints the pressed fill of a primary button from `--button-primary-active-background-color`. Without it, hover and the focus ring still follow the brand, and the pressed fill stays on Flatpack's hover.

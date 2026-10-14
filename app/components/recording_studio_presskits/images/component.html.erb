@@ -1,12 +1,13 @@
-<% if image_recordings.any? %>
-  <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
-    <% image_recordings.each do |item| %>
-      <% url = image_url_for(item) %>
-      <% next if url.blank? %>
-
-      <%= image_tag url,
-            alt: gallery_image_alt(item),
-            class: "aspect-video w-full rounded-lg object-cover" %>
+<%= helpers.turbo_frame_tag frame_id do %>
+  <%= render FlatPack::Masonry::Component.new(columns: columns, gap: :lg, order: :columns) do |masonry| %>
+    <% visible_tiles.each do |tile| %>
+      <% masonry.with_image(**tile) %>
     <% end %>
+  <% end %>
+
+  <% if show_more? %>
+    <div class="mt-8 flex justify-center">
+      <%= render show_more_button %>
+    </div>
   <% end %>
 <% end %>

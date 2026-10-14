@@ -1083,7 +1083,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes component, "def self.permitted_attributes\n        []"
     refute_includes show, "FlatPack::SectionTitle::Component"
     assert_includes heading_display, "FlatPack::SectionTitle::Component"
+    assert_includes heading_display, "with_trailing"
     assert_includes heading_display, "anchor_link:"
+    assert_includes show, "FlatPack::Masonry::Component"
+    assert_includes show, "with_image"
+    refute_includes show, "aspect-video"
     refute_includes section_editor, 'id: "presskits-section-grid"'
     refute_includes section_editor, "cols: 2"
     assert_includes section_editor, 'id="presskits-section-fields"'
