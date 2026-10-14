@@ -324,7 +324,7 @@ begin
   end
   ensure_images_section.call(press_kit_recording)
 
-  ensure_stats_section = lambda do |kit_recording, title, columns, stats|
+  ensure_stats_section = lambda do |kit_recording, title, stats|
     existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
       section.recordable.title == title
     end
@@ -335,11 +335,6 @@ begin
       title: title
     )
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    if content.recordable.columns != columns
-      root_recording.revise(content, actor: user) do |recordable|
-        recordable.columns = columns
-      end
-    end
     stats.each do |label, value, unit|
       already = RecordingStudioPresskits::StatsSection.active_stats(content).any? do |child|
         child.recordable.label == label && child.recordable.value == value
@@ -357,7 +352,6 @@ begin
   ensure_stats_section.call(
     press_kit_recording,
     "Company statistics",
-    3,
     [
       ["Projects", "120", nil],
       ["Countries", "15", nil],
@@ -367,7 +361,6 @@ begin
   ensure_stats_section.call(
     press_kit_recording,
     "Project specifications",
-    2,
     [
       ["Floor area", "420", "m²"],
       ["Completion", "2025", nil],

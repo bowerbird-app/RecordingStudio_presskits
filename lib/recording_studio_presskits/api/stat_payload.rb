@@ -20,7 +20,6 @@ module RecordingStudioPresskits
         return withheld_section if Exposure.withhold?(context, recording)
 
         {
-          columns: columns_for(recording&.recordable),
           stats: StatsSection.active_stats(recording).map { |child| StatPayload.for(child.recordable) }
         }
       end
@@ -31,7 +30,7 @@ module RecordingStudioPresskits
       private_class_method :withheld_stat
 
       def self.withheld_section
-        { columns: nil, stats: [] }
+        { stats: [] }
       end
       private_class_method :withheld_section
 
@@ -42,11 +41,6 @@ module RecordingStudioPresskits
         RecordingStudio::Recording.find_by(recordable: recordable)
       end
       private_class_method :recording_for
-
-      def self.columns_for(recordable)
-        recordable&.columns.presence || StatsSection::DEFAULT_COLUMNS
-      end
-      private_class_method :columns_for
 
       def self.blank_to_nil(value)
         value.to_s.strip.presence

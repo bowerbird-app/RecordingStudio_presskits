@@ -27,10 +27,9 @@ module RecordingStudioPresskits
       def register_stats_section
         register_type(
           "RecordingStudioPresskits::StatsSection",
-          operations: %i[index show update],
+          operations: %i[index show],
           serializer: stats_section_serializer,
-          output_keys: %i[columns stats],
-          writable_attributes: %i[columns]
+          output_keys: %i[stats]
         )
       end
 

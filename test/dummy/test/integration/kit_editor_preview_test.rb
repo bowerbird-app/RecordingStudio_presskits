@@ -321,7 +321,8 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "turbo-frame#pk-editor-screen"
     assert_select "a[data-fp-nav='push']", text: "Stat"
-    assert_select "form#presskits-stats-columns-form[data-turbo-frame='_top']"
+    refute_select "form#presskits-stats-columns-form"
+    refute_select "[name='stats_section[columns]']"
     refute_select "[name='stats_section[display_style]']"
   end
 

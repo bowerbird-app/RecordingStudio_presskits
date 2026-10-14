@@ -1,29 +1,4 @@
 <div class="flex w-full flex-col gap-6">
-  <%= form_with url: update_path, method: :patch, local: true,
-        id: "presskits-stats-columns-form",
-        class: "flex flex-col gap-6",
-        data: helpers.presskits_editor_save_data.merge(
-          controller: "flat-pack--unsaved-changes"
-        ) do %>
-    <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
-    <%= render FlatPack::Select::Component.new(
-      name: "stats_section[columns]",
-      value: section.columns,
-      label: "Columns",
-      options: column_options,
-      class: "w-full"
-    ) %>
-
-    <div id="presskits-stats-columns-update" class="flex flex-wrap items-center gap-3">
-      <%= render FlatPack::Button::Component.new(
-        text: "Update",
-        style: :default,
-        type: "submit",
-        data: { "flat-pack--unsaved-changes-target": "submit" }
-      ) %>
-    </div>
-  <% end %>
-
   <% if stats.any? %>
     <div
       id="presskits-stat-list"

@@ -24,7 +24,7 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     Current.actor = @previous_actor
   end
 
-  test "create section stores the heading and default columns" do
+  test "create section stores the heading" do
     kit = record_kit("Spring launch")
 
     assert_difference -> { RecordingStudioPresskits::KitSection.count }, 1 do
@@ -47,7 +47,7 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_equal @section, content.parent_recording
     assert_kind_of RecordingStudioPresskits::StatsSection, content.recordable
     refute content.recordable.respond_to?(:display_style)
-    assert_equal 3, content.recordable.columns
+    refute content.recordable.respond_to?(:columns)
     assert_equal [content.id], @section.child_recordings.map(&:id)
     assert_equal(
       {
@@ -55,14 +55,13 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
         subtitle: "This year",
         content_type: "RecordingStudioPresskits::StatsSection",
         content_id: content.id,
-        columns: 3,
         stats: []
       },
       RecordingStudioPresskits::Api::SectionPayload.for(@section.recordable, @section)
     )
   end
 
-  test "a kit can hold two stats sections with their own stats and columns" do
+  test "a kit can hold two stats sections with their own stats" do
     kit = record_kit("Spring launch")
     wide = add_stats_section(kit, title: "Company statistics")
     narrow = add_stats_section(kit, title: "Project specifications")
@@ -71,17 +70,15 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     record_stat(wide_content, label: "Projects", value: "120")
     record_stat(wide_content, label: "Employees", value: "85")
     record_stat(narrow_content, label: "Floor area", value: "420", unit: "m²")
-    @root.revise(wide_content, actor: @user) { |recordable| recordable.columns = 4 }
-    @root.revise(narrow_content, actor: @user) { |recordable| recordable.columns = 2 }
 
     assert_equal [wide.id, narrow.id], RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
-    assert_equal 4, wide_content.reload.recordable.columns
-    assert_equal 2, narrow_content.reload.recordable.columns
+    refute wide_content.reload.recordable.respond_to?(:columns)
+    refute narrow_content.reload.recordable.respond_to?(:columns)
     assert_equal 2, RecordingStudioPresskits::StatsSection.active_stats(wide_content).size
     assert_equal 1, RecordingStudioPresskits::StatsSection.active_stats(narrow_content).size
   end
 
-  test "the editor adds edits reorders and trashes stats and saves columns" do
+  test "the editor adds edits reorders and trashes stats" do
     kit = record_kit("Spring launch")
     sign_in @user
     switch_to_root(@root)
@@ -107,7 +104,8 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     refute_select "input[name='kit_section[title]']"
     assert_select "#presskits-section-actions a[href='#{new_stat}']", text: "Stat"
     assert_select "[data-flat-pack--icon-name-value='plus']"
-    assert_select "select[name='stats_section[columns]'], [name='stats_section[columns]']"
+    refute_select "[name='stats_section[columns]']"
+    refute_select "form#presskits-stats-columns-form"
     refute_select "[name='stats_section[display_style]']"
     refute_includes response.body, "facts-display"
     refute_includes response.body, "Show as"
@@ -157,17 +155,10 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_equal "Company statistics", section.reload.recordable.title
 
-    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
-      stats_section: { columns: 4 }
-    }
-    follow_redirect!
-    content = section_content(section)
-    assert_equal 4, content.reload.recordable.columns
-
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select ".fp-section-title h2", text: "Company statistics"
-    assert_includes css_select("#presskits-editor-preview").first.to_html, "lg:grid-cols-4"
+    assert_includes css_select("#presskits-editor-preview").first.to_html, "lg:grid-cols-3"
     assert_includes response.body, "Projects"
     assert_includes response.body, "120"
     assert_includes response.body, "Employees"
@@ -191,12 +182,12 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_nil second.reload.trashed_at
   end
 
-  test "cards render at two three and four columns and an empty section stays off the public page" do
+  test "cards render in three columns and an empty section stays off the public page" do
     kit = record_kit("Spring launch")
     sign_in @user
     switch_to_root(@root)
-    section = add_stats_section(kit, title: "Project specifications")
-    content = section_content(section)
+    add_stats_section(kit, title: "Project specifications")
+    content = section_content(stats_section(kit))
     record_stat(content, label: "Floor area", value: "420", unit: "m²", description: "Total internal floor area")
     record_stat(content, label: "Completion", value: "2025")
     publish_stats_kit!(kit)
@@ -204,34 +195,16 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     preview = css_select("#presskits-editor-preview").first.to_html
-    assert_includes preview, "lg:grid-cols-3"
+    assert_stats_grid(preview)
     assert_includes preview, "420 m²"
     assert_includes preview, "Floor area"
     refute_includes preview, "<th"
     refute_includes preview, "<dt"
 
-    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
-      stats_section: { columns: 2 }
-    }
-    follow_redirect!
-    get recording_studio_presskits.edit_press_kit_path(kit)
-    preview = css_select("#presskits-editor-preview").first.to_html
-    assert_includes preview, "lg:grid-cols-2"
-    refute_includes preview, "lg:grid-cols-3"
-
-    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
-      stats_section: { columns: 4 }
-    }
-    follow_redirect!
-    get recording_studio_presskits.edit_press_kit_path(kit)
-    preview = css_select("#presskits-editor-preview").first.to_html
-    assert_includes preview, "lg:grid-cols-4"
-    assert_includes preview, "420 m²"
-
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-stats"
     assert_response :success
     assert_select ".fp-section-title h2", text: "Project specifications"
-    assert_includes response.body, "lg:grid-cols-4"
+    assert_stats_grid(response.body)
     assert_includes response.body, "420 m²"
     refute_includes response.body, "<th"
 
@@ -246,13 +219,12 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_select ".fp-section-title h2", text: "Stats", count: 0
   end
 
-  test "duplicating a kit copies columns and order" do
+  test "duplicating a kit copies stat order" do
     kit = record_kit("Spring launch")
     section = add_stats_section(kit, title: "Company statistics")
     content = section_content(section)
     first = record_stat(content, label: "Projects", value: "120")
     second = record_stat(content, label: "Countries", value: "15")
-    @root.revise(content, actor: @user) { |recordable| recordable.columns = 4 }
     content.recording_studio_orderable_reorder!(
       ordered_recording_ids: [second.id, first.id],
       actor: @user
@@ -264,7 +236,7 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     copied_stats = RecordingStudioPresskits::StatsSection.active_stats(copied_content)
 
     assert_equal "Company statistics (Copy)", copied_section.recordable.title
-    assert_equal 4, copied_content.recordable.columns
+    refute copied_content.recordable.respond_to?(:columns)
     assert_equal ["Countries", "Projects"], copied_stats.map { |child| child.recordable.label }
     refute_includes copied_stats.map(&:id), first.id
     refute_includes copied_stats.map(&:id), second.id
@@ -296,11 +268,10 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     record_stat(content, label: "Projects", value: "120")
     gone = record_stat(content, label: "Gone", value: "0")
     gone.recording_studio_trashable_trash!(actor: @user)
-    @root.revise(content, actor: @user) { |recordable| recordable.columns = 2 }
 
     payload = RecordingStudioPresskits::Api::SectionPayload.for(section.recordable, section)
     assert_equal ["Projects"], payload.fetch(:stats).map { |entry| entry[:label] }
-    assert_equal 2, payload[:columns]
+    refute payload.key?(:columns)
     refute payload.key?(:display)
 
     get "/published/#{kit.publishable_child_recording&.id}/spring-launch-stats"
@@ -375,5 +346,13 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
 
   def refute_section_preview_card
     refute_select "#presskits-section-preview"
+  end
+
+  def assert_stats_grid(html)
+    assert_includes html, "grid-cols-1"
+    assert_includes html, "md:grid-cols-2"
+    assert_includes html, "lg:grid-cols-3"
+    refute_includes html, "lg:grid-cols-2"
+    refute_includes html, "lg:grid-cols-4"
   end
 end

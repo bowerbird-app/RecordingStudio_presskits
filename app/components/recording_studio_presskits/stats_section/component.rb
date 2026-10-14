@@ -16,14 +16,6 @@ module RecordingStudioPresskits
         StatsSection.active_stats(@recording)
       end
 
-      def section
-        @recording.recordable
-      end
-
-      def columns
-        section.columns
-      end
-
       def formatted_value(recordable)
         recordable.formatted_value
       end
@@ -33,10 +25,6 @@ module RecordingStudioPresskits
           recordable.description.to_s.strip.presence,
           as_of_text(recordable)
         ].compact
-      end
-
-      def grid_class
-        "grid-cols-1 sm:grid-cols-2 lg:grid-cols-#{columns}"
       end
 
       private

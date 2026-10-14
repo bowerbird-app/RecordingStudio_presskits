@@ -691,7 +691,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Stat", parent_recording: kit_section)
     refute section.recordable.respond_to?(:title=)
     refute section.recordable.respond_to?(:display_style)
-    assert_equal 3, section.recordable.columns
+    refute section.recordable.respond_to?(:columns)
     assert_nil kit_section.recordable.title
     assert_equal "Stats", RecordingStudioPresskits.section_heading(kit_section)
   end

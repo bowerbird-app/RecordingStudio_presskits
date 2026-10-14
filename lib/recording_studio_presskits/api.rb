@@ -65,7 +65,7 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
           serializer: method(:kit_section_serializer),
-          output_keys: %i[title subtitle content_type content_id videos columns stats locations],
+          output_keys: %i[title subtitle content_type content_id videos stats locations],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )

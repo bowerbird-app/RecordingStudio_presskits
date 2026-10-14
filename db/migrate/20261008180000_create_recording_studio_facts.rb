@@ -10,7 +10,6 @@ class CreateRecordingStudioFacts < ActiveRecord::Migration[8.1]
 
   def create_stats_sections
     create_table :recording_studio_stats_sections, id: :uuid do |t|
-      t.integer :columns, null: false, default: 3
       t.datetime :created_at, null: false
     end
   end

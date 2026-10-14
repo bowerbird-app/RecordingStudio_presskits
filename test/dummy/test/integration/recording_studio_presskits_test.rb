@@ -103,7 +103,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute connection.table_exists?(:recording_studio_facts)
     assert connection.table_exists?(:recording_studio_stats_sections)
     refute connection.column_exists?(:recording_studio_stats_sections, :display_style)
-    assert connection.column_exists?(:recording_studio_stats_sections, :columns)
+    refute connection.column_exists?(:recording_studio_stats_sections, :columns)
     refute connection.column_exists?(:recording_studio_stats_sections, :updated_at)
     assert connection.table_exists?(:recording_studio_stats)
     assert connection.column_exists?(:recording_studio_stats, :label)
@@ -237,13 +237,13 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     specifications = spring_sections.find { |section| section.recordable.title == "Project specifications" }
     statistics_content = RecordingStudioPresskits::KitQuery.section_content(statistics)
     specifications_content = RecordingStudioPresskits::KitQuery.section_content(specifications)
-    assert_equal 3, statistics_content.recordable.columns
+    refute statistics_content.recordable.respond_to?(:columns)
     refute statistics_content.recordable.respond_to?(:display_style)
     assert_equal(
       ["Projects", "Countries", "Employees"],
       RecordingStudioPresskits::StatsSection.active_stats(statistics_content).map { |child| child.recordable.label }
     )
-    assert_equal 2, specifications_content.recordable.columns
+    refute specifications_content.recordable.respond_to?(:columns)
     assert_equal(
       ["Floor area", "Completion", "Project cost"],
       RecordingStudioPresskits::StatsSection.active_stats(specifications_content).map { |child| child.recordable.label }

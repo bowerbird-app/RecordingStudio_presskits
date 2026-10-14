@@ -17,7 +17,7 @@ module RecordingStudioPresskits
         end
 
         def permitted_attributes
-          %i[columns]
+          []
         end
 
         def below?
@@ -27,10 +27,6 @@ module RecordingStudioPresskits
 
       def stats
         StatsSection.active_stats(@recording)
-      end
-
-      def section
-        @recording.recordable
       end
 
       def section_actions
@@ -55,10 +51,6 @@ module RecordingStudioPresskits
 
       def stat_summary(stat_recording)
         stat_recording.recordable.formatted_value.presence
-      end
-
-      def column_options
-        StatsSection::COLUMN_COUNTS.map { |count| [count.to_s, count] }
       end
 
       private

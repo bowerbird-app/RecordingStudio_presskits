@@ -62,7 +62,7 @@ class StatPayloadTest < ActiveSupport::TestCase
     )
   end
 
-  test "section payload lists active stats in order with the column count" do
+  test "section payload lists active stats in order" do
     built = sections_with_stats
     section = built.fetch(:section)
     content = built.fetch(:content)
@@ -74,7 +74,7 @@ class StatPayloadTest < ActiveSupport::TestCase
     assert_equal "On the books", payload[:subtitle]
     assert_equal "RecordingStudioPresskits::StatsSection", payload[:content_type]
     assert_equal content.id, payload[:content_id]
-    assert_equal 3, payload[:columns]
+    refute payload.key?(:columns)
     refute payload.key?(:display)
     refute payload.key?(:facts)
     assert_equal ["Floor area", "Completed"], labels
@@ -83,7 +83,7 @@ class StatPayloadTest < ActiveSupport::TestCase
     refute_includes labels, "Gone"
   end
 
-  test "stats section api serializer returns columns and stats" do
+  test "stats section api serializer returns stats" do
     built = sections_with_stats
     content = built.fetch(:content)
     payload = RecordingStudioPresskits::Api::SectionPayload.for(built.fetch(:section).recordable, built.fetch(:section))
@@ -93,7 +93,7 @@ class StatPayloadTest < ActiveSupport::TestCase
     serialized = serializer.call(content.recordable, recording: content)
 
     assert_equal payload.fetch(:stats), serialized.fetch(:stats)
-    assert_equal payload.fetch(:columns), serialized.fetch(:columns)
+    refute serialized.key?(:columns)
     refute serialized.key?(:display)
   end
 
@@ -111,22 +111,11 @@ class StatPayloadTest < ActiveSupport::TestCase
     assert stat.valid?
   end
 
-  test "stats section validates columns and keeps the default" do
+  test "stats section has no columns attribute" do
     section = RecordingStudioPresskits::StatsSection.new
 
+    refute section.respond_to?(:columns)
     refute section.respond_to?(:display_style)
-    assert_equal 3, section.columns
-    assert section.valid?
-
-    section.columns = 5
-    refute section.valid?
-    assert_includes section.errors[:columns], "is not included in the list"
-
-    section.columns = nil
-    assert section.valid?
-    assert_equal 3, section.columns
-
-    section.columns = 2
     assert section.valid?
   end
 
@@ -161,7 +150,26 @@ class StatPayloadTest < ActiveSupport::TestCase
     assert_equal "RecordingStudioPresskits::StatsSection", content.reload.recordable_type
     assert_equal "RecordingStudioPresskits::Stat", stat.reload.recordable_type
     assert_kind_of RecordingStudioPresskits::StatsSection, content.recordable
-    assert_equal 3, content.recordable.columns
+    refute content.recordable.respond_to?(:columns)
+  end
+
+  test "drop columns migration removes the columns column" do
+    connection = ActiveRecord::Base.connection
+    connection.add_column :recording_studio_stats_sections, :columns, :integer, default: 3, null: false
+    RecordingStudioPresskits::StatsSection.reset_column_information
+    assert connection.column_exists?(:recording_studio_stats_sections, :columns)
+
+    load Rails.root.join("db/migrate/20261014130000_drop_columns_from_recording_studio_stats_sections.rb")
+    DropColumnsFromRecordingStudioStatsSections.drop_columns
+    RecordingStudioPresskits::StatsSection.reset_column_information
+
+    refute connection.column_exists?(:recording_studio_stats_sections, :columns)
+    refute RecordingStudioPresskits::StatsSection.new.respond_to?(:columns)
+  ensure
+    if connection&.column_exists?(:recording_studio_stats_sections, :columns)
+      connection.remove_column :recording_studio_stats_sections, :columns
+    end
+    RecordingStudioPresskits::StatsSection.reset_column_information
   end
 
   private
@@ -205,8 +213,6 @@ class StatPayloadTest < ActiveSupport::TestCase
       subtitle: "On the books"
     )
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    root.revise(content, actor: user) { |recordable| recordable.columns = 3 }
-    content.reload
     record_stat(content, label: "Floor area", value: "420", unit: "m²")
     record_stat(content, label: "Completed", value: "2025")
     gone = record_stat(content, label: "Gone", value: "0")
