@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.60.0] - 2026-10-14
+
+### Added
+- A Lists section. `RecordingStudioPresskits::ListSection` is an empty recording under a kit section. It orders `RecordingStudioPresskits::ListItem` children. Each item stores an optional Flatpack icon name, a required `key`, and a required `value`.
+- The + Section menu shows List (`list-bullet`). The section editor is a Flatpack collection editor for Icon, Key, and Value. The icon column is `7rem`. Preview and the public page render a Flatpack list with `layout: :key_value` and `divider: true`. Each row passes `key:` and puts the value in the block. Six lines or fewer stay one list, capped at `max-w-[65ch]` like a text section. More than six split in order into two lists, side by side from the `md` breakpoint, capped at two text measures plus the grid gap. An empty list stays off those pages.
+- `kit.txt` prints each line as `Key: Value`. The icon name is not in the zip.
+- The public kit and the owner preview put `FlatPack::CopyButton` on the right of a list heading, the same row as **Copy** on a stats section. It uses the clipboard icon, `style: :default`, `size: :sm`, and the visible label Copy. It copies each visible line as `Key: Value`, the same lines as `kit.txt`. The kit editor does not show that button.
+- The kit section API payload includes `items` for a list section. A list item exposes `icon`, `key`, and `value`.
+- Version `0.60.0`
+
+### Upgrade notes
+- `0.59.0` already shipped. This release is `0.60.0`. Bump to `0.60.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
+- Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
+- This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
+- List item lookup uses `recording_studio_trashable_kept_sql`. A hidden list line uses `recording_studio_trashable_trashed?`.
+- Flatpack is `>= 0.1.239` (dummy tag `v0.1.239`). Rebuild Tailwind so the key/value list grid classes generate. Reload Flatpack CSS so the description-list divider paints. `FlatPack::Card` no longer accepts `theme:` or the old structural styles (`outlined`, `elevated`, `flat`, `interactive`, `list`). Press Kits maps those names onto the new colour, border, shadow, and hover until Location and Trashable pass the new API. The kit cover keeps the brand colour on `--color-primary` and `--color-primary-text`.
+
 ## [0.59.0] - 2026-10-14
 
 ### Added
@@ -1122,7 +1139,9 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.58.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...HEAD
+[0.60.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.59.0...v0.60.0
+[0.59.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.58.0...v0.59.0
 [0.58.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.57.0...v0.58.0
 [0.57.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.56.0...v0.57.0
 [0.56.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.55.0...v0.56.0

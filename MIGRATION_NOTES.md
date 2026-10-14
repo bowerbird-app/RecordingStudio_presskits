@@ -1,5 +1,36 @@
 # Upgrade notes
 
+## 0.60.0
+
+`0.59.0` already shipped. Bump to `0.60.0`.
+
+
+A Lists section is a press kit section. The list section stores no heading. Each item is its own recording.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds two tables and does not change existing kit rows.
+
+`recording_studio_list_sections` is the section content under a kit section, the same shape as a quote section. `recording_studio_kit_list_items` stores optional `icon`, required `key`, and required `value`. `icon` is a Flatpack icon name, such as `star`. There is no foreign key between the tables. The recording tree is the parent. This table is not `recording_studio_list_items`. That table belongs to Recording Studio Lists.
+
+Add these to `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::ListSection",
+"RecordingStudioPresskits::ListItem"
+```
+
+`ListSection` allows a kit section. `ListItem` allows a list section. Orderable on the list section allows items. Trashable is on both. Publishable, Duplicatable, and Attachable stay off them. Duplicating a kit copies the list section and the items in order.
+
+Create the section with `RecordingStudioPresskits.create_section!`. Record an item under the list section. Reorder with `recording_studio_orderable_reorder!` or `recording_studio_orderable_move!` on the list section. Trash an item with `recording_studio_trashable_trash!`.
+
+The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A list section also includes `items`. Each item is `icon`, `key`, and `value`. A blank icon is nil. `kit.txt` prints `Key: Value` and leaves the icon name out.
+
+The public kit and the owner preview put `FlatPack::CopyButton` on the right of that heading (`style: :default`, `size: :sm`, label Copy, icon `clipboard-document`). The clipboard text is `ListSection.copy_text`: each visible line as `Key: Value`, in saved order, with the icon name left out. That is the same line `kit.txt` prints. A trashed line stays out. The kit editor does not show the button.
+
+The section editor is `FlatPack::CollectionEditor::Component`. **Save** records, revises, and trashes the rows. The icon column is `7rem`. The public page and the kit preview use `FlatPack::List::Component` with `layout: :key_value` and `divider: true`. Each row is a `FlatPack::List::Item` with `key:` set to the item key. The block is the value. Flatpack lines the icon and the key up and mutes the key. A blank icon leaves that slot empty. Six items or fewer stay one list at `max-w-[65ch]`, the same measure as a text section. More than six split in saved order into two halves. Each half is its own list inside `FlatPack::Grid::Component` `cols: 2` (`grid-cols-1 md:grid-cols-2`), so a phone stays one column and a wider window shows them side by side. That pair is capped at `max-w-[calc(130ch+1.5rem)]`.
+
+Bump Flatpack to `>= 0.1.239` (dummy tag `v0.1.239`). Rebuild Tailwind so the key/value grid classes generate. Reload Flatpack CSS so the description-list divider paints. `FlatPack::Card` no longer accepts `theme:` or the old structural styles (`outlined`, `elevated`, `flat`, `interactive`, `list`). Press Kits maps those names onto the new colour, border, shadow, and hover until Location and Trashable pass the new API. The kit cover keeps the brand colour on the wrapper through `--color-primary` and `--color-primary-text`.
+
+Finding a list item uses `where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)`. A hidden line uses `recording_studio_trashable_trashed?`.
 
 ## 0.59.0
 

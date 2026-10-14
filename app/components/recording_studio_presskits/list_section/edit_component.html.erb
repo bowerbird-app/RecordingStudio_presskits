@@ -1,0 +1,51 @@
+<%= form_with model: batch, url: lines_path, method: :patch, local: true,
+      id: "presskits-list-editor", class: "flex flex-col gap-6",
+      data: helpers.presskits_editor_save_data.merge(controller: "flat-pack--unsaved-changes") do |form| %>
+  <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
+
+  <%= render FlatPack::CollectionEditor::Component.new(
+    empty_text: "No lines yet",
+    add_label: "Item",
+    headers: ["Icon", "Key", "Value"],
+    column_widths: ["7rem", "minmax(0, 1fr)", "minmax(0, 1.4fr)"],
+    orderable: true,
+    orderable_url: order_path,
+    param_uuid_name: "moving_recording_id",
+    param_target_position_name: "target_position"
+  ) do |editor| %>
+    <% batch.lines.each_with_index do |draft, index| %>
+      <% form.fields_for :lines, draft, child_index: index do |row_form| %>
+        <% editor.with_row(form: row_form, record_id: draft.id, remove_label: "Remove item") do |row| %>
+          <%= render "recording_studio_presskits/list_section/line_fields",
+                row: row,
+                row_form: row_form,
+                icon_options: icon_options %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% editor.with_template do %>
+      <% form.fields_for :lines, blank_line, child_index: "NEW_RECORD" do |row_form| %>
+        <%= render FlatPack::CollectionEditor::Row::Component.new(
+          form: row_form,
+          index_token: "NEW_RECORD",
+          remove_label: "Remove item"
+        ) do |row| %>
+          <%= render "recording_studio_presskits/list_section/line_fields",
+                row: row,
+                row_form: row_form,
+                icon_options: icon_options %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <div id="presskits-list-lines-save" class="flex flex-wrap items-center gap-3">
+    <%= render FlatPack::Button::Component.new(
+      text: "Save",
+      style: :default,
+      type: "submit",
+      data: { "flat-pack--unsaved-changes-target": "submit" }
+    ) %>
+  </div>
+<% end %>

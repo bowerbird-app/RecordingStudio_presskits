@@ -1,0 +1,35 @@
+<div class="flex flex-col gap-6">
+  <% unless helpers.presskits_editor_dialog? %>
+    <%= render FlatPack::PageTitle::Component.new(title: heading, variant: :h1) %>
+  <% end %>
+
+  <%= form_with url: form_path, method: form_method, local: true, class: "flex flex-col gap-6", data: form_data do %>
+    <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
+    <div id="presskits-list-item-actions" class="flex flex-wrap items-center gap-3">
+      <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
+      <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path, data: helpers.presskits_editor_nav(:back)) %>
+    </div>
+
+    <%= render FlatPack::Select::Component.new(
+      name: "list_item[icon]",
+      value: item.icon.to_s,
+      label: "Icon",
+      options: icon_options,
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "list_item[key]",
+      value: item.key,
+      label: "Key",
+      required: true,
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "list_item[value]",
+      value: item.value,
+      label: "Value",
+      required: true,
+      class: "w-full"
+    ) %>
+  <% end %>
+</div>

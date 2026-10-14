@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.59.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.60.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -39,6 +39,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
       "db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "db/migrate/20261010150000_create_recording_studio_location_sections.rb",
+      "db/migrate/20261014230000_create_recording_studio_list_sections.rb",
       "test/dummy/db/migrate/20261010000013_create_recording_studio_access_constraints.rb",
       "test/dummy/db/migrate/20261010000014_create_recording_studio_access_rules.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
@@ -58,6 +59,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
       "test/dummy/db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "test/dummy/db/migrate/20261010150000_create_recording_studio_location_sections.rb",
+      "test/dummy/db/migrate/20261014230000_create_recording_studio_list_sections.rb",
       "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb",
@@ -80,6 +82,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes engine, "recording_studio_presskits.location_trash"
     assert_includes engine, "RecordingStudio::Location::Location.include RecordingStudio::Capabilities::Trashable.to"
     assert_includes engine, "register_location_section"
+    assert_includes engine, "register_list_section"
     assert_includes engine, "RecordingStudioPresskits::LocationSection"
     assert_includes engine, "recording_studio_presskits.action_audiences"
     assert_includes engine, "RecordingStudioPresskits::Visibility.register_action!"
@@ -95,7 +98,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.9"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.235"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.239"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
@@ -115,7 +118,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.235"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.239"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
@@ -450,7 +453,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "v0.8.0"
     assert_includes readme, "tag: \"v0.5.0\""
-    assert_includes readme, "tag: \"v0.1.235\""
+    assert_includes readme, "tag: \"v0.1.239\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.3"'
     assert_includes readme, 'gem "recording_studio_lists", "~> 0.5"'
@@ -464,6 +467,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "recording_studio_location_search_fields"
     assert_includes readme, "recording_studio_location_display"
     assert_includes readme, "LocationSection"
+    assert_includes readme, "ListSection"
+    assert_includes readme, "recording_studio_kit_list_items"
     assert_includes readme, "Cover::Company"
     assert_includes readme, "KitLocation"
     assert_includes readme, "RecordingStudio::Capabilities::PressKits.to"
@@ -484,7 +489,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[430/368]"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.235"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.239"'
     assert_includes readme, "FlatPack::FontSwatch"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
@@ -1432,6 +1437,65 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes options.map(&:last), "not-an-icon"
   end
 
+  def test_list_section_uses_a_list_and_a_collection_editor
+    show = File.read(presskits_path("app/components/recording_studio_presskits/list_section/component.html.erb"))
+    show_rb = File.read(presskits_path("app/components/recording_studio_presskits/list_section/component.rb"))
+    lines = File.read(presskits_path("app/views/recording_studio_presskits/list_section/_lines.html.erb"))
+    editor = File.read(presskits_path("app/components/recording_studio_presskits/list_section/edit_component.html.erb"))
+    fields = File.read(presskits_path("app/views/recording_studio_presskits/list_section/_line_fields.html.erb"))
+    routes = File.read(presskits_path("config/routes.rb"))
+
+    assert_includes show, "FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start"
+    assert_includes show, "measure_class"
+    assert_includes lines, "FlatPack::List::Component"
+    assert_includes lines, "FlatPack::List::Item"
+    assert_includes lines, "layout: :key_value"
+    assert_includes lines, "divider: true"
+    assert_includes lines, "key: item.key"
+    assert_includes lines, "icon: item.icon.presence"
+    assert_includes lines, "<%= item.value %>"
+    refute_includes lines, "justify-between"
+    refute_includes lines, "!items-center"
+    refute_includes lines, "text-(--surface-muted-content-color)"
+    assert_includes show_rb, 'NARROW_MEASURE = "max-w-[65ch]"'
+    assert_includes show_rb, 'WIDE_MEASURE = "max-w-[calc(130ch+1.5rem)]"'
+    assert_includes show_rb, "SINGLE_LIST_LIMIT = 6"
+    refute_includes show, "FlatPack::Table::Component"
+    refute_includes show, "[&_thead]:hidden"
+    refute_includes lines, "whitespace-nowrap"
+    assert_includes editor, "FlatPack::CollectionEditor::Component"
+    assert_includes editor, 'add_label: "Item"'
+    assert_includes editor, 'empty_text: "No lines yet"'
+    assert_includes editor, 'headers: ["Icon", "Key", "Value"]'
+    assert_includes editor, 'column_widths: ["7rem", "minmax(0, 1fr)", "minmax(0, 1.4fr)"]'
+    assert_includes editor, "moving_recording_id"
+    assert_includes editor, "target_position"
+    assert_includes editor, 'text: "Save"'
+    assert_includes fields, "chrome: :cell"
+    assert_includes routes, "resource :list_lines, only: :update"
+    refute File.exist?(presskits_path("app/components/recording_studio_presskits/list_section/actions_component.rb"))
+
+    model = File.read(presskits_path("app/models/recording_studio_presskits/list_section.rb"))
+    copy_button = File.read(presskits_path(
+                              "app/components/recording_studio_presskits/list_section/copy_button_component.rb"
+                            ))
+    frame = File.read(presskits_path(
+                        "app/components/recording_studio_presskits/press_kits/section_frame_component.html.erb"
+                      ))
+    text_file = File.read(presskits_path("lib/recording_studio_presskits/kit_download/text_file.rb"))
+    assert_includes model, "def self.copy_text"
+    assert_includes model, "def self.copy_line"
+    assert_match(/#\{key\}: #\{value\}/, model)
+    assert_includes copy_button, "FlatPack::CopyButton::Component"
+    assert_includes copy_button, 'label: "Copy"'
+    assert_includes copy_button, 'icon: "clipboard-document"'
+    assert_includes copy_button, "style: :default"
+    assert_includes copy_button, "size: :sm"
+    assert_includes frame, "lists_copy_button"
+    assert_includes frame, "data-list-copy"
+    assert_includes text_file, "ListSection.copy_line"
+  end
+
   def test_video_routes_initializer_and_gemfile_pins
     root = File.expand_path("..", __dir__)
     routes = File.read(File.join(root, "config/routes.rb"))
@@ -1449,6 +1513,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer, '"RecordingStudioPresskits::PodcastSection"'
     assert_includes initializer, '"RecordingStudioPresskits::Podcast"'
     assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::ListSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::ListItem"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.2.0"'
     assert_includes gemfile, 'gem "recording_studio_lists", "~> 0.5"'

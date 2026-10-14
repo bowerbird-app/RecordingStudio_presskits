@@ -4,6 +4,7 @@ require "recording_studio_presskits/api/video_payload"
 require "recording_studio_presskits/api/stat_payload"
 require "recording_studio_presskits/api/podcast_payload"
 require "recording_studio_presskits/api/location_payload"
+require "recording_studio_presskits/api/list_payload"
 require "recording_studio_presskits/api/file_payload"
 
 module RecordingStudioPresskits
@@ -31,6 +32,7 @@ module RecordingStudioPresskits
         "RecordingStudioPresskits::LocationSection" => lambda { |content|
           { locations: LocationPayload.for_recording(content) }
         },
+        "RecordingStudioPresskits::ListSection" => ->(content) { { items: ListPayload.for_recording(content) } },
         "RecordingStudioPresskits::PodcastSection" => lambda { |content|
           { podcasts: PodcastPayload.for_recording(content) }
         },

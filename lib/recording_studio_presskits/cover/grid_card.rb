@@ -73,16 +73,7 @@ module RecordingStudioPresskits
         { cover_card: true, brand_color: brand_color, brand_text_color: brand_text_color, presskits_brand: "true" }
       end
 
-      def view_button_theme
-        {
-          primary: brand_color,
-          primary_text: brand_text_color
-        }
-      end
-
-      # Hover, pressed fill, and the focus ring. Flatpack's theme hash only
-      # accepts a plain colour, and a same-colour hover leaves the pressed
-      # states on the theme root. These aliases sit beside --color-primary.
+      # Hover, pressed fill, and the focus ring. These aliases sit beside --color-primary.
       def button_state_style
         BrandStyle.button_state_attribute
       end

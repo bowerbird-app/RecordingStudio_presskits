@@ -188,6 +188,7 @@ class KitDownloadTest < Minitest::Test
     source = File.read(File.expand_path("../lib/recording_studio_presskits/kit_download/text_file.rb", __dir__))
 
     assert_includes source, "\"RecordingStudioPresskits::LocationSection\" => :location_section_lines"
+    assert_includes source, "\"RecordingStudioPresskits::ListSection\" => :list_lines"
     assert_includes source, "LocationSection.active_locations"
   end
 end

@@ -22,6 +22,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::PodcastSection",
     "RecordingStudioPresskits::Podcast",
     "RecordingStudioPresskits::LocationSection",
+    "RecordingStudioPresskits::ListSection",
+    "RecordingStudioPresskits::ListItem",
     "RecordingStudioPresskits::Files",
     "RecordingStudioVideo::Video",
     "RecordingStudioPublishable::Publishable",

@@ -96,8 +96,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "[data-cover-card][data-brand-color='#DB2777']", count: 1
     cover = css_select("[data-brand-color='#DB2777']").first
     assert_includes cover.to_html, "Spring launch"
-    assert_includes cover["style"], "--button-primary-background-color: #DB2777"
-    assert_includes cover["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#DB2777')}"
+    brand = cover.parent
+    assert_equal "true", brand["data-presskits-brand"]
+    assert_includes brand["style"], "--color-primary: #DB2777"
+    assert_includes brand["style"], "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast.text_on('#DB2777')}"
+    assert_includes brand["style"], "--button-primary-background-color: var(--color-primary)"
+    assert_includes brand["style"], "--button-primary-text-color: var(--color-primary-text)"
     pill = css_select("[data-brand-color='#DB2777'] [data-cover-eyebrow]").first
     assert_equal "top_left", pill.parent["data-fp-placement"]
     assert_equal "md", pill.parent["data-fp-inset"]
@@ -214,6 +218,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_section_menu_icon("RecordingStudioPresskits::VideoSection", "video-camera")
     assert_section_menu_icon("RecordingStudioPresskits::PodcastSection", "microphone")
     assert_section_menu_icon("RecordingStudioPresskits::LocationSection", "map-pin")
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AListSection'] span",
+                  text: "List"
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AListSection'] span",
+                  text: "Labeled lines, in the order you want."
+    assert_section_menu_icon("RecordingStudioPresskits::ListSection", "list-bullet")
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AFiles'] span", text: "Files"
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AFiles'] span",
                   text: "Sheets, decks, and zip files they can take with the kit."

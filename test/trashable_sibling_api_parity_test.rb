@@ -14,7 +14,9 @@ class TrashableSiblingApiParityTest < Minitest::Test
     "lib/recording_studio_presskits/metrics.rb",
     "app/controllers/recording_studio_presskits/quotes_controller.rb",
     "app/controllers/recording_studio_presskits/stats_controller.rb",
-    "app/controllers/recording_studio_presskits/quote_images_controller.rb"
+    "app/controllers/recording_studio_presskits/quote_images_controller.rb",
+    "app/models/recording_studio_presskits/list_section.rb",
+    "app/controllers/recording_studio_presskits/list_items_controller.rb"
   ].freeze
 
   def test_pins_trashable_0_9_by_tag_and_gemspec
@@ -57,6 +59,11 @@ class TrashableSiblingApiParityTest < Minitest::Test
     facts_controller = File.read(File.join(ROOT, "app/controllers/recording_studio_presskits/stats_controller.rb"))
     quote_images = File.read(File.join(ROOT, "app/controllers/recording_studio_presskits/quote_images_controller.rb"))
 
+    list_section = File.read(File.join(ROOT, "app/models/recording_studio_presskits/list_section.rb"))
+    list_items = File.read(File.join(ROOT, "app/controllers/recording_studio_presskits/list_items_controller.rb"))
+
+    assert_includes list_section, "recording_studio_trashable_trashed?"
+    assert_includes list_items, "recording_studio_trashable_kept_sql"
     assert_includes facts, "recording_studio_trashable_trashed?"
     assert_includes quotes, "recording_studio_trashable_trashed?"
     assert_includes quote_edit, "recording_studio_trashable_trashed?"

@@ -8,6 +8,7 @@ require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
 require "recording_studio_presskits/api/podcast_payload"
 require "recording_studio_presskits/api/location_payload"
+require "recording_studio_presskits/api/list_payload"
 require "recording_studio_presskits/api/file_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/api/section_action"
@@ -22,6 +23,7 @@ require "recording_studio_presskits/api/credit_registration"
 require "recording_studio_presskits/api/stat_registration"
 require "recording_studio_presskits/api/file_registration"
 require "recording_studio_presskits/api/location_registration"
+require "recording_studio_presskits/api/list_registration"
 require "recording_studio_presskits/api/podcast_registration"
 
 module RecordingStudioPresskits
@@ -30,6 +32,7 @@ module RecordingStudioPresskits
     extend CreditRegistration
     extend StatRegistration
     extend LocationRegistration
+    extend ListRegistration
     extend PodcastRegistration
 
     class << self
@@ -37,6 +40,7 @@ module RecordingStudioPresskits
         return unless defined?(::RecordingStudioApi)
 
         register_recordable_types
+        register_lists!
         register_section_actions
       end
 
@@ -71,7 +75,7 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
           serializer: method(:kit_section_serializer),
-          output_keys: %i[title subtitle content_type content_id videos stats locations podcasts files],
+          output_keys: %i[title subtitle content_type content_id videos stats locations podcasts files items],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )
@@ -131,11 +135,7 @@ module RecordingStudioPresskits
       end
 
       def empty_section_options
-        {
-          operations: %i[index show],
-          serializer: empty_serializer,
-          output_keys: []
-        }
+        { operations: %i[index show], serializer: empty_serializer, output_keys: [] }
       end
 
       def empty_serializer

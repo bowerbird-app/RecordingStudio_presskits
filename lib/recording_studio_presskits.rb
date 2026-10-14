@@ -15,7 +15,9 @@ require "recording_studio_company"
 require "recording_studio_lists"
 require "recording_studio_location"
 require "flat_pack"
+require "recording_studio_presskits/flatpack_card_styles"
 require "recording_studio_presskits/version"
+require "recording_studio_presskits/icons"
 require "recording_studio_presskits/engine"
 require "recording_studio_presskits/cover/hex"
 require "recording_studio_presskits/cover/contrast"
@@ -65,6 +67,8 @@ require "recording_studio_presskits/credits"
 require "recording_studio_presskits/credits/picker"
 require "recording_studio_presskits/credit_line_batch"
 require "recording_studio_presskits/credit_line_batch/sync"
+require "recording_studio_presskits/list_item_batch"
+require "recording_studio_presskits/list_item_batch/sync"
 
 module RecordingStudioPresskits
   class << self

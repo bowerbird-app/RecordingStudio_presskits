@@ -54,6 +54,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     trashed.recording_studio_trashable_trash!(actor: @user)
     add_text_section(kit, title: "The story", body: "<p>Private? No. This is the story.</p>")
     add_quote_section(kit)
+    add_list_section(kit)
     publish_kit!(kit, slug: "spring-launch-download")
 
     files = kit.recordable.downloadable_manifest
@@ -77,6 +78,10 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_includes body, "Sam"
     assert_includes body, "Doors at noon, bring coffee."
     assert_includes body, "Ada"
+    assert_includes body, "At a glance"
+    assert_includes body, "Capacity: 120 seats"
+    refute_includes body, "star"
+    refute_includes body, "Draft line"
     refute_includes body, "Draft shot"
     refute_includes body, "draft.jpg"
     assert cover.present?
@@ -441,6 +446,27 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     )
     content = RecordingStudioPresskits::KitQuery.section_content(section)
     @root.revise(content) { |text| text.body = body }
+    section
+  end
+
+  def add_list_section(kit)
+    section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::ListSection",
+      actor: @user,
+      title: "At a glance"
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    content.record(RecordingStudioPresskits::ListItem, actor: @user, parent_recording: content) do |item|
+      item.icon = "star"
+      item.key = "Capacity"
+      item.value = "120 seats"
+    end
+    gone = content.record(RecordingStudioPresskits::ListItem, actor: @user, parent_recording: content) do |item|
+      item.key = "Draft line"
+      item.value = "Hidden"
+    end
+    gone.recording_studio_trashable_trash!(actor: @user)
     section
   end
 

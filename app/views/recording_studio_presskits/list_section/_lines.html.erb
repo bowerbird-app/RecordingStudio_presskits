@@ -1,0 +1,12 @@
+<%= render FlatPack::List::Component.new(layout: :key_value, divider: true) do %>
+  <% column.each do |recording| %>
+    <% item = recording.recordable %>
+    <%= render FlatPack::List::Item.new(
+          key: item.key,
+          icon: item.icon.presence,
+          data: { list_item: true }
+        ) do %>
+      <%= item.value %>
+    <% end %>
+  <% end %>
+<% end %>

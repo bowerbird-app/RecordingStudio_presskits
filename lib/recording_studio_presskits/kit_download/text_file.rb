@@ -27,6 +27,7 @@ module RecordingStudioPresskits
         "RecordingStudioPresskits::VideoSection" => :video_lines,
         "RecordingStudioPresskits::PodcastSection" => :podcast_lines,
         "RecordingStudioPresskits::LocationSection" => :location_section_lines,
+        "RecordingStudioPresskits::ListSection" => :list_lines,
         "RecordingStudioPresskits::Files" => :file_section_lines
       }.freeze
 
@@ -143,6 +144,10 @@ module RecordingStudioPresskits
 
       def video_lines(content, _recordable)
         VideoSection.active_videos(content).filter_map { |child| video_block(child.recordable) }
+      end
+
+      def list_lines(content, _recordable)
+        ListSection.active_items(content).filter_map { |child| ListSection.copy_line(child.recordable) }
       end
 
       def podcast_lines(content, _recordable)

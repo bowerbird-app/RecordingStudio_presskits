@@ -22,6 +22,7 @@ module RecordingStudioPresskits
         register_video_section
         register_podcast_section
         register_location_section
+        register_list_section
         register_files_section
       end
 
@@ -129,12 +130,29 @@ module RecordingStudioPresskits
         )
       end
 
+      def register_list_section
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::ListSection",
+          component: "RecordingStudioPresskits::ListSection::Component",
+          editor: "RecordingStudioPresskits::ListSection::EditComponent"
+        )
+      end
+
       def register_files_section
         RecordingStudioPresskits.register_section(
           "RecordingStudioPresskits::Files",
           component: "RecordingStudioPresskits::Files::Component",
           editor: "RecordingStudioPresskits::Files::EditComponent"
         )
+      end
+    end
+
+    initializer "recording_studio_presskits.flatpack_card_styles" do
+      config.to_prepare do
+        component = FlatPack::Card::Component
+        next if component.ancestors.include?(RecordingStudioPresskits::FlatpackCardStyles)
+
+        component.prepend(RecordingStudioPresskits::FlatpackCardStyles)
       end
     end
 

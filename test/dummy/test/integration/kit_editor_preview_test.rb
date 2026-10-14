@@ -127,7 +127,7 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-picker-modal"
     header_card = css_select("#presskits-kit-header [data-cover-card]").first
     assert_includes header_card["class"], "rounded-[var(--radius-lg)]"
-    assert_includes header_card["class"], "bg-[var(--card-background-color)]"
+    assert_includes header_card["class"], "[background:var(--card-style-default-background)]"
     empty_card = css_select("#presskits-editor-sections [data-section-card]").first
     assert_includes empty_card["class"], "rounded-[var(--radius-lg)]"
     assert_includes empty_card["class"], "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
@@ -162,7 +162,7 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "rounded-[var(--radius-lg)]"
     section_card = css_select("#presskits-section-#{section.id} [data-section-card]").first
     assert_includes section_card["class"], "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
-    assert_includes section_card["class"], "bg-[var(--card-background-color)]"
+    assert_includes section_card["class"], "[background:var(--card-style-default-background)]"
     refute_includes body["class"], "hover:outline-[var(--color-primary)]"
     refute_select "#presskits-section-#{section.id} .fp-fab"
     refute_select "#presskits-section-picker-after-#{section.id}"

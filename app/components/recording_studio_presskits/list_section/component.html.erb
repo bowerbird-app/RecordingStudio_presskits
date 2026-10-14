@@ -1,0 +1,13 @@
+<% if items.any? %>
+  <div id="presskits-list-lines" class="<%= measure_class %>">
+    <% if wide? %>
+      <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start, class: "w-full") do %>
+        <% line_columns.each do |column| %>
+          <%= render "recording_studio_presskits/list_section/lines", column: column %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <%= render "recording_studio_presskits/list_section/lines", column: items %>
+    <% end %>
+  </div>
+<% end %>

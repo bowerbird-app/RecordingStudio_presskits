@@ -56,7 +56,13 @@ module RecordingStudioPresskits
       def stats_copy_button
         return @stats_copy_button if defined?(@stats_copy_button)
 
-        @stats_copy_button = build_stats_copy_button
+        @stats_copy_button = StatsSection::CopyButtonComponent.for(@content_recording, title: saved_title)
+      end
+
+      def lists_copy_button
+        return @lists_copy_button if defined?(@lists_copy_button)
+
+        @lists_copy_button = ListSection::CopyButtonComponent.for(@content_recording)
       end
 
       def text_section?
@@ -103,7 +109,10 @@ module RecordingStudioPresskits
       end
 
       def heading_action?
-        images_download_button.present? || credits_copy_button.present? || stats_copy_button.present?
+        images_download_button.present? ||
+          credits_copy_button.present? ||
+          stats_copy_button.present? ||
+          lists_copy_button.present?
       end
 
       def build_images_download_button
@@ -125,10 +134,6 @@ module RecordingStudioPresskits
         return unless view.respond_to?(:copy_button)
 
         view.copy_button
-      end
-
-      def build_stats_copy_button
-        StatsSection::CopyButtonComponent.for(@content_recording, title: saved_title)
       end
     end
   end
