@@ -37,13 +37,20 @@ module RecordingStudioPresskits
         credit_recording.recording_studio_trashable_restore!(actor: actor)
       end
 
-      def add!(credits_section_recording:, credit_recording:, role: nil, actor: nil)
+      def add!(credits_section_recording:, credit_recording:, role: nil, icon: nil, actor: nil)
         assert_usable!(credits_section_recording, credit_recording)
-        record_line(credits_section_recording, credit_recording, role, actor)
+        record_line(credits_section_recording, credit_recording, role, icon, actor)
       end
 
       def revise_role!(line_recording:, root_recording:, role:)
-        root_recording.revise(line_recording) { |line| line.role = role }
+        revise_line!(line_recording:, root_recording:, role:, icon: line_recording.recordable.icon)
+      end
+
+      def revise_line!(line_recording:, root_recording:, role:, icon:)
+        root_recording.revise(line_recording) do |line|
+          line.role = role
+          line.icon = icon
+        end
       end
 
       def remove!(line_recording, actor:)
@@ -101,10 +108,11 @@ module RecordingStudioPresskits
           credit_recording.parent_recording_id == section_recording.root_recording_id
       end
 
-      def record_line(section_recording, credit_recording, role, actor)
+      def record_line(section_recording, credit_recording, role, icon, actor)
         section_recording.record(CreditLine, parent_recording: section_recording, actor: actor) do |line|
           line.credit_recording_id = credit_recording.id
           line.role = chosen_role(role, credit_recording)
+          line.icon = icon
         end
       end
 

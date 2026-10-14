@@ -1,8 +1,8 @@
 # Upgrade notes
 
-## 0.50.0
+## 0.51.0
 
-Bump to `0.50.0`. Flatpack is `>= 0.1.235` (dummy tag `v0.1.235`). Rebuild Tailwind. Reload Press Kits JavaScript. The copy-link controller is `recording-studio-presskits--copy-link`.
+Bump to `0.51.0`. Flatpack is `>= 0.1.235` (dummy tag `v0.1.235`). Rebuild Tailwind. Reload Press Kits JavaScript. The copy-link controller is `recording-studio-presskits--copy-link`.
 
 `FlatPack::SectionTitle` `with_trailing` is where a count badge sits, after the heading and outside the copy-link anchor. The public video heading passes `FlatPack::Badge` (`size: :sm`) with the number of videos. A section with no videos does not render, so the badge is absent then. The editor still edits the title with `FlatPack::InlineEdit` and does not show the count. Text sections keep `TextSectionHeadingComponent`. Images keep their own count badge.
 
@@ -20,6 +20,25 @@ The editor asks for length as `m:ss` (`1:24`) and stores seconds. A blank length
 `VideoSection` includes Orderable for `RecordingStudioVideo::Video`. `active_videos` follows that order. A video with no position yet sorts after positioned ones, then by `created_at`. The public page features the first and puts the rest in `FlatPack::Grid` `cols: 2`. The card uses `FlatPack::VideoPreview`: poster, centred play control, and `recording_studio_video_player` inside `with_player` so the iframe stays in a template until play. **Copy link** dispatches `toast:add`. Below `sm` it is icon-only, with `aria-label` and a tooltip of **Copy link**. From `sm` up the label is visible. The title wraps on the same row. The public card does not show a watch-on-provider link or the description. The public heading shows the video count in the trailing slot.
 
 The video payload adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the poster the card would show, not only the override. The kit text file adds a `Provider · m:ss` line between the title and the URL.
+
+## 0.50.0
+
+Run the new migration. It adds `icon` (string, optional) on `recording_studio_credit_lines`. There is no backfill and no compatibility shim. Existing lines stay without an icon until an editor picks one.
+
+Bump to `0.50.0`. Flatpack is `>= 0.1.234` (dummy tag `v0.1.234`). Rebuild Tailwind so the credits grid utilities generate (`grid-cols-1`, `md:grid-cols-2`, `lg:grid-cols-4` come from `FlatPack::Grid`).
+
+**Copy credits** is `FlatPack::CopyButton` on the public credits heading. A host that pins Flatpack scripts by hand needs:
+
+```ruby
+pin "flat_pack/clipboard", to: "flat_pack/clipboard.js", preload: false
+pin "flat_pack/copy", to: "flat_pack/copy.js", preload: false
+```
+
+Flatpack's engine importmap already includes both. Section title anchors use the same clipboard controller.
+
+The public credits section is a four-column grid (two from `md`, one on a phone). The role is uppercase. The name is bold. A URL adds `arrow-up-right`. An icon is optional and comes from `CreditIcons`. If any visible line has one, the others keep an empty icon-sized space. If none do, the plain layout is used. An empty section stays hidden.
+
+`Credits.add!` and `Credits.revise_line!` take `icon:`. `Credits.revise_role!` still changes only the role and keeps the icon. The line API accepts `icon` on show, update, and `add_credit`. A blank or unknown icon is stored as nil and left out of the payload.
 
 ## 0.49.0
 

@@ -9,6 +9,7 @@ module RecordingStudioPresskits
         credit = Credits.credit_for(recording)
         payload = {}
         assign_present(payload, :role, recording.recordable.role)
+        assign_present(payload, :icon, recording.recordable.icon)
         payload[:credit_id] = credit.id if credit
         assign_credit(payload, credit)
         payload

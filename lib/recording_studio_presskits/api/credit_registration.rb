@@ -27,8 +27,8 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::CreditLine",
           operations: %i[index show update],
           serializer: credit_line_serializer,
-          output_keys: %i[role name url credit_id],
-          writable_attributes: %i[role],
+          output_keys: %i[role name url credit_id icon],
+          writable_attributes: %i[role icon],
           capability_actions: %i[remove_credit]
         )
       end
@@ -87,7 +87,8 @@ module RecordingStudioPresskits
           reject_unknown: true,
           fields: {
             credit_id: { type: :string, required: true, allow_blank: false },
-            role: { type: :string, required: false, allow_blank: true }
+            role: { type: :string, required: false, allow_blank: true },
+            icon: { type: :string, required: false, allow_blank: true }
           }
         }
       end

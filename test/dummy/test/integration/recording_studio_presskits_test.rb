@@ -113,6 +113,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.column_exists?(:recording_studio_facts, :as_of_date)
     refute connection.column_exists?(:recording_studio_facts, :updated_at)
     assert connection.column_exists?(:recording_studio_credit_lines, :role)
+    assert connection.column_exists?(:recording_studio_credit_lines, :icon)
     assert connection.column_exists?(:recording_studio_credit_lines, :credit_recording_id)
     assert connection.column_exists?(:recording_studio_kit_sections, :title)
     assert connection.column_exists?(:recording_studio_kit_sections, :subtitle)

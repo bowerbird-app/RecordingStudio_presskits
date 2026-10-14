@@ -45,7 +45,12 @@ module RecordingStudioPresskits
         line = find_line(row)
         return if line.blank?
 
-        Credits.revise_role!(line_recording: line, root_recording: @root_recording, role: row[:role])
+        Credits.revise_line!(
+          line_recording: line,
+          root_recording: @root_recording,
+          role: row[:role],
+          icon: submitted_icon(row, line)
+        )
         line.id
       end
 
@@ -57,6 +62,7 @@ module RecordingStudioPresskits
           credits_section_recording: @section_recording,
           credit_recording: Credits.find_for_root(@root_recording, credit_id),
           role: row[:role],
+          icon: row[:icon],
           actor: @actor
         ).id
       end
@@ -67,6 +73,12 @@ module RecordingStudioPresskits
 
       def line_id(row)
         row[:id].to_s.strip.presence
+      end
+
+      def submitted_icon(row, line)
+        return row[:icon] if row.key?(:icon) || row.key?("icon")
+
+        line.recordable.icon
       end
 
       def reorder(ids)

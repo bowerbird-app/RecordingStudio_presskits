@@ -17,6 +17,7 @@ module RecordingStudioPresskits
           credits_section_recording: context.recording,
           credit_recording: credit,
           role: context.params[:role],
+          icon: context.params[:icon],
           actor: context.access_grant.actor
         )
       end

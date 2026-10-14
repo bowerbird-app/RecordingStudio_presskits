@@ -34,7 +34,7 @@ module RecordingStudioPresskits
           title: title,
           subtitle: subtitle,
           size: :lg,
-          spacing: images_download_button ? :none : :md,
+          spacing: heading_action? ? :none : :md,
           level: :h2,
           anchor_link: true,
           trailing: section_count_badge
@@ -45,6 +45,12 @@ module RecordingStudioPresskits
         return @images_download_button if defined?(@images_download_button)
 
         @images_download_button = build_images_download_button
+      end
+
+      def credits_copy_button
+        return @credits_copy_button if defined?(@credits_copy_button)
+
+        @credits_copy_button = build_credits_copy_button
       end
 
       def text_section?
@@ -87,31 +93,20 @@ module RecordingStudioPresskits
       end
 
       def section_count_badge
-        images_count_badge || video_count_badge
-      end
-
-      def images_count_badge
         content = @content_recording
-        return unless content&.recordable.is_a?(Images)
+        recordable = content&.recordable
+        count = if recordable.is_a?(Images)
+                  DirectImages.list(content).size
+                elsif recordable.is_a?(VideoSection)
+                  VideoSection.active_videos(content).size
+                end
+        return if count.nil? || count.zero?
 
-        count = DirectImages.list(content).size
-        return if count.zero?
-
-        count_badge(count)
-      end
-
-      def video_count_badge
-        content = @content_recording
-        return unless content&.recordable.is_a?(VideoSection)
-
-        count = VideoSection.active_videos(content).size
-        return if count.zero?
-
-        count_badge(count)
-      end
-
-      def count_badge(count)
         FlatPack::Badge::Component.new(text: count.to_s, size: :sm)
+      end
+
+      def heading_action?
+        images_download_button.present? || credits_copy_button.present?
       end
 
       def build_images_download_button
@@ -126,6 +121,13 @@ module RecordingStudioPresskits
           href: image_archive_href(content),
           data: { turbo: false }
         )
+      end
+
+      def build_credits_copy_button
+        view = content_view
+        return unless view.respond_to?(:copy_button)
+
+        view.copy_button
       end
     end
   end

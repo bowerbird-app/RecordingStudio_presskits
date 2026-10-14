@@ -12,7 +12,7 @@ module RecordingStudioPresskits
 
     validates :credit_recording_id, presence: true
 
-    before_validation :clear_blank_role
+    before_validation :normalize_details
 
     def title
       role.to_s.strip.presence || "Credit"
@@ -20,8 +20,9 @@ module RecordingStudioPresskits
 
     private
 
-    def clear_blank_role
+    def normalize_details
       self.role = role.to_s.strip.presence
+      self.icon = CreditIcons.normalize(icon)
     end
   end
 end
