@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-10-14
+
+### Changed
+- On `Cover::Component` at `:card`, a container at least 640px wide adds `pt-16` above the copy (`@min-[640px]:pt-16` on the company, title, subtitle, heart, and description). The body keeps `pt-7`, so that block starts about 6rem from the top of the card. Below 640px of container width the extra padding stays off.
+- **View** stays in the `mt-auto` footer. **Edit image** stays on the cover overlay.
+- On the editor card, **Edit** is rendered twice and a container query shows one. Below 640px it sits on the cover overlay, in the same `top_right` item as **Edit image**, immediately to its left, with `gap-2`. From 640px that copy is `@min-[640px]:hidden`, and **Edit** is the body overlay item (`placement: :top_right`, `inset: :lg`). The copy row does not reserve space for it. Below 640px the copy has no extra top padding. At 640px and wider, `@min-[640px]:pt-16` still applies.
+- The list heart is a body overlay item (`placement: :top_right`, `inset: :sm`), not a column beside the copy. Company, title, subtitle, description, and location use the full body width. The company line adds `pr-16` so it does not run under the heart. From 640px the heart uses `@min-[640px]:top-18`, which lines it up with the company line and sits below **Edit**.
+- Version `0.49.0`
+
+### Upgrade notes
+- Bump to `0.49.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.233`. Hosts that reserved a flex column for header **Edit** or the list heart should drop it. The cover places those as overlay items. On a narrow card, **Edit** shares the cover's top-right overlay with **Edit image**.
+
 ## [0.48.0] - 2026-10-14
 
 ### Changed

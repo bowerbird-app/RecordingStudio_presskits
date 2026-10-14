@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.48.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.49.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -681,6 +681,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes grid_card, "@min-[640px]:min-h-[50cqw]"
     assert_includes grid_card, "aspect-[430/368]"
     assert_includes grid_card, "flex flex-1 flex-col px-8 pt-7"
+    assert_includes grid_card, "def grid_card_copy_classes"
+    assert_includes grid_card, "min-w-0 @min-[640px]:pt-16"
+    assert_includes grid_card, "def company_heart_clearance_classes"
+    assert_includes grid_card, "\"pr-16\""
+    refute_includes grid_card[/def grid_card_copy_classes.*?end/m], "gap-3"
+    refute_includes grid_card[/def grid_card_copy_classes.*?end/m], "pt-12"
+    refute_includes grid_card[/def grid_card_body_classes.*?end/m], "@min-[640px]:pt-"
+    assert_includes cover_html, "grid_card_copy_classes"
+    assert_includes cover_html, "data-cover-copy"
     assert_includes cover_html, "grid_card_row_classes"
     assert_includes cover_html, "data-cover-row"
     assert_includes cover_html, "@min-[640px]:flex-row"
@@ -776,6 +785,20 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover, "image_actions?"
     assert_includes cover, "with_item(placement: :top_left, inset: :md)"
     assert_includes cover, "with_item(placement: :top_right, inset: :md)"
+    assert_includes cover, "with_item(placement: :top_right, inset: :lg)"
+    assert_includes cover, "data: { cover_body: true }"
+    assert_includes cover, "@min-[640px]:hidden"
+    assert_includes cover, "hidden @min-[640px]:contents"
+    assert_includes cover, "data-cover-edit=\"stacked\""
+    assert_includes cover, "data-cover-edit=\"wide\""
+    assert_includes cover, "flex items-center gap-2"
+    assert_includes(
+      cover,
+      "with_item(placement: :top_right, inset: :sm, class: \"@min-[640px]:top-18\", data: { cover_heart: true })"
+    )
+    assert_includes cover, "company_heart_clearance_classes"
+    refute_includes cover, "flex items-start gap-3"
+    refute_includes cover, "flex-col-reverse"
     refute_includes cover, "inset-x-0 top-0"
     refute_includes cover, "left-5 top-5"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
