@@ -108,28 +108,29 @@ class PressKitMetricsTest < ActiveSupport::TestCase
   end
 
   test "published_over_time buckets live kits by their current publish_at" do
+    # A fixed past window keeps kits published by other tests out of the counts.
     draft = @root.record(RecordingStudioPresskits::PressKit) { |kit| kit.title = "Draft kit" }
-    travel_to 2.days.ago.change(hour: 12) do
+    travel_to Time.utc(2025, 3, 5, 12) do
       publish!(@live)
+      publish!(draft)
+      publish!(@trashed)
     end
-    publish!(draft)
-    publish!(@trashed)
-    draft_transition!(draft, "unpublish")
+    travel_to(Time.utc(2025, 3, 6, 12)) { draft_transition!(draft, "unpublish") }
 
     result = execute_metric(
       "press_kits.published_over_time",
       interval: :day,
-      start_at: 3.days.ago,
-      end_at: 1.day.from_now
+      start_at: Time.utc(2025, 3, 1),
+      end_at: Time.utc(2025, 3, 10)
     )
     counts = result.data.to_h { |row| [row[:date], row[:value]] }
     assert_equal :timeseries, result.type
     assert_equal "count", result.unit
-    assert_equal 1, counts.fetch(2.days.ago.utc.to_date.iso8601)
+    assert_equal 1, counts.fetch("2025-03-05")
     assert_equal 1, result.data.sum { |row| row[:value].to_i }, "unpublished and trashed kits are not counted"
 
     narrowed = execute_metric(
-      "press_kits.published_over_time", interval: :day, start_at: 1.day.ago, end_at: 1.day.from_now
+      "press_kits.published_over_time", interval: :day, start_at: Time.utc(2025, 3, 6), end_at: Time.utc(2025, 3, 10)
     )
     assert_equal 0, narrowed.data.sum { |row| row[:value].to_i }
   end
