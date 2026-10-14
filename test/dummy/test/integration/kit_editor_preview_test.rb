@@ -178,7 +178,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-#{section.id} input[name='text[body]']"
     title = css_select("#presskits-section-#{section.id} .fp-inline-edit--text h2").first
     assert title
-    assert_includes title["class"], "text-2xl"
+    assert_includes title["class"], "text-[2rem]"
+    assert_includes title["class"], "font-bold"
+    assert_includes title["class"], "text-[var(--surface-content-color)]"
+    refute_includes title["class"], "font-semibold"
     title_edit = css_select("#presskits-section-#{section.id} .fp-inline-edit").find { |node| node.at_css("h2") }
     assert_equal remove, title_edit["data-flat-pack--inline-edit-update-url-value"]
 
@@ -198,6 +201,11 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes edit_link["class"], "max-sm:[&>span]:sr-only"
     refute_includes edit_link["class"], "fp-hit-target"
     refute_select "#presskits-section-#{images.id} [data-flat-pack--inline-edit-mode-value='rich']"
+    image_title = css_select("#presskits-section-#{images.id} .fp-inline-edit--text h2").first
+    assert_includes image_title["class"], "text-2xl"
+    assert_includes image_title["class"], "font-semibold"
+    refute_includes image_title["class"], "text-[2rem]"
+    refute_select "#presskits-section-#{images.id} [data-presskits-text-copy-slot]"
   end
 
   test "adding a section saves the type title and returns to the kit" do
