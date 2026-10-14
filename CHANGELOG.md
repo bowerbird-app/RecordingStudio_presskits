@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-10-14
+
+### Added
+- Press kits index filters so `press_kits.published_over_time` can drill into the list: `published=1` (the kit's current Publishable is `published` with a `publish_at`, the same scope as the metric) and `publish_from` / `publish_to` (ISO date or timestamp, `publish_from <= publish_at < publish_to`; either bound implies published). The cards/table toggle keeps the filters. No migration.
+
+### Changed
+- The kit-to-Publishable join moved to `RecordingStudioPresskits::PublishedKits`, shared by `Metrics` and the index filters.
+
 ## [0.60.0] - 2026-10-14
 
 ### Added
@@ -1139,7 +1147,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.61.0...HEAD
+[0.61.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...v0.61.0
 [0.60.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.59.0...v0.60.0
 [0.59.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.58.0...v0.59.0
 [0.58.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.57.0...v0.58.0

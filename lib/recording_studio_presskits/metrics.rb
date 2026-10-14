@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "api/access"
+require_relative "published_kits"
 require "recording_studio_metrics"
 
 module RecordingStudioPresskits
@@ -74,14 +75,7 @@ module RecordingStudioPresskits
     end
 
     def publishable_join_sql(table)
-      children = RecordingStudio::Recording.unscoped
-                                           .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
-                                           .where(recordable_type: PUBLISHABLE_TYPE)
-                                           .select(:parent_recording_id, :recordable_id)
-      "INNER JOIN (#{children.to_sql}) publishable_children " \
-        "ON publishable_children.parent_recording_id = #{table}.id " \
-        "INNER JOIN recording_studio_publishable_publishables publishables " \
-        "ON publishables.id = publishable_children.recordable_id"
+      RecordingStudioPresskits::PublishedKits.join_sql(table)
     end
 
     def section_type_calculator

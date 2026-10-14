@@ -142,6 +142,27 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
 
   private
 
+  test "press kits index published filter keeps only published kits" do
+    publish_kit!(record_kit("Filter published kit"))
+    record_kit("Filter draft kit")
+
+    sign_in @user
+    switch_to_root(@root)
+    get recording_studio_presskits.press_kits_path(published: "1", view: "table")
+    assert_response :success
+    assert_includes response.body, "Filter published kit"
+    refute_includes response.body, "Filter draft kit"
+    assert_includes response.body, "published=1"
+
+    get recording_studio_presskits.press_kits_path(publish_from: 1.day.from_now.to_date.iso8601)
+    assert_response :success
+    refute_includes response.body, "Filter published kit"
+
+    get recording_studio_presskits.press_kits_path(publish_from: "bad")
+    assert_response :success
+    assert_includes response.body, "Filter draft kit"
+  end
+
   def record_kit(title)
     @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = title }
   end
