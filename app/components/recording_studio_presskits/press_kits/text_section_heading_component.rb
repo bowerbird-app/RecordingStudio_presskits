@@ -20,7 +20,9 @@ module RecordingStudioPresskits
       def initialize(section_recording:, clipboard_text: nil)
         super()
         @section_recording = section_recording
-        @clipboard_text = clipboard_text.to_s.strip.presence
+        @clipboard_text = clipboard_text
+        @clipboard_text = clipboard_text_from_section if @clipboard_text.nil?
+        @clipboard_text = @clipboard_text.to_s.strip.presence
       end
 
       def title
@@ -42,6 +44,13 @@ module RecordingStudioPresskits
       # Public and owner preview only. The editor heading does not use this component.
       # Outlined pill: secondary is the flat bordered button; sm plus the button
       # radius reads as a pill. The string is the full plain body, not the clamped HTML.
+      def clipboard_text_from_section
+        content = RecordingStudioPresskits::KitQuery.section_content(@section_recording)
+        return unless content&.recordable.is_a?(RecordingStudioPresskits::Text)
+
+        RecordingStudioPresskits::Text.clipboard_text(content.recordable.body)
+      end
+
       def copy_button
         return if @clipboard_text.blank?
 

@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version `0.52.0`
 
 ### Upgrade notes
-- No migration. Bump to `0.52.0`. `SectionFrameComponent` passes `clipboard_text:` into `TextSectionHeadingComponent`. A host that replaced that frame should pass `Text.clipboard_text(body)` the same way. Omit it and the slot stays empty. Flatpack stays `>= 0.1.235`. The `flat_pack/clipboard` pin already shipped in `0.50.0`.
+- No migration. Bump to `0.52.0`. `TextSectionHeadingComponent` copies `Text.clipboard_text` for that section. Pass `clipboard_text:` to override it. An empty string leaves the slot empty. Flatpack stays `>= 0.1.235`. The `flat_pack/clipboard` pin already shipped in `0.50.0`.
 
 ## [0.51.0] - 2026-10-14
 

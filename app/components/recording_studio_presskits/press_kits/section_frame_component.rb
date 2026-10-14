@@ -58,10 +58,7 @@ module RecordingStudioPresskits
       end
 
       def text_heading
-        TextSectionHeadingComponent.new(
-          section_recording: @section_recording,
-          clipboard_text: text_clipboard_text
-        )
+        TextSectionHeadingComponent.new(section_recording: @section_recording)
       end
 
       def content_view
@@ -84,12 +81,6 @@ module RecordingStudioPresskits
       end
 
       private
-
-      def text_clipboard_text
-        return unless text_section?
-
-        RecordingStudioPresskits::Text.clipboard_text(content_recording.recordable.body)
-      end
 
       def image_archive_href(content)
         presskits_routes.image_archive_path(content)

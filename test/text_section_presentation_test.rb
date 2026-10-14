@@ -41,8 +41,8 @@ class TextSectionPresentationTest < Minitest::Test
     assert_includes heading_ruby, "recording_studio_presskits.text.copy"
     assert_includes text_model, "def self.clipboard_text"
     assert_includes text_model, 'gsub(/\n{3,}/, "\n\n")'
-    assert_includes frame_ruby, "clipboard_text: text_clipboard_text"
-    assert_includes frame_ruby, "Text.clipboard_text"
+    assert_includes heading_ruby, "def clipboard_text_from_section"
+    assert_includes heading_ruby, "Text.clipboard_text"
     refute_includes inline, "CopyButton"
     refute_includes inline, "flat-pack--clipboard"
     assert_includes heading_ruby, "font-bold"
