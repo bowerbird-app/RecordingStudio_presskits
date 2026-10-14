@@ -54,7 +54,7 @@ module RecordingStudioPresskits
       private
 
       def hidden_quote?(child)
-        child.trashed_at.present? || !child.recordable.is_a?(Quote)
+        child.recording_studio_trashable_trashed? || !child.recordable.is_a?(Quote)
       end
 
       def kit_section_recording

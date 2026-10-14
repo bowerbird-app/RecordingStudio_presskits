@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.53.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.54.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -67,7 +67,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.15"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.8"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.9"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.235"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
@@ -77,7 +77,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_lists", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_location", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.1.0"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_metrics", "~> 0.2"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
   end
@@ -91,7 +91,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.235"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"'
@@ -100,7 +100,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -1378,7 +1378,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.1.0"'
     assert_includes gemfile, 'gem "recording_studio_lists", "~> 0.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
   end
