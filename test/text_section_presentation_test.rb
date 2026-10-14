@@ -10,6 +10,7 @@ class TextSectionPresentationTest < Minitest::Test
     heading_dir = "#{root}/app/components/recording_studio_presskits/press_kits"
     heading = File.read("#{heading_dir}/text_section_heading_component.html.erb")
     heading_ruby = File.read("#{heading_dir}/text_section_heading_component.rb")
+    text_model = File.read("#{root}/app/models/recording_studio_presskits/text.rb")
     frame = File.read("#{root}/app/components/recording_studio_presskits/press_kits/section_frame_component.html.erb")
     frame_ruby = File.read("#{root}/app/components/recording_studio_presskits/press_kits/section_frame_component.rb")
     inline = File.read("#{root}/app/components/recording_studio_presskits/text/inline_component.html.erb")
@@ -32,8 +33,18 @@ class TextSectionPresentationTest < Minitest::Test
     refute_includes show, "style: :ghost"
     assert_includes heading, "data-presskits-text-copy-slot"
     assert_includes heading, "justify-between"
-    refute_includes heading, "Copy text"
-    refute_includes heading, "clipboard"
+    assert_includes heading, "copy_button"
+    assert_includes heading_ruby, "FlatPack::CopyButton::Component"
+    assert_includes heading_ruby, "style: :secondary"
+    assert_includes heading_ruby, "size: :sm"
+    assert_includes heading_ruby, 'icon: "clipboard-document"'
+    assert_includes heading_ruby, "recording_studio_presskits.text.copy"
+    assert_includes text_model, "def self.clipboard_text"
+    assert_includes text_model, 'gsub(/\n{3,}/, "\n\n")'
+    assert_includes frame_ruby, "clipboard_text: text_clipboard_text"
+    assert_includes frame_ruby, "Text.clipboard_text"
+    refute_includes inline, "CopyButton"
+    refute_includes inline, "flat-pack--clipboard"
     assert_includes heading_ruby, "font-bold"
     assert_includes heading_ruby, "text-[2rem]"
     assert_includes heading_ruby, "text-[var(--surface-content-color)]"

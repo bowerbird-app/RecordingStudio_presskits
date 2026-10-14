@@ -35,6 +35,7 @@ en:
       invalid: "That choice is not available for this kit."
       save: "Update"
     text:
+      copy: "Copy text"
       show_more: "Show more"
       show_less: "Show less"
     editor:

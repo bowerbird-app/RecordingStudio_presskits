@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## 0.52.0
+
+No migration. Bump to `0.52.0`. Flatpack stays `>= 0.1.235`.
+
+On the public kit and the owner preview, the text heading slot (`data-presskits-text-copy-slot`) renders `FlatPack::CopyButton`: **Copy text**, `style: :secondary` (outlined, flat), `size: :sm`, icon `clipboard-document`. The clipboard string is `Text.clipboard_text`, the full plain body with a blank line between paragraphs. **Show more** only clamps the visible HTML. The kit editor does not render the button.
+
+`SectionFrameComponent` passes `clipboard_text:`. A host that replaced the frame and still renders `TextSectionHeadingComponent` should pass the same string. Without it, the slot stays empty. The `flat_pack/clipboard` and `flat_pack/copy` pins are the same ones `0.50.0` already requires for **Copy credits**.
+
 ## 0.51.0
 
 Bump to `0.51.0`. Flatpack is `>= 0.1.235` (dummy tag `v0.1.235`). Rebuild Tailwind. Reload Press Kits JavaScript. The copy-link controller is `recording-studio-presskits--copy-link`.
