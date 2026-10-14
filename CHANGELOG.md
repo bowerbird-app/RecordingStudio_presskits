@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - A video section's public cards use `FlatPack::VideoPreview`. The first video is a full-width card. The rest sit in `FlatPack::Grid` with two columns. One video is only that featured card. Flatpack is `>= 0.1.233`.
 - Videos in a section are orderable. Drag a row in the content editor. That order is the public order, and the first video is the featured card.
-- Each card shows the poster, a length pill, the title, a muted provider and length line, **Copy link**, and **Watch on YouTube** or **Watch on Vimeo**. The description stays on the edit screen and in the API. It is not on the public card.
+- Each card shows the poster, a length pill, the title, a muted provider and length line, and **Copy link**. Below `sm` that button is the link icon only, with the same words as its accessible name and tooltip. From `sm` up the words show. The title wraps beside the button. The description stays on the edit screen and in the API. It is not on the public card.
 - Length is entered as `m:ss` and stored as `duration_seconds` on `recording_studio_videos`. An optional `thumbnail_url` overrides the provider picture. A blank thumbnail uses YouTube's `hqdefault` image, or Vimeo's oEmbed thumbnail.
 - The video API entry adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the picture the card shows. The kit download text file adds a `Provider · m:ss` line under each video title.
 - Version `0.48.0`

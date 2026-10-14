@@ -98,7 +98,6 @@ en:
       copy_link: "Copy link"
       copied: "Link copied."
       copy_failed: "Couldn't copy that link."
-      watch_on: "Watch on %{provider}"
       play: "Play: %{title}"
     visibility:
       title: "Visibility"

@@ -22,39 +22,45 @@
     <% end %>
   <% end %>
 
-  <div class="flex w-full flex-col gap-2 min-[720px]:flex-row min-[720px]:items-center min-[720px]:justify-between">
+  <div class="flex w-full min-w-0 items-center justify-between gap-3">
     <div class="min-w-0 flex-1">
       <p class="<%= title_class %>"><%= title %></p>
       <% if meta.present? %>
-        <p class="truncate text-[13px] font-normal text-(--surface-muted-content-color)"><%= meta %></p>
+        <p class="break-words text-[13px] font-normal text-(--surface-muted-content-color)"><%= meta %></p>
       <% end %>
     </div>
     <div
-      class="flex shrink-0 flex-wrap items-center gap-2"
+      class="flex shrink-0 items-center"
       data-controller="recording-studio-presskits--copy-link"
       data-recording-studio-presskits--copy-link-url-value="<%= watch_url %>"
       data-recording-studio-presskits--copy-link-copied-value="<%= I18n.t("recording_studio_presskits.videos.copied") %>"
       data-recording-studio-presskits--copy-link-failed-value="<%= I18n.t("recording_studio_presskits.videos.copy_failed") %>"
     >
-      <%= render FlatPack::Button::Component.new(
-        text: I18n.t("recording_studio_presskits.videos.copy_link"),
-        icon: "link",
-        style: :default,
-        size: :sm,
-        type: "button",
-        class: "rounded-full",
-        data: { action: "recording-studio-presskits--copy-link#copy" }
-      ) %>
-      <% if watch_url.present? %>
+      <div class="inline-flex sm:hidden">
+        <%= render FlatPack::Tooltip::Component.new(text: copy_label, placement: :top) do %>
+          <%= render FlatPack::Button::Component.new(
+            text: copy_label,
+            icon: "link",
+            icon_only: true,
+            style: :default,
+            size: :sm,
+            type: "button",
+            class: "rounded-full",
+            data: { action: "recording-studio-presskits--copy-link#copy" }
+          ) %>
+        <% end %>
+      </div>
+      <div class="hidden sm:inline-flex">
         <%= render FlatPack::Button::Component.new(
-          text: watch_label,
+          text: copy_label,
+          icon: "link",
           style: :default,
           size: :sm,
-          href: watch_url,
-          target: "_blank",
-          class: "rounded-full"
+          type: "button",
+          class: "rounded-full",
+          data: { action: "recording-studio-presskits--copy-link#copy" }
         ) %>
-      <% end %>
+      </div>
     </div>
   </div>
 </article>

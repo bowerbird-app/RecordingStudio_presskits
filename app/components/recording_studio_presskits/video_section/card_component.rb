@@ -37,13 +37,8 @@ module RecordingStudioPresskits
         I18n.t("recording_studio_presskits.videos.play", title: title)
       end
 
-      def watch_text
-        provider = video.provider_name.presence || "the web"
-        I18n.t("recording_studio_presskits.videos.watch_on", provider: provider)
-      end
-
-      def watch_label
-        helpers.safe_join([brand_icon, watch_text], " ")
+      def copy_label
+        I18n.t("recording_studio_presskits.videos.copy_link")
       end
 
       def player
@@ -52,7 +47,7 @@ module RecordingStudioPresskits
 
       def title_class
         size = featured? ? "text-base" : "text-sm"
-        "truncate #{size} font-medium text-(--surface-content-color)"
+        "#{size} font-medium break-words text-(--surface-content-color)"
       end
 
       def dom_id
@@ -63,14 +58,6 @@ module RecordingStudioPresskits
 
       def video
         @video_recording.recordable
-      end
-
-      def brand_icon
-        name = video.provider.to_s
-        return "".html_safe unless %w[youtube vimeo].include?(name)
-
-        path = RecordingStudioPresskits::Engine.root.join("app/assets/images/recording_studio_presskits/#{name}.svg")
-        path.read.html_safe
       end
     end
   end

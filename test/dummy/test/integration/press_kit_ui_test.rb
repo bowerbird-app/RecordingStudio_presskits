@@ -1543,8 +1543,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes preview, "YouTube · 3:05"
     assert_includes preview, "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg"
     assert_includes preview, "https://cdn.example.com/second.jpg"
-    assert_includes preview, "Copy link"
-    assert_includes preview, "Watch on YouTube"
+    card = css_select("[data-presskits-video-featured='true']").first.to_html
+    assert_includes card, "Copy link"
+    assert_includes card, 'aria-label="Copy link"'
+    assert_includes card, "sm:hidden"
+    assert_includes card, "hidden sm:inline-flex"
+    assert_includes card, "break-words"
+    refute_includes card, "Watch on YouTube"
+    refute_includes card, "data-presskits-brand"
     assert_includes preview, 'data-presskits-video-featured="true"'
     assert_includes preview, "data-presskits-video-grid"
     refute_includes preview, "The first video uploaded to YouTube."
@@ -1564,7 +1570,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, zoo
     assert_includes response.body, rick
     assert_includes response.body, "YouTube · 1:24"
-    assert_includes response.body, "Copy link"
+    public_card = css_select("[data-presskits-video-featured='true']").first.to_html
+    assert_includes public_card, "Copy link"
+    assert_includes public_card, 'aria-label="Copy link"'
+    assert_includes public_card, "sm:hidden"
+    refute_includes public_card, "Watch on YouTube"
     refute_includes response.body, "The first video uploaded to YouTube."
     assert_select "[data-controller='flat-pack--toasts-region']"
   end
