@@ -47,6 +47,14 @@ module RecordingStudioPresskits
         @images_download_button = build_images_download_button
       end
 
+      def text_section?
+        content_recording&.recordable.is_a?(RecordingStudioPresskits::Text)
+      end
+
+      def text_heading
+        TextSectionHeadingComponent.new(section_recording: @section_recording)
+      end
+
       def content_view
         component = content_component
         return if component.blank?

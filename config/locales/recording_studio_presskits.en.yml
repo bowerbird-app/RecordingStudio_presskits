@@ -34,6 +34,9 @@ en:
       saved: "Saved. That's who can take the kit."
       invalid: "That choice is not available for this kit."
       save: "Update"
+    text:
+      show_more: "Show more"
+      show_less: "Show less"
     editor:
       add_section: "Section"
       picker_title: "Add a section"

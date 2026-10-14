@@ -9,10 +9,11 @@ module RecordingStudioPresskits
       TITLE_CLASSES = "text-2xl font-semibold text-[var(--surface-content-color)] leading-tight"
       SUBTITLE_CLASSES = "mt-1 text-base text-[var(--surface-muted-content-color)]"
 
-      def initialize(section_recording:, update_path:)
+      def initialize(section_recording:, update_path:, title_classes: nil)
         super()
         @section_recording = section_recording
         @update_path = update_path
+        @title_class_override = title_classes
       end
 
       def title
@@ -41,7 +42,7 @@ module RecordingStudioPresskits
       end
 
       def title_classes
-        TITLE_CLASSES
+        @title_class_override || TITLE_CLASSES
       end
 
       def subtitle_classes

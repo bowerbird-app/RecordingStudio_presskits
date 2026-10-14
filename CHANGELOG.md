@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.48.0] - 2026-10-13
+## [0.50.0] - 2026-10-14
 
 ### Changed
 - A video section's public cards use `FlatPack::VideoPreview`. The first video is a full-width card. The rest sit in `FlatPack::Grid` with two columns. One video is only that featured card. Flatpack is `>= 0.1.233`.
@@ -15,13 +15,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Each card shows the poster, a length pill, the title, a muted provider and length line, and **Copy link**. Below `sm` that button is the link icon only, with the same words as its accessible name and tooltip. From `sm` up the words show. The title wraps beside the button. The description stays on the edit screen and in the API. It is not on the public card.
 - Length is entered as `m:ss` and stored as `duration_seconds` on `recording_studio_videos`. An optional `thumbnail_url` overrides the provider picture. A blank thumbnail uses YouTube's `hqdefault` image, or Vimeo's oEmbed thumbnail.
 - The video API entry adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the picture the card shows. The kit download text file adds a `Provider · m:ss` line under each video title.
-- Version `0.48.0`
+- Version `0.50.0`
 
 ### Upgrade notes
-- Bump to `0.48.0`. Flatpack stays at `>= 0.1.233` (tag `v0.1.233`), which ships `FlatPack::VideoPreview`. Rebuild Tailwind so the video preview utilities generate. Reload Press Kits JavaScript so the copy-link controller loads.
+- Bump to `0.50.0`. Flatpack stays at `>= 0.1.233` (tag `v0.1.233`), which ships `FlatPack::VideoPreview`. Rebuild Tailwind so the video preview utilities generate. Reload Press Kits JavaScript so the copy-link controller loads.
 - Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds `duration_seconds` and `thumbnail_url` to `recording_studio_videos`. Run the Video gem's migrations first if that table is not there yet. Existing videos keep a blank length and a blank thumbnail override.
 - Press Kits still does not register Vimeo. A host that wants Vimeo registers that provider with External Embed before the catalog freezes. YouTube needs no extra registration.
 - Hosts that replaced the video section component should render `FlatPack::VideoPreview` with `with_player` around `recording_studio_video_player`, and should list `active_videos` so the first recording is the featured card.
+
+## [0.49.0] - 2026-10-14
+
+### Changed
+- On `Cover::Component` at `:card`, a container at least 640px wide adds `pt-16` above the copy (`@min-[640px]:pt-16` on the company, title, subtitle, heart, and description). The body keeps `pt-7`, so that block starts about 6rem from the top of the card. Below 640px of container width the extra padding stays off.
+- **View** stays in the `mt-auto` footer. **Edit image** stays on the cover overlay.
+- On the editor card, **Edit** is rendered twice and a container query shows one. Below 640px it sits on the cover overlay, in the same `top_right` item as **Edit image**, immediately to its left, with `gap-2`. From 640px that copy is `@min-[640px]:hidden`, and **Edit** is the body overlay item (`placement: :top_right`, `inset: :lg`). The copy row does not reserve space for it. Below 640px the copy has no extra top padding. At 640px and wider, `@min-[640px]:pt-16` still applies.
+- The list heart is a body overlay item (`placement: :top_right`, `inset: :sm`), not a column beside the copy. Company, title, subtitle, description, and location use the full body width. The company line adds `pr-16` so it does not run under the heart. From 640px the heart uses `@min-[640px]:top-18`, which lines it up with the company line and sits below **Edit**.
+- Version `0.49.0`
+
+### Upgrade notes
+- Bump to `0.49.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.233`. Hosts that reserved a flex column for header **Edit** or the list heart should drop it. The cover places those as overlay items. On a narrow card, **Edit** shares the cover's top-right overlay with **Edit image**.
+
+## [0.48.0] - 2026-10-14
+
+### Changed
+- A text section on the public kit and the owner preview uses a heading row: the title is bold and dark (`text-[2rem]`, `font-bold`, `--surface-content-color`) on the left, and an empty right-aligned slot (`data-presskits-text-copy-slot`) waits for Flatpack's copy control. The slot is empty. There is no copy button and no clipboard script. Other section types still use `SectionTitle`.
+- Section cards already use Flatpack `--radius-lg` (1.5rem / 24px). That matches the text-block corners, so the radius is unchanged and still shared.
+- Public and owner-preview text body no longer borrows `.ProseMirror` styles. It uses the theme muted text token other sections use for body copy (`--surface-muted-content-color`), `text-base`, `leading-7`, paragraph spacing, and `max-w-[65ch]`.
+- Long public text (plain text longer than 700 characters) clamps to eight lines with a fade into the card colour and a **Show more** / **Show less** control (`aria-expanded`). The control is `FlatPack::Button` `style: :default` (the standard raised button). Shorter copy, including the designed three-paragraph blurb, has no toggle. The kit editor always shows the full body. `FlatPack::Collapse` is a titled disclosure, so this stays a small Stimulus controller.
+- Text editing on the kit stays `FlatPack::InlineEdit` `mode: :rich`, which is the bubble toolbar. The editor heading for a text section uses the same bold title. Other sections stay `text-2xl` semibold.
+- Version `0.48.0`
+
+### Upgrade notes
+- Bump to `0.48.0`. There is no migration. Rebuild Tailwind so the text-section utilities generate. The public text heading is `TextSectionHeadingComponent`. Hosts that replaced `SectionFrameComponent` and still want this heading should branch on a text section. The copy slot is `data-presskits-text-copy-slot`. Leave it empty until Flatpack's copy control is ready.
+- Show more is public and owner preview only. The editor does not mount `recording-studio-presskits--text-collapse`.
 
 ## [0.47.0] - 2026-10-13
 
