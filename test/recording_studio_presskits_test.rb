@@ -1375,7 +1375,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
     assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
-    assert_includes gemfile, 'gem "recording_studio_video", "~> 0.1.0"'
+    assert_includes gemfile, 'gem "recording_studio_video", "~> 0.2.0"'
     assert_includes gemfile, 'gem "recording_studio_lists", "~> 0.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.0"'
