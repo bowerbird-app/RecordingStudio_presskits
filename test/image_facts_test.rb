@@ -6,8 +6,9 @@ class ImageFactsTest < Minitest::Test
   def test_caption_uses_the_name_and_a_reduced_ratio
     facts = RecordingStudioPresskits::ImageFacts.new(attachment(width: 4800, height: 6000, name: "Hero — Pendant"))
 
+    assert_equal "Hero — Pendant", facts.name
     assert_equal "JPG · 4800×6000 · 4:5", facts.meta
-    assert_equal "Hero — Pendant · JPG · 4800×6000 · 4:5", facts.caption
+    refute facts.respond_to?(:caption)
   end
 
   def test_wide_frames_use_16_9
