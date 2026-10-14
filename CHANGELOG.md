@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.55.0] - 2026-10-14
+## [0.56.0] - 2026-10-14
 
 ### Changed
 - Stats replace Facts & Figures. `RecordingStudioPresskits::StatsSection` sits under the kit section. Each `RecordingStudioPresskits::Stat` is a child recording with a required label and value, plus optional unit, description, and icon.
@@ -15,13 +15,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The content editor shows **+ Stat** and the stat list. There is no Columns control and no Show as control. A stat's fields are Value, Unit, Label, Description, and Icon. Label and value are required. Icon is a short list of Heroicons, and None leaves it blank.
 - The public stats heading has one `FlatPack::CopyButton` on the right of the title, the same row as **Copy credits**. It uses the clipboard icon, `style: :default`, `size: :sm`, and the visible label Copy. After a click the label becomes Copied. It copies the saved title when there is one, then one stat per line as value, optional unit, and label, with ` – ` and the description when that is set. Icons are left out. Cards do not have their own copy button.
 - A stats section payload is `stats`. The kit section payload includes `stats` when the content is a stats section.
-- Version `0.55.0`
+- Version `0.56.0`
 
 ### Upgrade notes
-- Bump to `0.55.0` and run the migrations. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections`, renames `recording_studio_facts` to `recording_studio_stats`, drops `display_style`, and rewrites recording types from `FactsSection` / `Fact` to `StatsSection` / `Stat`. The next migration drops `columns` from `recording_studio_stats_sections`. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats`. The one after that adds optional `icon` on `recording_studio_stats` when that column is missing. Icon values are Heroicons names from `Stat::ICONS`.
+- `0.55.0` already shipped. This release is `0.56.0`.
+- Bump to `0.56.0` and run the migrations. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections`, renames `recording_studio_facts` to `recording_studio_stats`, drops `display_style`, and rewrites recording types from `FactsSection` / `Fact` to `StatsSection` / `Stat`. The next migration drops `columns` from `recording_studio_stats_sections`. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats`. The one after that adds optional `icon` on `recording_studio_stats` when that column is missing. Icon values are Heroicons names from `Stat::ICONS`.
 - Register `RecordingStudioPresskits::StatsSection` and `RecordingStudioPresskits::Stat`. Drop `FactsSection` and `Fact`.
 - Call `register_stats!` paths through `RecordingStudioPresskits::Api.register!`. Read `stats`. `display`, `facts`, and `columns` are gone.
 - There are no Ruby aliases for the old class names, routes, or payload keys.
+
+## [0.55.0] - 2026-10-14
+
+### Added
+- A podcast section. `PodcastSection` is an empty recording under a kit section. Each episode is a `Podcast` child with a link, optional title, show, date, and duration, and an optional cover image.
+- The public section is a horizontal row of square cards. About three fit on a desktop and about 1.2 on a phone. CSS scroll-snap slides the row. Previous and next appear only when the row overflows. The card stays a square cover.
+- Play on Spotify or Apple Podcasts opens a `FlatPack::Modal` with only that platform's player and a close control. The episode title is visually hidden and names the dialog. The iframe is added when the dialog opens and removed when it closes. Spotify's player is 352px tall. Apple's is 175px. Any other link opens in a new tab. **Listen on** and **Copy link** stay on the card.
+- On save, Press Kits stores a copy of artwork from Spotify oEmbed or from the page's Open Graph image. The uploaded cover wins. Otherwise the card uses the stored copy, then a tile in the kit brand colour. A blank show is filled when the page names one. A platform name is not stored as the show.
+- The kit section payload adds `podcasts` when the content is a podcast section. A podcast exposes show and update. The kit text file lists the show, title, date, duration, and link.
+- Version `0.55.0`
+
+### Upgrade notes
+- `0.54.0` already shipped. This release is `0.55.0`.
+- Bump to `0.55.0`. Register `RecordingStudioPresskits::PodcastSection` and `RecordingStudioPresskits::Podcast` in `recordable_types`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration creates `recording_studio_podcast_sections` and `recording_studio_podcasts`.
+- Rebuild Tailwind so the carousel card widths generate. Reload Press Kits JavaScript so the podcast carousel and player controllers load.
 
 ## [0.54.0] - 2026-10-14
 
@@ -1068,7 +1085,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.55.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.56.0...HEAD
+[0.56.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.55.0...v0.56.0
 [0.55.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.54.0...v0.55.0
 [0.54.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.53.0...v0.54.0
 [0.53.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.52.0...v0.53.0

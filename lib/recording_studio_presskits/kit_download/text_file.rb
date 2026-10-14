@@ -73,6 +73,7 @@ module RecordingStudioPresskits
           StatsSection => :stat_lines,
           CreditsSection => :credit_lines,
           VideoSection => :video_lines,
+          PodcastSection => :podcast_lines,
           LocationSection => :location_section_lines
         }[recordable.class]
       end
@@ -139,6 +140,17 @@ module RecordingStudioPresskits
 
       def video_lines(content, _recordable)
         VideoSection.active_videos(content).filter_map { |child| video_block(child.recordable) }
+      end
+
+      def podcast_lines(content, _recordable)
+        PodcastSection.active_podcasts(content).filter_map { |child| podcast_block(child.recordable) }
+      end
+
+      def podcast_block(podcast)
+        lines = [podcast.show_name, podcast.title, podcast.meta_line, podcast.url].filter_map do |value|
+          value.to_s.strip.presence
+        end
+        lines.join("\n").presence
       end
 
       def location_section_lines(content, _recordable)

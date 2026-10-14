@@ -2,6 +2,7 @@
 
 require "recording_studio_presskits/api/video_payload"
 require "recording_studio_presskits/api/stat_payload"
+require "recording_studio_presskits/api/podcast_payload"
 require "recording_studio_presskits/api/location_payload"
 
 module RecordingStudioPresskits
@@ -31,6 +32,8 @@ module RecordingStudioPresskits
           StatPayload.for_recording(content)
         when LocationSection.name
           { locations: LocationPayload.for_recording(content) }
+        when PodcastSection.name
+          { podcasts: PodcastPayload.for_recording(content) }
         end
       end
       private_class_method :extras_for

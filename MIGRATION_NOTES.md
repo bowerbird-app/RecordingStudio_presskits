@@ -1,6 +1,8 @@
 # Upgrade notes
 
-## 0.55.0
+## 0.56.0
+
+`0.55.0` already shipped. Bump to `0.56.0`.
 
 Stats replace Facts & Figures. A stats section always renders as cards: three on a large screen, two from the medium breakpoint, and one on a phone. Each card is centered. An optional icon sits above the value as `FlatPack::Shared::IconComponent` at size `:xl`. The value is `text-4xl` and bold, the unit sits beside it at `text-xl`, the label is `text-lg` and semibold, and the description is `text-sm` and muted. A blank icon is left off the card. List, table, `display_style`, and `columns` are gone.
 
@@ -22,6 +24,36 @@ Create the section with `RecordingStudioPresskits.create_section!` and `content_
 The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A stats section also includes `stats`. `display`, `facts`, and `columns` are not in the payload. MCP uses that same payload.
 
 The public stats heading uses `FlatPack::CopyButton` (`style: :default`, `size: :sm`, label Copy, clipboard icon) on the right of the title. The first line is the saved section title when that title is present. Each following line is the value, then the unit when it is present, then the label. A description is appended as ` – ` plus that description. The icon name is not in the text. After a click the label becomes Copied.
+
+## 0.55.0
+
+`0.54.0` already shipped. Bump to `0.55.0`.
+
+Register both new types:
+
+```ruby
+"RecordingStudioPresskits::PodcastSection",
+"RecordingStudioPresskits::Podcast",
+```
+
+Run the new migration. It creates `recording_studio_podcast_sections` (an empty snapshot, `created_at` only) and `recording_studio_podcasts` (`url`, optional `title`, `show_name`, `aired_on`, `duration`, `artwork_source_url`, `created_at`). There is no backfill.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+`PodcastSection` includes Trashable and allows `KitSection` as its parent. `Podcast` includes Trashable and Attachable (one image, 10MB) and allows `PodcastSection` as its parent. Neither is Orderable. Episodes stay in the order they were added.
+
+The editor link is + Podcast. The episode screen asks for the link and optional title, show, date, and duration. The cover upload is on that screen after the episode exists. Removing the cover trashes the uploaded image. Removing an episode trashes that recording. Removing the section trashes the kit section and the episodes under it.
+
+On save, Press Kits fetches artwork for an https link when there is no uploaded cover and the stored copy is missing or stale. Spotify uses `https://open.spotify.com/oembed`. Other pages use `og:image`, then `twitter:image`. The bytes are attached to the episode snapshot. The public card never hotlinks that picture. A timeout, a non-image response, or a private address is skipped. The next save tries again. A title or show someone already typed is left as they typed it. A blank show is filled when the page names one: Spotify's oEmbed author, otherwise the episode description, the document title, or a podcast heading. Platform names such as Spotify, Apple Podcasts, and Pocket Casts are not stored as the show.
+
+The public row uses CSS scroll-snap. Previous and next are hidden until the row overflows, including when JavaScript has not run. The card stays a square cover. Play on Spotify or Apple Podcasts opens `FlatPack::Modal` (`scroll: :page`) with only the player and the close control. The episode title is in the header slot, visually hidden, so Flatpack's `aria-labelledby` names the dialog. The iframe is added when that dialog opens and removed when it closes, so audio stops. Spotify's frame is 352px tall. Apple's is 175px. Other links are a play control that opens a new tab. Spotify embeds are `https://open.spotify.com/embed/episode|show/ID`. Apple episode links use `https://embed.podcasts.apple.com/{country}/episode/{id}` when the link has an episode id, otherwise the Apple path.
+
+The kit section payload includes `podcasts` only for a podcast section: `title`, `show_name`, `url`, `aired_on`, `duration`, `service`, `embed_url`. A podcast's own show and update use `url`, `title`, `show_name`, `aired_on`, and `duration`. Saving from the editor fetches artwork. An API update does not.
+
+Rebuild Tailwind. The card widths are `w-[83.333%]` and `md:w-[calc((100%-2rem)/3)]`. Reload Press Kits JavaScript so `recording-studio-presskits--podcast-carousel` and `recording-studio-presskits--podcast-player` load. Copy link still uses `recording-studio-presskits--copy-link`.
 
 ## 0.54.0
 

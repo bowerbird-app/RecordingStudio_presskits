@@ -6,6 +6,7 @@ require "recording_studio_presskits/api/stat_payload"
 require "recording_studio_presskits/api/credit_payload"
 require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
+require "recording_studio_presskits/api/podcast_payload"
 require "recording_studio_presskits/api/location_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/api/section_action"
@@ -19,6 +20,7 @@ require "recording_studio_presskits/api/section_action_registration"
 require "recording_studio_presskits/api/credit_registration"
 require "recording_studio_presskits/api/stat_registration"
 require "recording_studio_presskits/api/location_registration"
+require "recording_studio_presskits/api/podcast_registration"
 
 module RecordingStudioPresskits
   module Api
@@ -26,6 +28,7 @@ module RecordingStudioPresskits
     extend CreditRegistration
     extend StatRegistration
     extend LocationRegistration
+    extend PodcastRegistration
 
     class << self
       def register!
@@ -44,6 +47,7 @@ module RecordingStudioPresskits
         register_stats!
         register_credits!
         register_video_section
+        register_podcasts!
         register_location_section
       end
 
@@ -65,7 +69,7 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
           serializer: method(:kit_section_serializer),
-          output_keys: %i[title subtitle content_type content_id videos stats locations],
+          output_keys: %i[title subtitle content_type content_id videos stats locations podcasts],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )

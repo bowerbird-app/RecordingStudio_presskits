@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -258,6 +258,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_190000) do
     t.index ["country_code"], name: "index_recording_studio_locations_on_country_code"
     t.index ["locality"], name: "index_recording_studio_locations_on_locality"
     t.index ["name"], name: "index_recording_studio_locations_on_name"
+  end
+
+  create_table "recording_studio_podcast_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+  end
+
+  create_table "recording_studio_podcasts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "url", null: false
+    t.text "title"
+    t.text "show_name"
+    t.date "aired_on"
+    t.string "duration"
+    t.text "artwork_source_url"
+    t.datetime "created_at", null: false
   end
 
   create_table "recording_studio_press_kits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

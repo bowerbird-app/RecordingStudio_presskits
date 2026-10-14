@@ -43,7 +43,11 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "Workspace" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Credit")
     assert_equal [ "RecordingStudioPresskits::CreditsSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::CreditLine")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PodcastSection")
+    assert_equal [ "RecordingStudioPresskits::PodcastSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Podcast")
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::VideoSection"
+    assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::PodcastSection"
+    refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Podcast"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::LocationSection"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::StatsSection"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Stat"
@@ -77,6 +81,12 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     refute connection.column_exists?(:recording_studio_images, :subtitle)
     refute connection.column_exists?(:recording_studio_images, :caption)
     assert connection.table_exists?(:recording_studio_video_sections)
+    assert connection.table_exists?(:recording_studio_podcast_sections)
+    assert connection.table_exists?(:recording_studio_podcasts)
+    assert connection.column_exists?(:recording_studio_podcasts, :url)
+    assert connection.column_exists?(:recording_studio_podcasts, :artwork_source_url)
+    refute connection.column_exists?(:recording_studio_podcasts, :updated_at)
+    refute connection.column_exists?(:recording_studio_podcast_sections, :updated_at)
     assert connection.table_exists?(:recording_studio_location_sections)
     refute connection.column_exists?(:recording_studio_location_sections, :title)
     refute connection.column_exists?(:recording_studio_location_sections, :updated_at)

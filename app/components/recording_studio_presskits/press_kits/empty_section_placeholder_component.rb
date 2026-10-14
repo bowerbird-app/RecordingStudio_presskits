@@ -10,6 +10,7 @@ module RecordingStudioPresskits
         "RecordingStudioPresskits::StatsSection" => "stats",
         "RecordingStudioPresskits::CreditsSection" => "credits",
         "RecordingStudioPresskits::VideoSection" => "video",
+        "RecordingStudioPresskits::PodcastSection" => "podcasts",
         "RecordingStudioPresskits::LocationSection" => "location"
       }.freeze
 

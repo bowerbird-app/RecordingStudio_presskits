@@ -14,6 +14,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     RecordingStudioPresskits::StatsSection
     RecordingStudioPresskits::CreditsSection
     RecordingStudioPresskits::VideoSection
+    RecordingStudioPresskits::PodcastSection
     RecordingStudioPresskits::LocationSection
   ].freeze
 
@@ -24,6 +25,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     RecordingStudioPresskits::Credit
     RecordingStudioPresskits::CreditLine
     RecordingStudioVideo::Video
+    RecordingStudioPresskits::Podcast
     Workspace
     Folder
     Page
@@ -61,6 +63,11 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "RecordingStudioPresskits::PressKit", RecordingStudioPresskits.press_kit_type_name
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::PressKit")
     refute RecordingStudio.root_allowed?("FakeBlock")
+  end
+
+  test "podcast recordables name their parents" do
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PodcastSection")
+    assert_equal ["RecordingStudioPresskits::PodcastSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Podcast")
   end
 
   test "root recordable creates a root recording" do
@@ -378,6 +385,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PodcastSection")
+    assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Podcast")
     assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Quote")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
 
@@ -435,6 +444,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "calculator", RecordingStudioPresskits::StatsSection.section_menu_icon
     assert_equal "user-group", RecordingStudioPresskits::CreditsSection.section_menu_icon
     assert_equal "video-camera", RecordingStudioPresskits::VideoSection.section_menu_icon
+    assert_equal "microphone", RecordingStudioPresskits::PodcastSection.section_menu_icon
     assert_equal "map-pin", RecordingStudioPresskits::LocationSection.section_menu_icon
     assert_nil FakeBlock.try(:section_menu_icon)
   end
@@ -492,6 +502,11 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal ["RecordingStudioPresskits::PressKit"], Array(workspace_options[:allows]).map(&:to_s)
   end
 
+  test "podcasts are not orderable" do
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PodcastSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Podcast")
+  end
+
   test "trashable is enabled on press kit and dummy fake block" do
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::PressKit")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::KitSection")
@@ -503,6 +518,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::StatsSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Stat")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::VideoSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::PodcastSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Podcast")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::LocationSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudio::Location::Location")
@@ -536,6 +553,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::StatsSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Stat")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::PodcastSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Podcast")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
@@ -558,6 +577,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::StatsSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Stat")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::PodcastSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Podcast")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Folder")

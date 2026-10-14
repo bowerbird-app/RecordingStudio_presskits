@@ -34,6 +34,9 @@ RecordingStudioPresskits::Engine.routes.draw do
       resource :credit_order, only: :update, controller: "credit_orders"
       resources :videos, only: %i[new create edit update destroy]
       resource :video_order, only: :update, controller: "video_orders"
+      resources :podcasts, only: %i[new create edit update destroy] do
+        resource :image, only: :destroy, controller: "podcast_images"
+      end
       resources :locations, only: %i[new create edit update destroy]
     end
     resource :order, only: :update, controller: "orders"

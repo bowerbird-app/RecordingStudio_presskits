@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.55.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.56.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -48,7 +48,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb",
       "db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
-      "test/dummy/db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb"
+      "test/dummy/db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
+      "db/migrate/20261014200000_create_recording_studio_podcasts.rb",
+      "test/dummy/db/migrate/20261014200000_create_recording_studio_podcasts.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
     end
@@ -1376,11 +1378,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.join(root, "Gemfile"))
 
     assert_includes routes, "resources :videos"
+    assert_includes routes, "resources :podcasts"
+    assert_includes routes, "podcast_images"
     assert_includes routes, "resources :locations"
     refute_includes routes, "resources :library_images"
     refute_includes routes, "resources :images, only: :destroy"
     assert_includes routes, "video_order"
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::PodcastSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::Podcast"'
     assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.2.0"'
