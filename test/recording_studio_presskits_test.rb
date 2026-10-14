@@ -997,12 +997,18 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes inline_copy, "event.stopPropagation()"
     cover = File.read(File.expand_path("cover/component.html.erb", components))
     assert_operator cover.index("inline_edit?"), :<, cover.index("HeaderInlineCopyComponent")
+    assert_includes cover, "data-cover-wide-line"
     assert_includes cover, "data-cover-release"
-    assert_includes cover, "hidden @min-[640px]:flex"
+    assert_includes cover, "data-cover-wide-location"
+    assert_includes cover, "hidden @min-[640px]:flex flex-wrap items-center gap-x-4 gap-y-1.5"
     assert_includes cover, 'name: "calendar"'
+    assert_includes cover, "location_icon"
+    assert_includes cover, "break-words"
+    assert_includes cover, "@min-[640px]:hidden"
     assert_includes cover, "FlatPack::Shared::IconComponent"
-    assert_operator cover.index("data-cover-description"), :<, cover.index("data-cover-release")
-    assert_operator cover.index("data-cover-release"), :<, cover.index("data-cover-location")
+    assert_operator cover.index("data-cover-description"), :<, cover.index("data-cover-wide-line")
+    assert_operator cover.index("data-cover-release"), :<, cover.index("data-cover-wide-location")
+    assert_operator cover.index("data-cover-wide-location"), :<, cover.index("data-cover-location")
     assert_operator cover.index("HeaderInlineCopyComponent"), :<, cover.index("cover_title: true")
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"

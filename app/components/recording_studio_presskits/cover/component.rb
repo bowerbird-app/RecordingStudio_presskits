@@ -52,6 +52,14 @@ module RecordingStudioPresskits
         )
       end
 
+      def wide_line?
+        release_line.present? || location_recordable.present?
+      end
+
+      def location_icon
+        location_recordable&.resolved_icon.presence || "map-pin"
+      end
+
       def subtitle
         text = @subtitle.nil? ? recordable&.try(:subtitle) : @subtitle
         text.to_s.strip.presence

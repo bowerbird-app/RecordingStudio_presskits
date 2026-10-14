@@ -458,8 +458,54 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     refute_select "#presskits-kit-header [data-cover-release]"
+    refute_select "#presskits-kit-header [data-cover-wide-line]"
     get kit.publishable_public_path
     refute_select "[data-cover-release]"
+    refute_select "[data-cover-wide-line]"
+  end
+
+  test "a wide card puts the kit location on the release line and keeps the stacked place" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) do |press_kit|
+      press_kit.description = "Doors at noon."
+      press_kit.release_date = Date.new(2026, 10, 14)
+    end
+    create_place!(kit, title: "Harbour Gallery")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_wide_place("#presskits-kit-header")
+
+    get recording_studio_presskits.press_kits_path
+    assert_wide_place("[data-cover-card]")
+
+    record_block(kit, "Hero")
+    publish_kit!(kit, slug: "spring-launch-place")
+    get kit.publishable_public_path
+    assert_response :success
+    assert_wide_place("#presskits-kit-cover")
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { release_date: "" },
+      location: { title: "Harbour Gallery", location_type: "venue", locality: "Sydney", country_code: "AU" }
+    }
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    line = css_select("#presskits-kit-header [data-cover-wide-line]").first
+    assert line
+    refute_select "#presskits-kit-header [data-cover-release]"
+    assert_includes line.text, "Harbour Gallery"
+    assert_select "#presskits-kit-header [data-cover-location]", text: /Harbour Gallery/
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { release_date: "2026-10-14" },
+      location: { title: "", location_type: "", locality: "", country_code: "" }
+    }
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_release_line("#presskits-kit-header")
+    refute_select "#presskits-kit-header [data-cover-wide-location]"
+    refute_select "#presskits-kit-header [data-cover-location]"
   end
 
   test "the header preview can leave the list heart off" do
@@ -491,18 +537,63 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   private
 
   def assert_release_line(scope)
-    line = css_select("#{scope} [data-cover-release]").first
-    assert line, "expected a release line in #{scope}"
-    assert_equal "Released 14 Oct 2026", line.text.squish
-    assert_includes line["class"], "hidden"
-    assert_includes line["class"], "@min-[640px]:flex"
-    assert_includes line["class"], "text-sm"
-    assert_includes line["class"], "text-[var(--surface-muted-content-color)]"
-    assert_includes line.to_html, "calendar-days"
+    line = css_select("#{scope} [data-cover-wide-line]").first
+    assert line, "expected a wide line in #{scope}"
+    release = css_select("#{scope} [data-cover-wide-line] [data-cover-release]").first
+    assert release, "expected a release date in #{scope}"
+    assert_equal "Released 14 Oct 2026", release.text.squish
+    assert_wide_line_classes(line)
+    assert_includes release.to_html, "calendar-days"
     copy = line.ancestors.find { |node| node["data-cover-copy"] }
     assert copy, "expected the release line inside the copy"
     html = copy.to_html
     assert_operator html.index("data-cover-description"), :<, html.index("data-cover-release")
+  end
+
+  def assert_wide_place(scope)
+    line = css_select("#{scope} [data-cover-wide-line]").first
+    assert line, "expected a wide line in #{scope}"
+    assert_wide_line_classes(line)
+    release = css_select("#{scope} [data-cover-wide-line] [data-cover-release]").first
+    place = css_select("#{scope} [data-cover-wide-line] [data-cover-wide-location]").first
+    stacked = css_select("#{scope} [data-cover-location]").first
+    assert release
+    assert place
+    assert stacked
+    assert_equal "Released 14 Oct 2026", release.text.squish
+    assert_includes place.text, "Harbour Gallery"
+    assert_includes place.to_html, "map-pin"
+    assert_includes release.to_html, "calendar-days"
+    classes = stacked["class"].split
+    assert_includes classes, "@min-[640px]:hidden"
+    refute_includes classes, "hidden"
+    html = line.to_html
+    assert_operator html.index("data-cover-release"), :<, html.index("data-cover-wide-location")
+    copy = line.ancestors.find { |node| node["data-cover-copy"] }
+    assert copy, "expected the wide line inside the copy for #{scope}"
+    copy_html = copy.to_html
+    assert_includes copy.text, "Doors at noon."
+    assert_operator copy_html.index("data-cover-description"), :<, copy_html.index("data-cover-wide-line")
+    assert_operator copy_html.index("data-cover-wide-line"), :<, copy_html.index("data-cover-location")
+  end
+
+  def assert_wide_line_classes(line)
+    assert_includes line["class"], "hidden"
+    assert_includes line["class"], "@min-[640px]:flex"
+    assert_includes line["class"], "flex-wrap"
+    assert_includes line["class"], "gap-x-4"
+    assert_includes line["class"], "gap-y-1.5"
+    assert_includes line["class"], "text-sm"
+    assert_includes line["class"], "text-[var(--surface-muted-content-color)]"
+  end
+
+  def create_place!(kit, title:)
+    kit.record(RecordingStudio::Location::Location, actor: @user, parent_recording: kit) do |location|
+      location.title = title
+      location.location_type = "venue"
+      location.locality = "Sydney"
+      location.country_code = "AU"
+    end
   end
 
   def assert_default_eyebrow(selector, absent:)
@@ -537,11 +628,11 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     )
   end
 
-  def publish_kit!(kit)
+  def publish_kit!(kit, slug: "spring-launch-cover")
     result = RecordingStudioPublishable::Services::Publishables::Update.call(
       parent_recording: kit,
       actor: @user,
-      attributes: { slug: "spring-launch-cover", status: "published" }
+      attributes: { slug: slug, status: "published" }
     )
     raise result.error if result.failure?
 
