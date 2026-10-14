@@ -9,7 +9,7 @@
     class: grid_card_classes,
     data: grid_card_data
   ) do %>
-    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:pt-16" "@min-[640px]:hidden" "@min-[640px]:contents" "hidden" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" "flex items-start gap-3 @min-[640px]:pt-16" "flex items-center gap-2" "flex w-full min-w-0 flex-col self-stretch" %>
+    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:pt-16" "@min-[640px]:top-18" "@min-[640px]:hidden" "@min-[640px]:contents" "hidden" "pr-16" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" "min-w-0 @min-[640px]:pt-16" "flex items-center gap-2" "flex w-full min-w-0 flex-col self-stretch" %>
     <div class="<%= grid_card_row_classes %>" style="<%= font_style %>" data-cover-row>
       <%= render FlatPack::Overlay::Component.new(class: grid_card_frame_classes, data: { cover_frame: true }) do |overlay| %>
         <% overlay.with_media do %>
@@ -45,9 +45,9 @@
 
       <% brand_row = capture do %>
         <div class="<%= grid_card_copy_classes %>" data-cover-copy<% if show_brand_row? %> data-cover-brand<% end %>>
-          <div class="flex min-w-0 flex-1 flex-col gap-[14px]">
+          <div class="flex min-w-0 flex-col gap-[14px]">
             <% if company_name.present? %>
-              <div class="flex min-w-0 items-center gap-1.5" data-cover-brand-name>
+              <div class="flex min-w-0 items-center gap-1.5 <%= company_heart_clearance_classes %>" data-cover-brand-name>
                 <p class="truncate text-[13px] font-medium uppercase leading-[normal] tracking-[0.22em]" data-cover-company><%= company_name %></p>
                 <span class="inline-flex shrink-0" data-cover-verification></span>
               </div>
@@ -81,20 +81,6 @@
               </div>
             <% end %>
           </div>
-          <% if show_add_to_list? %>
-            <div class="shrink-0" data-cover-list onclick="event.stopPropagation()">
-              <%= helpers.recording_studio_add_to_list(
-                @recording,
-                text: "",
-                icon: "heart",
-                style: :ghost,
-                size: :lg,
-                show_chevron: false,
-                placement: :bottom_right,
-                parent: list_parent
-              ) %>
-            </div>
-          <% end %>
         </div>
         <% end %>
 
@@ -115,18 +101,37 @@
           <% end %>
         <% end %>
 
-        <% if body_actions? %>
-          <%# Edit is out of flow. inset lg is the overlay step nearest the old 29/33 inset. %>
+        <% if body_actions? || show_add_to_list? %>
           <%= render FlatPack::Overlay::Component.new(class: grid_card_body_classes, data: { cover_body: true }) do |overlay| %>
             <% overlay.with_media do %>
               <div class="flex w-full min-w-0 flex-col self-stretch">
                 <%= column %>
               </div>
             <% end %>
-            <% overlay.with_item(placement: :top_right, inset: :lg) do %>
-              <div class="hidden @min-[640px]:contents" data-cover-edit="wide">
-                <%= body_actions %>
-              </div>
+            <% if body_actions? %>
+              <%# Wide Edit. inset lg is the overlay step nearest the old 29/33 inset. %>
+              <% overlay.with_item(placement: :top_right, inset: :lg) do %>
+                <div class="hidden @min-[640px]:contents" data-cover-edit="wide">
+                  <%= body_actions %>
+                </div>
+              <% end %>
+            <% end %>
+            <% if show_add_to_list? %>
+              <%# Stacked: body top-right (Edit is on the cover). Wide: top-18 lines the heart up with the company line, below Edit. %>
+              <% overlay.with_item(placement: :top_right, inset: :sm, class: "@min-[640px]:top-18", data: { cover_heart: true }) do %>
+                <div class="shrink-0" data-cover-list onclick="event.stopPropagation()">
+                  <%= helpers.recording_studio_add_to_list(
+                    @recording,
+                    text: "",
+                    icon: "heart",
+                    style: :ghost,
+                    size: :lg,
+                    show_chevron: false,
+                    placement: :bottom_right,
+                    parent: list_parent
+                  ) %>
+                </div>
+              <% end %>
             <% end %>
           <% end %>
         <% else %>

@@ -119,7 +119,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
     assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
     public_copy = css_select("#presskits-kit-cover [data-cover-copy]").first
-    assert_includes public_copy["class"], "@min-[640px]:pt-16"
+    assert_equal "min-w-0 @min-[640px]:pt-16", public_copy["class"]
     refute_includes public_copy["class"], "pt-12"
     public_body = css_select("#presskits-kit-cover [data-cover-row] > div").last
     assert_includes public_body["class"], "pt-7"
@@ -247,20 +247,29 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes view.parent["class"], "pb-8"
     refute view.ancestors.any? { |node| node["data-cover-copy"] }
     copy = css_select("[data-cover-copy]").first
-    assert_includes copy["class"], "@min-[640px]:pt-16"
-    assert_includes copy["class"], "flex items-start gap-3"
+    assert_equal "min-w-0 @min-[640px]:pt-16", copy["class"]
+    refute_includes copy["class"], "gap-3"
     refute_includes copy["class"], "pt-12"
     body = css_select("[data-cover-row] > div").last
     assert_includes body["class"], "pt-7"
     refute_includes body["class"], "@min-[640px]:pt-16"
     assert_select ".grid.items-stretch"
     assert_select "a[data-cover-card]", count: 0
+    heart = css_select("[data-cover-list]").first
+    assert heart
+    heart_item = heart.ancestors.find { |node| node["data-cover-heart"] }
+    assert_equal "top_right", heart_item["data-fp-placement"]
+    assert_equal "sm", heart_item["data-fp-inset"]
+    assert_includes heart_item["class"], "@min-[640px]:top-18"
+    refute heart.ancestors.any? { |node| node["data-cover-copy"] }
     assert_select "[data-cover-list] button[type=button] svg.w-6.h-6"
 
     RecordingStudioCompany.create(@root, actor: @user, name: "Harbour Studio")
     get recording_studio_presskits.press_kits_path
     assert_select "[data-cover-company]", text: "Harbour Studio", count: 2
-    harbour = css_select("[data-cover-card][data-brand-color='#BFDBFE']").first.to_html
+    harbour_card = css_select("[data-cover-card][data-brand-color='#BFDBFE']").first
+    harbour = harbour_card.to_html
+    assert_includes harbour_card.css("[data-cover-brand-name]").first["class"], "pr-16"
     assert_operator harbour.index("data-cover-company"), :<, harbour.index("data-cover-title")
     assert_operator harbour.index("gap-[14px]"), :<, harbour.index("data-cover-title")
   end
@@ -312,8 +321,17 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes body["class"], "@min-[640px]:min-w-0"
     refute_includes body["class"], "@min-[640px]:pt-16"
     copy = css_select("#presskits-kit-header [data-cover-copy]").first
-    assert_equal "flex items-start gap-3 @min-[640px]:pt-16", copy["class"]
+    assert_equal "min-w-0 @min-[640px]:pt-16", copy["class"]
+    refute_includes copy["class"], "gap-3"
     refute_includes copy["class"], "pt-12"
+    editor_heart = css_select("#presskits-kit-header [data-cover-list]").first
+    editor_heart_item = editor_heart.ancestors.find { |node| node["data-cover-heart"] }
+    assert_equal "top_right", editor_heart_item["data-fp-placement"]
+    assert_equal "sm", editor_heart_item["data-fp-inset"]
+    assert_includes editor_heart_item["class"], "@min-[640px]:top-18"
+    refute editor_heart.ancestors.any? { |node| node["data-cover-copy"] }
+    title = css_select("#presskits-kit-header [data-cover-title]").first
+    refute_includes title.parent["class"], "pr-16"
     assert_select "#presskits-kit-header [data-presskits-header-actions]", count: 2
     css_select("#presskits-kit-header [data-presskits-header-actions]").each do |actions|
       refute actions.ancestors.any? { |node| node["data-cover-copy"] }

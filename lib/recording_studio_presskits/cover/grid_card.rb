@@ -33,10 +33,16 @@ module RecordingStudioPresskits
 
       # pt-16 on the wide copy, on top of the body's pt-7, so the company name
       # starts about 6rem from the card top. A narrower card, editor included,
-      # keeps only that body padding. Tailwind scans this literal:
-      # "flex items-start gap-3 @min-[640px]:pt-16"
+      # keeps only that body padding. The heart is an overlay item, not a
+      # column in this row. Tailwind scans this literal: "@min-[640px]:pt-16"
       def grid_card_copy_classes
-        "flex items-start gap-3 @min-[640px]:pt-16"
+        "min-w-0 @min-[640px]:pt-16"
+      end
+
+      # Clears the overlay heart beside the company line. The button is about
+      # 4rem wide once its inset is counted. Tailwind scans this literal: "pr-16"
+      def company_heart_clearance_classes
+        "pr-16" if show_add_to_list?
       end
 
       def title_tag
