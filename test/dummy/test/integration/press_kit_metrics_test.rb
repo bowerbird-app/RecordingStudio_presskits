@@ -107,6 +107,42 @@ class PressKitMetricsTest < ActiveSupport::TestCase
     assert_operator actual.fetch("RecordingStudioPresskits::QuoteSection", 0), :>=, 1
   end
 
+  test "published_over_time buckets live kits by their current publish_at" do
+    draft = @root.record(RecordingStudioPresskits::PressKit) { |kit| kit.title = "Draft kit" }
+    travel_to 2.days.ago.change(hour: 12) do
+      publish!(@live)
+    end
+    publish!(draft)
+    publish!(@trashed)
+    draft_transition!(draft, "unpublish")
+
+    result = execute_metric(
+      "press_kits.published_over_time",
+      interval: :day,
+      start_at: 3.days.ago,
+      end_at: 1.day.from_now
+    )
+    counts = result.data.to_h { |row| [row[:date], row[:value]] }
+    assert_equal :timeseries, result.type
+    assert_equal "count", result.unit
+    assert_equal 1, counts.fetch(2.days.ago.utc.to_date.iso8601)
+    assert_equal 1, result.data.sum { |row| row[:value].to_i }, "unpublished and trashed kits are not counted"
+
+    narrowed = execute_metric(
+      "press_kits.published_over_time", interval: :day, start_at: 1.day.ago, end_at: 1.day.from_now
+    )
+    assert_equal 0, narrowed.data.sum { |row| row[:value].to_i }
+  end
+
+  test "published_over_time catalog carries unit, title and description and has no group_by" do
+    metadata = RecordingStudioMetrics.find("press_kits.published_over_time").catalog_metadata
+    assert_equal "count", metadata[:unit]
+    assert_equal "Press kits published over time", metadata[:title]
+    assert metadata[:description].present?
+    assert_equal [], metadata[:group_by]
+    assert_equal [:operations], metadata[:exposed_apis]
+  end
+
   test "staff with AdminRoot view may see metrics and a non-admin may not" do
     assert RecordingStudioPresskits::Api::Access.can_view?(grant_context(@staff))
     refute RecordingStudioPresskits::Api::Access.can_view?(grant_context(@outsider))
@@ -114,6 +150,17 @@ class PressKitMetricsTest < ActiveSupport::TestCase
   end
 
   private
+
+  def publish!(recording)
+    draft_transition!(recording, "publish")
+  end
+
+  def draft_transition!(recording, transition)
+    result = RecordingStudioPublishable::Services::Publishables::Transition.call(
+      parent_recording: recording, transition: transition, actor: @owner
+    )
+    raise "#{transition} failed: #{result.error}" if result.respond_to?(:failure?) && result.failure?
+  end
 
   def execute_metric(identifier, **)
     RecordingStudioMetrics.execute(

@@ -35,7 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"
   spec.add_dependency "recording_studio_lists", "~> 0.5"
   spec.add_dependency "recording_studio_location", "~> 0.4"
-  spec.add_dependency "recording_studio_metrics", "~> 0.2"
+  spec.add_dependency "recording_studio_metrics", "~> 0.3"
   spec.add_dependency "recording_studio_orderable", "~> 0.3"
   spec.add_dependency "recording_studio_publishable", "~> 0.8"
   spec.add_dependency "recording_studio_trashable", "~> 0.9"
