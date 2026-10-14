@@ -21,6 +21,8 @@ Create the section with `RecordingStudioPresskits.create_section!` and `content_
 
 The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A stats section also includes `stats`. `display`, `facts`, and `columns` are not in the payload. MCP uses that same payload.
 
+The public stats heading copies plain text. The first line is the saved section title when that title is present. Each following line is the value, then the unit when it is present, then the label. A description is appended as ` – ` plus that description. The icon name is not in the text.
+
 ## 0.47.0
 
 No migration. Bump to `0.47.0`. Flatpack is `>= 0.1.233` (dummy tag `v0.1.233`). Rebuild Tailwind so the masonry column classes (`columns-1`, `md:columns-2`, `lg:columns-4`) and the Section Title trailing-row utilities (`flex-wrap`, `flex-1`, `max-w-max`, `break-words`, `shrink-0`) are generated.

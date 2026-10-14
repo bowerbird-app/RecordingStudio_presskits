@@ -37,8 +37,12 @@ module RecordingStudioPresskits
           spacing: images_download_button ? :none : :md,
           level: :h2,
           anchor_link: true,
-          trailing: images_count_badge
+          trailing: heading_trailing
         )
+      end
+
+      def heading_trailing
+        images_count_badge || stats_copy_button
       end
 
       def images_download_button
@@ -76,6 +80,18 @@ module RecordingStudioPresskits
         return helpers.recording_studio_presskits if helpers.respond_to?(:recording_studio_presskits)
 
         helpers
+      end
+
+      def stats_copy_button
+        content = @content_recording
+        return unless content&.recordable.is_a?(StatsSection)
+
+        stats = StatsSection.active_stats(content)
+        return if stats.empty?
+
+        StatsSection::CopyButtonComponent.new(
+          text: StatsSection.copy_text(stats, title: saved_title)
+        )
       end
 
       def images_count_badge

@@ -22,6 +22,23 @@ module RecordingStudioPresskits
       child.trashed_at.present? || !child.recordable.is_a?(Stat)
     end
 
+    def self.copy_text(stats, title: nil)
+      lines = stats.filter_map { |recording| copy_line(recording.recordable) }
+      heading = title.to_s.strip.presence
+      [heading, *lines].compact.join("\n")
+    end
+
+    def self.copy_line(stat)
+      label = stat.label.to_s.strip
+      value = stat.formatted_value.to_s.strip
+      return if label.blank? || value.blank?
+
+      line = "#{value} #{label}"
+      description = stat.description.to_s.strip.presence
+      description ? "#{line} – #{description}" : line
+    end
+    private_class_method :copy_line
+
     include RecordingStudio::Capabilities::Trashable.to
     include RecordingStudio::Capabilities::Orderable.to(allows: ["RecordingStudioPresskits::Stat"])
   end

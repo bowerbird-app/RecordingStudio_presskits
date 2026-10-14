@@ -262,6 +262,50 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_select ".fp-section-title h2", text: "Stats", count: 0
   end
 
+  test "the public header copies every stat as plain text" do
+    kit = record_kit("Spring launch")
+    section = add_stats_section(kit, title: "Company statistics")
+    content = section_content(section)
+    record_stat(content, label: "Team members", value: "12", icon: "users", description: "Studio staff")
+    record_stat(content, label: "Floor area", value: "420", unit: "m²", icon: "building-office-2")
+    publish_stats_kit!(kit)
+
+    stats = live_stats(section)
+    expected = [
+      "Company statistics",
+      "12 Team members – Studio staff",
+      "420 m² Floor area"
+    ].join("\n")
+    assert_equal expected, RecordingStudioPresskits::StatsSection.copy_text(stats, title: "Company statistics")
+    refute_includes expected, "users"
+    refute_includes expected, "building-office-2"
+
+    untitled = add_stats_section(kit)
+    untitled_content = section_content(untitled)
+    record_stat(untitled_content, label: "Countries", value: "15")
+    assert_equal(
+      "15 Countries",
+      RecordingStudioPresskits::StatsSection.copy_text(live_stats(untitled), title: "  ")
+    )
+
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-stats"
+    assert_response :success
+    heading = css_select("h2").find { |node| node.text == "Company statistics" }
+    row = heading.parent
+    button = row.at_css("button[aria-label='Copy stats']")
+    assert button
+    assert_equal "ghost", button["data-fp-style"]
+    assert_equal "clipboard-document", row.at_css("button [data-flat-pack--icon-name-value]")["data-flat-pack--icon-name-value"]
+    assert_equal expected, button["data-recording-studio-presskits--copy-text-text-value"]
+    assert_equal "Copy link to Company statistics", row.at_css("a")["aria-label"]
+    assert_select "button[aria-label='Copy stats']", count: 2
+    assert_select ".text-center button[aria-label='Copy stats']", count: 0
+
+    fallback = css_select("h2").find { |node| node.text == "Stats" }
+    fallback_button = fallback.parent.at_css("button[aria-label='Copy stats']")
+    assert_equal "15 Countries", fallback_button["data-recording-studio-presskits--copy-text-text-value"]
+  end
+
   test "duplicating a kit copies stat order" do
     kit = record_kit("Spring launch")
     section = add_stats_section(kit, title: "Company statistics")
