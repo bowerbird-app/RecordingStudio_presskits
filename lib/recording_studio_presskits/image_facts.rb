@@ -44,7 +44,7 @@ module RecordingStudioPresskits
       "#{type} · #{width}×#{height} · #{ratio_label}"
     end
 
-    # Masonry::Image takes one caption string. The whole line is muted text-sm.
+    # The gallery caption is one muted line under FlatPack::Media.
     def caption
       [name, meta].compact.join(" · ")
     end

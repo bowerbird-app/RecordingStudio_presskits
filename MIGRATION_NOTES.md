@@ -1,5 +1,26 @@
 # Upgrade notes
 
+## 0.51.0
+
+Bump to `0.51.0`. Flatpack is `>= 0.1.235` (dummy tag `v0.1.235`). Rebuild Tailwind. Reload Press Kits JavaScript. The copy-link controller is `recording-studio-presskits--copy-link`.
+
+`FlatPack::SectionTitle` `with_trailing` is where a count badge sits, after the heading and outside the copy-link anchor. The public video heading passes `FlatPack::Badge` (`size: :sm`) with the number of videos. A section with no videos does not render, so the badge is absent then. The editor still edits the title with `FlatPack::InlineEdit` and does not show the count. Text sections keep `TextSectionHeadingComponent`. Images keep their own count badge.
+
+Flatpack 0.1.235 removes `FlatPack::Masonry::Image`. The images gallery still uses `FlatPack::Masonry::Component`. Each photo is `FlatPack::Media::Component` inside `with_item`. The caption is host text under the picture: attachment name, then `JPG · width×height · ratio`. Hosts that copied `with_image` should switch to that.
+
+`recording_studio_videos` gains `duration_seconds` (integer) and `thumbnail_url` (text). Those columns belong to Recording Studio Video's table. Press Kits adds them here because duration and the thumbnail override are part of the video snapshot, and `revise` already copies that row. A second recording would split the snapshot. Run the Video gem's migrations first so the table exists, then:
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+The editor asks for length as `m:ss` (`1:24`) and stores seconds. A blank length is allowed. The thumbnail field is an optional http or https override. When it is blank, YouTube uses `https://i.ytimg.com/vi/{id}/hqdefault.jpg`. Vimeo uses `https://vimeo.com/api/oembed.json` and caches the thumbnail. Press Kits still does not call `RecordingStudio::ExternalEmbed.register`. Vimeo works after the host registers that provider.
+
+`VideoSection` includes Orderable for `RecordingStudioVideo::Video`. `active_videos` follows that order. A video with no position yet sorts after positioned ones, then by `created_at`. The public page features the first and puts the rest in `FlatPack::Grid` `cols: 2`. The card uses `FlatPack::VideoPreview`: poster, centred play control, and `recording_studio_video_player` inside `with_player` so the iframe stays in a template until play. **Copy link** dispatches `toast:add`. Below `sm` it is icon-only, with `aria-label` and a tooltip of **Copy link**. From `sm` up the label is visible. The title wraps on the same row. The public card does not show a watch-on-provider link or the description. The public heading shows the video count in the trailing slot.
+
+The video payload adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the poster the card would show, not only the override. The kit text file adds a `Provider · m:ss` line between the title and the URL.
+
 ## 0.50.0
 
 Run the new migration. It adds `icon` (string, optional) on `recording_studio_credit_lines`. There is no backfill and no compatibility shim. Existing lines stay without an icon until an editor picks one.

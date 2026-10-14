@@ -11,6 +11,7 @@
     </div>
 
     <%= fields %>
+    <%= render RecordingStudioPresskits::Videos::DetailsComponent.new(video: video) %>
     <%= player %>
   <% end %>
 </div>

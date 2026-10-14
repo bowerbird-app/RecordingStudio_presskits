@@ -1,0 +1,16 @@
+<div class="flex flex-col gap-4">
+  <%= render FlatPack::TextInput::Component.new(
+    name: length_name,
+    value: @video.duration,
+    label: I18n.t("recording_studio_presskits.videos.length"),
+    help_text: I18n.t("recording_studio_presskits.videos.length_hint"),
+    error: length_error
+  ) %>
+  <%= render FlatPack::UrlInput::Component.new(
+    name: thumbnail_name,
+    value: @video.thumbnail_url,
+    label: I18n.t("recording_studio_presskits.videos.thumbnail"),
+    help_text: I18n.t("recording_studio_presskits.videos.thumbnail_hint"),
+    error: thumbnail_error
+  ) %>
+</div>

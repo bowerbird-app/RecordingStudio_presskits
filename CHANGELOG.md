@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.51.0] - 2026-10-14
+
+### Changed
+- A video section's public cards use `FlatPack::VideoPreview`. The first video is a full-width card. The rest sit in `FlatPack::Grid` with two columns. One video is only that featured card. Flatpack is `>= 0.1.235` (tag `v0.1.235`).
+- Videos in a section are orderable. Drag a row in the content editor. That order is the public order, and the first video is the featured card.
+- Each card shows the poster, a length pill, the title, a muted provider and length line, and **Copy link**. Below `sm` that button is the link icon only, with the same words as its accessible name and tooltip. From `sm` up the words show. The title wraps beside the button. The description stays on the edit screen and in the API. It is not on the public card.
+- The public video heading passes a `FlatPack::Badge` (`size: :sm`) with the video count through `FlatPack::SectionTitle` `with_trailing`. The badge sits after the title and outside the copy-link anchor. The editor heading stays inline edit and does not show that badge.
+- Flatpack 0.1.235 removes `FlatPack::Masonry::Image`. Each photo is `FlatPack::Media::Component` inside `with_item`. The caption is the same muted line under the picture.
+- Length is entered as `m:ss` and stored as `duration_seconds` on `recording_studio_videos`. An optional `thumbnail_url` overrides the provider picture. A blank thumbnail uses YouTube's `hqdefault` image, or Vimeo's oEmbed thumbnail.
+- The video API entry adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the picture the card shows. The kit download text file adds a `Provider · m:ss` line under each video title.
+- Version `0.51.0`
+
+### Upgrade notes
+- Bump to `0.51.0`. Flatpack is `>= 0.1.235` (tag `v0.1.235`). That release keeps `FlatPack::VideoPreview` and the Section Title trailing slot, and it removes `FlatPack::Masonry::Image`. Rebuild Tailwind. Reload Press Kits JavaScript so the copy-link controller loads.
+- Hosts that rendered `FlatPack::Masonry::Image` should put `FlatPack::Media::Component` in `with_item` and print the caption under the picture. Hosts that replaced the video section heading should pass a `FlatPack::Badge` (`size: :sm`, text is the video count) through `SectionTitle` `with_trailing`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds `duration_seconds` and `thumbnail_url` to `recording_studio_videos`. Run the Video gem's migrations first if that table is not there yet. Existing videos keep a blank length and a blank thumbnail override.
+- Press Kits still does not register Vimeo. A host that wants Vimeo registers that provider with External Embed before the catalog freezes. YouTube needs no extra registration.
+- Hosts that replaced the video section component should render `FlatPack::VideoPreview` with `with_player` around `recording_studio_video_player`, and should list `active_videos` so the first recording is the featured card.
+
 ## [0.50.0] - 2026-10-14
 
 ### Changed

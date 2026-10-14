@@ -393,6 +393,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_190000) do
     t.string "title"
     t.text "url", null: false
     t.text "description"
+    t.integer "duration_seconds"
+    t.text "thumbnail_url"
     t.datetime "created_at", null: false
   end
 

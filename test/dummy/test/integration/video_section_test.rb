@@ -105,7 +105,7 @@ class VideoSectionTest < ActionDispatch::IntegrationTest
     assert_includes error.record.errors[:url], "That URL is not from a supported provider."
   end
 
-  test "kit section order leaves videos in place and videos are not orderable" do
+  test "kit section order leaves videos in place and videos reorder inside the section" do
     kit = record_kit("Spring launch")
     text = RecordingStudioPresskits.create_section!(
       press_kit_recording: kit,
@@ -115,7 +115,8 @@ class VideoSectionTest < ActionDispatch::IntegrationTest
     )
     videos = add_video_section(kit, title: "Trailer")
     content = section_content(videos)
-    child = record_video(content, url: ZOO_URL, title: "Me at the zoo", description: "First")
+    first = record_video(content, url: ZOO_URL, title: "Me at the zoo", description: "First")
+    second = record_video(content, url: RICK_URL, title: "Second reel", description: "Later")
 
     kit.recording_studio_orderable_reorder!(
       ordered_recording_ids: [videos.id, text.id],
@@ -123,14 +124,56 @@ class VideoSectionTest < ActionDispatch::IntegrationTest
     )
 
     assert_equal [videos.id, text.id], RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
-    refute_includes RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id), child.id
-    assert content.respond_to?(:recording_studio_orderable_children)
-    assert_raises(RecordingStudio::CapabilityDisabled) { content.recording_studio_orderable_children }
-    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::VideoSection")
+    refute_includes RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id), first.id
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::VideoSection")
+    assert_equal [first.id, second.id], RecordingStudioPresskits::VideoSection.active_videos(content).map(&:id)
+
+    content.recording_studio_orderable_move!(second, to_index: 0, actor: @user)
+
+    assert_equal [second.id, first.id], RecordingStudioPresskits::VideoSection.active_videos(content.reload).map(&:id)
 
     names = RecordingStudioPresskits::Engine.routes.named_routes.names.map(&:to_s)
-    refute names.any? { |name| name.include?("video_order") }
+    assert names.any? { |name| name.include?("video_order") }
     assert_includes names, "press_kit_section_quote_order"
+  end
+
+  test "length is stored as seconds and a blank thumbnail uses the provider picture" do
+    kit = record_kit("Spring launch")
+    content = section_content(add_video_section(kit))
+    video = record_video(content, url: ZOO_URL, title: "Me at the zoo", description: "First", duration: "1:24")
+    snapshot_id = video.recordable_id
+
+    assert_equal 84, video.recordable.duration_seconds
+    assert_equal "1:24", video.recordable.duration_label
+    assert_nil video.recordable.thumbnail_url
+    assert_equal "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg", video.recordable.poster_url
+
+    @root.revise(video, actor: @user) do |clip|
+      clip.duration = "2:10"
+      clip.thumbnail_url = "https://cdn.example.com/poster.jpg"
+    end
+
+    assert_equal 84, RecordingStudioVideo::Video.find(snapshot_id).duration_seconds
+    assert_nil RecordingStudioVideo::Video.find(snapshot_id).thumbnail_url
+    assert_equal 130, video.reload.recordable.duration_seconds
+    assert_equal "https://cdn.example.com/poster.jpg", video.recordable.poster_url
+
+    text = RecordingStudioPresskits::KitDownload::TextFile.call(kit)
+    assert_includes text, "Me at the zoo"
+    assert_includes text, "YouTube · 2:10"
+    assert_includes text, ZOO_URL
+    refute_includes text, "First"
+  end
+
+  test "a bad length stays off the row" do
+    kit = record_kit("Spring launch")
+    content = section_content(add_video_section(kit))
+
+    error = assert_raises(ActiveRecord::RecordInvalid) do
+      record_video(content, url: ZOO_URL, title: "Me at the zoo", description: "First", duration: "1:99")
+    end
+
+    assert_includes error.record.errors[:duration], "Use minutes and seconds, like 1:24."
   end
 
   test "deleting one video trashes that recording only" do
@@ -224,11 +267,13 @@ class VideoSectionTest < ActionDispatch::IntegrationTest
     RecordingStudioPresskits::KitQuery.section_content(section)
   end
 
-  def record_video(content, url:, title:, description:)
+  def record_video(content, url:, title:, description:, duration: nil, thumbnail_url: nil)
     content.record(RecordingStudioVideo::Video, parent_recording: content, actor: @user) do |video|
       video.url = url
       video.title = title
       video.description = description
+      video.duration = duration if duration
+      video.thumbnail_url = thumbnail_url if thumbnail_url
     end
   end
 

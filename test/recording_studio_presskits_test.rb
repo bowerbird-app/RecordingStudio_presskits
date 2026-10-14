@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.50.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.51.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -38,7 +38,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261010150000_create_recording_studio_location_sections.rb",
       "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
-      "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb"
+      "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb",
+      "db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
+      "test/dummy/db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
     end
@@ -67,7 +69,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.234"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.235"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
@@ -87,7 +89,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.234"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.235"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
@@ -422,7 +424,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "v0.8.0"
     assert_includes readme, "tag: \"v0.5.0\""
-    assert_includes readme, "tag: \"v0.1.234\""
+    assert_includes readme, "tag: \"v0.1.235\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
     assert_includes readme, 'gem "recording_studio_lists", "~> 0.5"'
@@ -456,7 +458,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[430/368]"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.234"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.235"'
     assert_includes readme, "FlatPack::FontSwatch"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
@@ -1109,7 +1111,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes heading_display, "with_trailing"
     assert_includes heading_display, "anchor_link:"
     assert_includes show, "FlatPack::Masonry::Component"
-    assert_includes show, "with_image"
+    assert_includes show, "with_item"
+    assert_includes show, "FlatPack::Media::Component"
+    refute_includes show, "with_image"
+    refute_includes show, "Masonry::Image"
     refute_includes show, "aspect-video"
     refute_includes section_editor, 'id: "presskits-section-grid"'
     refute_includes section_editor, "cols: 2"
@@ -1365,7 +1370,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, "resources :locations"
     refute_includes routes, "resources :library_images"
     refute_includes routes, "resources :images, only: :destroy"
-    refute_includes routes, "video_order"
+    assert_includes routes, "video_order"
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
     assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'

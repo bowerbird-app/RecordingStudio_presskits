@@ -1,7 +1,19 @@
 <%= helpers.turbo_frame_tag frame_id do %>
   <%= render FlatPack::Masonry::Component.new(columns: columns, gap: :lg, order: :columns) do |masonry| %>
     <% visible_tiles.each do |tile| %>
-      <% masonry.with_image(**tile) %>
+      <% masonry.with_item do %>
+        <figure class="m-0">
+          <%= render FlatPack::Media::Component.new(
+            src: tile.fetch(:src),
+            alt: tile.fetch(:alt),
+            width: tile.fetch(:width),
+            height: tile.fetch(:height)
+          ) %>
+          <% if tile[:caption].present? %>
+            <figcaption class="mt-2 text-sm text-(--surface-muted-content-color)"><%= tile[:caption] %></figcaption>
+          <% end %>
+        </figure>
+      <% end %>
     <% end %>
   <% end %>
 
