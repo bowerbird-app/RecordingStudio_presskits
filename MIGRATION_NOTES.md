@@ -1,5 +1,17 @@
 # Upgrade notes
 
+## 0.49.0
+
+No migration. Bump to `0.49.0`. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.233`.
+
+On a cover card whose container is at least 640px wide, the company name, title, subtitle, list heart, and description sit lower. The body still has `pt-7`. The copy adds `pt-16`, so the company name starts about 6rem from the top of the card. A narrower card keeps only the body's `pt-7`.
+
+**View** stays in the footer with `mt-auto`. **Edit image** stays on the cover overlay.
+
+On the kit editor, **Edit** is out of the copy row. Below 640px of container width it sits on the cover overlay, in the same top-right item as **Edit image** and immediately to its left (`gap-2`). From 640px that copy is hidden, and **Edit** is the body overlay item (`placement: :top_right`, `inset: :lg`). Only one is shown. The copy keeps the body's `pt-7` below 640px, and adds `@min-[640px]:pt-16` from 640px.
+
+The list heart is also out of the copy. It is `with_item(placement: :top_right, inset: :sm)` on the body overlay. The company line has `pr-16`. Title, subtitle, description, and location stay full width. From 640px, `@min-[640px]:top-18` moves the heart down to the company line, under **Edit**.
+
 ## 0.48.0
 
 No migration. Rebuild Tailwind so the text-section utilities generate.
@@ -14,15 +26,15 @@ Hosts that replaced `SectionFrameComponent` should render `TextSectionHeadingCom
 
 ## 0.47.0
 
-No migration. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.231`.
+No migration. Bump to `0.47.0`. Flatpack is `>= 0.1.233` (dummy tag `v0.1.233`). Rebuild Tailwind so the masonry column classes (`columns-1`, `md:columns-2`, `lg:columns-4`) and the Section Title trailing-row utilities (`flex-wrap`, `flex-1`, `max-w-max`, `break-words`, `shrink-0`) are generated.
 
-On a cover card whose container is at least 640px wide, the company name, title, subtitle, list heart, and description sit lower. The body still has `pt-7`. The copy adds `pt-16`, so the company name starts about 6rem from the top of the card. A narrower card keeps only the body's `pt-7`.
+The public Images section uses `FlatPack::Masonry::Component` (`order: :columns`) and `FlatPack::Masonry::Image`. Photos keep their natural ratio. The first 12 render. **Show more images (N)** replaces the gallery Turbo frame (`presskits-images-<id>`) with the rest. N is the number of photos in the section.
 
-**View** stays in the footer with `mt-auto`. **Edit image** stays on the cover overlay.
+The public Images heading passes a `FlatPack::Badge` (`size: :sm`, text is the photo count) through `FlatPack::SectionTitle` `with_trailing`. The badge is outside the heading and outside the copy-link anchor. The editor still edits the title with `FlatPack::InlineEdit`. `SectionTitle` `title:` is a string, and Inline Edit has no trailing slot, so the count badge stays off the editor.
 
-On the kit editor, **Edit** is out of the copy row. Below 640px of container width it sits on the cover overlay, in the same top-right item as **Edit image** and immediately to its left (`gap-2`). From 640px that copy is hidden, and **Edit** is the body overlay item (`placement: :top_right`, `inset: :lg`). Only one is shown. The copy keeps the body's `pt-7` below 640px, and adds `@min-[640px]:pt-16` from 640px.
+**Download all images** is on the public heading row. It zips that section's photos only, from `GET /recording_studio_presskits/image_archives/:id` (the images content recording). The kit zip still includes the cover, every images section, and `kit.txt`. The section zip is sent only when `Visibility.presentation_for` is `:full`.
 
-The list heart is also out of the copy. It is `with_item(placement: :top_right, inset: :sm)` on the body overlay. The company line has `pr-16`. Title, subtitle, description, and location stay full width. From 640px, `@min-[640px]:top-18` moves the heart down to the company line, under **Edit**.
+Width and height are not columns. `ImagePixelSize` writes them onto the blob metadata for JPEG and PNG when ActiveStorage's analyzer left them out. The caption is one `FlatPack::Masonry::Image` `caption:` string: attachment name, then `JPG · width×height · ratio`. That component paints the whole string in muted `text-sm`. A primary title and a smaller meta line need `meta:` on `FlatPack::Masonry::Image`. Presskits does not restyle the figcaption.
 
 ## 0.46.0
 
