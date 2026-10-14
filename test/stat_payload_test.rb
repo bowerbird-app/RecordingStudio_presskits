@@ -105,9 +105,9 @@ class StatPayloadTest < ActiveSupport::TestCase
     assert_includes stat.errors[:label], "can't be blank"
     assert_includes stat.errors[:value], "can't be blank"
 
-    stat.label = "Employees"
+    stat.label = "Team members"
     stat.value = "85"
-    stat.unit = "people"
+    stat.unit = nil
     stat.description = "Studio staff"
     stat.icon = " users "
     assert stat.valid?

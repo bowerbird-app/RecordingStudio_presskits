@@ -249,6 +249,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
       ["chart-bar", "globe-alt", "users"],
       company_stats.map { |child| child.recordable.icon }
     )
+    assert_nil company_stats.find { |child| child.recordable.icon == "users" }.recordable.unit
     refute specifications_content.recordable.respond_to?(:columns)
     project_stats = RecordingStudioPresskits::StatsSection.active_stats(specifications_content)
     assert_equal(

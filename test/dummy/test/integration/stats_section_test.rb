@@ -183,9 +183,9 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     }
     second = live_stats(section).last
     patch recording_studio_presskits.press_kit_section_stat_path(kit, section, second), params: {
-      stat: { label: "Employees", value: "90", unit: "people" }
+      stat: { label: "Employees", value: "90", unit: "FTE" }
     }
-    assert_equal "90 people", second.reload.recordable.formatted_value
+    assert_equal "90 FTE", second.reload.recordable.formatted_value
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
       kit_section: { title: "Company statistics", subtitle: "This year" }
