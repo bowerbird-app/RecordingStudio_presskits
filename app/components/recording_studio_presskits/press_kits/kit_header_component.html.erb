@@ -9,7 +9,8 @@
     size: :card,
     heading: :h1,
     id: "presskits-kit-cover",
-    inline_path: helpers.press_kit_header_path(@press_kit_recording)
+    inline_path: helpers.press_kit_header_path(@press_kit_recording),
+    context: :header
   ) do |cover| %>
     <%= render RecordingStudioPresskits::Cover::DefaultActionsComponent.new(
       cover: cover,

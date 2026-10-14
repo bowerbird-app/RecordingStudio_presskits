@@ -82,7 +82,8 @@
           <% @press_kit_recordings.each do |recording| %>
             <%= render RecordingStudioPresskits::Cover::Component.new(
               recording: recording,
-              size: :card
+              size: :card,
+              context: :grid
             ) do |cover| %>
               <%= render RecordingStudioPresskits::Cover::DefaultActionsComponent.new(
                 cover: cover,

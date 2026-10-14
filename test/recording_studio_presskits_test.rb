@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.55.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.56.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -667,6 +667,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes index, 'text: "Table"'
     assert_includes index, "RecordingStudioPresskits::Cover::Component"
     assert_includes index, "size: :card"
+    assert_includes index, "context: :grid"
     cover = File.read(File.expand_path("cover/component.rb", components))
     cover_html = File.read(File.expand_path("cover/component.html.erb", components))
     assert_includes cover, "def brand_color"
@@ -733,8 +734,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes actions, "order-last"
     refute_includes actions, "extra_class"
     assert_includes cover_html, "hidden @min-[640px]:block"
-    assert_includes cover_html, "hidden @min-[640px]:line-clamp-3"
-    assert_includes cover_html, "line-clamp-3"
+    assert_includes cover_html, "description_classes"
+    assert_includes cover, "context: :header"
+    grid_card = File.read(File.expand_path("../lib/recording_studio_presskits/cover/grid_card.rb", __dir__))
+    assert_includes grid_card, "def grid?"
+    assert_includes grid_card, "hidden @min-[640px]:line-clamp-3"
+    assert_includes grid_card, "HEADER_DESCRIPTION_CLASSES"
+    refute_includes grid_card[/def description_classes.*?end/m], "actions"
     assert_includes cover_html, "data-cover-subtitle"
     assert_includes cover_html, "gap-[14px]"
     refute_includes cover_html, "mt-auto"
@@ -961,6 +967,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes public_kit, "EditorChrome::KIT_SECTIONS_CLASSES"
     assert_includes public_kit, "EditorChrome::SECTION_PAD_CLASSES"
     assert_includes public_kit, "padding: :none"
+    assert_includes public_kit, "context: :header"
+    assert_includes kit_header, "context: :header"
     assert_includes public_kit, "SectionCardComponent"
     assert_includes public_kit, "BrandedFrameComponent"
     assert_includes public_kit, "branding: branding?"
@@ -968,6 +976,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes frame, "EditorChrome::SECTION_PAD_CLASSES"
     assert_includes frame, "SectionCardComponent"
     preview_show = File.read(File.expand_path("press_kits/preview_show_component.html.erb", components))
+    assert_includes preview_show, "context: :header"
     assert_includes preview_show, "SectionCardComponent"
     assert_includes preview_show, "EditorChrome::PREVIEW_CLASSES"
     kit_header_rb = File.read(File.expand_path("press_kits/kit_header_component.rb", components))
@@ -1007,7 +1016,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes inline_copy, "mode: :text"
     assert_includes inline_copy, "data-presskits-inline-copy"
     assert_includes inline_copy, 'class="hidden @min-[640px]:block" data-cover-subtitle'
-    assert_includes inline_copy, 'class="hidden @min-[640px]:block" data-cover-description'
+    assert_includes inline_copy, "description_frame_classes"
+    refute_includes inline_copy, 'class="hidden @min-[640px]:block" data-cover-description'
+    inline_rb = File.read(File.expand_path("press_kits/header_inline_copy_component.rb", components))
+    assert_includes inline_rb, "context: :header"
+    assert_includes inline_rb, '"hidden @min-[640px]:block" if @context == :grid'
     assert_includes inline_copy, "relative z-20"
     assert_includes inline_copy, "event.stopPropagation()"
     cover = File.read(File.expand_path("cover/component.html.erb", components))

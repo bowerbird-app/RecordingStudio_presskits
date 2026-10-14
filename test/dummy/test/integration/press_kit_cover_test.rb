@@ -117,7 +117,10 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     refute_select "[data-presskits-inline-copy]"
     assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
     assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
-    assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    public_description = css_select("#presskits-kit-cover [data-cover-description]").first
+    assert_equal "Doors at noon.", public_description.text.squish
+    assert_includes public_description["class"], "line-clamp-3"
+    refute_includes public_description["class"].split, "hidden"
     public_copy = css_select("#presskits-kit-cover [data-cover-copy]").first
     assert_equal "min-w-0 @min-[640px]:pt-16", public_copy["class"]
     refute_includes public_copy["class"], "pt-12"
@@ -375,8 +378,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes editor_subtitle["class"], "@min-[640px]:block"
     editor_description = css_select("#presskits-kit-header [data-cover-description]").first
     assert_includes editor_description.text, "Doors at noon."
-    assert_includes editor_description["class"], "hidden"
-    assert_includes editor_description["class"], "@min-[640px]:block"
+    refute_includes editor_description["class"].to_s.split, "hidden"
     refute_includes frame.to_html, "Doors at noon."
     assert_select "#presskits-kit-header a[data-cover-view]", count: 0
     assert_select "#presskits-kit-header [data-presskits-inline-copy].relative.z-20"
@@ -398,6 +400,18 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-cover-hero"
     section = css_select("#presskits-editor-sections").first
     refute_includes section.to_html, "@min-[640px]:flex-row"
+  end
+
+  test "stacked description follows the cover context" do
+    kit = record_kit("Spring launch")
+    header = RecordingStudioPresskits::Cover::Component.new(recording: kit, context: :header)
+    grid = RecordingStudioPresskits::Cover::Component.new(recording: kit, context: :grid)
+
+    assert_equal "line-clamp-3 text-base leading-6 text-[var(--surface-muted-content-color)]", header.description_classes
+    assert_includes grid.description_classes, "hidden"
+    assert_includes grid.description_classes, "@min-[640px]:line-clamp-3"
+    refute header.grid?
+    assert grid.grid?
   end
 
   test "the card heading is h1 or h2" do

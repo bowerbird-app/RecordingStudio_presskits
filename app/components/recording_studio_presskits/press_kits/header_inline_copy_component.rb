@@ -11,11 +11,16 @@ module RecordingStudioPresskits
       SUBTITLE_CLASSES = "text-[30px] font-normal leading-[38px] tracking-[-0.45px]"
       DESCRIPTION_CLASSES = "text-base leading-6 text-[var(--surface-muted-content-color)]"
 
-      def initialize(recording:, update_path:, heading: :h1)
+      def initialize(recording:, update_path:, heading: :h1, context: :header)
         super()
         @recording = recording
         @update_path = update_path
         @heading = %i[h1 h2].include?(heading&.to_sym) ? heading.to_sym : :h2
+        @context = context.to_sym
+      end
+
+      def description_frame_classes
+        "hidden @min-[640px]:block" if @context == :grid
       end
 
       def title

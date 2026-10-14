@@ -33,7 +33,7 @@
         ) %>
       </div>
     </div>
-    <div class="hidden @min-[640px]:block" data-cover-description>
+    <div class="<%= description_frame_classes %>" data-cover-description>
       <%= render FlatPack::InlineEdit::Component.new(
         tag: :p,
         mode: :text,

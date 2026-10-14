@@ -1,8 +1,8 @@
 # Upgrade notes
 
-## 0.55.0
+## 0.56.0
 
-Bump to `0.55.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds a nullable `release_date` date column on `recording_studio_press_kits`. There is no backfill. Existing kits keep a blank date, and the card hides the line. Flatpack stays `>= 0.1.235`.
+Bump to `0.56.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds a nullable `release_date` date column on `recording_studio_press_kits`. There is no backfill. Existing kits keep a blank date, and the card hides the line. Flatpack stays `>= 0.1.235`.
 
 Rebuild Tailwind so `@min-[640px]:flex`, `flex-wrap`, `gap-x-4`, `gap-y-1.5`, `w-full`, and `@min-[640px]:w-auto` generate.
 
@@ -10,7 +10,7 @@ Hosts that replaced the header editor should add `FlatPack::DateInput` named `pr
 
 `Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action` (`renders_many :actions`). An empty slot hides the row. The public page no longer renders `recording_studio_downloadable_button` under the header. **Download kit** on the cover links to `recording_package_path` when that route exists, otherwise the first images section. It shows when `KitDownload.allowed?`. **Contact** shows for a Press contact credit or a section titled Contact. The index passes **View**. The header does not. **View** is that same primary FlatPack button (`size: :lg`, `arrow-right`), with the button's own radius.
 
-Below 640px of the cover container, hide the subtitle and the short description (`hidden`, then `@min-[640px]:block` on the subtitle and `@min-[640px]:line-clamp-3` on the description). The editor inline fields use the same hide. Wide cards still show both. Rebuild Tailwind so those two utilities generate.
+Below 640px of the cover container, hide the subtitle on every cover (`hidden`, then `@min-[640px]:block`). Hide the short description below that width only when `context: :grid` (`hidden @min-[640px]:line-clamp-3`). `context: :header` keeps `line-clamp-3` at every width. Pass `context:` from the caller. The index uses `:grid`. The public kit and the editor use `:header`. Do not infer the choice from which buttons are in the slot. Rebuild Tailwind so `@min-[640px]:block` and `@min-[640px]:line-clamp-3` generate.
 
 ## 0.54.0
 

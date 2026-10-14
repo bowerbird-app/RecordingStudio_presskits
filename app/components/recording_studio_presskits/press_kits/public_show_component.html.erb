@@ -13,7 +13,8 @@
       recording: @press_kit_recording,
       size: :card,
       heading: :h1,
-      id: "presskits-kit-cover"
+      id: "presskits-kit-cover",
+      context: :header
     ) do |cover| %>
       <%= render RecordingStudioPresskits::Cover::DefaultActionsComponent.new(
         cover: cover,

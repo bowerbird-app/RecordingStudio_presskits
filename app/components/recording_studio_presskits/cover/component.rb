@@ -19,7 +19,7 @@ module RecordingStudioPresskits
 
       def initialize(recording: nil, title: nil, description: nil, subtitle: nil, brand_color: nil, inline_path: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
                      font_family: nil, size: :card, href: nil, id: nil, heading: :h2, add_to_list: true,
-                     show_image: true)
+                     show_image: true, context: :header)
         super()
         @recording = recording
         @title = title
@@ -30,6 +30,7 @@ module RecordingStudioPresskits
         @size = SIZES.include?(size&.to_sym) ? size.to_sym : :card
         @href = href
         @id = id
+        @context = context.to_sym
         assign_inline_heading(heading, inline_path)
         @add_to_list = add_to_list
         @show_image = show_image
