@@ -201,7 +201,15 @@ class PodcastSectionTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "video-preview"
     assert_includes response.body, "h-[352px]"
     assert_includes response.body, "h-[175px]"
-    assert_select "[role=dialog][aria-modal=true]", count: 2
+    assert_select "[role=dialog][aria-modal=true][aria-labelledby]", count: 2
+    assert_select "[role=dialog] .sr-only", text: "Fetched title"
+    assert_select "[role=dialog] .sr-only", text: "Apple cut"
+    assert_select "[role=dialog] h2", count: 0
+    assert_select "[role=dialog] .flat-pack-modal__footer", count: 0
+    assert_select "[role=dialog] button[aria-label='Close']", count: 2
+    dialogs = css_select("[role=dialog]").to_html
+    refute_includes dialogs, "Listen on"
+    refute_includes dialogs, "Launch notes"
     assert_select "[data-controller='flat-pack--modal'][data-flat-pack--modal-close-on-escape-value='true']"
     assert_select "[data-controller='flat-pack--modal'][data-flat-pack--modal-close-on-backdrop-value='true']"
     assert_select "button[data-modal-id][aria-label='Play: Fetched title']"

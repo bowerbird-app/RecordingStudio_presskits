@@ -87,23 +87,13 @@
   </div>
 
   <% if embed_url.present? %>
-    <%= render FlatPack::Modal::Component.new(id: modal_id, title: title, size: :lg, scroll: :page) do |modal| %>
+    <%= render FlatPack::Modal::Component.new(id: modal_id, size: :lg, scroll: :page) do |modal| %>
+      <% modal.header do %>
+        <span class="sr-only"><%= title %></span>
+      <% end %>
       <% modal.body do %>
-        <% if show_name.present? %>
-          <p class="text-sm text-(--surface-muted-content-color)"><%= show_name %></p>
-        <% end %>
         <%# "h-full" "w-full" "border-0" %>
         <div class="<%= player_frame_classes %>" data-recording-studio-presskits--podcast-player-target="stage"></div>
-      <% end %>
-      <% modal.footer do %>
-        <%= render FlatPack::Button::Component.new(
-          text: listen_label,
-          style: :default,
-          size: :sm,
-          href: url,
-          target: "_blank",
-          class: "rounded-full"
-        ) %>
       <% end %>
     <% end %>
   <% end %>
