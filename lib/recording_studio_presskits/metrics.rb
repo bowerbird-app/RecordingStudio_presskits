@@ -41,9 +41,8 @@ module RecordingStudioPresskits
     end
 
     def live_kits(relation)
-      relation.where(
-        recordable_type: RecordingStudioPresskits.press_kit_type_name,
-        trashed_at: nil
+      relation.where(RecordingStudio::Recording.recording_studio_trashable_kept_sql).where(
+        recordable_type: RecordingStudioPresskits.press_kit_type_name
       )
     end
 
@@ -57,13 +56,12 @@ module RecordingStudioPresskits
     end
 
     def live_section_contents(kits)
-      sections = RecordingStudio::Recording.where(
+      sql = RecordingStudio::Recording.recording_studio_trashable_kept_sql
+      sections = RecordingStudio::Recording.where(sql).where(
         recordable_type: KitSection.name,
-        trashed_at: nil,
         parent_recording_id: kits.select(:id)
       )
-      RecordingStudio::Recording.where(
-        trashed_at: nil,
+      RecordingStudio::Recording.where(sql).where(
         parent_recording_id: sections.select(:id),
         recordable_type: RecordingStudioPresskits.section_types
       )

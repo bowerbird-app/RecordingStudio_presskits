@@ -24,8 +24,8 @@ gem "recording_studio_location", "~> 0.4", github: "bowerbird-app/RecordingStudi
 gem "recording_studio_metrics", "~> 0.2", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
 gem "recording_studio_orderable", "~> 0.3", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"
 gem "recording_studio_publishable", "~> 0.8", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"
-gem "recording_studio_trashable", "~> 0.8", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"
-gem "recording_studio_video", "~> 0.1.0", github: "bowerbird-app/RecordingStudio_video", tag: "v0.1.1"
+gem "recording_studio_trashable", "~> 0.9", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.9.0"
+gem "recording_studio_video", "~> 0.2.0", github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.0"
 
 gem "devise"
 gem "puma"

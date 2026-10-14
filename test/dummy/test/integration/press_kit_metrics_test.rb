@@ -70,10 +70,7 @@ class PressKitMetricsTest < ActiveSupport::TestCase
 
   test "live kit metrics ignore trash and extra snapshots" do
     result = execute_metric("press_kits.total")
-    expected = RecordingStudio::Recording.where(
-      recordable_type: RecordingStudioPresskits.press_kit_type_name,
-      trashed_at: nil
-    ).count
+    expected = live_kit_relation.count
 
     assert_equal expected, result.value
     assert_operator expected, :>=, 1
@@ -89,11 +86,7 @@ class PressKitMetricsTest < ActiveSupport::TestCase
       start_at: 2.days.ago,
       end_at: 1.day.from_now
     )
-    expected = RecordingStudio::Recording.where(
-      recordable_type: RecordingStudioPresskits.press_kit_type_name,
-      trashed_at: nil,
-      created_at: 2.days.ago...1.day.from_now
-    ).count
+    expected = live_kit_relation.where(created_at: 2.days.ago...1.day.from_now).count
 
     assert_equal :timeseries, result.type
     assert_equal expected, result.data.sum { |row| row[:value].to_i }
@@ -135,25 +128,27 @@ class PressKitMetricsTest < ActiveSupport::TestCase
     )
   end
 
-  def live_kit_ids
+  def live_kit_relation
     RecordingStudio::Recording.where(
-      recordable_type: RecordingStudioPresskits.press_kit_type_name,
-      trashed_at: nil
-    ).pluck(:id)
+      RecordingStudio::Recording.recording_studio_trashable_kept_sql
+    ).where(recordable_type: RecordingStudioPresskits.press_kit_type_name)
+  end
+
+  def live_kit_ids
+    live_kit_relation.pluck(:id)
   end
 
   def expected_section_counts
-    kits = RecordingStudio::Recording.where(
-      recordable_type: RecordingStudioPresskits.press_kit_type_name,
-      trashed_at: nil
-    )
+    kits = live_kit_relation
     sections = RecordingStudio::Recording.where(
+      RecordingStudio::Recording.recording_studio_trashable_kept_sql
+    ).where(
       recordable_type: RecordingStudioPresskits::KitSection.name,
-      trashed_at: nil,
       parent_recording_id: kits.select(:id)
     )
     RecordingStudio::Recording.where(
-      trashed_at: nil,
+      RecordingStudio::Recording.recording_studio_trashable_kept_sql
+    ).where(
       parent_recording_id: sections.select(:id),
       recordable_type: RecordingStudioPresskits.section_types
     ).group(:recordable_type).distinct.count

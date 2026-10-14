@@ -71,11 +71,10 @@ module RecordingStudioPresskits
     end
 
     def find_quote(id)
-      quote_section_recording.child_recordings.where(quote_scope).find_by(id: id)
-    end
-
-    def quote_scope
-      { trashed_at: nil, recordable_type: "RecordingStudioPresskits::Quote" }
+      quote_section_recording.child_recordings
+                             .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                             .where(recordable_type: "RecordingStudioPresskits::Quote")
+                             .find_by(id: id)
     end
 
     def section_edit_path
