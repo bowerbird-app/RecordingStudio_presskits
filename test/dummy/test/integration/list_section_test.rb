@@ -160,7 +160,7 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     assert_response :success
     preview = css_select("#presskits-editor-preview").first
     assert_select preview, ".fp-section-title h2", text: "At a glance"
-    assert_list_table(preview)
+    assert_list_lines(preview)
 
     patch recording_studio_presskits.press_kit_section_list_item_order_path(kit, section), params: {
       recording_id: second.id,
@@ -226,7 +226,7 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-list"
     assert_response :success
     assert_select ".fp-section-title h2", text: "At a glance"
-    assert_list_table(response.body)
+    assert_list_lines(response.body)
 
     empty = add_list_section(kit, title: "Empty list")
     get recording_studio_presskits.edit_press_kit_path(kit)
@@ -342,26 +342,27 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-section-preview"
   end
 
-  def assert_list_table(scope)
+  def assert_list_lines(scope)
     html = scope.is_a?(String) ? scope : scope.to_html
     assert_includes html, "max-w-[65ch]"
-    assert_match(/\[&(?:amp;)?_thead\]:hidden/, html)
+    assert_includes html, "flat-pack-list"
+    refute_includes html, "_thead]:hidden"
     root = scope.is_a?(String) ? nil : scope
     if root
-      assert_select root, "[data-list-item]", count: 2
+      assert_select root, "#presskits-list-lines table", count: 0
+      assert_select root, "#presskits-list-lines ul.flat-pack-list [data-list-item]", count: 2
       assert_select root, "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
       assert_select root, "[data-list-item] [data-flat-pack--icon-name-value='magnifying-glass']", count: 1
-      assert_select root, "td .truncate.whitespace-nowrap", text: "Capacity"
-      assert_select root, "td .truncate.whitespace-nowrap", text: "140 seats"
-      assert_includes html, "whitespace-nowrap"
+      assert_select root, "#presskits-list-lines span", text: "Capacity"
+      assert_select root, "#presskits-list-lines span", text: "140 seats"
     else
-      assert_select "[data-list-item]", count: 2
+      assert_select "#presskits-list-lines table", count: 0
+      assert_select "#presskits-list-lines ul.flat-pack-list [data-list-item]", count: 2
       assert_select "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
-      assert_select "td .truncate.whitespace-nowrap", text: "Capacity"
-      assert_select "td .truncate.whitespace-nowrap", text: "120 seats"
-      assert_select "td .truncate.whitespace-nowrap", text: "Floor"
-      assert_select "td .truncate.whitespace-nowrap", text: "Oak"
-      assert_includes html, "whitespace-nowrap"
+      assert_select "#presskits-list-lines span", text: "Capacity"
+      assert_select "#presskits-list-lines span", text: "120 seats"
+      assert_select "#presskits-list-lines span", text: "Floor"
+      assert_select "#presskits-list-lines span", text: "Oak"
     end
   end
 end

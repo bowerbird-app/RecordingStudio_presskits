@@ -1,13 +1,19 @@
 <% if items.any? %>
   <div id="presskits-list-lines" class="max-w-[65ch]">
-    <%= render FlatPack::Table::Component.new(
-      data: items,
-      min_width: :none,
-      class: "[&_table]:table-fixed [&_thead]:hidden [&_td]:overflow-hidden [&_td]:whitespace-nowrap"
-    ) do |table| %>
-      <% table.column(title: "Icon", html: ->(recording) { icon_cell(recording) }) %>
-      <% table.column(title: "Key", html: ->(recording) { clipped(recording.recordable.key, muted: true) }) %>
-      <% table.column(title: "Value", html: ->(recording) { clipped(recording.recordable.value, muted: false) }) %>
+    <%= render FlatPack::List::Component.new do %>
+      <% items.each do |recording| %>
+        <% item = recording.recordable %>
+        <%= render FlatPack::List::Item.new(
+              icon: item.icon.presence,
+              class: "!items-center",
+              data: { list_item: true }
+            ) do %>
+          <div class="flex flex-wrap items-baseline justify-between gap-3">
+            <span class="text-sm text-(--surface-muted-content-color)"><%= item.key %></span>
+            <span class="text-base font-medium text-(--surface-content-color)"><%= item.value %></span>
+          </div>
+        <% end %>
+      <% end %>
     <% end %>
   </div>
 <% end %>

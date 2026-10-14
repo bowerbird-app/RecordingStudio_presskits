@@ -1366,21 +1366,21 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes options.map(&:last), "not-an-icon"
   end
 
-  def test_list_section_uses_a_table_and_a_collection_editor
+  def test_list_section_uses_a_list_and_a_collection_editor
     show = File.read(presskits_path("app/components/recording_studio_presskits/list_section/component.html.erb"))
     show_rb = File.read(presskits_path("app/components/recording_studio_presskits/list_section/component.rb"))
     editor = File.read(presskits_path("app/components/recording_studio_presskits/list_section/edit_component.html.erb"))
     fields = File.read(presskits_path("app/views/recording_studio_presskits/list_section/_line_fields.html.erb"))
     routes = File.read(presskits_path("config/routes.rb"))
 
-    assert_includes show, "FlatPack::Table::Component"
+    assert_includes show, "FlatPack::List::Component"
+    assert_includes show, "FlatPack::List::Item"
     assert_includes show, 'class="max-w-[65ch]"'
-    assert_includes show, "[&_thead]:hidden"
-    assert_includes show, 'title: "Icon"'
-    assert_includes show, 'title: "Key"'
-    assert_includes show, 'title: "Value"'
-    assert_includes show_rb, "whitespace-nowrap"
-    assert_includes show_rb, "truncate"
+    assert_includes show, "icon: item.icon.presence"
+    assert_includes show, "justify-between"
+    refute_includes show, "FlatPack::Table::Component"
+    refute_includes show, "[&_thead]:hidden"
+    refute_includes show_rb, "whitespace-nowrap"
     assert_includes editor, "FlatPack::CollectionEditor::Component"
     assert_includes editor, 'add_label: "Item"'
     assert_includes editor, 'empty_text: "No lines yet"'

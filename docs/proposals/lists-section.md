@@ -172,7 +172,7 @@ Removing the section stays on `SectionsController#destroy`. That trashes the kit
 - Preview uses the same frame, so an empty list stays out of the preview column.
 - `KitDownload::TextFile` and `KitDownload::Manifest` skip the section. See below.
 
-The public page and the kit preview render `FlatPack::Table::Component` with one column for the icon, one for the key, and one for the value, in saved order. The table has no header row. It is capped at `max-w-[65ch]`, the same measure as a text section. Render the icon with the same Flatpack `icon:` argument the rest of the kit uses, so the name becomes `data-flat-pack--icon-name-value`. A blank icon leaves that cell empty and does not invent a default glyph. Key and value do not wrap: `whitespace-nowrap` and `truncate`. Key stays muted. Value stays medium. No link, no second paragraph, no bullets, no numbers.
+The public page and the kit preview render `FlatPack::List::Component` with one `FlatPack::List::Item` per line, in saved order. The icon uses the item's `icon:` argument, so the name becomes `data-flat-pack--icon-name-value`, and sits beside the key and the value the way a facts row pairs a label with its value. The list is capped at `max-w-[65ch]`, the same measure as a text section. A blank icon leaves that slot empty and does not invent a default glyph. Key stays muted. Value stays medium. No link, no second paragraph, no numbers.
 
 The component does not print the kit-section title or subtitle.
 
