@@ -37,7 +37,7 @@ module RecordingStudioPresskits
           spacing: images_download_button ? :none : :md,
           level: :h2,
           anchor_link: true,
-          trailing: images_count_badge
+          trailing: section_count_badge
         )
       end
 
@@ -86,6 +86,10 @@ module RecordingStudioPresskits
         helpers
       end
 
+      def section_count_badge
+        images_count_badge || video_count_badge
+      end
+
       def images_count_badge
         content = @content_recording
         return unless content&.recordable.is_a?(Images)
@@ -93,6 +97,20 @@ module RecordingStudioPresskits
         count = DirectImages.list(content).size
         return if count.zero?
 
+        count_badge(count)
+      end
+
+      def video_count_badge
+        content = @content_recording
+        return unless content&.recordable.is_a?(VideoSection)
+
+        count = VideoSection.active_videos(content).size
+        return if count.zero?
+
+        count_badge(count)
+      end
+
+      def count_badge(count)
         FlatPack::Badge::Component.new(text: count.to_s, size: :sm)
       end
 

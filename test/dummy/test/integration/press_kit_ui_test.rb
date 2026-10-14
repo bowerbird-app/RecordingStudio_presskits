@@ -1555,6 +1555,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes preview, "data-presskits-video-grid"
     refute_includes preview, "The first video uploaded to YouTube."
     refute_includes preview, "Another clip"
+    editor_section = css_select("#presskits-editor-preview section").find do |node|
+      field = node.at_css("[name='kit_section[title]']")
+      field && field["value"] == "Trailer"
+    end
+    assert editor_section
+    assert_select editor_section, "span", text: "2", count: 0
 
     featured = preview.index('data-presskits-video-featured="true"')
     grid = preview.index("data-presskits-video-grid")
@@ -1570,6 +1576,14 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, zoo
     assert_includes response.body, rick
     assert_includes response.body, "YouTube · 1:24"
+    heading = css_select("h2").find { |node| node.text == "Trailer" }
+    assert_equal "Trailer", heading.text
+    row = heading.parent
+    badge = row.css("span.shrink-0").find { |node| node.text.strip == "2" }
+    assert badge
+    assert_includes badge.at_css("span")["class"], "rounded-full"
+    assert_equal "Copy link to Trailer", row.at_css("a")["aria-label"]
+    refute_includes row.at_css("a").text, "2"
     public_card = css_select("[data-presskits-video-featured='true']").first.to_html
     assert_includes public_card, "Copy link"
     assert_includes public_card, 'aria-label="Copy link"'
