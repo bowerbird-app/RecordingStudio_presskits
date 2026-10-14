@@ -110,6 +110,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.column_exists?(:recording_studio_stats, :value)
     assert connection.column_exists?(:recording_studio_stats, :unit)
     assert connection.column_exists?(:recording_studio_stats, :description)
+    assert connection.column_exists?(:recording_studio_stats, :icon)
     refute connection.column_exists?(:recording_studio_stats, :source_url)
     refute connection.column_exists?(:recording_studio_stats, :as_of_date)
     refute connection.column_exists?(:recording_studio_stats, :updated_at)
@@ -239,14 +240,24 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     specifications_content = RecordingStudioPresskits::KitQuery.section_content(specifications)
     refute statistics_content.recordable.respond_to?(:columns)
     refute statistics_content.recordable.respond_to?(:display_style)
+    company_stats = RecordingStudioPresskits::StatsSection.active_stats(statistics_content)
     assert_equal(
       ["Projects", "Countries", "Employees"],
-      RecordingStudioPresskits::StatsSection.active_stats(statistics_content).map { |child| child.recordable.label }
+      company_stats.map { |child| child.recordable.label }
+    )
+    assert_equal(
+      ["chart-bar", "globe-alt", "users"],
+      company_stats.map { |child| child.recordable.icon }
     )
     refute specifications_content.recordable.respond_to?(:columns)
+    project_stats = RecordingStudioPresskits::StatsSection.active_stats(specifications_content)
     assert_equal(
       ["Floor area", "Completion", "Project cost"],
-      RecordingStudioPresskits::StatsSection.active_stats(specifications_content).map { |child| child.recordable.label }
+      project_stats.map { |child| child.recordable.label }
+    )
+    assert_equal(
+      ["building-office-2", "calendar-days", "currency-dollar"],
+      project_stats.map { |child| child.recordable.icon }
     )
     assert press_kit.published?
     company = RecordingStudioCompany.company(root_recording)

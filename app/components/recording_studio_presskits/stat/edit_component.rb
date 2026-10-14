@@ -36,6 +36,12 @@ module RecordingStudioPresskits
         helpers.edit_press_kit_section_path(kit_recording, @section_recording)
       end
 
+      def icon_options
+        [{ label: "None", value: "" }] + Stat::ICONS.map do |label, name|
+          { label: label, value: name, icon: name }
+        end
+      end
+
       private
 
       def kit_recording

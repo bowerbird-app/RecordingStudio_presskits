@@ -335,16 +335,24 @@ begin
       title: title
     )
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    stats.each do |label, value, unit|
-      already = RecordingStudioPresskits::StatsSection.active_stats(content).any? do |child|
+    stats.each do |label, value, unit, icon|
+      existing = RecordingStudioPresskits::StatsSection.active_stats(content).find do |child|
         child.recordable.label == label && child.recordable.value == value
       end
-      next if already
+      if existing
+        next if existing.recordable.icon == icon
+
+        root_recording.revise(existing, actor: user) do |stat|
+          stat.icon = icon
+        end
+        next
+      end
 
       content.record(RecordingStudioPresskits::Stat, parent_recording: content, actor: user) do |stat|
         stat.label = label
         stat.value = value
         stat.unit = unit
+        stat.icon = icon
       end
     end
   end
@@ -353,18 +361,18 @@ begin
     press_kit_recording,
     "Company statistics",
     [
-      ["Projects", "120", nil],
-      ["Countries", "15", nil],
-      ["Employees", "85", nil]
+      ["Projects", "120", nil, "chart-bar"],
+      ["Countries", "15", nil, "globe-alt"],
+      ["Employees", "85", nil, "users"]
     ]
   )
   ensure_stats_section.call(
     press_kit_recording,
     "Project specifications",
     [
-      ["Floor area", "420", "m²"],
-      ["Completion", "2025", nil],
-      ["Project cost", "2.4 million", "AUD"]
+      ["Floor area", "420", "m²", "building-office-2"],
+      ["Completion", "2025", nil, "calendar-days"],
+      ["Project cost", "2.4 million", "AUD", "currency-dollar"]
     ]
   )
 

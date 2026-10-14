@@ -12,7 +12,8 @@ class StatPayloadTest < ActiveSupport::TestCase
       label: "Floor area",
       value: "420",
       unit: " m² ",
-      description: " Total internal floor area "
+      description: " Total internal floor area ",
+      icon: " building-office-2 "
     )
 
     assert_equal(
@@ -20,7 +21,8 @@ class StatPayloadTest < ActiveSupport::TestCase
         label: "Floor area",
         value: "420",
         unit: "m²",
-        description: "Total internal floor area"
+        description: "Total internal floor area",
+        icon: "building-office-2"
       },
       RecordingStudioPresskits::Api::StatPayload.for(stat)
     )
@@ -34,7 +36,8 @@ class StatPayloadTest < ActiveSupport::TestCase
         label: "Completed",
         value: "2025",
         unit: nil,
-        description: nil
+        description: nil,
+        icon: nil
       },
       RecordingStudioPresskits::Api::StatPayload.for(stat)
     )
@@ -72,7 +75,7 @@ class StatPayloadTest < ActiveSupport::TestCase
     refute payload.key?(:display)
     refute payload.key?(:facts)
     assert_equal ["Floor area", "Completed"], labels
-    assert_equal %i[label value unit description], stats.first.keys
+    assert_equal %i[label value unit description icon], stats.first.keys
     refute stats.first.key?(:source_url)
     refute stats.first.key?(:as_of_date)
     assert_equal "m²", stats.first[:unit]
@@ -106,7 +109,17 @@ class StatPayloadTest < ActiveSupport::TestCase
     stat.value = "85"
     stat.unit = "people"
     stat.description = "Studio staff"
+    stat.icon = " users "
     assert stat.valid?
+    assert_equal "users", stat.icon
+
+    stat.icon = "not-an-icon"
+    refute stat.valid?
+    assert_includes stat.errors[:icon], "is not included in the list"
+
+    stat.icon = ""
+    assert stat.valid?
+    assert_nil stat.icon
   end
 
   test "stats section has no columns attribute" do
@@ -192,6 +205,25 @@ class StatPayloadTest < ActiveSupport::TestCase
     end
     if connection&.column_exists?(:recording_studio_stats, :as_of_date)
       connection.remove_column :recording_studio_stats, :as_of_date
+    end
+    RecordingStudioPresskits::Stat.reset_column_information
+  end
+
+  test "add icon migration adds the icon column" do
+    connection = ActiveRecord::Base.connection
+    connection.remove_column :recording_studio_stats, :icon
+    RecordingStudioPresskits::Stat.reset_column_information
+    refute connection.column_exists?(:recording_studio_stats, :icon)
+
+    load Rails.root.join("db/migrate/20261014150000_add_icon_to_recording_studio_stats.rb")
+    AddIconToRecordingStudioStats.add_icon
+    RecordingStudioPresskits::Stat.reset_column_information
+
+    assert connection.column_exists?(:recording_studio_stats, :icon)
+    assert RecordingStudioPresskits::Stat.new.respond_to?(:icon)
+  ensure
+    unless connection&.column_exists?(:recording_studio_stats, :icon)
+      connection&.add_column(:recording_studio_stats, :icon, :string)
     end
     RecordingStudioPresskits::Stat.reset_column_information
   end

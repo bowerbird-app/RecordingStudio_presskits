@@ -36,5 +36,13 @@
       label: "Description",
       class: "w-full"
     ) %>
+    <%= render FlatPack::RadioGroup::Component.new(
+      name: "stat[icon]",
+      label: "Icon",
+      value: stat.icon.to_s,
+      options: icon_options,
+      variant: :cards,
+      error: stat.errors[:icon].to_sentence.presence
+    ) %>
   <% end %>
 </div>

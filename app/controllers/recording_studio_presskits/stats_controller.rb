@@ -74,7 +74,7 @@ module RecordingStudioPresskits
     end
 
     def stat_params
-      params.require(:stat).permit(:label, :value, :unit, :description)
+      params.require(:stat).permit(:label, :value, :unit, :description, :icon)
     end
 
     def invalid_stat(error)

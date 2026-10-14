@@ -4,6 +4,13 @@
       <% stat = stat_recording.recordable %>
       <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
         <div class="text-center">
+          <% if (icon = stat.icon.to_s.strip.presence) %>
+            <%= render FlatPack::Shared::IconComponent.new(
+              name: icon,
+              size: :xl,
+              class: "mx-auto mb-2 text-(--surface-content-color)"
+            ) %>
+          <% end %>
           <p class="fp-tabular-nums text-(--surface-content-color)">
             <span class="text-4xl font-bold"><%= stat.value %></span>
             <% if (unit = stat.unit.to_s.strip.presence) %>

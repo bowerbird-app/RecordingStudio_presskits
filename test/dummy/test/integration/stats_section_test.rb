@@ -124,6 +124,10 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_operator response.body.index("name=\"stat[value]\""), :<, response.body.index("name=\"stat[unit]\"")
     assert_operator response.body.index("name=\"stat[unit]\""), :<, response.body.index("name=\"stat[label]\"")
     assert_operator response.body.index("name=\"stat[label]\""), :<, response.body.index("name=\"stat[description]\"")
+    assert_operator response.body.index("name=\"stat[description]\""), :<, response.body.index("name=\"stat[icon]\"")
+    assert_select "input[type=radio][name='stat[icon]'][value='chart-bar']"
+    assert_select "input[type=radio][name='stat[icon]'][value='']"
+    assert_select "[data-flat-pack--icon-name-value='users']"
 
     assert_no_difference -> { RecordingStudioPresskits::Stat.count } do
       post recording_studio_presskits.press_kit_section_stats_path(kit, section), params: {
@@ -151,9 +155,28 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_equal "Projects", first.recordable.label
     assert_equal "120", first.recordable.value
     assert_equal "Shipped work", first.recordable.description
+    assert_nil first.recordable.icon
     refute first.recordable.respond_to?(:source_url)
     refute first.recordable.respond_to?(:as_of_date)
     refute_includes first.recordable.attributes.values, "nope"
+
+    assert_no_difference -> { RecordingStudioPresskits::Stat.count } do
+      patch recording_studio_presskits.press_kit_section_stat_path(kit, section, first), params: {
+        stat: { label: "Projects", value: "120", icon: "not-an-icon" }
+      }
+    end
+    assert_response :unprocessable_entity
+    assert_nil first.reload.recordable.icon
+
+    patch recording_studio_presskits.press_kit_section_stat_path(kit, section, first), params: {
+      stat: { label: "Projects", value: "120", icon: "chart-bar" }
+    }
+    assert_equal "chart-bar", first.reload.recordable.icon
+
+    patch recording_studio_presskits.press_kit_section_stat_path(kit, section, first), params: {
+      stat: { label: "Projects", value: "120", icon: "" }
+    }
+    assert_nil first.reload.recordable.icon
 
     post recording_studio_presskits.press_kit_section_stats_path(kit, section), params: {
       stat: { label: "Employees", value: "85" }
@@ -205,7 +228,7 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     add_stats_section(kit, title: "Project specifications")
     content = section_content(stats_section(kit))
-    record_stat(content, label: "Floor area", value: "420", unit: "m²", description: "Total internal floor area")
+    record_stat(content, label: "Floor area", value: "420", unit: "m²", description: "Total internal floor area", icon: "building-office-2")
     record_stat(content, label: "Completion", value: "2025")
     publish_stats_kit!(kit)
 
@@ -213,7 +236,7 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_response :success
     preview = css_select("#presskits-editor-preview").first.to_html
     assert_stats_grid(preview)
-    assert_stat_card(preview, value: "420", unit: "m²", label: "Floor area", description: "Total internal floor area")
+    assert_stat_card(preview, value: "420", unit: "m²", label: "Floor area", description: "Total internal floor area", icon: "building-office-2")
     assert_stat_card(preview, value: "2025", label: "Completion")
     refute_includes preview, "As of"
     refute_includes preview, "<th"
@@ -223,7 +246,7 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".fp-section-title h2", text: "Project specifications"
     assert_stats_grid(response.body)
-    assert_stat_card(response.body, value: "420", unit: "m²", label: "Floor area", description: "Total internal floor area")
+    assert_stat_card(response.body, value: "420", unit: "m²", label: "Floor area", description: "Total internal floor area", icon: "building-office-2")
     assert_stat_card(response.body, value: "2025", label: "Completion")
     refute_includes response.body, "As of"
     refute_includes response.body, "<th"
@@ -319,12 +342,13 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     )
   end
 
-  def record_stat(content, label:, value:, unit: nil, description: nil)
+  def record_stat(content, label:, value:, unit: nil, description: nil, icon: nil)
     content.record(RecordingStudioPresskits::Stat, parent_recording: content, actor: @user) do |stat|
       stat.label = label
       stat.value = value
       stat.unit = unit
       stat.description = description
+      stat.icon = icon
     end
   end
 
@@ -376,10 +400,19 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     refute_includes html, "lg:grid-cols-4"
   end
 
-  def assert_stat_card(html, value:, label:, unit: nil, description: nil)
+  def assert_stat_card(html, value:, label:, unit: nil, description: nil, icon: nil)
     fragment = Nokogiri::HTML.fragment(html)
     card = fragment.css(".text-center").find { |node| node.at_css(".text-4xl")&.text == value }
     assert card, "expected a centered stat card for #{value}"
+    icon_node = card.at_css("[data-flat-pack--icon-name-value]")
+    if icon
+      assert_equal icon, icon_node["data-flat-pack--icon-name-value"]
+      assert_includes icon_node["class"], "w-8"
+      assert_includes icon_node["class"], "h-8"
+      assert_operator card.to_html.index("data-flat-pack--icon-name-value"), :<, card.to_html.index("text-4xl")
+    else
+      assert_nil icon_node
+    end
     assert_includes card.at_css(".text-4xl")["class"], "font-bold"
     assert_includes card.at_css(".fp-tabular-nums")["class"], "fp-tabular-nums"
     assert_equal label, card.at_css(".text-lg")&.text

@@ -10,8 +10,24 @@ module RecordingStudioPresskits
 
     include RecordingStudio::Capabilities::Trashable.to
 
+    ICONS = [
+      ["Chart", "chart-bar"],
+      ["People", "users"],
+      ["Places", "globe-alt"],
+      ["Building", "building-office-2"],
+      ["Awards", "trophy"],
+      ["Date", "calendar-days"],
+      ["Money", "currency-dollar"],
+      ["Pin", "map-pin"],
+      ["Growth", "arrow-trending-up"],
+      ["Time", "clock"],
+      ["Star", "star"],
+      ["Home", "home"]
+    ].freeze
+
     validates :label, presence: true
     validates :value, presence: true
+    validates :icon, inclusion: { in: ICONS.map(&:last) }, allow_blank: true
 
     before_validation :clear_blank_details
 
@@ -26,6 +42,7 @@ module RecordingStudioPresskits
       self.value = stripped(value)
       self.unit = blank_to_nil(unit)
       self.description = blank_to_nil(description)
+      self.icon = blank_to_nil(icon)
     end
 
     def stripped(value)

@@ -21,7 +21,7 @@ module RecordingStudioPresskits
       end
 
       def stat_keys
-        %i[label value unit description]
+        %i[label value unit description icon]
       end
 
       def register_stats_section

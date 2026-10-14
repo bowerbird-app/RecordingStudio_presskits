@@ -20,6 +20,7 @@ class CreateRecordingStudioFacts < ActiveRecord::Migration[8.1]
       t.text :value, null: false, default: ""
       t.string :unit
       t.text :description
+      t.string :icon
       t.datetime :created_at, null: false
     end
   end
