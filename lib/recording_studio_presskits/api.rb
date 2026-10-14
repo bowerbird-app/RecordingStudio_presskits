@@ -2,7 +2,7 @@
 
 require "recording_studio_presskits/api/exposure"
 require "recording_studio_presskits/api/quote_payload"
-require "recording_studio_presskits/api/fact_payload"
+require "recording_studio_presskits/api/stat_payload"
 require "recording_studio_presskits/api/credit_payload"
 require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
@@ -17,14 +17,14 @@ require "recording_studio_presskits/api/reorder_credits"
 require "recording_studio_presskits/api/remove_credit"
 require "recording_studio_presskits/api/section_action_registration"
 require "recording_studio_presskits/api/credit_registration"
-require "recording_studio_presskits/api/fact_registration"
+require "recording_studio_presskits/api/stat_registration"
 require "recording_studio_presskits/api/location_registration"
 
 module RecordingStudioPresskits
   module Api
     extend SectionActionRegistration
     extend CreditRegistration
-    extend FactRegistration
+    extend StatRegistration
     extend LocationRegistration
 
     class << self
@@ -41,7 +41,7 @@ module RecordingStudioPresskits
         register_text
         register_quote
         register_quote_section
-        register_facts!
+        register_stats!
         register_credits!
         register_video_section
         register_location_section
@@ -65,7 +65,7 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
           serializer: method(:kit_section_serializer),
-          output_keys: %i[title subtitle content_type content_id videos display facts locations],
+          output_keys: %i[title subtitle content_type content_id videos columns stats locations],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )

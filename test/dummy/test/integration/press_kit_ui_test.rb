@@ -210,7 +210,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
     assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
     assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")
-    assert_section_menu_icon("RecordingStudioPresskits::FactsSection", "calculator")
+    assert_section_menu_icon("RecordingStudioPresskits::StatsSection", "calculator")
     assert_section_menu_icon("RecordingStudioPresskits::VideoSection", "video-camera")
     assert_section_menu_icon("RecordingStudioPresskits::LocationSection", "map-pin")
     toolbar_html = css_select("#presskits-editor-toolbar").to_html

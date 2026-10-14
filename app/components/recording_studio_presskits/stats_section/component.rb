@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  class FactsSection
+  class StatsSection
     class Component < ViewComponent::Base
       def initialize(recording:)
         super()
@@ -9,23 +9,15 @@ module RecordingStudioPresskits
       end
 
       def render?
-        facts.any?
+        stats.any?
       end
 
-      def facts
-        FactsSection.active_facts(@recording)
+      def stats
+        StatsSection.active_stats(@recording)
       end
 
       def section
         @recording.recordable
-      end
-
-      def cards?
-        section.cards?
-      end
-
-      def table?
-        section.table?
       end
 
       def columns
@@ -41,10 +33,6 @@ module RecordingStudioPresskits
           recordable.description.to_s.strip.presence,
           as_of_text(recordable)
         ].compact
-      end
-
-      def source_url(recordable)
-        FlatPack::AttributeSanitizer.sanitize_url(recordable.source_url)
       end
 
       def grid_class

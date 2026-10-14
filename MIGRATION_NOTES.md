@@ -1,5 +1,26 @@
 # Upgrade notes
 
+## 0.48.0
+
+Stats replace Facts & Figures. A stats section always renders as cards. `columns` is `2`, `3`, or `4`, and the default is `3`. List, table, and `display_style` are gone.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections` and `recording_studio_facts` to `recording_studio_stats` when those old tables are still present. It drops `display_style`. It rewrites `recordable_type` from `RecordingStudioPresskits::FactsSection` to `RecordingStudioPresskits::StatsSection` and from `RecordingStudioPresskits::Fact` to `RecordingStudioPresskits::Stat`. A database that already has the stats tables is left in place. There is no down migration and no Ruby alias for the old names.
+
+`recording_studio_stats_sections` stores `columns`. `recording_studio_stats` stores `label`, `value`, optional `unit`, `description`, `source_url`, and `as_of_date`. There is no foreign key between the tables. The recording tree is the parent.
+
+Replace the old types in `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::StatsSection",
+"RecordingStudioPresskits::Stat"
+```
+
+`StatsSection` allows a kit section. `Stat` allows a stats section. Orderable on the stats section allows stats. Trashable is on both. Publishable and Duplicatable stay off them. Duplicating a kit copies the stats section, its column count, and the stats in order.
+
+Create the section with `RecordingStudioPresskits.create_section!` and `content_type: "RecordingStudioPresskits::StatsSection"`. Record a stat under the stats section. Revise `columns` on the stats section. Reorder with `recording_studio_orderable_reorder!` or `recording_studio_orderable_move!` on the stats section.
+
+The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A stats section also includes `columns` and `stats`. `display` and `facts` are not in the payload. MCP uses that same payload.
+
 ## 0.46.0
 
 No migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` on every layout that renders a kit, next to `flat_pack/application`. That sheet paints the pressed fill of a primary button from `--button-primary-active-background-color`. Without it, hover and the focus ring still follow the brand, and the pressed fill stays on Flatpack's hover.

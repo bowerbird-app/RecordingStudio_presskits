@@ -5,28 +5,28 @@
 
   <%= form_with url: form_path, method: form_method, local: true, class: "flex flex-col gap-6", data: form_data do %>
     <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
-    <div id="presskits-fact-actions" class="flex flex-wrap items-center gap-3">
+    <div id="presskits-stat-actions" class="flex flex-wrap items-center gap-3">
       <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
       <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path, data: helpers.presskits_editor_nav(:back)) %>
     </div>
 
     <%= render FlatPack::TextInput::Component.new(
-      name: "fact[label]",
-      value: fact.label,
+      name: "stat[label]",
+      value: stat.label,
       label: "Label",
       required: true,
       class: "w-full"
     ) %>
     <%= render FlatPack::TextInput::Component.new(
-      name: "fact[value]",
-      value: fact.value,
+      name: "stat[value]",
+      value: stat.value,
       label: "Value",
       required: true,
       class: "w-full"
     ) %>
     <%= render FlatPack::TextInput::Component.new(
-      name: "fact[unit]",
-      value: fact.unit,
+      name: "stat[unit]",
+      value: stat.unit,
       label: "Unit",
       class: "w-full"
     ) %>
@@ -36,21 +36,21 @@
         More detail
       </summary>
       <%= render FlatPack::TextArea::Component.new(
-        name: "fact[description]",
-        value: fact.description,
+        name: "stat[description]",
+        value: stat.description,
         label: "Description",
         class: "w-full"
       ) %>
       <%= render FlatPack::TextInput::Component.new(
-        name: "fact[source_url]",
-        value: fact.source_url,
+        name: "stat[source_url]",
+        value: stat.source_url,
         label: "Source",
         placeholder: "https://",
         class: "w-full"
       ) %>
       <%= render FlatPack::TextInput::Component.new(
-        name: "fact[as_of_date]",
-        value: fact.as_of_date,
+        name: "stat[as_of_date]",
+        value: stat.as_of_date,
         label: "As of",
         type: "date",
         class: "w-full"

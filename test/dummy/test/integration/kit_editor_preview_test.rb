@@ -206,15 +206,15 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
 
     post recording_studio_presskits.press_kit_sections_path(kit),
-         params: { type: "RecordingStudioPresskits::FactsSection" }
-    section = content_section(kit, RecordingStudioPresskits::FactsSection)
-    assert_equal "Facts & Figures", section.recordable.title
+         params: { type: "RecordingStudioPresskits::StatsSection" }
+    section = content_section(kit, RecordingStudioPresskits::StatsSection)
+    assert_equal "Stats", section.recordable.title
     assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit, highlight: section.id)
     follow_redirect!
     assert_response :success
     assert_select "#presskits-section-#{section.id}"
-    assert_select "#presskits-section-placeholder", text: /Add a figure/
-    assert_select ".fp-section-title h2", text: "Facts & Figures"
+    assert_select "#presskits-section-placeholder", text: /Add a stat/
+    assert_select ".fp-section-title h2", text: "Stats"
   end
 
   test "empty sections stay off the public kit" do
@@ -304,8 +304,8 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     sign_in @user
     switch_to_root(@root)
     post recording_studio_presskits.press_kit_sections_path(kit),
-         params: { type: "RecordingStudioPresskits::FactsSection" }
-    section = content_section(kit, RecordingStudioPresskits::FactsSection)
+         params: { type: "RecordingStudioPresskits::StatsSection" }
+    section = content_section(kit, RecordingStudioPresskits::StatsSection)
 
     get recording_studio_presskits.heading_press_kit_section_path(kit, section),
         headers: { "Turbo-Frame" => "pk-editor-screen" }
@@ -320,31 +320,32 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
         headers: { "Turbo-Frame" => "pk-editor-screen" }
     assert_response :success
     assert_select "turbo-frame#pk-editor-screen"
-    assert_select "a[data-fp-nav='push']", text: "Fact"
-    assert_select "form#presskits-facts-display-form[data-turbo-frame='_top']"
+    assert_select "a[data-fp-nav='push']", text: "Stat"
+    assert_select "form#presskits-stats-columns-form[data-turbo-frame='_top']"
+    refute_select "[name='stats_section[display_style]']"
   end
 
-  test "fact turbo stream updates the preview and leaves the modal" do
+  test "stat turbo stream updates the preview and leaves the modal" do
     kit = record_kit("Spring launch")
     sign_in @user
     switch_to_root(@root)
     post recording_studio_presskits.press_kit_sections_path(kit),
-         params: { type: "RecordingStudioPresskits::FactsSection" }
-    section = content_section(kit, RecordingStudioPresskits::FactsSection)
+         params: { type: "RecordingStudioPresskits::StatsSection" }
+    section = content_section(kit, RecordingStudioPresskits::StatsSection)
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    fact = content.record(RecordingStudioPresskits::Fact, parent_recording: content, actor: @user) do |recordable|
+    stat = content.record(RecordingStudioPresskits::Stat, parent_recording: content, actor: @user) do |recordable|
       recordable.label = "Projects"
       recordable.value = "120"
     end
 
-    patch recording_studio_presskits.press_kit_section_fact_path(kit, section, fact),
+    patch recording_studio_presskits.press_kit_section_stat_path(kit, section, stat),
           params: {
-            fact: { label: "Projects", value: "121" },
+            stat: { label: "Projects", value: "121" },
             from_kit_editor: "1"
           },
           as: :turbo_stream
     assert_response :success
-    assert_equal "121", fact.reload.recordable.value
+    assert_equal "121", stat.reload.recordable.value
     assert_includes response.body, "presskits-section-#{section.id}"
     assert_includes response.body, "121"
     refute_includes response.body, "turbo-stream action=\"update\" target=\"pk-editor\""
@@ -401,10 +402,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
 
     third = record_block(kit, "Notes")
     post recording_studio_presskits.press_kit_sections_path(kit), params: {
-      type: "RecordingStudioPresskits::FactsSection",
+      type: "RecordingStudioPresskits::StatsSection",
       after_recording_id: first.id
     }
-    inserted = content_section(kit, RecordingStudioPresskits::FactsSection)
+    inserted = content_section(kit, RecordingStudioPresskits::StatsSection)
     assert_equal [first.id, inserted.id, second.id, third.id],
                  RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
   end

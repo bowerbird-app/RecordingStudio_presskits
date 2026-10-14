@@ -2,22 +2,21 @@
 
 class CreateRecordingStudioFacts < ActiveRecord::Migration[8.1]
   def change
-    create_facts_sections
-    create_facts
+    create_stats_sections
+    create_stats
   end
 
   private
 
-  def create_facts_sections
-    create_table :recording_studio_facts_sections, id: :uuid do |t|
-      t.string :display_style, null: false, default: "list"
+  def create_stats_sections
+    create_table :recording_studio_stats_sections, id: :uuid do |t|
       t.integer :columns, null: false, default: 3
       t.datetime :created_at, null: false
     end
   end
 
-  def create_facts
-    create_table :recording_studio_facts, id: :uuid do |t|
+  def create_stats
+    create_table :recording_studio_stats, id: :uuid do |t|
       t.string :label, null: false, default: ""
       t.text :value, null: false, default: ""
       t.string :unit

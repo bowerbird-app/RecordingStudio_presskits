@@ -70,7 +70,7 @@ module RecordingStudioPresskits
           Text => :text_lines,
           Images => :image_section_lines,
           QuoteSection => :quote_lines,
-          FactsSection => :fact_lines,
+          StatsSection => :stat_lines,
           CreditsSection => :credit_lines,
           VideoSection => :video_lines,
           LocationSection => :location_section_lines
@@ -111,15 +111,15 @@ module RecordingStudioPresskits
         [body, cite.any? ? "— #{cite.join(', ')}" : nil].compact.join("\n")
       end
 
-      def fact_lines(content, _recordable)
-        FactsSection.active_facts(content).filter_map { |child| fact_block(child.recordable) }
+      def stat_lines(content, _recordable)
+        StatsSection.active_stats(content).filter_map { |child| stat_block(child.recordable) }
       end
 
-      def fact_block(fact)
-        value = fact.formatted_value.to_s.strip.presence
-        return if fact.label.blank? || value.blank?
+      def stat_block(stat)
+        value = stat.formatted_value.to_s.strip.presence
+        return if stat.label.blank? || value.blank?
 
-        [labeled(:fact, "#{fact.label}: #{value}"), fact.description.to_s.strip.presence].compact.join("\n")
+        [labeled(:stat, "#{stat.label}: #{value}"), stat.description.to_s.strip.presence].compact.join("\n")
       end
 
       def credit_lines(content, _recordable)

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-10-14
+
+### Changed
+- Stats replace Facts & Figures. `RecordingStudioPresskits::StatsSection` sits under the kit section and stores `columns` (`2`, `3`, or `4`, default `3`). Each `RecordingStudioPresskits::Stat` is a child recording with a required label and value, plus optional unit, description, source URL, and as-of date.
+- Stats always render as cards. List and table are gone, and so is `display_style`. Columns still choose 2, 3, or 4 on larger screens.
+- The content editor shows Columns, **+ Stat**, and the stat list. There is no Show as control.
+- A stats section payload is `columns` and `stats`. The kit section payload uses those keys when the content is a stats section.
+- Version `0.48.0`
+
+### Upgrade notes
+- Bump to `0.48.0` and run the new migration. It renames `recording_studio_facts_sections` to `recording_studio_stats_sections`, renames `recording_studio_facts` to `recording_studio_stats`, drops `display_style`, and rewrites recording types from `FactsSection` / `Fact` to `StatsSection` / `Stat`.
+- Register `RecordingStudioPresskits::StatsSection` and `RecordingStudioPresskits::Stat`. Drop `FactsSection` and `Fact`.
+- Call `register_stats!` paths through `RecordingStudioPresskits::Api.register!`. Read `columns` and `stats`. `display` and `facts` are gone.
+- There are no Ruby aliases for the old class names, routes, or payload keys.
+
 ## [0.46.0] - 2026-10-13
 
 ### Changed

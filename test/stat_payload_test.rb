@@ -6,9 +6,9 @@ require_relative "dummy/config/environment"
 
 require "rails/test_help"
 
-class FactPayloadTest < ActiveSupport::TestCase
-  test "includes every fact key and keeps blank optionals as nil" do
-    fact = RecordingStudioPresskits::Fact.new(
+class StatPayloadTest < ActiveSupport::TestCase
+  test "includes every stat key and keeps blank optionals as nil" do
+    stat = RecordingStudioPresskits::Stat.new(
       label: "Floor area",
       value: "420",
       unit: " m² ",
@@ -26,12 +26,12 @@ class FactPayloadTest < ActiveSupport::TestCase
         source_url: "https://example.com/area",
         as_of_date: Date.new(2025, 1, 1)
       },
-      RecordingStudioPresskits::Api::FactPayload.for(fact)
+      RecordingStudioPresskits::Api::StatPayload.for(stat)
     )
   end
 
   test "omits blank optional fields as nil" do
-    fact = RecordingStudioPresskits::Fact.new(label: "Completed", value: "2025", unit: "  ", description: nil)
+    stat = RecordingStudioPresskits::Stat.new(label: "Completed", value: "2025", unit: "  ", description: nil)
 
     assert_equal(
       {
@@ -42,12 +42,12 @@ class FactPayloadTest < ActiveSupport::TestCase
         source_url: nil,
         as_of_date: nil
       },
-      RecordingStudioPresskits::Api::FactPayload.for(fact)
+      RecordingStudioPresskits::Api::StatPayload.for(stat)
     )
   end
 
   test "section payload leaves a text section at four keys" do
-    built = sections_with_facts
+    built = sections_with_stats
     text = built.fetch(:text)
     text_content = RecordingStudioPresskits::KitQuery.section_content(text)
 
@@ -62,81 +62,112 @@ class FactPayloadTest < ActiveSupport::TestCase
     )
   end
 
-  test "section payload lists active facts in order with display settings" do
-    built = sections_with_facts
+  test "section payload lists active stats in order with the column count" do
+    built = sections_with_stats
     section = built.fetch(:section)
     content = built.fetch(:content)
     payload = RecordingStudioPresskits::Api::SectionPayload.for(section.recordable, section)
-    facts = payload.fetch(:facts)
-    labels = facts.map { |entry| entry[:label] }
+    stats = payload.fetch(:stats)
+    labels = stats.map { |entry| entry[:label] }
 
-    assert_equal "Project facts", payload[:title]
+    assert_equal "Project stats", payload[:title]
     assert_equal "On the books", payload[:subtitle]
-    assert_equal "RecordingStudioPresskits::FactsSection", payload[:content_type]
+    assert_equal "RecordingStudioPresskits::StatsSection", payload[:content_type]
     assert_equal content.id, payload[:content_id]
-    assert_equal({ style: "cards", columns: 3 }, payload[:display])
+    assert_equal 3, payload[:columns]
+    refute payload.key?(:display)
+    refute payload.key?(:facts)
     assert_equal ["Floor area", "Completed"], labels
-    assert_equal %i[label value unit description source_url as_of_date], facts.first.keys
-    assert_equal "m²", facts.first[:unit]
+    assert_equal %i[label value unit description source_url as_of_date], stats.first.keys
+    assert_equal "m²", stats.first[:unit]
     refute_includes labels, "Gone"
   end
 
-  test "facts section api serializer returns display and facts" do
-    built = sections_with_facts
+  test "stats section api serializer returns columns and stats" do
+    built = sections_with_stats
     content = built.fetch(:content)
     payload = RecordingStudioPresskits::Api::SectionPayload.for(built.fetch(:section).recordable, built.fetch(:section))
     registry = fake_api_registry
     with_recording_studio_api(registry) { RecordingStudioPresskits::Api.register! }
-    serializer = registry.types.fetch("RecordingStudioPresskits::FactsSection").fetch(:serializer)
+    serializer = registry.types.fetch("RecordingStudioPresskits::StatsSection").fetch(:serializer)
+    serialized = serializer.call(content.recordable, recording: content)
 
-    assert_equal payload.fetch(:facts), serializer.call(content.recordable, recording: content).fetch(:facts)
-    assert_equal payload.fetch(:display), serializer.call(content.recordable, recording: content).fetch(:display)
+    assert_equal payload.fetch(:stats), serialized.fetch(:stats)
+    assert_equal payload.fetch(:columns), serialized.fetch(:columns)
+    refute serialized.key?(:display)
   end
 
-  test "fact requires label and value and accepts an http source" do
-    fact = RecordingStudioPresskits::Fact.new(label: "", value: "", source_url: "ftp://example.com")
+  test "stat requires label and value and accepts an http source" do
+    stat = RecordingStudioPresskits::Stat.new(label: "", value: "", source_url: "ftp://example.com")
 
-    refute fact.valid?
-    assert_includes fact.errors[:label], "can't be blank"
-    assert_includes fact.errors[:value], "can't be blank"
-    assert_includes fact.errors[:source_url], "must be an HTTP or HTTPS link"
+    refute stat.valid?
+    assert_includes stat.errors[:label], "can't be blank"
+    assert_includes stat.errors[:value], "can't be blank"
+    assert_includes stat.errors[:source_url], "must be an HTTP or HTTPS link"
 
-    fact.label = "Employees"
-    fact.value = "85"
-    fact.source_url = "https://example.com/team"
-    assert fact.valid?
+    stat.label = "Employees"
+    stat.value = "85"
+    stat.source_url = "https://example.com/team"
+    assert stat.valid?
   end
 
-  test "facts section validates display style and columns and keeps defaults" do
-    section = RecordingStudioPresskits::FactsSection.new
+  test "stats section validates columns and keeps the default" do
+    section = RecordingStudioPresskits::StatsSection.new
 
-    assert_equal "list", section.display_style
+    refute section.respond_to?(:display_style)
     assert_equal 3, section.columns
     assert section.valid?
 
-    section.display_style = "chart"
     section.columns = 5
     refute section.valid?
-    assert_includes section.errors[:display_style], "is not included in the list"
     assert_includes section.errors[:columns], "is not included in the list"
 
-    section.display_style = "table"
+    section.columns = nil
+    assert section.valid?
+    assert_equal 3, section.columns
+
     section.columns = 2
     assert section.valid?
   end
 
   test "formatted value joins a unit without a trailing space" do
-    with_unit = RecordingStudioPresskits::Fact.new(label: "Floor area", value: "420", unit: "m²")
-    without_unit = RecordingStudioPresskits::Fact.new(label: "Completed", value: "2025", unit: "  ")
+    with_unit = RecordingStudioPresskits::Stat.new(label: "Floor area", value: "420", unit: "m²")
+    without_unit = RecordingStudioPresskits::Stat.new(label: "Completed", value: "2025", unit: "  ")
 
     assert_equal "420 m²", with_unit.formatted_value
     assert_equal "2025", without_unit.formatted_value
   end
 
+  test "rewrite_recordable_types renames stored fact types" do
+    root, kit = kit_tree
+    user = owner_for(root)
+    section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::StatsSection",
+      actor: user
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    stat = record_stat(content, label: "Projects", value: "12")
+    RecordingStudio::Recording.where(id: content.id).update_all(
+      recordable_type: "RecordingStudioPresskits::FactsSection"
+    )
+    RecordingStudio::Recording.where(id: stat.id).update_all(
+      recordable_type: "RecordingStudioPresskits::Fact"
+    )
+
+    load Rails.root.join("db/migrate/20261014120000_rename_recording_studio_facts_to_stats.rb")
+    RenameRecordingStudioFactsToStats.rewrite_recordable_types
+
+    assert_equal "RecordingStudioPresskits::StatsSection", content.reload.recordable_type
+    assert_equal "RecordingStudioPresskits::Stat", stat.reload.recordable_type
+    assert_kind_of RecordingStudioPresskits::StatsSection, content.recordable
+    assert_equal 3, content.recordable.columns
+  end
+
   private
 
   def kit_tree
-    root = RecordingStudio.root_recording_for(Workspace.create!(name: "Fact payload #{SecureRandom.hex(4)}"))
+    root = RecordingStudio.root_recording_for(Workspace.create!(name: "Stat payload #{SecureRandom.hex(4)}"))
     kit = root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = "Spring launch" }
     [root, kit]
   end
@@ -144,7 +175,7 @@ class FactPayloadTest < ActiveSupport::TestCase
   def owner_for(root_recording)
     previous = Current.actor
     user = User.create!(
-      email: "fact-payload-#{SecureRandom.hex(4)}@example.com",
+      email: "stat-payload-#{SecureRandom.hex(4)}@example.com",
       password: "Password123!",
       password_confirmation: "Password123!"
     )
@@ -157,7 +188,7 @@ class FactPayloadTest < ActiveSupport::TestCase
     Current.actor = previous
   end
 
-  def sections_with_facts
+  def sections_with_stats
     root, kit = kit_tree
     user = owner_for(root)
     text = RecordingStudioPresskits.create_section!(
@@ -168,29 +199,26 @@ class FactPayloadTest < ActiveSupport::TestCase
     )
     section = RecordingStudioPresskits.create_section!(
       press_kit_recording: kit,
-      content_type: "RecordingStudioPresskits::FactsSection",
+      content_type: "RecordingStudioPresskits::StatsSection",
       actor: user,
-      title: "Project facts",
+      title: "Project stats",
       subtitle: "On the books"
     )
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    root.revise(content, actor: user) do |recordable|
-      recordable.display_style = "cards"
-      recordable.columns = 3
-    end
+    root.revise(content, actor: user) { |recordable| recordable.columns = 3 }
     content.reload
-    record_fact(content, label: "Floor area", value: "420", unit: "m²")
-    record_fact(content, label: "Completed", value: "2025")
-    gone = record_fact(content, label: "Gone", value: "0")
+    record_stat(content, label: "Floor area", value: "420", unit: "m²")
+    record_stat(content, label: "Completed", value: "2025")
+    gone = record_stat(content, label: "Gone", value: "0")
     gone.recording_studio_trashable_trash!(actor: user)
     { text: text, section: section, content: content }
   end
 
-  def record_fact(content, label:, value:, unit: nil)
-    content.record(RecordingStudioPresskits::Fact, parent_recording: content) do |fact|
-      fact.label = label
-      fact.value = value
-      fact.unit = unit
+  def record_stat(content, label:, value:, unit: nil)
+    content.record(RecordingStudioPresskits::Stat, parent_recording: content) do |stat|
+      stat.label = label
+      stat.value = value
+      stat.unit = unit
     end
   end
 

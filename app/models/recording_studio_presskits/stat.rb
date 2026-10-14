@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  class Fact < ApplicationRecord
-    self.table_name = "recording_studio_facts"
+  class Stat < ApplicationRecord
+    self.table_name = "recording_studio_stats"
 
     HTTP_URL = %r{\Ahttps?://[^\s]+\z}i
 
-    recording_studio_recordable label: "Fact",
+    recording_studio_recordable label: "Stat",
                                 root: false,
-                                allowed_parent_types: ["RecordingStudioPresskits::FactsSection"]
+                                allowed_parent_types: ["RecordingStudioPresskits::StatsSection"]
 
     include RecordingStudio::Capabilities::Trashable.to
 

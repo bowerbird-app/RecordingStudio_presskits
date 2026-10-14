@@ -1,0 +1,14 @@
+<% if stats.any? %>
+  <%= render FlatPack::Grid::Component.new(cols: columns, gap: :lg, class: grid_class) do %>
+    <% stats.each do |stat_recording| %>
+      <% stat = stat_recording.recordable %>
+      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+        <p class="text-2xl font-medium text-(--surface-content-color)"><%= formatted_value(stat) %></p>
+        <p class="mt-1 text-sm text-(--surface-muted-content-color)"><%= stat.label %></p>
+        <% supporting_text(stat).each do |line| %>
+          <p class="mt-2 text-sm text-(--surface-muted-content-color)"><%= line %></p>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

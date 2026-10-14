@@ -1,0 +1,379 @@
+# frozen_string_literal: true
+
+require "test_helper"
+require "devise/test/integration_helpers"
+
+class StatsSectionTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
+  setup do
+    @previous_actor = Current.actor
+    @user = User.create!(
+      email: "stats-section-#{SecureRandom.hex(4)}@example.com",
+      password: "Password123!",
+      password_confirmation: "Password123!"
+    )
+    @workspace = Workspace.create!(name: "Stats Workspace #{SecureRandom.hex(4)}")
+    Current.actor = @user
+    @root = RecordingStudio.root_recording_for(@workspace)
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: @root, actor: @user)
+    raise result.error if result.failure?
+  end
+
+  teardown do
+    Current.actor = @previous_actor
+  end
+
+  test "create section stores the heading and default columns" do
+    kit = record_kit("Spring launch")
+
+    assert_difference -> { RecordingStudioPresskits::KitSection.count }, 1 do
+      assert_difference -> { RecordingStudioPresskits::StatsSection.count }, 1 do
+        assert_no_difference -> { RecordingStudioPresskits::Stat.count } do
+          @section = RecordingStudioPresskits.create_section!(
+            press_kit_recording: kit,
+            content_type: "RecordingStudioPresskits::StatsSection",
+            actor: @user,
+            title: "Company statistics",
+            subtitle: "This year"
+          )
+        end
+      end
+    end
+
+    content = section_content(@section)
+    assert_equal "Company statistics", @section.recordable.title
+    assert_equal "This year", @section.recordable.subtitle
+    assert_equal @section, content.parent_recording
+    assert_kind_of RecordingStudioPresskits::StatsSection, content.recordable
+    refute content.recordable.respond_to?(:display_style)
+    assert_equal 3, content.recordable.columns
+    assert_equal [content.id], @section.child_recordings.map(&:id)
+    assert_equal(
+      {
+        title: "Company statistics",
+        subtitle: "This year",
+        content_type: "RecordingStudioPresskits::StatsSection",
+        content_id: content.id,
+        columns: 3,
+        stats: []
+      },
+      RecordingStudioPresskits::Api::SectionPayload.for(@section.recordable, @section)
+    )
+  end
+
+  test "a kit can hold two stats sections with their own stats and columns" do
+    kit = record_kit("Spring launch")
+    wide = add_stats_section(kit, title: "Company statistics")
+    narrow = add_stats_section(kit, title: "Project specifications")
+    wide_content = section_content(wide)
+    narrow_content = section_content(narrow)
+    record_stat(wide_content, label: "Projects", value: "120")
+    record_stat(wide_content, label: "Employees", value: "85")
+    record_stat(narrow_content, label: "Floor area", value: "420", unit: "m²")
+    @root.revise(wide_content, actor: @user) { |recordable| recordable.columns = 4 }
+    @root.revise(narrow_content, actor: @user) { |recordable| recordable.columns = 2 }
+
+    assert_equal [wide.id, narrow.id], RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
+    assert_equal 4, wide_content.reload.recordable.columns
+    assert_equal 2, narrow_content.reload.recordable.columns
+    assert_equal 2, RecordingStudioPresskits::StatsSection.active_stats(wide_content).size
+    assert_equal 1, RecordingStudioPresskits::StatsSection.active_stats(narrow_content).size
+  end
+
+  test "the editor adds edits reorders and trashes stats and saves columns" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    assert_difference -> { RecordingStudioPresskits::StatsSection.count }, 1 do
+      post recording_studio_presskits.press_kit_sections_path(kit),
+           params: { type: "RecordingStudioPresskits::StatsSection" }
+    end
+    follow_redirect!
+    assert_response :success
+    section = stats_section(kit)
+    new_stat = recording_studio_presskits.new_press_kit_section_stat_path(kit, section)
+    assert_equal "Stats", section.recordable.title
+    assert_select ".fp-section-title h2", text: "Stats"
+    assert_select "#presskits-section-placeholder"
+
+    get recording_studio_presskits.heading_press_kit_section_path(kit, section)
+    assert_select "input[name='kit_section[title]'][placeholder=?]", "Stats"
+    assert_select "input[name='kit_section[subtitle]']"
+
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_select "h1", text: "Stats"
+    refute_select "input[name='kit_section[title]']"
+    assert_select "#presskits-section-actions a[href='#{new_stat}']", text: "Stat"
+    assert_select "[data-flat-pack--icon-name-value='plus']"
+    assert_select "select[name='stats_section[columns]'], [name='stats_section[columns]']"
+    refute_select "[name='stats_section[display_style]']"
+    refute_includes response.body, "facts-display"
+    refute_includes response.body, "Show as"
+    assert_includes response.body, "No stats yet"
+    refute_section_preview_card
+
+    get new_stat
+    assert_response :success
+    assert_select "input[name='stat[label]']"
+    assert_select "input[name='stat[value]']"
+    assert_select "input[name='stat[unit]']"
+    assert_select "textarea[name='stat[description]']"
+    assert_select "input[name='stat[source_url]']"
+    assert_select "input[name='stat[as_of_date]']"
+
+    assert_no_difference -> { RecordingStudioPresskits::Stat.count } do
+      post recording_studio_presskits.press_kit_section_stats_path(kit, section), params: {
+        stat: { label: "", value: "120" }
+      }
+    end
+    assert_response :unprocessable_entity
+
+    assert_difference -> { RecordingStudioPresskits::Stat.count }, 1 do
+      post recording_studio_presskits.press_kit_section_stats_path(kit, section), params: {
+        stat: { label: "Projects", value: "120", unit: "", description: "Shipped work", decoy: "nope" }
+      }
+    end
+    follow_redirect!
+    assert_response :success
+    first = live_stats(section).first
+    assert_equal "Projects", first.recordable.label
+    assert_equal "120", first.recordable.value
+    refute_includes first.recordable.attributes.values, "nope"
+
+    post recording_studio_presskits.press_kit_section_stats_path(kit, section), params: {
+      stat: { label: "Employees", value: "85" }
+    }
+    second = live_stats(section).last
+    patch recording_studio_presskits.press_kit_section_stat_path(kit, section, second), params: {
+      stat: { label: "Employees", value: "90", unit: "people" }
+    }
+    assert_equal "90 people", second.reload.recordable.formatted_value
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      kit_section: { title: "Company statistics", subtitle: "This year" }
+    }
+    follow_redirect!
+    assert_equal "Company statistics", section.reload.recordable.title
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      stats_section: { columns: 4 }
+    }
+    follow_redirect!
+    content = section_content(section)
+    assert_equal 4, content.reload.recordable.columns
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select ".fp-section-title h2", text: "Company statistics"
+    assert_includes css_select("#presskits-editor-preview").first.to_html, "lg:grid-cols-4"
+    assert_includes response.body, "Projects"
+    assert_includes response.body, "120"
+    assert_includes response.body, "Employees"
+
+    patch recording_studio_presskits.press_kit_section_stat_order_path(kit, section), params: {
+      recording_id: second.id,
+      before_recording_id: first.id
+    }
+    follow_redirect!
+    assert_equal [second.id, first.id], live_stats(section).map(&:id)
+
+    delete recording_studio_presskits.press_kit_section_stat_path(kit, section, second)
+    follow_redirect!
+    assert second.reload.trashed_at.present?
+    assert_nil first.reload.trashed_at
+    assert_nil section.reload.trashed_at
+    refute_includes response.body, "Employees"
+    assert_includes response.body, "Projects"
+
+    second.recording_studio_trashable_restore!(actor: @user)
+    assert_nil second.reload.trashed_at
+  end
+
+  test "cards render at two three and four columns and an empty section stays off the public page" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    section = add_stats_section(kit, title: "Project specifications")
+    content = section_content(section)
+    record_stat(content, label: "Floor area", value: "420", unit: "m²", description: "Total internal floor area")
+    record_stat(content, label: "Completion", value: "2025")
+    publish_stats_kit!(kit)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    preview = css_select("#presskits-editor-preview").first.to_html
+    assert_includes preview, "lg:grid-cols-3"
+    assert_includes preview, "420 m²"
+    assert_includes preview, "Floor area"
+    refute_includes preview, "<th"
+    refute_includes preview, "<dt"
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      stats_section: { columns: 2 }
+    }
+    follow_redirect!
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    preview = css_select("#presskits-editor-preview").first.to_html
+    assert_includes preview, "lg:grid-cols-2"
+    refute_includes preview, "lg:grid-cols-3"
+
+    patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
+      stats_section: { columns: 4 }
+    }
+    follow_redirect!
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    preview = css_select("#presskits-editor-preview").first.to_html
+    assert_includes preview, "lg:grid-cols-4"
+    assert_includes preview, "420 m²"
+
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-stats"
+    assert_response :success
+    assert_select ".fp-section-title h2", text: "Project specifications"
+    assert_includes response.body, "lg:grid-cols-4"
+    assert_includes response.body, "420 m²"
+    refute_includes response.body, "<th"
+
+    empty = add_stats_section(kit)
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-section-#{empty.id} #presskits-section-placeholder"
+    get recording_studio_presskits.edit_press_kit_section_path(kit, empty)
+    refute_section_preview_card
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-stats"
+    assert_select ".fp-section-title h2", text: "Project specifications"
+    assert_select ".fp-section-title h2", text: "Stats", count: 0
+  end
+
+  test "duplicating a kit copies columns and order" do
+    kit = record_kit("Spring launch")
+    section = add_stats_section(kit, title: "Company statistics")
+    content = section_content(section)
+    first = record_stat(content, label: "Projects", value: "120")
+    second = record_stat(content, label: "Countries", value: "15")
+    @root.revise(content, actor: @user) { |recordable| recordable.columns = 4 }
+    content.recording_studio_orderable_reorder!(
+      ordered_recording_ids: [second.id, first.id],
+      actor: @user
+    )
+
+    copy = kit.duplicate_in_place!(actor: @user)
+    copied_section = RecordingStudioPresskits::KitQuery.sections_for(copy).first
+    copied_content = section_content(copied_section)
+    copied_stats = RecordingStudioPresskits::StatsSection.active_stats(copied_content)
+
+    assert_equal "Company statistics (Copy)", copied_section.recordable.title
+    assert_equal 4, copied_content.recordable.columns
+    assert_equal ["Countries", "Projects"], copied_stats.map { |child| child.recordable.label }
+    refute_includes copied_stats.map(&:id), first.id
+    refute_includes copied_stats.map(&:id), second.id
+  end
+
+  test "trashing a section leaves the kit and trashing a stat leaves the section" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    section = add_stats_section(kit, title: "Company statistics")
+    content = section_content(section)
+    stat = record_stat(content, label: "Projects", value: "120")
+
+    delete recording_studio_presskits.press_kit_section_stat_path(kit, section, stat)
+    assert stat.reload.trashed_at.present?
+    assert_nil section.reload.trashed_at
+
+    stat.recording_studio_trashable_restore!(actor: @user)
+    delete recording_studio_presskits.press_kit_section_path(kit, section)
+    assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
+    assert section.reload.trashed_at.present?
+    assert_nil kit.reload.trashed_at
+  end
+
+  test "a published payload keeps public access rules and omits trashed stats" do
+    kit = record_kit("Spring launch")
+    section = add_stats_section(kit, title: "Company statistics")
+    content = section_content(section)
+    record_stat(content, label: "Projects", value: "120")
+    gone = record_stat(content, label: "Gone", value: "0")
+    gone.recording_studio_trashable_trash!(actor: @user)
+    @root.revise(content, actor: @user) { |recordable| recordable.columns = 2 }
+
+    payload = RecordingStudioPresskits::Api::SectionPayload.for(section.recordable, section)
+    assert_equal ["Projects"], payload.fetch(:stats).map { |entry| entry[:label] }
+    assert_equal 2, payload[:columns]
+    refute payload.key?(:display)
+
+    get "/published/#{kit.publishable_child_recording&.id}/spring-launch-stats"
+    assert_response :not_found
+
+    publish_stats_kit!(kit)
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-stats"
+    assert_response :success
+    assert_includes response.body, "Projects"
+    refute_includes response.body, "Gone"
+  end
+
+  private
+
+  def record_kit(title)
+    @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = title }
+  end
+
+  def add_stats_section(kit, title: nil)
+    RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::StatsSection",
+      actor: @user,
+      title: title
+    )
+  end
+
+  def record_stat(content, label:, value:, unit: nil, description: nil)
+    content.record(RecordingStudioPresskits::Stat, parent_recording: content, actor: @user) do |stat|
+      stat.label = label
+      stat.value = value
+      stat.unit = unit
+      stat.description = description
+    end
+  end
+
+  def stats_section(kit)
+    RecordingStudioPresskits::KitQuery.sections_for(kit).find do |section|
+      section_content(section)&.recordable.is_a?(RecordingStudioPresskits::StatsSection)
+    end
+  end
+
+  def section_content(section)
+    RecordingStudioPresskits::KitQuery.section_content(section)
+  end
+
+  def live_stats(section)
+    RecordingStudioPresskits::StatsSection.active_stats(section_content(section))
+  end
+
+  def publish_stats_kit!(kit)
+    result = RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: kit,
+      actor: @user,
+      attributes: { slug: "spring-launch-stats", status: "published", meta_robots: "index,follow" }
+    )
+    raise result.error if result.failure?
+
+    result.value
+  end
+
+  def switch_to_root(root)
+    patch "/recording_studio_root_switchable/v1/root_switch", params: {
+      scope: "all_workspaces",
+      root_switch: {
+        root_recording_id: root.id,
+        return_to: "/recording_studio_presskits"
+      }
+    }
+    follow_redirect! if response.redirect?
+  end
+
+  def refute_section_preview_card
+    refute_select "#presskits-section-preview"
+  end
+end

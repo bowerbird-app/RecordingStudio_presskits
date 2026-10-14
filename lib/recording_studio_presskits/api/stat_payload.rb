@@ -2,9 +2,9 @@
 
 module RecordingStudioPresskits
   module Api
-    class FactPayload
+    class StatPayload
       def self.for(recordable, context: nil)
-        return withheld_fact if Exposure.withhold?(context, recording_for(recordable, context))
+        return withheld_stat if Exposure.withhold?(context, recording_for(recordable, context))
 
         {
           label: recordable.label,
@@ -20,18 +20,18 @@ module RecordingStudioPresskits
         return withheld_section if Exposure.withhold?(context, recording)
 
         {
-          display: display_for(recording&.recordable),
-          facts: FactsSection.active_facts(recording).map { |child| FactPayload.for(child.recordable) }
+          columns: columns_for(recording&.recordable),
+          stats: StatsSection.active_stats(recording).map { |child| StatPayload.for(child.recordable) }
         }
       end
 
-      def self.withheld_fact
+      def self.withheld_stat
         { label: nil, value: nil, unit: nil, description: nil, source_url: nil, as_of_date: nil }
       end
-      private_class_method :withheld_fact
+      private_class_method :withheld_stat
 
       def self.withheld_section
-        { display: { style: nil, columns: nil }, facts: [] }
+        { columns: nil, stats: [] }
       end
       private_class_method :withheld_section
 
@@ -43,13 +43,10 @@ module RecordingStudioPresskits
       end
       private_class_method :recording_for
 
-      def self.display_for(recordable)
-        {
-          style: recordable&.display_style.presence || FactsSection::DEFAULT_DISPLAY_STYLE,
-          columns: recordable&.columns.presence || FactsSection::DEFAULT_COLUMNS
-        }
+      def self.columns_for(recordable)
+        recordable&.columns.presence || StatsSection::DEFAULT_COLUMNS
       end
-      private_class_method :display_for
+      private_class_method :columns_for
 
       def self.blank_to_nil(value)
         value.to_s.strip.presence

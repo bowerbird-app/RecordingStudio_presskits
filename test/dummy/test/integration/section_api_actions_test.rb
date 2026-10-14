@@ -126,6 +126,17 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     assert_includes kit_section[:output_keys], :title
     assert_includes kit_section[:output_keys], :videos
     assert_includes kit_section[:output_keys], :locations
+    assert_includes kit_section[:output_keys], :columns
+    assert_includes kit_section[:output_keys], :stats
+    refute_includes kit_section[:output_keys], :facts
+    refute_includes kit_section[:output_keys], :display
+
+    registered_stats = registry.types.fetch("RecordingStudioPresskits::StatsSection")
+    assert_equal %i[index show update], registered_stats[:operations]
+    assert_equal %i[columns stats], registered_stats[:output_keys]
+    assert_equal %i[columns], registered_stats[:writable_attributes]
+    registered_stat = registry.types.fetch("RecordingStudioPresskits::Stat")
+    assert_equal %i[index show create update destroy], registered_stat[:operations]
 
     registered_location = registry.types.fetch("RecordingStudioPresskits::LocationSection")
     assert_equal %i[index show], registered_location[:operations]

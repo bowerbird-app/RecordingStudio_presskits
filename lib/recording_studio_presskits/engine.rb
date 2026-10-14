@@ -17,7 +17,7 @@ module RecordingStudioPresskits
         register_text_section
         register_images_section
         register_quote_section
-        register_facts_section
+        register_stats_section
         register_credits_section
         register_video_section
         register_location_section
@@ -87,11 +87,11 @@ module RecordingStudioPresskits
         )
       end
 
-      def register_facts_section
+      def register_stats_section
         RecordingStudioPresskits.register_section(
-          "RecordingStudioPresskits::FactsSection",
-          component: "RecordingStudioPresskits::FactsSection::Component",
-          editor: "RecordingStudioPresskits::FactsSection::EditComponent"
+          "RecordingStudioPresskits::StatsSection",
+          component: "RecordingStudioPresskits::StatsSection::Component",
+          editor: "RecordingStudioPresskits::StatsSection::EditComponent"
         )
       end
 
