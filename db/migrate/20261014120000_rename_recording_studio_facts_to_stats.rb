@@ -11,11 +11,19 @@ class RenameRecordingStudioFactsToStats < ActiveRecord::Migration[8.1]
     connection = ActiveRecord::Base.connection
     return unless connection.data_source_exists?("recording_studio_recordings")
 
+    rewrite_section_type(connection)
+    rewrite_stat_type(connection)
+  end
+
+  def self.rewrite_section_type(connection)
     connection.execute(<<~SQL.squish)
       UPDATE recording_studio_recordings
       SET recordable_type = 'RecordingStudioPresskits::StatsSection'
       WHERE recordable_type = 'RecordingStudioPresskits::FactsSection'
     SQL
+  end
+
+  def self.rewrite_stat_type(connection)
     connection.execute(<<~SQL.squish)
       UPDATE recording_studio_recordings
       SET recordable_type = 'RecordingStudioPresskits::Stat'
@@ -26,13 +34,22 @@ class RenameRecordingStudioFactsToStats < ActiveRecord::Migration[8.1]
   private
 
   def rename_legacy_tables
-    if table_exists?(:recording_studio_facts_sections) && !table_exists?(:recording_studio_stats_sections)
-      rename_table :recording_studio_facts_sections, :recording_studio_stats_sections
-    end
+    rename_facts_sections_table
+    rename_facts_table
+  end
 
-    if table_exists?(:recording_studio_facts) && !table_exists?(:recording_studio_stats)
-      rename_table :recording_studio_facts, :recording_studio_stats
-    end
+  def rename_facts_sections_table
+    return unless table_exists?(:recording_studio_facts_sections)
+    return if table_exists?(:recording_studio_stats_sections)
+
+    rename_table :recording_studio_facts_sections, :recording_studio_stats_sections
+  end
+
+  def rename_facts_table
+    return unless table_exists?(:recording_studio_facts)
+    return if table_exists?(:recording_studio_stats)
+
+    rename_table :recording_studio_facts, :recording_studio_stats
   end
 
   def drop_display_style

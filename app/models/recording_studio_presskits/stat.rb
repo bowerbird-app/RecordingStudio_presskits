@@ -11,18 +11,18 @@ module RecordingStudioPresskits
     include RecordingStudio::Capabilities::Trashable.to
 
     ICONS = [
-      ["Chart", "chart-bar"],
-      ["People", "users"],
-      ["Places", "globe-alt"],
-      ["Building", "building-office-2"],
-      ["Awards", "trophy"],
-      ["Date", "calendar-days"],
-      ["Money", "currency-dollar"],
-      ["Pin", "map-pin"],
-      ["Growth", "arrow-trending-up"],
-      ["Time", "clock"],
-      ["Star", "star"],
-      ["Home", "home"]
+      %w[Chart chart-bar],
+      %w[People users],
+      %w[Places globe-alt],
+      %w[Building building-office-2],
+      %w[Awards trophy],
+      %w[Date calendar-days],
+      %w[Money currency-dollar],
+      %w[Pin map-pin],
+      %w[Growth arrow-trending-up],
+      %w[Time clock],
+      %w[Star star],
+      %w[Home home]
     ].freeze
 
     validates :label, presence: true
