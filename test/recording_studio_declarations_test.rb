@@ -57,14 +57,17 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::FactsSection")
     assert_equal ["RecordingStudioPresskits::FactsSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Fact")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
-    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PodcastSection")
-    assert_equal ["RecordingStudioPresskits::PodcastSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Podcast")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::KitSection")
     assert_equal "Press kit", RecordingStudio.recordable_type_label("RecordingStudioPresskits::PressKit")
     assert_equal "RecordingStudioPresskits::PressKit", RecordingStudioPresskits.press_kit_type_name
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::PressKit")
     refute RecordingStudio.root_allowed?("FakeBlock")
+  end
+
+  test "podcast recordables name their parents" do
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PodcastSection")
+    assert_equal ["RecordingStudioPresskits::PodcastSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Podcast")
   end
 
   test "root recordable creates a root recording" do
@@ -478,8 +481,6 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::FactsSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Fact")
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::VideoSection")
-    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PodcastSection")
-    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Podcast")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
@@ -499,6 +500,11 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
     workspace_options = RecordingStudio.capability_options(:orderable, for: "Workspace").to_h
     assert_equal ["RecordingStudioPresskits::PressKit"], Array(workspace_options[:allows]).map(&:to_s)
+  end
+
+  test "podcasts are not orderable" do
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PodcastSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Podcast")
   end
 
   test "trashable is enabled on press kit and dummy fake block" do
