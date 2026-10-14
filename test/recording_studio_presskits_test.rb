@@ -728,6 +728,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes actions, "cover_download: true"
     assert_includes actions, "cover_contact: true"
     assert_includes actions, "w-full @min-[640px]:w-auto"
+    assert_includes actions, "size: :lg"
+    refute_includes actions, "rounded-full"
+    refute_includes actions, "order-last"
+    refute_includes actions, "extra_class"
+    assert_includes cover_html, "hidden @min-[640px]:block"
+    assert_includes cover_html, "hidden @min-[640px]:line-clamp-3"
     assert_includes cover_html, "line-clamp-3"
     assert_includes cover_html, "data-cover-subtitle"
     assert_includes cover_html, "gap-[14px]"
@@ -1000,6 +1006,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes inline_copy, "required: true"
     assert_includes inline_copy, "mode: :text"
     assert_includes inline_copy, "data-presskits-inline-copy"
+    assert_includes inline_copy, 'class="hidden @min-[640px]:block" data-cover-subtitle'
+    assert_includes inline_copy, 'class="hidden @min-[640px]:block" data-cover-description'
     assert_includes inline_copy, "relative z-20"
     assert_includes inline_copy, "event.stopPropagation()"
     cover = File.read(File.expand_path("cover/component.html.erb", components))

@@ -27,7 +27,6 @@ module RecordingStudioPresskits
           text: I18n.t("recording_studio_presskits.cover.view"),
           icon: "arrow-right",
           href: @href,
-          extra_class: "rounded-full [&>svg]:order-last",
           data: { cover_view: true }
         )
       end
@@ -68,14 +67,14 @@ module RecordingStudioPresskits
         @links ||= ActionLinks.new(recording: @recording, helpers: helpers)
       end
 
-      def button(text:, href:, data:, icon: nil, style: :primary, extra_class: nil) # rubocop:disable Metrics/ParameterLists
+      def button(text:, href:, data:, icon: nil, style: :primary)
         FlatPack::Button::Component.new(
           text: text,
           icon: icon,
           style: style,
           size: :lg,
           href: href,
-          class: [BUTTON_WIDTH, extra_class].compact.join(" "),
+          class: BUTTON_WIDTH,
           data: data
         )
       end

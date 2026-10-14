@@ -224,8 +224,14 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "[data-cover-card][data-brand-color='#BFDBFE']", count: 1
     assert_select "[data-cover-card][data-brand-color='#D97706']", count: 1
     assert_select "[data-cover-fallback]", count: 2
-    assert_select "[data-cover-subtitle]", text: "Collection released"
-    assert_select "[data-cover-description]", text: "A longer line that should clamp on the card."
+    subtitle = css_select("[data-cover-subtitle]").first
+    assert_equal "Collection released", subtitle.text.squish
+    assert_includes subtitle["class"], "hidden"
+    assert_includes subtitle["class"], "@min-[640px]:block"
+    description = css_select("[data-cover-description]").first
+    assert_equal "A longer line that should clamp on the card.", description.text.squish
+    assert_includes description["class"], "hidden"
+    assert_includes description["class"], "@min-[640px]:line-clamp-3"
     sky = css_select("[data-brand-color='#BFDBFE']").first
     amber = css_select("[data-brand-color='#D97706']").first
     assert_includes sky["style"], "--button-primary-background-color: #BFDBFE"
@@ -252,6 +258,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes actions["class"], "pb-8"
     assert_includes view["class"], "w-full"
     assert_includes view["class"], "@min-[640px]:w-auto"
+    refute_includes view["class"], "rounded-full"
     assert view.ancestors.any? { |node| node["data-cover-copy"] }
     refute_select "[data-cover-download]"
     refute_select "[data-cover-contact]"
@@ -362,8 +369,14 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
     assert_default_eyebrow("#presskits-kit-header [data-cover-eyebrow]", absent: "#0F766E")
     assert_select "#presskits-kit-header [data-cover-title] h1", text: "Spring launch"
-    assert_select "#presskits-kit-header [data-cover-subtitle]", text: "Collection released"
-    assert_select "#presskits-kit-header [data-cover-description]", text: "Doors at noon."
+    editor_subtitle = css_select("#presskits-kit-header [data-cover-subtitle]").first
+    assert_includes editor_subtitle.text, "Collection released"
+    assert_includes editor_subtitle["class"], "hidden"
+    assert_includes editor_subtitle["class"], "@min-[640px]:block"
+    editor_description = css_select("#presskits-kit-header [data-cover-description]").first
+    assert_includes editor_description.text, "Doors at noon."
+    assert_includes editor_description["class"], "hidden"
+    assert_includes editor_description["class"], "@min-[640px]:block"
     refute_includes frame.to_html, "Doors at noon."
     assert_select "#presskits-kit-header a[data-cover-view]", count: 0
     assert_select "#presskits-kit-header [data-presskits-inline-copy].relative.z-20"

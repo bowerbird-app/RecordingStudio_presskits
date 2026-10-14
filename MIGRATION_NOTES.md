@@ -8,7 +8,9 @@ Rebuild Tailwind so `@min-[640px]:flex`, `flex-wrap`, `gap-x-4`, `gap-y-1.5`, `w
 
 Hosts that replaced the header editor should add `FlatPack::DateInput` named `press_kit[release_date]`. The kit location is still the Location child (`KitLocation`), not a string column. On a cover at least 640px wide, the date and that place share one wrapping muted line under the description. Each shows only when it is present. Both blank hides the line. Below 640px the date stays off and the place stays on its own line.
 
-`Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action` (`renders_many :actions`). An empty slot hides the row. The public page no longer renders `recording_studio_downloadable_button` under the header. **Download kit** on the cover links to `recording_package_path` when that route exists, otherwise the first images section. It shows when `KitDownload.allowed?`. **Contact** shows for a Press contact credit or a section titled Contact. The index passes **View**. The header does not.
+`Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action` (`renders_many :actions`). An empty slot hides the row. The public page no longer renders `recording_studio_downloadable_button` under the header. **Download kit** on the cover links to `recording_package_path` when that route exists, otherwise the first images section. It shows when `KitDownload.allowed?`. **Contact** shows for a Press contact credit or a section titled Contact. The index passes **View**. The header does not. **View** is that same primary FlatPack button (`size: :lg`, `arrow-right`), with the button's own radius.
+
+Below 640px of the cover container, hide the subtitle and the short description (`hidden`, then `@min-[640px]:block` on the subtitle and `@min-[640px]:line-clamp-3` on the description). The editor inline fields use the same hide. Wide cards still show both. Rebuild Tailwind so those two utilities generate.
 
 ## 0.54.0
 

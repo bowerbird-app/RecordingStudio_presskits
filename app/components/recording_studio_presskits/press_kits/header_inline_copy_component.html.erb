@@ -19,7 +19,7 @@
           class: title_classes
         ) %>
       </div>
-      <div data-cover-subtitle>
+      <div class="hidden @min-[640px]:block" data-cover-subtitle>
         <%= render FlatPack::InlineEdit::Component.new(
           tag: :p,
           mode: :text,
@@ -33,7 +33,7 @@
         ) %>
       </div>
     </div>
-    <div data-cover-description>
+    <div class="hidden @min-[640px]:block" data-cover-description>
       <%= render FlatPack::InlineEdit::Component.new(
         tag: :p,
         mode: :text,
