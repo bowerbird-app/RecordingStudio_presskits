@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.52.0] - 2026-10-14
+
+### Added
+- A podcast section. `PodcastSection` is an empty recording under a kit section. Each episode is a `Podcast` child with a link, optional title, show, date, and duration, and an optional cover image.
+- The public section is a horizontal row of square cards. About three fit on a desktop and about 1.2 on a phone. CSS scroll-snap slides the row. Previous and next appear only when the row overflows.
+- Play swaps in a Spotify or Apple Podcasts player when the link is one of those. Any other link opens in a new tab. **Listen on** follows the same link. **Copy link** copies it.
+- On save, Press Kits stores a copy of artwork from Spotify oEmbed or from the page's Open Graph image. The uploaded cover wins. Otherwise the card uses the stored copy, then a tile in the kit brand colour.
+- The kit section payload adds `podcasts` when the content is a podcast section. A podcast exposes show and update. The kit text file lists the show, title, date, duration, and link.
+- Version `0.52.0`
+
+### Upgrade notes
+- `0.50.0` and `0.51.0` already shipped. This release is `0.52.0`.
+- Bump to `0.52.0`. Register `RecordingStudioPresskits::PodcastSection` and `RecordingStudioPresskits::Podcast` in `recordable_types`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration creates `recording_studio_podcast_sections` and `recording_studio_podcasts`.
+- Rebuild Tailwind so the carousel card widths generate. Reload Press Kits JavaScript so the podcast carousel controller loads.
+
 ## [0.51.0] - 2026-10-14
 
 ### Changed

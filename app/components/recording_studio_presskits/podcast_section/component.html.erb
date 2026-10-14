@@ -1,0 +1,40 @@
+<% if podcasts.any? %>
+  <div
+    class="flex items-center gap-2"
+    data-controller="recording-studio-presskits--podcast-carousel"
+    data-podcast-carousel
+  >
+    <span data-recording-studio-presskits--podcast-carousel-target="previous" hidden>
+      <%= render FlatPack::Button::Component.new(
+        icon: "chevron-left",
+        icon_only: true,
+        style: :default,
+        size: :sm,
+        type: "button",
+        aria: { label: previous_label },
+        data: { action: "recording-studio-presskits--podcast-carousel#previous" }
+      ) %>
+    </span>
+
+    <div
+      class="<%= scroller_classes %>"
+      data-recording-studio-presskits--podcast-carousel-target="scroller"
+    >
+      <% podcasts.each do |podcast_recording| %>
+        <%= render RecordingStudioPresskits::PodcastSection::CardComponent.new(podcast_recording: podcast_recording) %>
+      <% end %>
+    </div>
+
+    <span data-recording-studio-presskits--podcast-carousel-target="next" hidden>
+      <%= render FlatPack::Button::Component.new(
+        icon: "chevron-right",
+        icon_only: true,
+        style: :default,
+        size: :sm,
+        type: "button",
+        aria: { label: next_label },
+        data: { action: "recording-studio-presskits--podcast-carousel#next" }
+      ) %>
+    </span>
+  </div>
+<% end %>

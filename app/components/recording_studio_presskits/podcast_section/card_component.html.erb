@@ -1,0 +1,83 @@
+<article id="<%= dom_id %>" class="<%= card_classes %>" data-podcast-card>
+  <% if embed_url.present? %>
+    <%= render FlatPack::VideoPreview::Component.new(label: play_label, aspect_ratio: "1/1") do |preview| %>
+      <% preview.with_media do %>
+        <% if image_url.present? %>
+          <%= image_tag image_url, alt: "", data: { podcast_cover: true } %>
+        <% else %>
+          <div class="h-full w-full" style="background-color: <%= brand_color %>" data-podcast-fallback role="img" aria-label="<%= title %>"></div>
+        <% end %>
+      <% end %>
+      <% preview.with_player do %>
+        <iframe
+          src="<%= embed_url %>"
+          title="<%= play_label %>"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          data-podcast-embed
+        ></iframe>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= render FlatPack::Overlay::Component.new(class: "aspect-square w-full overflow-hidden rounded-[var(--radius-lg)]") do |overlay| %>
+      <% overlay.with_media do %>
+        <% if image_url.present? %>
+          <%= image_tag image_url, alt: "", class: "h-full w-full object-cover", data: { podcast_cover: true } %>
+        <% else %>
+          <div class="absolute inset-0 h-full w-full" style="background-color: <%= brand_color %>" data-podcast-fallback role="img" aria-label="<%= title %>"></div>
+        <% end %>
+      <% end %>
+      <% overlay.with_item(placement: :center) do %>
+        <%= render FlatPack::Button::Component.new(
+          icon: "play",
+          icon_only: true,
+          style: :default,
+          size: :lg,
+          href: url,
+          target: "_blank",
+          class: "rounded-full",
+          aria: { label: play_label }
+        ) %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <div class="flex min-w-0 flex-col gap-1">
+    <% if show_name.present? %>
+      <p class="truncate text-sm text-(--surface-muted-content-color)"><%= show_name %></p>
+    <% end %>
+    <p class="break-words text-base font-medium text-(--surface-content-color)"><%= title %></p>
+    <% if meta.present? %>
+      <p class="text-[13px] text-(--surface-muted-content-color)"><%= meta %></p>
+    <% end %>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <% if listen_label.present? %>
+      <%= render FlatPack::Button::Component.new(
+        text: listen_label,
+        style: :default,
+        size: :sm,
+        href: url,
+        target: "_blank",
+        class: "rounded-full"
+      ) %>
+    <% end %>
+    <div
+      data-controller="recording-studio-presskits--copy-link"
+      data-recording-studio-presskits--copy-link-url-value="<%= url %>"
+      data-recording-studio-presskits--copy-link-copied-value="<%= copied_label %>"
+      data-recording-studio-presskits--copy-link-failed-value="<%= copy_failed_label %>"
+    >
+      <%= render FlatPack::Button::Component.new(
+        text: copy_label,
+        icon: "link",
+        style: :default,
+        size: :sm,
+        type: "button",
+        class: "rounded-full",
+        data: { action: "recording-studio-presskits--copy-link#copy" }
+      ) %>
+    </div>
+  </div>
+</article>

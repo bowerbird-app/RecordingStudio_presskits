@@ -1,5 +1,35 @@
 # Upgrade notes
 
+## 0.52.0
+
+`0.50.0` and `0.51.0` already shipped. Bump to `0.52.0`.
+
+Register both new types:
+
+```ruby
+"RecordingStudioPresskits::PodcastSection",
+"RecordingStudioPresskits::Podcast",
+```
+
+Run the new migration. It creates `recording_studio_podcast_sections` (an empty snapshot, `created_at` only) and `recording_studio_podcasts` (`url`, optional `title`, `show_name`, `aired_on`, `duration`, `artwork_source_url`, `created_at`). There is no backfill.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+`PodcastSection` includes Trashable and allows `KitSection` as its parent. `Podcast` includes Trashable and Attachable (one image, 10MB) and allows `PodcastSection` as its parent. Neither is Orderable. Episodes stay in the order they were added.
+
+The editor link is + Podcast. The episode screen asks for the link and optional title, show, date, and duration. The cover upload is on that screen after the episode exists. Removing the cover trashes the uploaded image. Removing an episode trashes that recording. Removing the section trashes the kit section and the episodes under it.
+
+On save, Press Kits fetches artwork for an https link when there is no uploaded cover and the stored copy is missing or stale. Spotify uses `https://open.spotify.com/oembed`. Other pages use `og:image`, then `twitter:image`. The bytes are attached to the episode snapshot. The public card never hotlinks that picture. A timeout, a non-image response, or a private address is skipped. The next save tries again. A title or show someone already typed is left as they typed it.
+
+The public row uses CSS scroll-snap. Previous and next are hidden until the row overflows, including when JavaScript has not run. Play uses `FlatPack::VideoPreview` for Spotify (`https://open.spotify.com/embed/episode|show/ID`) and Apple Podcasts (`https://embed.podcasts.apple.com` plus the path). Other links are a play control that opens a new tab.
+
+The kit section payload includes `podcasts` only for a podcast section: `title`, `show_name`, `url`, `aired_on`, `duration`, `service`, `embed_url`. A podcast's own show and update use `url`, `title`, `show_name`, `aired_on`, and `duration`. Saving from the editor fetches artwork. An API update does not.
+
+Rebuild Tailwind. The card widths are `w-[83.333%]` and `md:w-[calc((100%-2rem)/3)]`. Reload Press Kits JavaScript so `recording-studio-presskits--podcast-carousel` loads. Copy link still uses `recording-studio-presskits--copy-link`.
+
 ## 0.51.0
 
 Bump to `0.51.0`. Flatpack is `>= 0.1.235` (dummy tag `v0.1.235`). Rebuild Tailwind. Reload Press Kits JavaScript. The copy-link controller is `recording-studio-presskits--copy-link`.

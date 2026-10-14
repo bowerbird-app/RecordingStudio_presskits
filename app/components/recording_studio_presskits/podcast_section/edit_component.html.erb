@@ -1,0 +1,36 @@
+<div class="flex w-full flex-col gap-6">
+  <% if podcasts.any? %>
+    <div id="presskits-podcast-list">
+      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+        <%= render FlatPack::List::Component.new(divider: true, class: "w-full") do %>
+          <% podcasts.each do |podcast_recording| %>
+            <%= render FlatPack::List::Item.new(id: podcast_recording.id, hover: true) do %>
+              <div class="flex w-full items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <%= link_to edit_path(podcast_recording), class: "block min-w-0", data: helpers.presskits_editor_nav(:push) do %>
+                    <span class="block truncate text-sm font-medium text-(--surface-content-color)">
+                      <%= podcast_title(podcast_recording) %>
+                    </span>
+                    <span class="block truncate text-sm text-(--surface-muted-content-color)">
+                      <%= podcast_url(podcast_recording) %>
+                    </span>
+                  <% end %>
+                </div>
+                <%= form_with url: remove_path(podcast_recording), method: :delete, local: true do %>
+                  <%= render FlatPack::Button::Component.new(
+                    icon: "trash",
+                    icon_only: true,
+                    style: :ghost,
+                    size: :sm,
+                    type: "submit",
+                    aria: { label: "Remove podcast" }
+                  ) %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -80,6 +80,7 @@ en:
         facts: "Add a figure"
         credits: "Add a credit"
         video: "Add a video"
+        podcasts: "Add an episode"
         location: "Add a place"
         generic: "Add something here"
       picker_descriptions:
@@ -89,8 +90,17 @@ en:
         facts_section: "The numbers that make the story land."
         credits_section: "Who did the work, and what they did."
         video_section: "A clip they can watch without a hunt."
+        podcast_section: "A show they can press play on."
         location_section: "Where they can find you, or the work."
         generic: "Another block for the kit."
+    podcasts:
+      previous: "Previous episodes"
+      next: "Next episodes"
+      play: "Play: %{title}"
+      listen: "Listen on %{service}"
+      copy_link: "Copy link"
+      copied: "Link copied."
+      copy_failed: "Couldn't copy that link."
     videos:
       length: "Length"
       length_hint: "Minutes and seconds, like 1:24."
