@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.47.0] - 2026-10-13
+
+### Changed
+- An Images section on the public kit is a `FlatPack::Masonry::Component`: one column on a phone, two from `md`, four from `lg`, `gap: :lg`, `order: :columns`. Each photo is `FlatPack::Masonry::Image` at its natural ratio. The first 12 show. **Show more images (N)** is a Flatpack button (`style: :default`) in that gallery's Turbo frame. N is how many photos the section has. The link is the same page with `images` set to the images recording id.
+- The public section heading row adds **Download all images**, a Flatpack button (`style: :default`, icon `arrow-down-tray`). The zip is that section's photos only. `ImageArchivesController` sends it when `Visibility.presentation_for` is `:full`. The kit zip is unchanged.
+- The public Images heading uses `FlatPack::SectionTitle` `with_trailing` for a `FlatPack::Badge` (`size: :sm`) with the photo count. The badge sits after the title and outside the copy-link anchor. The editor heading stays `FlatPack::InlineEdit` and does not show that badge.
+- The caption under each photo is the attachment name, then `JPG · width×height · ratio` (a reduced ratio such as `4:5` or `16:9`). `ImagePixelSize` stores width and height on the blob when ActiveStorage's analyzer did not. `FlatPack::Masonry::Image` still paints that whole caption as one muted line. A content-colour title and a smaller meta line need a `meta:` argument on that component.
+- Version `0.47.0`
+
+### Upgrade notes
+- No migration. Bump to `0.47.0`. Flatpack is `>= 0.1.233` (dummy tag `v0.1.233`). Rebuild Tailwind so `columns-1`, `md:columns-2`, `lg:columns-4`, and the Section Title trailing-row utilities (`flex-wrap`, `flex-1`, `max-w-max`, `break-words`, `shrink-0`) are in the host stylesheet.
+- Hosts that replaced the images show template should render `FlatPack::Masonry::Component` and `FlatPack::Masonry::Image` instead of a cropped grid. The show-more link targets the Turbo frame `presskits-images-<images recording id>`.
+- The section zip is `GET /recording_studio_presskits/image_archives/:id`, where `:id` is the images content recording. It is not the kit package. A kit that is not fully visible returns 404.
+
 ## [0.46.0] - 2026-10-13
 
 ### Changed

@@ -6,7 +6,13 @@
     size: @size,
     spacing: @spacing,
     level: @level
-  ) %>
+  ) do |section| %>
+    <% if @trailing %>
+      <% section.with_trailing do %>
+        <%= render @trailing %>
+      <% end %>
+    <% end %>
+  <% end %>
 <% elsif @subtitle.to_s.strip.present? %>
   <%= render FlatPack::SectionTitle::Component.new(
     title: @subtitle,
