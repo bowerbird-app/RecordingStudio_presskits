@@ -18,6 +18,19 @@ module RecordingStudioPresskits
         "#{[header.join("\n"), *section_blocks].compact_blank.join("\n\n").strip}\n"
       end
 
+      CONTENT_HANDLERS = {
+        "RecordingStudioPresskits::Text" => :text_lines,
+        "RecordingStudioPresskits::Images" => :image_section_lines,
+        "RecordingStudioPresskits::QuoteSection" => :quote_lines,
+        "RecordingStudioPresskits::StatsSection" => :stat_lines,
+        "RecordingStudioPresskits::CreditsSection" => :credit_lines,
+        "RecordingStudioPresskits::VideoSection" => :video_lines,
+        "RecordingStudioPresskits::PodcastSection" => :podcast_lines,
+        "RecordingStudioPresskits::LocationSection" => :location_section_lines,
+        "RecordingStudioPresskits::ListSection" => :list_lines,
+        "RecordingStudioPresskits::Files" => :file_section_lines
+      }.freeze
+
       private
 
       def header
@@ -66,16 +79,7 @@ module RecordingStudioPresskits
       end
 
       def content_handler_for(recordable)
-        {
-          Text => :text_lines,
-          Images => :image_section_lines,
-          QuoteSection => :quote_lines,
-          FactsSection => :fact_lines,
-          CreditsSection => :credit_lines,
-          VideoSection => :video_lines,
-          LocationSection => :location_section_lines,
-          ListSection => :list_lines
-        }[recordable.class]
+        CONTENT_HANDLERS[recordable.class.name]
       end
 
       def text_lines(_content, recordable)
@@ -112,15 +116,15 @@ module RecordingStudioPresskits
         [body, cite.any? ? "— #{cite.join(', ')}" : nil].compact.join("\n")
       end
 
-      def fact_lines(content, _recordable)
-        FactsSection.active_facts(content).filter_map { |child| fact_block(child.recordable) }
+      def stat_lines(content, _recordable)
+        StatsSection.active_stats(content).filter_map { |child| stat_block(child.recordable) }
       end
 
-      def fact_block(fact)
-        value = fact.formatted_value.to_s.strip.presence
-        return if fact.label.blank? || value.blank?
+      def stat_block(stat)
+        value = stat.formatted_value.to_s.strip.presence
+        return if stat.label.blank? || value.blank?
 
-        [labeled(:fact, "#{fact.label}: #{value}"), fact.description.to_s.strip.presence].compact.join("\n")
+        [labeled(:stat, "#{stat.label}: #{value}"), stat.description.to_s.strip.presence].compact.join("\n")
       end
 
       def credit_lines(content, _recordable)
@@ -152,6 +156,49 @@ module RecordingStudioPresskits
         return if key.blank? || value.blank?
 
         "#{key}: #{value}"
+      end
+
+      def podcast_lines(content, _recordable)
+        PodcastSection.active_podcasts(content).filter_map { |child| podcast_block(child.recordable) }
+      end
+
+      def podcast_block(podcast)
+        lines = [podcast.show_name, podcast.title, podcast.meta_line, podcast.url].filter_map do |value|
+          value.to_s.strip.presence
+        end
+        lines.join("\n").presence
+      end
+
+      def file_section_lines(content, _recordable)
+        DirectFiles.list(content).filter_map { |item| file_block(item.recordable) }
+      end
+
+      def file_block(attachment)
+        return if attachment.blank?
+
+        name = file_name(attachment)
+        return if name.blank?
+
+        [name, file_meta(attachment), file_description(attachment)].compact.join("\n")
+      end
+
+      def file_name(attachment)
+        attachment.name.to_s.strip.presence || attachment.original_filename.to_s.strip.presence
+      end
+
+      def file_description(attachment)
+        attachment.description.to_s.strip.presence
+      end
+
+      def file_meta(attachment)
+        [attachment.original_filename.to_s.strip.presence, file_size(attachment)].compact.join(" · ").presence
+      end
+
+      def file_size(attachment)
+        bytes = attachment.byte_size
+        return if bytes.nil?
+
+        ActiveSupport::NumberHelper.number_to_human_size(bytes, strip_insignificant_zeros: true)
       end
 
       def location_section_lines(content, _recordable)

@@ -4,7 +4,19 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.55.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.59.0", ::RecordingStudioPresskits::VERSION
+  end
+
+  def test_release_date_migration_adds_a_nullable_date
+    root = File.expand_path("..", __dir__)
+    [
+      "db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb"
+    ].each do |path|
+      source = File.read(File.join(root, path))
+      assert_includes source, "add_column :recording_studio_press_kits, :release_date, :date"
+      refute_includes source, "null: false"
+    end
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -18,11 +30,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261008120000_create_recording_studio_credits.rb",
       "db/migrate/20261014190000_add_icon_to_recording_studio_credit_lines.rb",
       "db/migrate/20261008180000_create_recording_studio_facts.rb",
+      "db/migrate/20261014120000_rename_recording_studio_facts_to_stats.rb",
+      "db/migrate/20261014130000_drop_columns_from_recording_studio_stats_sections.rb",
+      "db/migrate/20261014140000_drop_source_and_as_of_from_recording_studio_stats.rb",
+      "db/migrate/20261014150000_add_icon_to_recording_studio_stats.rb",
+      "db/migrate/20261014220000_create_recording_studio_files.rb",
       "db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
       "db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "db/migrate/20261010150000_create_recording_studio_location_sections.rb",
-      "db/migrate/20261014120000_create_recording_studio_list_sections.rb",
+      "db/migrate/20261014230000_create_recording_studio_list_sections.rb",
       "test/dummy/db/migrate/20261010000013_create_recording_studio_access_constraints.rb",
       "test/dummy/db/migrate/20261010000014_create_recording_studio_access_rules.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
@@ -33,16 +50,25 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261014190000_add_icon_to_recording_studio_credit_lines.rb",
       "test/dummy/db/migrate/20261008180000_create_recording_studio_facts.rb",
+      "test/dummy/db/migrate/20261014120000_rename_recording_studio_facts_to_stats.rb",
+      "test/dummy/db/migrate/20261014130000_drop_columns_from_recording_studio_stats_sections.rb",
+      "test/dummy/db/migrate/20261014140000_drop_source_and_as_of_from_recording_studio_stats.rb",
+      "test/dummy/db/migrate/20261014150000_add_icon_to_recording_studio_stats.rb",
+      "test/dummy/db/migrate/20261014220000_create_recording_studio_files.rb",
       "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
       "test/dummy/db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "test/dummy/db/migrate/20261010150000_create_recording_studio_location_sections.rb",
-      "test/dummy/db/migrate/20261014120000_create_recording_studio_list_sections.rb",
+      "test/dummy/db/migrate/20261014230000_create_recording_studio_list_sections.rb",
       "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb",
       "db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
-      "test/dummy/db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb"
+      "test/dummy/db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
+      "db/migrate/20261014200000_create_recording_studio_podcasts.rb",
+      "test/dummy/db/migrate/20261014200000_create_recording_studio_podcasts.rb",
+      "db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
     end
@@ -395,7 +421,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "publishable_public_path"
     assert_includes readme, "RecordingStudio::Capabilities::PressKits.to"
     assert_includes readme, "does not call `Visibility.presentation_for`"
-    assert_includes readme, "recording_studio_downloadable_button"
+    assert_includes readme, "recording_package_path"
     assert_includes readme, "### Planned"
     assert_includes readme, "presskit_card"
     assert_includes readme, "presskit_public_url(recording)"
@@ -658,6 +684,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes index, 'text: "Table"'
     assert_includes index, "RecordingStudioPresskits::Cover::Component"
     assert_includes index, "size: :card"
+    assert_includes index, "context: :grid"
     cover = File.read(File.expand_path("cover/component.rb", components))
     cover_html = File.read(File.expand_path("cover/component.html.erb", components))
     assert_includes cover, "def brand_color"
@@ -711,12 +738,29 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover_html, "recording_studio_add_to_list"
     heart_call = cover_html[/recording_studio_add_to_list\(.*?\)/m]
     assert_includes heart_call, "size: :lg"
-    assert_includes cover_html, "cover_view: true"
-    assert_includes cover_html, "line-clamp-3"
-    assert_includes cover_html, "arrow-right"
+    assert_includes cover, "renders_many :actions"
+    assert_includes cover_html, "data-cover-actions"
+    actions = File.read(File.expand_path("cover/default_actions_component.rb", components))
+    assert_includes actions, "cover_view: true"
+    assert_includes actions, "arrow-right"
+    assert_includes actions, "cover_download: true"
+    assert_includes actions, "cover_contact: true"
+    assert_includes actions, "w-full @min-[640px]:w-auto"
+    assert_includes actions, "size: :lg"
+    refute_includes actions, "rounded-full"
+    refute_includes actions, "order-last"
+    refute_includes actions, "extra_class"
+    assert_includes cover_html, "hidden @min-[640px]:block"
+    assert_includes cover_html, "description_classes"
+    assert_includes cover, "context: :header"
+    grid_card = File.read(File.expand_path("../lib/recording_studio_presskits/cover/grid_card.rb", __dir__))
+    assert_includes grid_card, "def grid?"
+    assert_includes grid_card, "hidden @min-[640px]:line-clamp-3"
+    assert_includes grid_card, "HEADER_DESCRIPTION_CLASSES"
+    refute_includes grid_card[/def description_classes.*?end/m], "actions"
     assert_includes cover_html, "data-cover-subtitle"
     assert_includes cover_html, "gap-[14px]"
-    assert_includes cover_html, "mt-auto"
+    refute_includes cover_html, "mt-auto"
     refute_includes index, "featured_card?"
     refute_includes index, "data-cover-feature"
     refute_includes index, "featured_recording"
@@ -726,6 +770,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes locales, "cover:"
     assert_includes locales, 'eyebrow: "Press kit"'
     assert_includes locales, 'view: "View"'
+    assert_includes locales, 'contact: "Contact"'
     refute_includes index, "card.media"
     refute_includes index, 'name: "photo"'
     refute_includes index, "presskits_cover_url_for"
@@ -861,6 +906,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes header, 'name: "press_kit[subtitle]"'
     refute_includes header, 'name: "press_kit[description]"'
     assert_includes header, 'id="presskits-header-location"'
+    assert_includes header, 'id="presskits-header-release"'
+    assert_includes header, "FlatPack::DateInput::Component"
+    assert_includes header, 'name: "press_kit[release_date]"'
+    assert_operator header.index("fields_for :location"), :<, header.index("presskits-header-release")
+    assert_operator header.index("presskits-header-release"), :<, header.index("presskits-header-brand")
     assert_includes header, "fields_for :location"
     assert_includes header, "recording_studio_location_search_fields"
     assert_includes header, 'id="press_kit_cover_image"'
@@ -934,6 +984,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes public_kit, "EditorChrome::KIT_SECTIONS_CLASSES"
     assert_includes public_kit, "EditorChrome::SECTION_PAD_CLASSES"
     assert_includes public_kit, "padding: :none"
+    assert_includes public_kit, "context: :header"
+    assert_includes kit_header, "context: :header"
     assert_includes public_kit, "SectionCardComponent"
     assert_includes public_kit, "BrandedFrameComponent"
     assert_includes public_kit, "branding: branding?"
@@ -941,6 +993,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes frame, "EditorChrome::SECTION_PAD_CLASSES"
     assert_includes frame, "SectionCardComponent"
     preview_show = File.read(File.expand_path("press_kits/preview_show_component.html.erb", components))
+    assert_includes preview_show, "context: :header"
     assert_includes preview_show, "SectionCardComponent"
     assert_includes preview_show, "EditorChrome::PREVIEW_CLASSES"
     kit_header_rb = File.read(File.expand_path("press_kits/kit_header_component.rb", components))
@@ -979,10 +1032,28 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes inline_copy, "required: true"
     assert_includes inline_copy, "mode: :text"
     assert_includes inline_copy, "data-presskits-inline-copy"
+    assert_includes inline_copy, 'class="hidden @min-[640px]:block" data-cover-subtitle'
+    assert_includes inline_copy, "description_frame_classes"
+    refute_includes inline_copy, 'class="hidden @min-[640px]:block" data-cover-description'
+    inline_rb = File.read(File.expand_path("press_kits/header_inline_copy_component.rb", components))
+    assert_includes inline_rb, "context: :header"
+    assert_includes inline_rb, '"hidden @min-[640px]:block" if @context == :grid'
     assert_includes inline_copy, "relative z-20"
     assert_includes inline_copy, "event.stopPropagation()"
     cover = File.read(File.expand_path("cover/component.html.erb", components))
     assert_operator cover.index("inline_edit?"), :<, cover.index("HeaderInlineCopyComponent")
+    assert_includes cover, "data-cover-wide-line"
+    assert_includes cover, "data-cover-release"
+    assert_includes cover, "data-cover-wide-location"
+    assert_includes cover, "hidden @min-[640px]:flex flex-wrap items-center gap-x-4 gap-y-1.5"
+    assert_includes cover, 'name: "calendar"'
+    assert_includes cover, "location_icon"
+    assert_includes cover, "break-words"
+    assert_includes cover, "@min-[640px]:hidden"
+    assert_includes cover, "FlatPack::Shared::IconComponent"
+    assert_operator cover.index("data-cover-description"), :<, cover.index("data-cover-wide-line")
+    assert_operator cover.index("data-cover-release"), :<, cover.index("data-cover-wide-location")
+    assert_operator cover.index("data-cover-wide-location"), :<, cover.index("data-cover-location")
     assert_operator cover.index("HeaderInlineCopyComponent"), :<, cover.index("cover_title: true")
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
@@ -1408,11 +1479,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.join(root, "Gemfile"))
 
     assert_includes routes, "resources :videos"
+    assert_includes routes, "resources :podcasts"
+    assert_includes routes, "podcast_images"
     assert_includes routes, "resources :locations"
     refute_includes routes, "resources :library_images"
     refute_includes routes, "resources :images, only: :destroy"
     assert_includes routes, "video_order"
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::PodcastSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::Podcast"'
     assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
     assert_includes initializer, '"RecordingStudioPresskits::ListSection"'
     assert_includes initializer, '"RecordingStudioPresskits::ListItem"'

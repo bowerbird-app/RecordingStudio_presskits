@@ -53,6 +53,12 @@ module RecordingStudioPresskits
         @credits_copy_button = build_credits_copy_button
       end
 
+      def stats_copy_button
+        return @stats_copy_button if defined?(@stats_copy_button)
+
+        @stats_copy_button = build_stats_copy_button
+      end
+
       def text_section?
         content_recording&.recordable.is_a?(RecordingStudioPresskits::Text)
       end
@@ -93,20 +99,11 @@ module RecordingStudioPresskits
       end
 
       def section_count_badge
-        content = @content_recording
-        recordable = content&.recordable
-        count = if recordable.is_a?(Images)
-                  DirectImages.list(content).size
-                elsif recordable.is_a?(VideoSection)
-                  VideoSection.active_videos(content).size
-                end
-        return if count.nil? || count.zero?
-
-        FlatPack::Badge::Component.new(text: count.to_s, size: :sm)
+        SectionCountBadge.for(@content_recording)
       end
 
       def heading_action?
-        images_download_button.present? || credits_copy_button.present?
+        images_download_button.present? || credits_copy_button.present? || stats_copy_button.present?
       end
 
       def build_images_download_button
@@ -128,6 +125,10 @@ module RecordingStudioPresskits
         return unless view.respond_to?(:copy_button)
 
         view.copy_button
+      end
+
+      def build_stats_copy_button
+        StatsSection::CopyButtonComponent.for(@content_recording, title: saved_title)
       end
     end
   end

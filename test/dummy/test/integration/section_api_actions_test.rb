@@ -126,6 +126,29 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     assert_includes kit_section[:output_keys], :title
     assert_includes kit_section[:output_keys], :videos
     assert_includes kit_section[:output_keys], :locations
+    assert_includes kit_section[:output_keys], :stats
+    assert_includes kit_section[:output_keys], :podcasts
+    refute_includes kit_section[:output_keys], :columns
+    refute_includes kit_section[:output_keys], :facts
+    refute_includes kit_section[:output_keys], :display
+
+    registered_stats = registry.types.fetch("RecordingStudioPresskits::StatsSection")
+    assert_equal %i[index show], registered_stats[:operations]
+    assert_equal %i[stats], registered_stats[:output_keys]
+    assert_nil registered_stats[:writable_attributes]
+    registered_stat = registry.types.fetch("RecordingStudioPresskits::Stat")
+    assert_equal %i[index show create update destroy], registered_stat[:operations]
+
+    registered_podcasts = registry.types.fetch("RecordingStudioPresskits::PodcastSection")
+    assert_equal %i[index show], registered_podcasts[:operations]
+    assert_equal %i[podcasts], registered_podcasts[:output_keys]
+    podcast = registry.types.fetch("RecordingStudioPresskits::Podcast")
+    assert_equal %i[show update], podcast[:operations]
+    assert_equal %i[url title show_name aired_on duration], podcast[:writable_attributes]
+    assert_includes kit_section[:output_keys], :files
+    registered_files = registry.types.fetch("RecordingStudioPresskits::Files")
+    assert_equal %i[index show], registered_files[:operations]
+    assert_equal %i[files], registered_files[:output_keys]
 
     registered_location = registry.types.fetch("RecordingStudioPresskits::LocationSection")
     assert_equal %i[index show], registered_location[:operations]

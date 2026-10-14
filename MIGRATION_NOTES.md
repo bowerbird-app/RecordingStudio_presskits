@@ -1,6 +1,9 @@
 # Upgrade notes
 
-## 0.55.0
+## 0.59.0
+
+`0.58.0` already shipped. Bump to `0.59.0`.
+
 
 A Lists section is a press kit section. The list section stores no heading. Each item is its own recording.
 
@@ -24,6 +27,83 @@ The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_
 The section editor is `FlatPack::CollectionEditor::Component`. **Save** records, revises, and trashes the rows. The icon column is `7rem`. The public page and the kit preview use `FlatPack::List::Component` with `divider: true`. Each row is a `FlatPack::List::Item`. The line reads `Key: Value`, with the key muted and the value in the normal text colour. A blank icon leaves that slot empty. Six items or fewer stay one list at `max-w-[65ch]`, the same measure as a text section. More than six split in saved order into two halves. Each half is its own list inside `FlatPack::Grid::Component` `cols: 2` (`grid-cols-1 md:grid-cols-2`), so a phone stays one column and a wider window shows them side by side. That pair is capped at `max-w-[calc(130ch+1.5rem)]`.
 
 Finding a list item uses `where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)`. A hidden line uses `recording_studio_trashable_trashed?`.
+
+## 0.58.0
+
+`0.57.0` already shipped. Bump to `0.58.0`.
+
+Files sections are new. A kit that has none keeps working. The new table is `recording_studio_files`. Copy `db/migrate/20261014220000_create_recording_studio_files.rb` into the host app and migrate. Add `RecordingStudioPresskits::Files` to `recordable_types`.
+
+A Files section holds up to 10 documents, 25 MB each. Allowed types are PDF, Word, Excel, CSV, PowerPoint, plain text, and zip. The kit download zip adds one folder per Files section, using the section title. Two sections with the same title get `Title` and `Title-2`. Downloadable flattens zip entry names. This gem keeps that one folder and still flattens every other name.
+
+There is no per-file download on the public kit or in the section API. A direct attachment URL for a file in the section is allowed only when the kit download is allowed. Trashing the section trashes its files. Restoring the section restores files that were trashed with it. Duplicating a kit copies the files and their blobs. The section API payload includes `files` and no file URLs.
+
+## 0.57.0
+
+Bump to `0.57.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds a nullable `release_date` date column on `recording_studio_press_kits`. There is no backfill. Existing kits keep a blank date, and the card hides the line. Flatpack stays `>= 0.1.235`.
+
+Rebuild Tailwind so `@min-[640px]:flex`, `flex-wrap`, `gap-x-4`, `gap-y-1.5`, `w-full`, and `@min-[640px]:w-auto` generate.
+
+Hosts that replaced the header editor should add `FlatPack::DateInput` named `press_kit[release_date]`. The kit location is still the Location child (`KitLocation`), not a string column. On a cover at least 640px wide, the date and that place share one wrapping muted line under the description. Each shows only when it is present. Both blank hides the line. Below 640px the date stays off and the place stays on its own line.
+
+`Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action` (`renders_many :actions`). An empty slot hides the row. The public page no longer renders `recording_studio_downloadable_button` under the header. **Download kit** on the cover links to `recording_package_path` when that route exists, otherwise the first images section. It shows when `KitDownload.allowed?`. **Contact** shows for a Press contact credit or a section titled Contact. The index passes **View**. The header does not. **View** is that same primary FlatPack button (`size: :lg`, `arrow-right`), with the button's own radius.
+
+Below 640px of the cover container, hide the subtitle on every cover (`hidden`, then `@min-[640px]:block`). Hide the short description below that width only when `context: :grid` (`hidden @min-[640px]:line-clamp-3`). `context: :header` keeps `line-clamp-3` at every width. Pass `context:` from the caller. The index uses `:grid`. The public kit and the editor use `:header`. Do not infer the choice from which buttons are in the slot. Rebuild Tailwind so `@min-[640px]:block` and `@min-[640px]:line-clamp-3` generate.
+
+## 0.56.0
+
+`0.55.0` already shipped. Bump to `0.56.0`.
+
+Stats replace Facts & Figures. A stats section always renders as cards: three on a large screen, two from the medium breakpoint, and one on a phone. Each card is centered. An optional icon sits above the value as `FlatPack::Shared::IconComponent` at size `:xl`. The value is `text-4xl` and bold, the unit sits beside it at `text-xl`, the label is `text-lg` and semibold, and the description is `text-sm` and muted. A blank icon is left off the card. List, table, `display_style`, and `columns` are gone.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections` and `recording_studio_facts` to `recording_studio_stats` when those old tables are still present. It drops `display_style`. It rewrites `recordable_type` from `RecordingStudioPresskits::FactsSection` to `RecordingStudioPresskits::StatsSection` and from `RecordingStudioPresskits::Fact` to `RecordingStudioPresskits::Stat`. The following migration drops `columns` from `recording_studio_stats_sections` when that column is still present. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats` when those columns are still present. The one after that adds optional `icon` on `recording_studio_stats` when that column is missing. A database that already has the stats tables and the icon column is left in place. There is no down migration and no Ruby alias for the old names.
+
+`recording_studio_stats_sections` stores `created_at`. `recording_studio_stats` stores `label`, `value`, optional `unit`, `description`, and optional `icon`. `icon` is a Heroicons name from `RecordingStudioPresskits::Stat::ICONS`, or blank. There is no foreign key between the tables. The recording tree is the parent.
+
+Replace the old types in `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::StatsSection",
+"RecordingStudioPresskits::Stat"
+```
+
+`StatsSection` allows a kit section. `Stat` allows a stats section. Orderable on the stats section allows stats. Trashable is on both. Publishable and Duplicatable stay off them. Duplicating a kit copies the stats section and the stats in order.
+
+Create the section with `RecordingStudioPresskits.create_section!` and `content_type: "RecordingStudioPresskits::StatsSection"`. Record a stat under the stats section. Reorder with `recording_studio_orderable_reorder!` or `recording_studio_orderable_move!` on the stats section.
+
+The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A stats section also includes `stats`. `display`, `facts`, and `columns` are not in the payload. MCP uses that same payload.
+
+The public stats heading uses `FlatPack::CopyButton` (`style: :default`, `size: :sm`, label Copy, clipboard icon) on the right of the title. The first line is the saved section title when that title is present. Each following line is the value, then the unit when it is present, then the label. A description is appended as ` – ` plus that description. The icon name is not in the text. After a click the label becomes Copied.
+
+## 0.55.0
+
+`0.54.0` already shipped. Bump to `0.55.0`.
+
+Register both new types:
+
+```ruby
+"RecordingStudioPresskits::PodcastSection",
+"RecordingStudioPresskits::Podcast",
+```
+
+Run the new migration. It creates `recording_studio_podcast_sections` (an empty snapshot, `created_at` only) and `recording_studio_podcasts` (`url`, optional `title`, `show_name`, `aired_on`, `duration`, `artwork_source_url`, `created_at`). There is no backfill.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+`PodcastSection` includes Trashable and allows `KitSection` as its parent. `Podcast` includes Trashable and Attachable (one image, 10MB) and allows `PodcastSection` as its parent. Neither is Orderable. Episodes stay in the order they were added.
+
+The editor link is + Podcast. The episode screen asks for the link and optional title, show, date, and duration. The cover upload is on that screen after the episode exists. Removing the cover trashes the uploaded image. Removing an episode trashes that recording. Removing the section trashes the kit section and the episodes under it.
+
+On save, Press Kits fetches artwork for an https link when there is no uploaded cover and the stored copy is missing or stale. Spotify uses `https://open.spotify.com/oembed`. Other pages use `og:image`, then `twitter:image`. The bytes are attached to the episode snapshot. The public card never hotlinks that picture. A timeout, a non-image response, or a private address is skipped. The next save tries again. A title or show someone already typed is left as they typed it. A blank show is filled when the page names one: Spotify's oEmbed author, otherwise the episode description, the document title, or a podcast heading. Platform names such as Spotify, Apple Podcasts, and Pocket Casts are not stored as the show.
+
+The public row uses CSS scroll-snap. Previous and next are hidden until the row overflows, including when JavaScript has not run. The card stays a square cover. Play on Spotify or Apple Podcasts opens `FlatPack::Modal` (`scroll: :page`) with only the player and the close control. The episode title is in the header slot, visually hidden, so Flatpack's `aria-labelledby` names the dialog. The iframe is added when that dialog opens and removed when it closes, so audio stops. Spotify's frame is 352px tall. Apple's is 175px. Other links are a play control that opens a new tab. Spotify embeds are `https://open.spotify.com/embed/episode|show/ID`. Apple episode links use `https://embed.podcasts.apple.com/{country}/episode/{id}` when the link has an episode id, otherwise the Apple path.
+
+The kit section payload includes `podcasts` only for a podcast section: `title`, `show_name`, `url`, `aired_on`, `duration`, `service`, `embed_url`. A podcast's own show and update use `url`, `title`, `show_name`, `aired_on`, and `duration`. Saving from the editor fetches artwork. An API update does not.
+
+Rebuild Tailwind. The card widths are `w-[83.333%]` and `md:w-[calc((100%-2rem)/3)]`. Reload Press Kits JavaScript so `recording-studio-presskits--podcast-carousel` and `recording-studio-presskits--podcast-player` load. Copy link still uses `recording-studio-presskits--copy-link`.
 
 ## 0.54.0
 

@@ -66,7 +66,7 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Secret notes"
     refute_includes response.body, "Doors at noon."
     refute_select "#presskits-public-sections"
-    refute_select "#presskits-kit-download"
+    refute_select "[data-cover-download]"
     refute_select "#presskits-cover-image"
     assert_select "meta[name='robots'][content='noindex, nofollow']"
     refute_select "meta[name='description']"
@@ -101,7 +101,7 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-presskits-presentation='full']"
     assert_includes response.body, "Secret notes"
-    assert_select "#presskits-kit-download", count: 1
+    assert_select "[data-cover-download]", count: 1
     assert_equal "private, no-store", response.headers["Cache-Control"]
 
     get recording_studio_downloadable.recording_package_path(kit)
@@ -135,7 +135,7 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_includes response.body, "Secret notes"
-    assert_select "#presskits-kit-download", count: 0
+    assert_select "[data-cover-download]", count: 0
 
     get recording_studio_downloadable.recording_package_path(kit)
     assert_response :forbidden

@@ -210,14 +210,19 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_section_menu_icon("RecordingStudioPresskits::Text", "document-text")
     assert_section_menu_icon("RecordingStudioPresskits::Images", "photo")
     assert_section_menu_icon("RecordingStudioPresskits::QuoteSection", "chat-bubble-bottom-center-text")
-    assert_section_menu_icon("RecordingStudioPresskits::FactsSection", "calculator")
+    assert_section_menu_icon("RecordingStudioPresskits::StatsSection", "calculator")
     assert_section_menu_icon("RecordingStudioPresskits::VideoSection", "video-camera")
+    assert_section_menu_icon("RecordingStudioPresskits::PodcastSection", "microphone")
     assert_section_menu_icon("RecordingStudioPresskits::LocationSection", "map-pin")
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AListSection'] span",
                   text: "List"
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AListSection'] span",
                   text: "Labeled lines, in the order you want."
     assert_section_menu_icon("RecordingStudioPresskits::ListSection", "list-bullet")
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AFiles'] span", text: "Files"
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AFiles'] span",
+                  text: "Sheets, decks, and zip files they can take with the kit."
+    assert_section_menu_icon("RecordingStudioPresskits::Files", "paper-clip")
     toolbar_html = css_select("#presskits-editor-toolbar").to_html
     assert_operator toolbar_html.index("presskits-section-picker"), :<, toolbar_html.index("presskits-visibility")
     assert_operator toolbar_html.index("presskits-visibility"), :<, toolbar_html.index("presskits-downloads")

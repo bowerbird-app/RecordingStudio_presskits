@@ -7,11 +7,13 @@ module RecordingStudioPresskits
         "RecordingStudioPresskits::Text" => "text",
         "RecordingStudioPresskits::Images" => "images",
         "RecordingStudioPresskits::QuoteSection" => "quotes",
-        "RecordingStudioPresskits::FactsSection" => "facts",
+        "RecordingStudioPresskits::StatsSection" => "stats",
         "RecordingStudioPresskits::CreditsSection" => "credits",
         "RecordingStudioPresskits::VideoSection" => "video",
+        "RecordingStudioPresskits::PodcastSection" => "podcasts",
         "RecordingStudioPresskits::LocationSection" => "location",
-        "RecordingStudioPresskits::ListSection" => "list"
+        "RecordingStudioPresskits::ListSection" => "list",
+        "RecordingStudioPresskits::Files" => "files"
       }.freeze
 
       def initialize(content_type:, edit_path:)

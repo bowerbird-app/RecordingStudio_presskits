@@ -2,12 +2,14 @@
 
 require "recording_studio_presskits/api/exposure"
 require "recording_studio_presskits/api/quote_payload"
-require "recording_studio_presskits/api/fact_payload"
+require "recording_studio_presskits/api/stat_payload"
 require "recording_studio_presskits/api/credit_payload"
 require "recording_studio_presskits/api/credit_line_payload"
 require "recording_studio_presskits/api/video_payload"
+require "recording_studio_presskits/api/podcast_payload"
 require "recording_studio_presskits/api/location_payload"
 require "recording_studio_presskits/api/list_payload"
+require "recording_studio_presskits/api/file_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/api/section_action"
 require "recording_studio_presskits/api/create_section"
@@ -18,17 +20,20 @@ require "recording_studio_presskits/api/reorder_credits"
 require "recording_studio_presskits/api/remove_credit"
 require "recording_studio_presskits/api/section_action_registration"
 require "recording_studio_presskits/api/credit_registration"
-require "recording_studio_presskits/api/fact_registration"
+require "recording_studio_presskits/api/stat_registration"
+require "recording_studio_presskits/api/file_registration"
 require "recording_studio_presskits/api/location_registration"
 require "recording_studio_presskits/api/list_registration"
+require "recording_studio_presskits/api/podcast_registration"
 
 module RecordingStudioPresskits
   module Api
     extend SectionActionRegistration
     extend CreditRegistration
-    extend FactRegistration
+    extend StatRegistration
     extend LocationRegistration
     extend ListRegistration
+    extend PodcastRegistration
 
     class << self
       def register!
@@ -44,9 +49,10 @@ module RecordingStudioPresskits
         register_text
         register_quote
         register_quote_section
-        register_facts!
+        register_stats!
         register_credits!
         register_video_section
+        register_podcasts!
         register_location_section
         register_lists!
       end
@@ -69,7 +75,7 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::KitSection",
           operations: %i[index show update],
           serializer: method(:kit_section_serializer),
-          output_keys: %i[title subtitle content_type content_id videos display facts locations items],
+          output_keys: %i[title subtitle content_type content_id videos stats locations podcasts files items],
           writable_attributes: %i[title subtitle],
           capability_actions: %i[remove_section]
         )

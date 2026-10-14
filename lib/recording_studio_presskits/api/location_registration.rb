@@ -3,7 +3,16 @@
 module RecordingStudioPresskits
   module Api
     module LocationRegistration
+      include FileRegistration
+
       def register_location_section
+        register_location_type
+        register_files!
+      end
+
+      private
+
+      def register_location_type
         register_type(
           "RecordingStudioPresskits::LocationSection",
           operations: %i[index show],
@@ -11,8 +20,6 @@ module RecordingStudioPresskits
           output_keys: %i[locations]
         )
       end
-
-      private
 
       def location_section_serializer
         lambda { |_recordable, recording: nil, context: nil, **|

@@ -133,9 +133,11 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 1
+    link = css_select("a[data-cover-download]").first
+    assert link
+    assert_equal recording_studio_downloadable.recording_package_path(kit), link["href"]
     assert_includes response.body, "Download kit"
-    assert_includes response.body, "recording-studio-downloadable--package"
+    refute_select "[data-cover-view]"
   end
 
   test "anonymous visitors can download a published public kit" do
@@ -148,7 +150,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 1
+    assert_select "[data-cover-download]", count: 1
     assert_includes response.body, "Download kit"
 
     get recording_studio_downloadable.recording_package_path(kit)
@@ -156,7 +158,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     refute_equal 403, response.status
   end
 
-  test "download button stays off previews and the editor" do
+  test "download stays off the owner preview and shows on the editor card" do
     kit = record_kit("Spring launch")
     place_cover!(kit)
     perform_enqueued_jobs do
@@ -167,11 +169,13 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     switch_to_root(@root)
     get recording_studio_presskits.preview_press_kit_path(kit)
     assert_response :success
-    assert_select "#presskits-kit-download", count: 0
+    assert_select "[data-cover-download]", count: 0
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    refute_includes css_select("#presskits-editor-preview").to_html, "presskits-kit-download"
+    assert_select "#presskits-editor-preview a[data-cover-download]", count: 1
+    assert_select "#presskits-kit-header a[data-cover-view]", count: 0
+    assert_select "[data-presskits-header-actions] a[aria-label='Edit']"
     assert_select "#presskits-downloads", text: "Downloads"
     assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
   end
@@ -186,7 +190,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 0
+    assert_select "[data-cover-download]", count: 0
     refute_includes response.body, "Download kit"
 
     get recording_studio_downloadable.recording_package_path(kit)
@@ -215,7 +219,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     Current.actor = nil
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 0
+    assert_select "[data-cover-download]", count: 0
 
     sign_in viewer
     Current.actor = viewer
@@ -224,7 +228,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 0
+    assert_select "[data-cover-download]", count: 0
   end
 
   test "a view-only person can download a public kit" do
@@ -250,7 +254,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     Current.actor = viewer
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 1
+    assert_select "[data-cover-download]", count: 1
 
     get recording_studio_downloadable.recording_package_path(kit)
     assert_response :redirect

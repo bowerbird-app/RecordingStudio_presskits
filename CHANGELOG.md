@@ -7,20 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.55.0] - 2026-10-14
+## [0.59.0] - 2026-10-14
 
 ### Added
 - A Lists section. `RecordingStudioPresskits::ListSection` is an empty recording under a kit section. It orders `RecordingStudioPresskits::ListItem` children. Each item stores an optional Flatpack icon name, a required `key`, and a required `value`.
 - The + Section menu shows List (`list-bullet`). The section editor is a Flatpack collection editor for Icon, Key, and Value. The icon column is `7rem`. Preview and the public page render a Flatpack list with `divider: true`. Each line reads `Key: Value`, with the key muted. Six lines or fewer stay one list, capped at `max-w-[65ch]` like a text section. More than six split in order into two lists, side by side from the `md` breakpoint, capped at two text measures plus the grid gap. An empty list stays off those pages.
 - `kit.txt` prints each line as `Key: Value`. The icon name is not in the zip.
 - The kit section API payload includes `items` for a list section. A list item exposes `icon`, `key`, and `value`.
-- Version `0.55.0`
+- Version `0.59.0`
 
 ### Upgrade notes
-- Bump to `0.55.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
+- `0.58.0` already shipped. This release is `0.59.0`. Bump to `0.59.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
 - Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
 - This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
 - List item lookup uses `recording_studio_trashable_kept_sql`. A hidden list line uses `recording_studio_trashable_trashed?`.
+
+## [0.58.0] - 2026-10-14
+
+### Added
+- `RecordingStudioPresskits::Files` is a kit section for documents. People upload PDF, Word, Excel, CSV, PowerPoint, text, and zip files straight onto the section. Images, HTML, and SVG are refused. Each file can be 25 MB. A section holds 10 files in total, including files already there. The editor and the public kit show an icon, the name, the extension, the size, and the description. The public kit and the section API do not link to a single file.
+- The kit download zip puts each Files section in its own folder, named from the section title. Two sections with the same title become `Title` and `Title-2`. `KitDownload::FolderNames` keeps that one folder. Downloadable would otherwise flatten every zip entry.
+- A direct attachment link for a file in a Files section uses the same publish and embargo check as the kit download.
+- The section API payload includes `files` with the name, description, original filename, type, byte size, and position, and no URL.
+- Version `0.58.0`
+
+### Upgrade notes
+- `0.57.0` already shipped. This release is `0.58.0`.
+- Copy `db/migrate/20261014220000_create_recording_studio_files.rb` into the host app and migrate. Add `RecordingStudioPresskits::Files` to `recordable_types`. A kit that has no Files section keeps working. There is no per-file download to turn off. The kit zip gains one folder per Files section.
+
+## [0.57.0] - 2026-10-14
+
+### Changed
+- Press kits store an optional `release_date`. The header screen edits it with `FlatPack::DateInput`. A blank value stays blank.
+- On `Cover::Component` at `:card`, a container at least 640px wide shows one muted line under the description. A calendar icon and the date (Released 14 Oct 2026) come first when `release_date` is set. The kit location follows on that same line: its icon (a venue defaults to map-pin) and `display_name`, with a gap, and the line wraps. Each piece shows only when it is present. Both blank hides the line. Below 640px the date stays off and the location stays on its own line.
+- Cover actions are a `with_action` slot (`renders_many :actions`) under that line on every width. An empty slot hides the row. Stacked buttons are full width; from 640px they sit in a wrapping row. The index passes one primary **View** button, the same FlatPack button as **Download kit** (`size: :lg`, the button radius, brand colour, `arrow-right`). The open kit and the editor card pass primary **Download kit** when `KitDownload.allowed?` (the zip, linking to the package route, or to the images section when that route is missing) and secondary **Contact** (a Press contact credit, or a Contact section). Neither shows View. Editor Edit chrome stays neutral. Owner preview leaves Download off.
+- Below 640px of the cover container, the subtitle stays hidden. The short description stays hidden only when the caller passes `context: :grid`. `context: :header` keeps the description on a narrow card, still clamped to three lines. The public kit and the editor pass `:header`. The index passes `:grid`. The option is on `Cover::Component`. It is not inferred from the buttons.
+- Version `0.57.0`
+
+### Upgrade notes
+- Bump to `0.57.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds a nullable `release_date` date column on `recording_studio_press_kits`. There is no backfill. Existing kits keep a blank date, and the card hides the line.
+- Rebuild Tailwind so `@min-[640px]:flex` generates. Flatpack stays `>= 0.1.235`.
+- Hosts that replaced the header editor should add `FlatPack::DateInput` named `press_kit[release_date]`. The kit location is still the Location child (`KitLocation`), not a string column. Hosts that replaced the cover should put the date and that place on one wrapping line from a 640px container up, show each only when present, and keep the place on its own line below 640px. Hide the subtitle below that width on every cover. Hide the short description below that width only for `context: :grid`. `context: :header` keeps the description. Pass `context:` on the cover. Do not infer it from the buttons. Rebuild Tailwind so `flex-wrap`, `gap-x-4`, `gap-y-1.5`, `w-full`, `@min-[640px]:w-auto`, `@min-[640px]:block`, and `@min-[640px]:line-clamp-3` generate with `@min-[640px]:flex`.
+- **View** is a FlatPack primary button at `size: :lg` with `arrow-right`. Do not add `rounded-full` or an icon-order override.
+- `Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action`. The public page no longer renders `recording_studio_downloadable_button` under the header. Download kit on the cover links to `recording_package_path`.
+
+## [0.56.0] - 2026-10-14
+
+### Changed
+- Stats replace Facts & Figures. `RecordingStudioPresskits::StatsSection` sits under the kit section. Each `RecordingStudioPresskits::Stat` is a child recording with a required label and value, plus optional unit, description, and icon.
+- Stats always render as cards: three on a large screen, two from the medium breakpoint, and one on a phone. List, table, `display_style`, and `columns` are gone. Card copy is centered. An icon, when set, sits above the value as `FlatPack::Shared::IconComponent` at size `:xl`. The value is `text-4xl` and bold, the unit sits beside it at `text-xl`, the label is `text-lg` and semibold, and the description is `text-sm` and muted. A blank icon is left off the card.
+- The content editor shows **+ Stat** and the stat list. There is no Columns control and no Show as control. A stat's fields are Value, Unit, Label, Description, and Icon. Label and value are required. Icon is a short list of Heroicons, and None leaves it blank.
+- The public stats heading has one `FlatPack::CopyButton` on the right of the title, the same row as **Copy credits**. It uses the clipboard icon, `style: :default`, `size: :sm`, and the visible label Copy. After a click the label becomes Copied. It copies the saved title when there is one, then one stat per line as value, optional unit, and label, with ` – ` and the description when that is set. Icons are left out. Cards do not have their own copy button.
+- A stats section payload is `stats`. The kit section payload includes `stats` when the content is a stats section.
+- Version `0.56.0`
+
+### Upgrade notes
+- `0.55.0` already shipped. This release is `0.56.0`.
+- Bump to `0.56.0` and run the migrations. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections`, renames `recording_studio_facts` to `recording_studio_stats`, drops `display_style`, and rewrites recording types from `FactsSection` / `Fact` to `StatsSection` / `Stat`. The next migration drops `columns` from `recording_studio_stats_sections`. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats`. The one after that adds optional `icon` on `recording_studio_stats` when that column is missing. Icon values are Heroicons names from `Stat::ICONS`.
+- Register `RecordingStudioPresskits::StatsSection` and `RecordingStudioPresskits::Stat`. Drop `FactsSection` and `Fact`.
+- Call `register_stats!` paths through `RecordingStudioPresskits::Api.register!`. Read `stats`. `display`, `facts`, and `columns` are gone.
+- There are no Ruby aliases for the old class names, routes, or payload keys.
+
+## [0.55.0] - 2026-10-14
+
+### Added
+- A podcast section. `PodcastSection` is an empty recording under a kit section. Each episode is a `Podcast` child with a link, optional title, show, date, and duration, and an optional cover image.
+- The public section is a horizontal row of square cards. About three fit on a desktop and about 1.2 on a phone. CSS scroll-snap slides the row. Previous and next appear only when the row overflows. The card stays a square cover.
+- Play on Spotify or Apple Podcasts opens a `FlatPack::Modal` with only that platform's player and a close control. The episode title is visually hidden and names the dialog. The iframe is added when the dialog opens and removed when it closes. Spotify's player is 352px tall. Apple's is 175px. Any other link opens in a new tab. **Listen on** and **Copy link** stay on the card.
+- On save, Press Kits stores a copy of artwork from Spotify oEmbed or from the page's Open Graph image. The uploaded cover wins. Otherwise the card uses the stored copy, then a tile in the kit brand colour. A blank show is filled when the page names one. A platform name is not stored as the show.
+- The kit section payload adds `podcasts` when the content is a podcast section. A podcast exposes show and update. The kit text file lists the show, title, date, duration, and link.
+- Version `0.55.0`
+
+### Upgrade notes
+- `0.54.0` already shipped. This release is `0.55.0`.
+- Bump to `0.55.0`. Register `RecordingStudioPresskits::PodcastSection` and `RecordingStudioPresskits::Podcast` in `recordable_types`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration creates `recording_studio_podcast_sections` and `recording_studio_podcasts`.
+- Rebuild Tailwind so the carousel card widths generate. Reload Press Kits JavaScript so the podcast carousel and player controllers load.
 
 ## [0.54.0] - 2026-10-14
 
@@ -1067,7 +1129,11 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.55.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.59.0...HEAD
+[0.59.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.58.0...v0.59.0
+[0.58.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.57.0...v0.58.0
+[0.57.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.56.0...v0.57.0
+[0.56.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.55.0...v0.56.0
 [0.55.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.54.0...v0.55.0
 [0.54.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.53.0...v0.54.0
 [0.53.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.52.0...v0.53.0

@@ -117,7 +117,10 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     refute_select "[data-presskits-inline-copy]"
     assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
     assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
-    assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    public_description = css_select("#presskits-kit-cover [data-cover-description]").first
+    assert_equal "Doors at noon.", public_description.text.squish
+    assert_includes public_description["class"], "line-clamp-3"
+    refute_includes public_description["class"].split, "hidden"
     public_copy = css_select("#presskits-kit-cover [data-cover-copy]").first
     assert_equal "min-w-0 @min-[640px]:pt-16", public_copy["class"]
     refute_includes public_copy["class"], "pt-12"
@@ -224,8 +227,14 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "[data-cover-card][data-brand-color='#BFDBFE']", count: 1
     assert_select "[data-cover-card][data-brand-color='#D97706']", count: 1
     assert_select "[data-cover-fallback]", count: 2
-    assert_select "[data-cover-subtitle]", text: "Collection released"
-    assert_select "[data-cover-description]", text: "A longer line that should clamp on the card."
+    subtitle = css_select("[data-cover-subtitle]").first
+    assert_equal "Collection released", subtitle.text.squish
+    assert_includes subtitle["class"], "hidden"
+    assert_includes subtitle["class"], "@min-[640px]:block"
+    description = css_select("[data-cover-description]").first
+    assert_equal "A longer line that should clamp on the card.", description.text.squish
+    assert_includes description["class"], "hidden"
+    assert_includes description["class"], "@min-[640px]:line-clamp-3"
     sky = css_select("[data-brand-color='#BFDBFE']").first
     amber = css_select("[data-brand-color='#D97706']").first
     assert_includes sky["style"], "--button-primary-background-color: #BFDBFE"
@@ -243,9 +252,19 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_default_eyebrow("[data-brand-color='#D97706'] [data-cover-eyebrow]", absent: "#D97706")
     assert_select "a[data-cover-view][href='#{recording_studio_presskits.edit_press_kit_path(first)}']", text: /View/
     view = css_select("a[data-cover-view]").first
-    assert_includes view.parent["class"], "mt-auto"
-    assert_includes view.parent["class"], "pb-8"
-    refute view.ancestors.any? { |node| node["data-cover-copy"] }
+    actions = css_select("[data-cover-actions]").first
+    assert_equal actions, view.parent
+    assert_includes actions["class"], "flex"
+    assert_includes actions["class"], "w-full"
+    assert_includes actions["class"], "flex-col"
+    assert_includes actions["class"], "@min-[640px]:flex-row"
+    assert_includes actions["class"], "pb-8"
+    assert_includes view["class"], "w-full"
+    assert_includes view["class"], "@min-[640px]:w-auto"
+    refute_includes view["class"], "rounded-full"
+    assert view.ancestors.any? { |node| node["data-cover-copy"] }
+    refute_select "[data-cover-download]"
+    refute_select "[data-cover-contact]"
     copy = css_select("[data-cover-copy]").first
     assert_equal "min-w-0 @min-[640px]:pt-16", copy["class"]
     refute_includes copy["class"], "gap-3"
@@ -353,8 +372,13 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
     assert_default_eyebrow("#presskits-kit-header [data-cover-eyebrow]", absent: "#0F766E")
     assert_select "#presskits-kit-header [data-cover-title] h1", text: "Spring launch"
-    assert_select "#presskits-kit-header [data-cover-subtitle]", text: "Collection released"
-    assert_select "#presskits-kit-header [data-cover-description]", text: "Doors at noon."
+    editor_subtitle = css_select("#presskits-kit-header [data-cover-subtitle]").first
+    assert_includes editor_subtitle.text, "Collection released"
+    assert_includes editor_subtitle["class"], "hidden"
+    assert_includes editor_subtitle["class"], "@min-[640px]:block"
+    editor_description = css_select("#presskits-kit-header [data-cover-description]").first
+    assert_includes editor_description.text, "Doors at noon."
+    refute_includes editor_description["class"].to_s.split, "hidden"
     refute_includes frame.to_html, "Doors at noon."
     assert_select "#presskits-kit-header a[data-cover-view]", count: 0
     assert_select "#presskits-kit-header [data-presskits-inline-copy].relative.z-20"
@@ -376,6 +400,18 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-cover-hero"
     section = css_select("#presskits-editor-sections").first
     refute_includes section.to_html, "@min-[640px]:flex-row"
+  end
+
+  test "stacked description follows the cover context" do
+    kit = record_kit("Spring launch")
+    header = RecordingStudioPresskits::Cover::Component.new(recording: kit, context: :header)
+    grid = RecordingStudioPresskits::Cover::Component.new(recording: kit, context: :grid)
+
+    assert_equal "line-clamp-3 text-base leading-6 text-[var(--surface-muted-content-color)]", header.description_classes
+    assert_includes grid.description_classes, "hidden"
+    assert_includes grid.description_classes, "@min-[640px]:line-clamp-3"
+    refute header.grid?
+    assert grid.grid?
   end
 
   test "the card heading is h1 or h2" do
@@ -400,6 +436,175 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     component.define_singleton_method(:lists_installed?) { false }
     Current.actor = @user
     refute component.show_add_to_list?
+  end
+
+  test "a release date sits under the description on a wide card and stays off when blank" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    refute_select "#presskits-kit-header [data-cover-release]"
+
+    get recording_studio_presskits.edit_press_kit_header_path(kit)
+    assert_response :success
+    assert_select "input[name='press_kit[release_date]'][type='date']"
+    assert_select "label", text: "Release date"
+    form = css_select("form#presskits-header-form").first.to_html
+    assert_operator form.index('name="location[title]"'), :<, form.index('name="press_kit[release_date]"')
+    assert_operator form.index('name="press_kit[release_date]"'), :<, form.index('name="press_kit[brand_color]"')
+
+    original_id = kit.recordable_id
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { release_date: "2026-10-14" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
+    kit.reload
+    assert_not_equal original_id, kit.recordable_id
+    assert_equal Date.new(2026, 10, 14), kit.recordable.release_date
+    assert_nil RecordingStudioPresskits::PressKit.find(original_id).release_date
+    assert_equal "Doors at noon.", kit.recordable.description
+
+    get recording_studio_presskits.edit_press_kit_header_path(kit)
+    assert_select "input[name='press_kit[release_date]'][value='2026-10-14']"
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_release_line("#presskits-kit-header")
+
+    get recording_studio_presskits.press_kits_path
+    assert_release_line("[data-cover-card]")
+
+    record_block(kit, "Hero")
+    publish_kit!(kit)
+    get kit.publishable_public_path
+    assert_response :success
+    assert_release_line("#presskits-kit-cover")
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { title: "Spring launch" }
+    }
+    assert_equal Date.new(2026, 10, 14), kit.reload.recordable.release_date
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { release_date: "  " }
+    }
+    assert_nil kit.reload.recordable.release_date
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    refute_select "#presskits-kit-header [data-cover-release]"
+    refute_select "#presskits-kit-header [data-cover-wide-line]"
+    get kit.publishable_public_path
+    refute_select "[data-cover-release]"
+    refute_select "[data-cover-wide-line]"
+  end
+
+  test "a wide card puts the kit location on the release line and keeps the stacked place" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) do |press_kit|
+      press_kit.description = "Doors at noon."
+      press_kit.release_date = Date.new(2026, 10, 14)
+    end
+    create_place!(kit, title: "Harbour Gallery")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_wide_place("#presskits-kit-header")
+
+    get recording_studio_presskits.press_kits_path
+    assert_wide_place("[data-cover-card]")
+
+    record_block(kit, "Hero")
+    publish_kit!(kit, slug: "spring-launch-place")
+    get kit.publishable_public_path
+    assert_response :success
+    assert_wide_place("#presskits-kit-cover")
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { release_date: "" },
+      location: { title: "Harbour Gallery", location_type: "venue", locality: "Sydney", country_code: "AU" }
+    }
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    line = css_select("#presskits-kit-header [data-cover-wide-line]").first
+    assert line
+    refute_select "#presskits-kit-header [data-cover-release]"
+    assert_includes line.text, "Harbour Gallery"
+    assert_select "#presskits-kit-header [data-cover-location]", text: /Harbour Gallery/
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { release_date: "2026-10-14" },
+      location: { title: "", location_type: "", locality: "", country_code: "" }
+    }
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_release_line("#presskits-kit-header")
+    refute_select "#presskits-kit-header [data-cover-wide-location]"
+    refute_select "#presskits-kit-header [data-cover-location]"
+  end
+
+  test "header actions follow assets and a press contact, and the row hides when both are blank" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    record_block(kit, "Notes")
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    refute_select "#presskits-kit-header [data-cover-actions]"
+
+    publish_kit!(kit, slug: "spring-launch-actions")
+
+    get kit.publishable_public_path
+    assert_response :success
+    download = css_select("a[data-cover-download]").first
+    assert download
+    assert_equal recording_studio_downloadable.recording_package_path(kit), download["href"]
+    refute_select "[data-cover-contact]"
+    refute_select "[data-cover-view]"
+
+    RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::Text",
+      actor: @user,
+      title: "Contact"
+    )
+    get kit.publishable_public_path
+    contact = css_select("a[data-cover-contact]").first
+    assert contact
+    assert_equal "#contact", contact["href"]
+    assert_equal "secondary", contact["data-fp-style"]
+    assert_includes contact["class"], "w-full"
+    assert_select "a[data-cover-download]", count: 1
+    refute_select "[data-cover-view]"
+
+    credit = RecordingStudioPresskits::Credits.create!(
+      root_recording: @root,
+      name: "Harbour press",
+      url: "press@harbour.studio",
+      usual_role: "Press contact",
+      actor: @user
+    )
+    credits = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::CreditsSection",
+      actor: @user,
+      title: "Credits"
+    )
+    RecordingStudioPresskits::Credits.add!(
+      credits_section_recording: RecordingStudioPresskits::KitQuery.section_content(credits),
+      credit_recording: credit,
+      role: "Press contact",
+      actor: @user
+    )
+    get kit.publishable_public_path
+    assert_equal "mailto:press@harbour.studio", css_select("a[data-cover-contact]").first["href"]
+
+    get recording_studio_presskits.press_kits_path
+    assert_select "a[data-cover-view]", count: 1
+    refute_select "[data-cover-contact]"
+    refute_select "[data-cover-download]"
   end
 
   test "the header preview can leave the list heart off" do
@@ -429,6 +634,66 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_release_line(scope)
+    line = css_select("#{scope} [data-cover-wide-line]").first
+    assert line, "expected a wide line in #{scope}"
+    release = css_select("#{scope} [data-cover-wide-line] [data-cover-release]").first
+    assert release, "expected a release date in #{scope}"
+    assert_equal "Released 14 Oct 2026", release.text.squish
+    assert_wide_line_classes(line)
+    assert_includes release.to_html, "calendar-days"
+    copy = line.ancestors.find { |node| node["data-cover-copy"] }
+    assert copy, "expected the release line inside the copy"
+    html = copy.to_html
+    assert_operator html.index("data-cover-description"), :<, html.index("data-cover-release")
+  end
+
+  def assert_wide_place(scope)
+    line = css_select("#{scope} [data-cover-wide-line]").first
+    assert line, "expected a wide line in #{scope}"
+    assert_wide_line_classes(line)
+    release = css_select("#{scope} [data-cover-wide-line] [data-cover-release]").first
+    place = css_select("#{scope} [data-cover-wide-line] [data-cover-wide-location]").first
+    stacked = css_select("#{scope} [data-cover-location]").first
+    assert release
+    assert place
+    assert stacked
+    assert_equal "Released 14 Oct 2026", release.text.squish
+    assert_includes place.text, "Harbour Gallery"
+    assert_includes place.to_html, "map-pin"
+    assert_includes release.to_html, "calendar-days"
+    classes = stacked["class"].split
+    assert_includes classes, "@min-[640px]:hidden"
+    refute_includes classes, "hidden"
+    html = line.to_html
+    assert_operator html.index("data-cover-release"), :<, html.index("data-cover-wide-location")
+    copy = line.ancestors.find { |node| node["data-cover-copy"] }
+    assert copy, "expected the wide line inside the copy for #{scope}"
+    copy_html = copy.to_html
+    assert_includes copy.text, "Doors at noon."
+    assert_operator copy_html.index("data-cover-description"), :<, copy_html.index("data-cover-wide-line")
+    assert_operator copy_html.index("data-cover-wide-line"), :<, copy_html.index("data-cover-location")
+  end
+
+  def assert_wide_line_classes(line)
+    assert_includes line["class"], "hidden"
+    assert_includes line["class"], "@min-[640px]:flex"
+    assert_includes line["class"], "flex-wrap"
+    assert_includes line["class"], "gap-x-4"
+    assert_includes line["class"], "gap-y-1.5"
+    assert_includes line["class"], "text-sm"
+    assert_includes line["class"], "text-[var(--surface-muted-content-color)]"
+  end
+
+  def create_place!(kit, title:)
+    kit.record(RecordingStudio::Location::Location, actor: @user, parent_recording: kit) do |location|
+      location.title = title
+      location.location_type = "venue"
+      location.locality = "Sydney"
+      location.country_code = "AU"
+    end
+  end
 
   def assert_default_eyebrow(selector, absent:)
     badge = css_select(selector).first
@@ -462,11 +727,11 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     )
   end
 
-  def publish_kit!(kit)
+  def publish_kit!(kit, slug: "spring-launch-cover")
     result = RecordingStudioPublishable::Services::Publishables::Update.call(
       parent_recording: kit,
       actor: @user,
-      attributes: { slug: "spring-launch-cover", status: "published" }
+      attributes: { slug: slug, status: "published" }
     )
     raise result.error if result.failure?
 

@@ -11,21 +11,24 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     RecordingStudioPresskits::Text
     RecordingStudioPresskits::Images
     RecordingStudioPresskits::QuoteSection
-    RecordingStudioPresskits::FactsSection
+    RecordingStudioPresskits::StatsSection
     RecordingStudioPresskits::CreditsSection
     RecordingStudioPresskits::VideoSection
+    RecordingStudioPresskits::PodcastSection
     RecordingStudioPresskits::LocationSection
     RecordingStudioPresskits::ListSection
+    RecordingStudioPresskits::Files
   ].freeze
 
   PICKER_TYPES_EXCLUDED = %w[
     FakeBlock
     RecordingStudioPresskits::Quote
-    RecordingStudioPresskits::Fact
+    RecordingStudioPresskits::Stat
     RecordingStudioPresskits::ListItem
     RecordingStudioPresskits::Credit
     RecordingStudioPresskits::CreditLine
     RecordingStudioVideo::Video
+    RecordingStudioPresskits::Podcast
     Workspace
     Folder
     Page
@@ -54,8 +57,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Text")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Images")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::QuoteSection")
-    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::FactsSection")
-    assert_equal ["RecordingStudioPresskits::FactsSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Fact")
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::StatsSection")
+    assert_equal ["RecordingStudioPresskits::StatsSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Stat")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
     assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::KitSection")
@@ -63,6 +66,11 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "RecordingStudioPresskits::PressKit", RecordingStudioPresskits.press_kit_type_name
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::PressKit")
     refute RecordingStudio.root_allowed?("FakeBlock")
+  end
+
+  test "podcast recordables name their parents" do
+    assert_equal ["RecordingStudioPresskits::KitSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PodcastSection")
+    assert_equal ["RecordingStudioPresskits::PodcastSection"], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Podcast")
   end
 
   test "root recordable creates a root recording" do
@@ -380,6 +388,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PodcastSection")
+    assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Podcast")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::ListSection")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::ListItem")
     assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Quote")
@@ -389,6 +399,35 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal section, images_recording.parent_recording
     assert_kind_of RecordingStudioPresskits::Images, images_recording.recordable
     refute images_recording.recordable.respond_to?(:title=)
+  end
+
+  test "files is allowed under a kit section and attaches documents" do
+    _root, kit_recording = spring_kit
+    section = record_section(kit_recording)
+
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::Files",
+      parent_recording: section
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::Files",
+      parent_recording: kit_recording
+    )
+    assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Files")
+    refute RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::Files")
+    options = RecordingStudio.capability_options(:attachable, for: "RecordingStudioPresskits::Files").to_h
+    assert_equal [:file], Array(options[:enabled_attachment_kinds]).map(&:to_sym)
+    assert_equal RecordingStudioPresskits::Files::MAX_FILE_BYTES, options[:max_file_size]
+    assert_equal RecordingStudioPresskits::Files::MAX_FILES, options[:max_file_count]
+    assert_includes options[:allowed_content_types], "application/pdf"
+    assert_includes options[:allowed_content_types], "text/csv"
+    refute_includes options[:allowed_content_types], "image/jpeg"
+    refute_includes options[:allowed_content_types], "text/html"
+    refute_includes options[:allowed_content_types], "image/svg+xml"
+    assert_equal RecordingStudioPresskits::FileAccess, options[:authorize_with]
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Files")
+    orderable = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::Files").to_h
+    assert_equal ["RecordingStudioAttachable::Attachment"], Array(orderable[:allows]).map(&:to_s)
   end
 
   test "picker types skip dummy placeholders and types that do not allow press kit" do
@@ -436,11 +475,13 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "document-text", RecordingStudioPresskits::Text.section_menu_icon
     assert_equal "photo", RecordingStudioPresskits::Images.section_menu_icon
     assert_equal "chat-bubble-bottom-center-text", RecordingStudioPresskits::QuoteSection.section_menu_icon
-    assert_equal "calculator", RecordingStudioPresskits::FactsSection.section_menu_icon
+    assert_equal "calculator", RecordingStudioPresskits::StatsSection.section_menu_icon
     assert_equal "user-group", RecordingStudioPresskits::CreditsSection.section_menu_icon
     assert_equal "video-camera", RecordingStudioPresskits::VideoSection.section_menu_icon
+    assert_equal "microphone", RecordingStudioPresskits::PodcastSection.section_menu_icon
     assert_equal "map-pin", RecordingStudioPresskits::LocationSection.section_menu_icon
     assert_equal "list-bullet", RecordingStudioPresskits::ListSection.section_menu_icon
+    assert_equal "paper-clip", RecordingStudioPresskits::Files.section_menu_icon
     assert_nil FakeBlock.try(:section_menu_icon)
   end
 
@@ -473,8 +514,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Quote")
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::QuoteSection")
-    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::FactsSection")
-    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Fact")
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::StatsSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Stat")
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::VideoSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Folder")
@@ -487,14 +528,19 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     quote_section_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::QuoteSection").to_h
     assert_equal ["RecordingStudioPresskits::Quote"], Array(quote_section_options[:allows]).map(&:to_s)
 
-    facts_section_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::FactsSection").to_h
-    assert_equal ["RecordingStudioPresskits::Fact"], Array(facts_section_options[:allows]).map(&:to_s)
+    facts_section_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::StatsSection").to_h
+    assert_equal ["RecordingStudioPresskits::Stat"], Array(facts_section_options[:allows]).map(&:to_s)
 
     images_options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::Images").to_h
     assert_equal ["RecordingStudioAttachable::Attachment"], Array(images_options[:allows]).map(&:to_s)
 
     workspace_options = RecordingStudio.capability_options(:orderable, for: "Workspace").to_h
     assert_equal ["RecordingStudioPresskits::PressKit"], Array(workspace_options[:allows]).map(&:to_s)
+  end
+
+  test "podcasts are not orderable" do
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PodcastSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Podcast")
   end
 
   test "trashable is enabled on press kit and dummy fake block" do
@@ -505,12 +551,15 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Images")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::QuoteSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Quote")
-    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::FactsSection")
-    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Fact")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::StatsSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Stat")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::VideoSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::PodcastSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Podcast")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::LocationSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::ListSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::ListItem")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Files")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudio::Location::Location")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
@@ -540,12 +589,15 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Quote")
-    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::FactsSection")
-    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Fact")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::StatsSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Stat")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::PodcastSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Podcast")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::ListSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::ListItem")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Files")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Page")
@@ -564,9 +616,11 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Quote")
-    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::FactsSection")
-    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Fact")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::StatsSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Stat")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::PodcastSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Podcast")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::ListSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::ListItem")
@@ -682,29 +736,29 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_nil kit_section.recordable.title
   end
 
-  test "facts section sits under a kit section and facts sit under the facts section" do
+  test "stats section sits under a kit section and stats sit under the stats section" do
     root, kit = spring_kit
     kit_section = RecordingStudioPresskits.create_section!(
       press_kit_recording: kit,
-      content_type: "RecordingStudioPresskits::FactsSection"
+      content_type: "RecordingStudioPresskits::StatsSection"
     )
     section = RecordingStudioPresskits::KitQuery.section_content(kit_section)
 
     assert_kind_of RecordingStudioPresskits::KitSection, kit_section.recordable
     assert_equal kit, kit_section.parent_recording
     assert RecordingStudio.parent_allowed?(
-      child_type: "RecordingStudioPresskits::FactsSection",
+      child_type: "RecordingStudioPresskits::StatsSection",
       parent_recording: kit_section
     )
-    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::FactsSection", parent_recording: kit)
-    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::FactsSection", parent_recording: root)
-    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Fact", parent_recording: section)
-    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Fact", parent_recording: kit_section)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::StatsSection", parent_recording: kit)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::StatsSection", parent_recording: root)
+    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Stat", parent_recording: section)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::Stat", parent_recording: kit_section)
     refute section.recordable.respond_to?(:title=)
-    assert_equal "list", section.recordable.display_style
-    assert_equal 3, section.recordable.columns
+    refute section.recordable.respond_to?(:display_style)
+    refute section.recordable.respond_to?(:columns)
     assert_nil kit_section.recordable.title
-    assert_equal "Facts & Figures", RecordingStudioPresskits.section_heading(kit_section)
+    assert_equal "Stats", RecordingStudioPresskits.section_heading(kit_section)
   end
 
   test "list section parent is a kit section and a list item parent is the list section" do

@@ -83,7 +83,7 @@ class PressKitDownloadAudienceTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 0
+    assert_select "[data-cover-download]", count: 0
     refute_includes response.body, "Download kit"
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
@@ -205,7 +205,7 @@ class PressKitDownloadAudienceTest < ActionDispatch::IntegrationTest
   def assert_download_allowed(kit)
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 1
+    assert_select "[data-cover-download]", count: 1
     assert_includes response.body, "Download kit"
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
@@ -232,7 +232,7 @@ class PressKitDownloadAudienceTest < ActionDispatch::IntegrationTest
   def assert_download_refused(kit)
     get kit.publishable_public_path
     assert_response :success
-    assert_select "#presskits-kit-download", count: 0
+    assert_select "[data-cover-download]", count: 0
     refute_includes response.body, "Download kit"
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do

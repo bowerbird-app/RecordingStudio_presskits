@@ -9,7 +9,7 @@
     class: grid_card_classes,
     data: grid_card_data
   ) do %>
-    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:pt-16" "@min-[640px]:top-18" "@min-[640px]:hidden" "@min-[640px]:contents" "hidden" "pr-16" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" "min-w-0 @min-[640px]:pt-16" "flex items-center gap-2" "flex w-full min-w-0 flex-col self-stretch" %>
+    <%# Tailwind scans these literals: "@container" "@min-[640px]:flex-row" "@min-[640px]:min-h-[50cqw]" "@min-[640px]:aspect-auto" "@min-[640px]:w-1/2" "@min-[640px]:shrink-0" "@min-[640px]:self-stretch" "@min-[640px]:min-w-0" "@min-[640px]:pt-16" "@min-[640px]:top-18" "@min-[640px]:hidden" "@min-[640px]:contents" "@min-[640px]:flex" "@min-[640px]:w-auto" "@min-[640px]:items-center" "hidden" "pr-16" "@min-[640px]:rounded-tr-none" "@min-[640px]:rounded-bl-[var(--radius-lg)]" "aspect-[430/368]" "flex flex-1 flex-col px-8 pt-7" "min-w-0 @min-[640px]:pt-16" "flex items-center gap-2" "flex w-full min-w-0 flex-col self-stretch" "hidden @min-[640px]:flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[var(--surface-muted-content-color)]" "inline-flex max-w-full items-center gap-1.5" "min-w-0 break-words" "flex w-full flex-col gap-3 pb-8 @min-[640px]:flex-row @min-[640px]:flex-wrap @min-[640px]:items-center" "w-full @min-[640px]:w-auto" "hidden @min-[640px]:block" "@min-[640px]:line-clamp-3" %>
     <div class="<%= grid_card_row_classes %>" style="<%= font_style %>" data-cover-row>
       <%= render FlatPack::Overlay::Component.new(class: grid_card_frame_classes, data: { cover_frame: true }) do |overlay| %>
         <% overlay.with_media do %>
@@ -57,55 +57,64 @@
               <%= render RecordingStudioPresskits::PressKits::HeaderInlineCopyComponent.new(
                 recording: @recording,
                 update_path: inline_path,
-                heading: title_tag
+                heading: title_tag,
+                context: @context
               ) %>
             <% else %>
               <div class="flex flex-col gap-0.5">
                 <%= content_tag title_tag, title, class: "text-[30px] font-bold leading-[38px] tracking-[-0.45px] text-balance", data: { cover_title: true } %>
                 <% if subtitle.present? %>
-                  <p class="text-[30px] font-normal leading-[38px] tracking-[-0.45px]" data-cover-subtitle><%= subtitle %></p>
+                  <p class="hidden @min-[640px]:block text-[30px] font-normal leading-[38px] tracking-[-0.45px]" data-cover-subtitle><%= subtitle %></p>
                 <% end %>
               </div>
 
               <% if description.present? %>
-                <p class="line-clamp-3 text-base leading-6 text-[var(--surface-muted-content-color)]" data-cover-description><%= description %></p>
+                <p class="<%= description_classes %>" data-cover-description><%= description %></p>
               <% end %>
             <% end %>
 
+            <% if wide_line? %>
+              <p class="hidden @min-[640px]:flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[var(--surface-muted-content-color)]" data-cover-wide-line>
+                <% if release_line.present? %>
+                  <span class="inline-flex max-w-full items-center gap-1.5" data-cover-release>
+                    <%= render FlatPack::Shared::IconComponent.new(name: "calendar", size: :sm, class: "shrink-0") %>
+                    <span class="min-w-0 break-words"><%= release_line %></span>
+                  </span>
+                <% end %>
+                <% if location_recordable %>
+                  <span class="inline-flex max-w-full items-center gap-1.5" data-cover-wide-location>
+                    <%= render FlatPack::Shared::IconComponent.new(name: location_icon, size: :sm, class: "shrink-0") %>
+                    <span class="min-w-0 break-words"><%= location_recordable.display_name %></span>
+                  </span>
+                <% end %>
+              </p>
+            <% end %>
+
             <% if location_recordable %>
-              <div class="flex items-center gap-2 text-sm" data-cover-location>
+              <div class="flex items-center gap-2 text-sm @min-[640px]:hidden" data-cover-location>
                 <% if location_recordable.resolved_icon.present? %>
                   <%= render FlatPack::Shared::IconComponent.new(name: location_recordable.resolved_icon, size: :sm) %>
                 <% end %>
                 <span><%= location_recordable.display_name %></span>
               </div>
             <% end %>
+
+            <% if actions.any? %>
+              <div class="flex w-full flex-col gap-3 pb-8 @min-[640px]:flex-row @min-[640px]:flex-wrap @min-[640px]:items-center" data-cover-actions>
+                <% actions.each do |action| %>
+                  <%= action %>
+                <% end %>
+              </div>
+            <% end %>
           </div>
         </div>
-        <% end %>
-
-        <% column = capture do %>
-          <%= brand_row %>
-          <% if href.present? %>
-            <div class="mt-auto flex justify-end pb-8 pt-6">
-              <%= render FlatPack::Button::Component.new(
-                text: view_label,
-                icon: "arrow-right",
-                style: :primary,
-                size: :lg,
-                href: href,
-                class: "rounded-full [&>svg]:order-last",
-                data: { cover_view: true }
-              ) %>
-            </div>
-          <% end %>
         <% end %>
 
         <% if body_actions? || show_add_to_list? %>
           <%= render FlatPack::Overlay::Component.new(class: grid_card_body_classes, data: { cover_body: true }) do |overlay| %>
             <% overlay.with_media do %>
               <div class="flex w-full min-w-0 flex-col self-stretch">
-                <%= column %>
+                <%= brand_row %>
               </div>
             <% end %>
             <% if body_actions? %>
@@ -136,7 +145,7 @@
           <% end %>
         <% else %>
           <div class="<%= grid_card_body_classes %>" data-cover-body>
-            <%= column %>
+            <%= brand_row %>
           </div>
         <% end %>
     </div>

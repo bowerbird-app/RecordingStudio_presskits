@@ -60,7 +60,8 @@ module RecordingStudioPresskits
     end
 
     # The header is the kit itself. Title is required. The short description
-    # can be blank. It is not a child, so it cannot be trashed or reordered.
+    # can be blank. release_date is an optional date. It is not a child, so
+    # it cannot be trashed or reordered.
     SHORT_DESCRIPTION_LIMIT = 280
     SUBTITLE_LIMIT = 120
 

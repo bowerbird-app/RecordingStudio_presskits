@@ -6,14 +6,14 @@ class TrashableSiblingApiParityTest < Minitest::Test
   ROOT = File.expand_path("..", __dir__)
 
   MAPPED_SOURCES = [
-    "app/models/recording_studio_presskits/facts_section.rb",
+    "app/models/recording_studio_presskits/stats_section.rb",
     "app/components/recording_studio_presskits/quote_section/component.rb",
     "app/components/recording_studio_presskits/quote_section/edit_component.rb",
     "lib/recording_studio_presskits/credits.rb",
     "lib/recording_studio_presskits/quote_order.rb",
     "lib/recording_studio_presskits/metrics.rb",
     "app/controllers/recording_studio_presskits/quotes_controller.rb",
-    "app/controllers/recording_studio_presskits/facts_controller.rb",
+    "app/controllers/recording_studio_presskits/stats_controller.rb",
     "app/controllers/recording_studio_presskits/quote_images_controller.rb",
     "app/models/recording_studio_presskits/list_section.rb",
     "app/controllers/recording_studio_presskits/list_items_controller.rb"
@@ -49,14 +49,14 @@ class TrashableSiblingApiParityTest < Minitest::Test
       refute_includes source, "merge(RecordingStudio::Recording.recording_studio_trashable_active)", relative
     end
 
-    facts = File.read(File.join(ROOT, "app/models/recording_studio_presskits/facts_section.rb"))
+    facts = File.read(File.join(ROOT, "app/models/recording_studio_presskits/stats_section.rb"))
     quotes = File.read(File.join(ROOT, "app/components/recording_studio_presskits/quote_section/component.rb"))
     quote_edit = File.read(File.join(ROOT, "app/components/recording_studio_presskits/quote_section/edit_component.rb"))
     credits = File.read(File.join(ROOT, "lib/recording_studio_presskits/credits.rb"))
     quote_order = File.read(File.join(ROOT, "lib/recording_studio_presskits/quote_order.rb"))
     metrics = File.read(File.join(ROOT, "lib/recording_studio_presskits/metrics.rb"))
     quotes_controller = File.read(File.join(ROOT, "app/controllers/recording_studio_presskits/quotes_controller.rb"))
-    facts_controller = File.read(File.join(ROOT, "app/controllers/recording_studio_presskits/facts_controller.rb"))
+    facts_controller = File.read(File.join(ROOT, "app/controllers/recording_studio_presskits/stats_controller.rb"))
     quote_images = File.read(File.join(ROOT, "app/controllers/recording_studio_presskits/quote_images_controller.rb"))
 
     list_section = File.read(File.join(ROOT, "app/models/recording_studio_presskits/list_section.rb"))

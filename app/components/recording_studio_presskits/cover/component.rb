@@ -11,13 +11,15 @@ module RecordingStudioPresskits
 
       SIZES = %i[card].freeze
 
-      # Editor-only. Index, public, and preview cards leave both empty.
+      # Editor chrome. Index, public, and preview cards leave both empty.
       renders_one :body_actions
       renders_one :image_actions
+      # Caller-supplied card actions. An empty collection hides the row.
+      renders_many :actions
 
       def initialize(recording: nil, title: nil, description: nil, subtitle: nil, brand_color: nil, inline_path: nil, # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
                      font_family: nil, size: :card, href: nil, id: nil, heading: :h2, add_to_list: true,
-                     show_image: true)
+                     show_image: true, context: :header)
         super()
         @recording = recording
         @title = title
@@ -28,6 +30,7 @@ module RecordingStudioPresskits
         @size = SIZES.include?(size&.to_sym) ? size.to_sym : :card
         @href = href
         @id = id
+        @context = context.to_sym
         assign_inline_heading(heading, inline_path)
         @add_to_list = add_to_list
         @show_image = show_image
@@ -40,6 +43,24 @@ module RecordingStudioPresskits
       def description
         text = @description.nil? ? recordable&.try(:description) : @description
         text.to_s.strip.presence
+      end
+
+      def release_line
+        date = release_date
+        return if date.blank?
+
+        I18n.t(
+          "recording_studio_presskits.cover.released",
+          date: I18n.l(date.to_date, format: "%-d %b %Y")
+        )
+      end
+
+      def wide_line?
+        release_line.present? || location_recordable.present?
+      end
+
+      def location_icon
+        location_recordable&.resolved_icon.presence || "map-pin"
       end
 
       def subtitle
@@ -104,6 +125,10 @@ module RecordingStudioPresskits
 
       def recordable
         @recording&.recordable
+      end
+
+      def release_date
+        recordable&.try(:release_date)
       end
     end
   end

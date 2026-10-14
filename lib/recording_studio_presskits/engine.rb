@@ -17,11 +17,13 @@ module RecordingStudioPresskits
         register_text_section
         register_images_section
         register_quote_section
-        register_facts_section
+        register_stats_section
         register_credits_section
         register_video_section
+        register_podcast_section
         register_location_section
         register_list_section
+        register_files_section
       end
 
       private
@@ -88,11 +90,11 @@ module RecordingStudioPresskits
         )
       end
 
-      def register_facts_section
+      def register_stats_section
         RecordingStudioPresskits.register_section(
-          "RecordingStudioPresskits::FactsSection",
-          component: "RecordingStudioPresskits::FactsSection::Component",
-          editor: "RecordingStudioPresskits::FactsSection::EditComponent"
+          "RecordingStudioPresskits::StatsSection",
+          component: "RecordingStudioPresskits::StatsSection::Component",
+          editor: "RecordingStudioPresskits::StatsSection::EditComponent"
         )
       end
 
@@ -112,6 +114,14 @@ module RecordingStudioPresskits
         )
       end
 
+      def register_podcast_section
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::PodcastSection",
+          component: "RecordingStudioPresskits::PodcastSection::Component",
+          editor: "RecordingStudioPresskits::PodcastSection::EditComponent"
+        )
+      end
+
       def register_location_section
         RecordingStudioPresskits.register_section(
           "RecordingStudioPresskits::LocationSection",
@@ -125,6 +135,14 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::ListSection",
           component: "RecordingStudioPresskits::ListSection::Component",
           editor: "RecordingStudioPresskits::ListSection::EditComponent"
+        )
+      end
+
+      def register_files_section
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::Files",
+          component: "RecordingStudioPresskits::Files::Component",
+          editor: "RecordingStudioPresskits::Files::EditComponent"
         )
       end
     end
@@ -225,6 +243,20 @@ module RecordingStudioPresskits
         next if RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
 
         RecordingStudioAttachable::Attachment.include RecordingStudio::Capabilities::Trashable.to
+      end
+    end
+
+    initializer "recording_studio_presskits.file_quota" do
+      config.to_prepare do
+        RecordingStudioPresskits::FileQuota.install!
+      end
+    end
+
+    initializer "recording_studio_presskits.download_folders" do
+      config.to_prepare do
+        next unless defined?(RecordingStudioDownloadable::Filename)
+
+        RecordingStudioPresskits::KitDownload::FolderNames.install!
       end
     end
 

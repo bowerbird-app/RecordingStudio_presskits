@@ -22,6 +22,15 @@
           <%= render action %>
         </div>
       </div>
+    <% elsif (action = stats_copy_button) %>
+      <div class="mb-8 flex items-start justify-between gap-3 sm:mb-10" data-stats-copy>
+        <div class="min-w-0 flex-1">
+          <%= render heading_component %>
+        </div>
+        <div class="shrink-0">
+          <%= render action %>
+        </div>
+      </div>
     <% else %>
       <%= render heading_component %>
     <% end %>
