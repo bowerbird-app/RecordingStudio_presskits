@@ -25,6 +25,10 @@ module RecordingStudioPresskits
       DEFAULT_SUBTITLE
     end
 
+    def prepare_defaults
+      normalize_menu
+    end
+
     include RecordingStudio::Capabilities::Trashable.to
 
     validates :layout, inclusion: { in: LAYOUTS }

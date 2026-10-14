@@ -169,7 +169,7 @@ module RecordingStudioPresskits
 
     def section_type_default(method_name)
       type = section_type_name.to_s.safe_constantize
-      return unless type&.respond_to?(method_name)
+      return unless type.respond_to?(method_name)
 
       type.public_send(method_name).presence
     end

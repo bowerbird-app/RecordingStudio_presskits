@@ -66,7 +66,10 @@ module RecordingStudioPresskits
       def section_icon(section)
         return unless menu.show_icons?
 
-        section_content(section)&.recordable&.class&.try(:section_menu_icon)
+        recordable = section_content(section)&.recordable
+        return if recordable.blank?
+
+        recordable.class.try(:section_menu_icon)
       end
 
       def linked_sections

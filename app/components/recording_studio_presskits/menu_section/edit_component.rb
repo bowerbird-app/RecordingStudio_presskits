@@ -19,7 +19,7 @@ module RecordingStudioPresskits
       end
 
       def layout_options
-        [["Grid", "grid"], ["List", "list"]]
+        [%w[Grid grid], %w[List list]]
       end
 
       def exclusion_candidates

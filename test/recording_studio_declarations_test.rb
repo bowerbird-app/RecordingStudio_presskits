@@ -813,15 +813,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "List", RecordingStudioPresskits.section_heading(kit_section)
   end
 
-  test "menu section parent is a kit section and the saved heading defaults to Contents" do
-    _root, kit = spring_kit
-    kit_section = RecordingStudioPresskits.create_section!(
-      press_kit_recording: kit,
-      content_type: "RecordingStudioPresskits::MenuSection"
-    )
-    section = RecordingStudioPresskits::KitQuery.section_content(kit_section)
-    menu = section.recordable
-
+  test "menu section parent is a kit section" do
     assert_equal(
       ["RecordingStudioPresskits::KitSection"],
       RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::MenuSection")
@@ -830,6 +822,17 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.root_allowed?("RecordingStudioPresskits::MenuSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::MenuSection")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::MenuSection")
+  end
+
+  test "a new menu saves Contents and the default flags" do
+    _root, kit = spring_kit
+    kit_section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::MenuSection"
+    )
+    section = RecordingStudioPresskits::KitQuery.section_content(kit_section)
+    menu = section.recordable
+
     assert_kind_of RecordingStudioPresskits::KitSection, kit_section.recordable
     assert RecordingStudio.parent_allowed?(
       child_type: "RecordingStudioPresskits::MenuSection",

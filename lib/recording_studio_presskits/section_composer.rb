@@ -35,7 +35,7 @@ module RecordingStudioPresskits
 
       def type_default(type_name, method_name)
         type = type_name.safe_constantize
-        return unless type&.respond_to?(method_name)
+        return unless type.respond_to?(method_name)
 
         type.public_send(method_name).presence
       end
