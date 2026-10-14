@@ -119,6 +119,8 @@ bin/rails server
 
 Open http://localhost:3000
 
+A Cursor cloud preview uses a `*.cursorvm.com` host. Development allows that host. When `CURSOR_AGENT` is set, the origin check is off so sign-in works behind the preview proxy. The authenticity token stays on.
+
 ### 10. Run Tests
 
 ```bash

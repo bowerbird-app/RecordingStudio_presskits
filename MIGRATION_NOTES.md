@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.60.1
+
+No migration. Host apps do not change.
+
+The dummy app's development config allows `*.cursorvm.com` so a Cursor cloud preview can open the server. When `CURSOR_AGENT` is set, the CSRF origin check is off. Authenticity tokens stay on.
+
 ## 0.60.0
 
 `0.59.0` already shipped. Bump to `0.60.0`.
