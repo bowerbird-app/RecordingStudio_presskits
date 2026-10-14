@@ -45,7 +45,7 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
     assert_equal "grid", menu.layout
     assert menu.show_counts
     assert menu.show_icons
-    assert_equal [], menu.excluded_section_ids
+    assert_equal({}, menu.items)
     assert_select "#presskits-section-placeholder", text: /Nothing to jump to yet/
     refute_select "nav[data-presskits-menu]"
   end
@@ -90,6 +90,8 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
     long_link = menu_links(menus[0]).find { |link| link.text.include?(LONG_TITLE) }
     assert_includes long_link["class"], "justify-center"
     assert_includes long_link["class"], "inline-flex"
+    assert_includes long_link["class"], "line-clamp-2"
+    assert_equal LONG_TITLE, long_link["title"]
     refute_includes long_link["class"], "truncate"
 
     refute_includes menus[0].text, "Empty lines"
@@ -119,7 +121,7 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
     assert_equal "photos-2", RecordingStudioPresskits.section_anchor_id(first)
   end
 
-  test "exclusions counts icons and both layouts" do
+  test "hidden sections, counts, icons, and both layouts" do
     kit = record_kit("Spring launch")
     about = add_text(kit, "About the launch")
     photos = add_images(kit, "Photos")
@@ -134,23 +136,26 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
     assert_select "input[name='menu_section[layout]'][value='grid'][checked]"
     assert_select "input[name='menu_section[show_counts]'][value='0']"
     assert_select "input[name='menu_section[show_icons]'][value='0']"
-    assert_select "input[type='checkbox'][name='menu_section[excluded_section_ids][]'][value='#{about.id}']"
-    assert_select "legend", text: "Leave these out"
+    assert_select "input[name='menu_section[items][#{about.id}][label]'][placeholder='About the launch']"
+    assert_select "input[name='menu_section[items][#{about.id}][shown]'][value='0']"
+    assert_select "legend", text: "Sections"
+    refute_select "legend", text: "Leave these out"
 
     patch recording_studio_presskits.press_kit_section_path(kit, menu), params: {
-      menu_section: {
-        layout: "list",
-        show_counts: "0",
-        show_icons: "0",
-        excluded_section_ids: [about.id, ""]
-      }
+      menu_section: menu_params(
+        "list",
+        "0",
+        "0",
+        about.id => { label: "", shown: "0" },
+        photos.id => { label: "", shown: "1" }
+      )
     }
     assert_response :redirect
     saved = section_content(menu).recordable.reload
     assert_equal "list", saved.layout
     refute saved.show_counts
     refute saved.show_icons
-    assert_equal [about.id], saved.excluded_section_ids
+    assert_equal true, saved.items[about.id.to_s]["hidden"]
 
     get recording_studio_presskits.preview_press_kit_path(kit)
     nav = css_select("nav[data-presskits-menu]").first
@@ -162,12 +167,13 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
     assert_select "nav[data-presskits-menu] [aria-label='1 image']", count: 0
 
     patch recording_studio_presskits.press_kit_section_path(kit, menu), params: {
-      menu_section: {
-        layout: "grid",
-        show_counts: "1",
-        show_icons: "1",
-        excluded_section_ids: [""]
-      }
+      menu_section: menu_params(
+        "grid",
+        "1",
+        "1",
+        about.id => { label: "", shown: "1" },
+        photos.id => { label: "", shown: "1" }
+      )
     }
     get recording_studio_presskits.preview_press_kit_path(kit)
     nav = css_select("nav[data-presskits-menu]").first
@@ -177,7 +183,105 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
     assert_equal "photo", nav.at_css("a[href='#photos'] [data-flat-pack--icon-name-value]")["data-flat-pack--icon-name-value"]
     assert_equal "1 image", nav.at_css("[aria-label='1 image']")["aria-label"]
     assert_equal "1", nav.at_css("[aria-label='1 image']").text.strip
-    assert_equal [], section_content(menu).recordable.reload.excluded_section_ids
+    assert_equal({}, section_content(menu).recordable.reload.items)
+  end
+
+  test "overrides fall back, hide, ignore stale ids, and keep matching after rename and reorder" do
+    kit = record_kit("Spring launch")
+    about = add_text(kit, "About the launch")
+    photos = add_text(kit, "Photos")
+    again = add_text(kit, "Photos")
+    menu = add_menu(kit)
+    RecordingStudioPresskits::MenuSection.where(id: section_content(menu).recordable_id).update_all(
+      items: {
+        about.id => { "label" => "Bio", "hidden" => false },
+        "00000000-0000-0000-0000-000000000000" => { "label" => "Ghost", "hidden" => false }
+      }
+    )
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.preview_press_kit_path(kit)
+    nav = css_select("nav[data-presskits-menu]").first
+    assert_equal "Bio", menu_links(nav).first.text.squish
+    refute_includes nav.text, "Ghost"
+
+    patch recording_studio_presskits.press_kit_section_path(kit, menu), params: {
+      menu_section: menu_params(
+        "grid",
+        "1",
+        "1",
+        about.id => { label: "Bio", shown: "1" },
+        photos.id => { label: "   ", shown: "1" },
+        again.id => { label: "", shown: "0" },
+        "00000000-0000-0000-0000-000000000000" => { label: "Ghost", shown: "1" }
+      )
+    }
+
+    saved = section_content(menu).recordable.reload
+    assert_equal({ "label" => "Bio", "hidden" => false }, saved.items[about.id.to_s])
+    refute saved.items.key?(photos.id.to_s)
+    assert_equal true, saved.items[again.id.to_s]["hidden"]
+    refute saved.items.key?("00000000-0000-0000-0000-000000000000")
+
+    get recording_studio_presskits.preview_press_kit_path(kit)
+    nav = css_select("nav[data-presskits-menu]").first
+    links = menu_links(nav)
+    assert_equal ["#about-the-launch", "#photos"], links.map { |link| link["href"] }
+    bio = links[0]
+    assert_equal "Bio", bio.text.squish
+    assert_equal "About the launch", bio["title"]
+    assert_equal "About the launch", bio["aria-label"]
+    assert_equal "Photos", links[1].text.squish
+    assert_nil links[1]["aria-label"]
+    refute_includes nav.text, "Ghost"
+
+    patch recording_studio_presskits.press_kit_section_path(kit, menu), params: {
+      menu_section: menu_params(
+        "grid",
+        "1",
+        "1",
+        about.id => { label: "", shown: "1" },
+        photos.id => { label: "", shown: "1" },
+        again.id => { label: "", shown: "1" }
+      )
+    }
+    get recording_studio_presskits.preview_press_kit_path(kit)
+    nav = css_select("nav[data-presskits-menu]").first
+    about_link = menu_links(nav).find { |link| link["href"] == "#about-the-launch" }
+    assert_equal "About the launch", about_link.text.squish
+    assert_nil about_link["aria-label"]
+
+    patch recording_studio_presskits.press_kit_section_path(kit, menu), params: {
+      menu_section: menu_params(
+        "grid",
+        "1",
+        "1",
+        about.id => { label: "Bio", shown: "1" },
+        photos.id => { label: "", shown: "1" },
+        again.id => { label: "Extra", shown: "1" }
+      )
+    }
+    @root.revise(about) { |section| section.title = "Launch story" }
+    kit.recording_studio_orderable_reorder!(
+      ordered_recording_ids: [again.id, photos.id, about.id, menu.id],
+      actor: @user
+    )
+
+    get recording_studio_presskits.preview_press_kit_path(kit)
+    nav = css_select("nav[data-presskits-menu]").first
+    links = menu_links(nav)
+    assert_equal ["#photos", "#photos-2", "#launch-story"], links.map { |link| link["href"] }
+    assert_equal "Extra", links[0].text.squish
+    assert_equal "Photos", links[0]["title"]
+    assert_equal "Photos", links[0]["aria-label"]
+    assert_equal "Photos", links[1].text.squish
+    assert_nil links[1]["aria-label"]
+    assert_equal "Bio", links[2].text.squish
+    assert_equal "Launch story", links[2]["title"]
+    assert_equal "Launch story", links[2]["aria-label"]
+    assert_equal "##{RecordingStudioPresskits.section_anchor_id(about.reload)}", links[2]["href"]
+    assert_equal "##{RecordingStudioPresskits.section_anchor_id(again.reload)}", links[0]["href"]
   end
 
   test "a menu with nothing to list stays off the page" do
@@ -206,6 +310,8 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
       link = items[index].at_css("a")
       assert_equal label, link.text.squish
       assert_equal "##{anchor}", link["href"]
+      assert_equal label, link["title"]
+      assert_nil link["aria-label"]
       assert_equal "default", link["data-fp-style"]
       assert_includes link["class"], "fp-button"
       icon_node = link.at_css("svg[data-flat-pack--icon-name-value='#{icon}']")
@@ -244,6 +350,10 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
 
   def menu_links(nav)
     nav.css("a")
+  end
+
+  def menu_params(layout, counts, icons, items)
+    { layout: layout, show_counts: counts, show_icons: icons, items: items }
   end
 
   def record_kit(title)

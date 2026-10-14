@@ -6,7 +6,7 @@ class CreateRecordingStudioMenuSections < ActiveRecord::Migration[8.1]
       t.string :layout, null: false, default: "grid"
       t.boolean :show_counts, null: false, default: true
       t.boolean :show_icons, null: false, default: true
-      t.json :excluded_section_ids, null: false, default: []
+      t.json :items, null: false, default: {}
       t.datetime :created_at, null: false
     end
   end

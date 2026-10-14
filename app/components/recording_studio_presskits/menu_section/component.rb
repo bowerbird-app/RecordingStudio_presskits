@@ -10,7 +10,8 @@ module RecordingStudioPresskits
       GRID_CLASSES = "m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3 p-0"
       LIST_CLASSES = "m-0 grid list-none grid-cols-1 gap-2 p-0"
       ITEM_CLASSES = "flex min-w-0 items-center gap-2"
-      LINK_CLASSES = "w-full min-w-0 flex-1"
+      # "line-clamp-2" "min-w-0" "text-left"
+      LINK_CLASSES = "w-full min-w-0 flex-1 [&>span]:line-clamp-2 [&>span]:min-w-0 [&>span]:text-left"
 
       Entry = Struct.new(:button, :badge, keyword_init: true)
 
@@ -46,15 +47,26 @@ module RecordingStudioPresskits
       end
 
       def link_button(section)
-        options = {
-          text: RecordingStudioPresskits.section_heading(section),
-          href: "##{RecordingStudioPresskits.section_anchor_id(section)}",
-          style: :default,
-          class: LINK_CLASSES
-        }
+        heading = RecordingStudioPresskits.section_heading(section)
+        FlatPack::Button::Component.new(**link_options(section, heading))
+      end
+
+      def link_options(section, heading)
+        options = base_link_options(section, heading)
         icon = section_icon(section)
         options[:icon] = icon if icon.present?
-        FlatPack::Button::Component.new(**options)
+        options
+      end
+
+      def base_link_options(section, heading)
+        {
+          text: menu.link_label(section, heading),
+          href: "##{RecordingStudioPresskits.section_anchor_id(section)}",
+          style: :default,
+          class: LINK_CLASSES,
+          title: heading,
+          aria: (menu.label_overridden?(section) ? { label: heading } : nil)
+        }.compact
       end
 
       def count_badge(section)
@@ -78,18 +90,14 @@ module RecordingStudioPresskits
 
       def linkable?(section)
         return false if section.id == kit_section&.id
-        return false if excluded?(section)
         return false if menu_content?(section)
+        return false if menu.hidden_section?(section)
 
         PressKits::SectionFrameComponent.new(section_recording: section).content_visible?
       end
 
       def menu_content?(section)
         section_content(section)&.recordable.is_a?(MenuSection)
-      end
-
-      def excluded?(section)
-        Array(menu.excluded_section_ids).map(&:to_s).include?(section.id.to_s)
       end
 
       def sibling_sections

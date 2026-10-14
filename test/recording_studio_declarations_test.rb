@@ -848,7 +848,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "grid", menu.layout
     assert menu.show_counts
     assert menu.show_icons
-    assert_equal [], menu.excluded_section_ids
+    assert_equal({}, menu.items)
     refute menu.respond_to?(:title=)
   end
 

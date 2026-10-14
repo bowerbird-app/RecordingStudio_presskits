@@ -101,7 +101,14 @@ module RecordingStudioPresskits
       return if editor.blank? || editor.permitted_attributes.blank?
       return unless params.key?(editor.param_key)
 
-      params.require(editor.param_key).permit(*editor.permitted_attributes).to_h
+      permit_content(editor).to_h
+    end
+
+    def permit_content(editor)
+      raw = params.require(editor.param_key)
+      return editor.permit(raw) if editor.respond_to?(:permit)
+
+      raw.permit(*editor.permitted_attributes)
     end
 
     def after_save_path

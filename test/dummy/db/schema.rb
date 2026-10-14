@@ -279,7 +279,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_233000) do
     t.string "layout", default: "grid", null: false
     t.boolean "show_counts", default: true, null: false
     t.boolean "show_icons", default: true, null: false
-    t.json "excluded_section_ids", default: [], null: false
+    t.json "items", default: {}, null: false
     t.datetime "created_at", null: false
   end
 

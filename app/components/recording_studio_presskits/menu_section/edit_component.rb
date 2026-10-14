@@ -15,19 +15,40 @@ module RecordingStudioPresskits
       end
 
       def self.permitted_attributes
-        [:layout, :show_counts, :show_icons, { excluded_section_ids: [] }]
+        %i[layout show_counts show_icons]
+      end
+
+      def self.permit(raw)
+        permitted = raw.permit(*permitted_attributes)
+        permitted.merge(items: permitted_items(raw[:items]))
+      end
+
+      def self.permitted_items(items)
+        raw = items.respond_to?(:to_unsafe_h) ? items.to_unsafe_h : items
+        return {} unless raw.is_a?(Hash)
+
+        raw.each_with_object({}) do |(section_id, attrs), kept|
+          next if section_id.blank?
+          next unless attrs.is_a?(Hash)
+
+          kept[section_id.to_s] = ActionController::Parameters.new(attrs).permit(:label, :shown, :hidden).to_h
+        end
       end
 
       def layout_options
         [%w[Grid grid], %w[List list]]
       end
 
-      def exclusion_candidates
+      def section_rows
         siblings.reject { |section| section.id == kit_section&.id || menu_content?(section) }
       end
 
-      def excluded?(section)
-        Array(@menu.excluded_section_ids).map(&:to_s).include?(section.id.to_s)
+      def short_label(section)
+        @menu.item_for(section.id).label
+      end
+
+      def shown?(section)
+        @menu.item_for(section.id).shown?
       end
 
       def heading_for(section)

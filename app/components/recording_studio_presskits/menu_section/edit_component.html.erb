@@ -23,19 +23,26 @@
     help_text: "The section icon beside the name."
   ) %>
 
-  <% if exclusion_candidates.any? %>
-    <%= hidden_field_tag "menu_section[excluded_section_ids][]", "" %>
+  <% if section_rows.any? %>
     <%= render FlatPack::Fieldset::Component.new(
-      title: "Leave these out",
-      description: "They stay in the kit."
+      title: "Sections",
+      description: "A short name, or hide one."
     ) do %>
-      <% exclusion_candidates.each do |section| %>
-        <%= render FlatPack::Checkbox::Component.new(
-          name: "menu_section[excluded_section_ids][]",
-          value: section.id,
-          checked: excluded?(section),
-          label: heading_for(section)
-        ) %>
+      <% section_rows.each do |section| %>
+        <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-end">
+          <%= render FlatPack::TextInput::Component.new(
+            name: "menu_section[items][#{section.id}][label]",
+            label: "Short name",
+            value: short_label(section),
+            placeholder: heading_for(section)
+          ) %>
+          <%= hidden_field_tag "menu_section[items][#{section.id}][shown]", "0" %>
+          <%= render FlatPack::Switch::Component.new(
+            name: "menu_section[items][#{section.id}][shown]",
+            label: "Show",
+            checked: shown?(section)
+          ) %>
+        </div>
       <% end %>
     <% end %>
   <% end %>
