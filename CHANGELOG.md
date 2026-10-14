@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.54.0] - 2026-10-14
+## [0.55.0] - 2026-10-14
 
 ### Added
 - A podcast section. `PodcastSection` is an empty recording under a kit section. Each episode is a `Podcast` child with a link, optional title, show, date, and duration, and an optional cover image.
@@ -15,13 +15,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Play on Spotify or Apple Podcasts opens a `FlatPack::Modal` with only that platform's player and a close control. The episode title is visually hidden and names the dialog. The iframe is added when the dialog opens and removed when it closes. Spotify's player is 352px tall. Apple's is 175px. Any other link opens in a new tab. **Listen on** and **Copy link** stay on the card.
 - On save, Press Kits stores a copy of artwork from Spotify oEmbed or from the page's Open Graph image. The uploaded cover wins. Otherwise the card uses the stored copy, then a tile in the kit brand colour. A blank show is filled when the page names one. A platform name is not stored as the show.
 - The kit section payload adds `podcasts` when the content is a podcast section. A podcast exposes show and update. The kit text file lists the show, title, date, duration, and link.
+- Version `0.55.0`
+
+### Upgrade notes
+- `0.54.0` already shipped. This release is `0.55.0`.
+- Bump to `0.55.0`. Register `RecordingStudioPresskits::PodcastSection` and `RecordingStudioPresskits::Podcast` in `recordable_types`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration creates `recording_studio_podcast_sections` and `recording_studio_podcasts`.
+- Rebuild Tailwind so the carousel card widths generate. Reload Press Kits JavaScript so the podcast carousel and player controllers load.
+
+## [0.54.0] - 2026-10-14
+
+### Changed
+- Depend on Recording Studio Trashable `~> 0.9` (tag `v0.9.0`). Call sites that used `where(trashed_at: nil)` now use `where(recording_studio_trashable_kept_sql)` (quotes/facts/credits finders, metrics). Predicates use `recording_studio_trashable_kept?` / `recording_studio_trashable_trashed?`. Sites that already used `recording_studio_trashable_active` on main stay on `_active` (credits `live_credits`, `KitQuery.live_kits`, and kit-query child merges).
+- Pin `recording_studio_video` to `~> 0.2.0` (tag `v0.2.0`).
 - Version `0.54.0`
 
 ### Upgrade notes
-- `0.53.0` already shipped. This release is `0.54.0`.
-- Bump to `0.54.0`. Register `RecordingStudioPresskits::PodcastSection` and `RecordingStudioPresskits::Podcast` in `recordable_types`.
-- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration creates `recording_studio_podcast_sections` and `recording_studio_podcasts`.
-- Rebuild Tailwind so the carousel card widths generate. Reload Press Kits JavaScript so the podcast carousel and player controllers load.
+- Bump to `0.54.0` and pin `recording_studio_trashable` to `~> 0.9` (tag `v0.9.0`). There is no presskits migration. Reload so Recording scopes pick up Trashable’s sibling helpers.
+- Replace raw `where(trashed_at: nil)` with `where(recording_studio_trashable_kept_sql)` on the same relation. Keep `recording_studio_trashable_active` / `merge(active)` only where main already used `_active` — that scope unscopes `trashed_at` first and is not equivalent to additive `where(trashed_at: nil)`.
+- User-facing trash and restore stay on `recording_studio_trashable_trash!` / `recording_studio_trashable_restore!`. The one-time `LegacySectionTree` upgrade still copies `trashed_at` and `trash_root` with `update!`. It does not use `void_recording!`, which would drop `trash_root` and skip validations/callbacks.
+- Pin `recording_studio_video` to `~> 0.2.0` (tag `v0.2.0`).
 
 ## [0.53.0] - 2026-10-14
 
@@ -1055,7 +1068,35 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.29.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.55.0...HEAD
+[0.55.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.54.0...v0.55.0
+[0.54.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.53.0...v0.54.0
+[0.53.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.52.0...v0.53.0
+[0.52.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.51.0...v0.52.0
+[0.51.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.50.0...v0.51.0
+[0.50.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.49.0...v0.50.0
+[0.49.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.48.0...v0.49.0
+[0.48.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.47.0...v0.48.0
+[0.47.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.46.0...v0.47.0
+[0.46.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.45.0...v0.46.0
+[0.45.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.44.0...v0.45.0
+[0.44.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.43.0...v0.44.0
+[0.43.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.42.0...v0.43.0
+[0.42.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.41.0...v0.42.0
+[0.41.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.40.0...v0.41.0
+[0.40.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.39.0...v0.40.0
+[0.39.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.38.1...v0.39.0
+[0.38.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.38.0...v0.38.1
+[0.38.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.37.0...v0.38.0
+[0.37.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.36.1...v0.37.0
+[0.36.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.36.0...v0.36.1
+[0.36.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.35.0...v0.36.0
+[0.35.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.34.0...v0.35.0
+[0.34.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.33.0...v0.34.0
+[0.33.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.32.0...v0.33.0
+[0.32.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.31.0...v0.32.0
+[0.31.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.30.0...v0.31.0
+[0.30.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.1...v0.27.0

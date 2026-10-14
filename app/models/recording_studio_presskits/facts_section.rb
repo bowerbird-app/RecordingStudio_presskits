@@ -24,7 +24,7 @@ module RecordingStudioPresskits
     end
 
     def self.hidden_fact?(child)
-      child.trashed_at.present? || !child.recordable.is_a?(Fact)
+      child.recording_studio_trashable_trashed? || !child.recordable.is_a?(Fact)
     end
 
     include RecordingStudio::Capabilities::Trashable.to

@@ -52,11 +52,10 @@ module RecordingStudioPresskits
     def find_attachment
       return unless podcast_recording
 
-      podcast_recording.child_recordings.where(attachment_scope).first
-    end
-
-    def attachment_scope
-      { trashed_at: nil, recordable_type: "RecordingStudioAttachable::Attachment" }
+      podcast_recording.child_recordings
+                       .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                       .where(recordable_type: "RecordingStudioAttachable::Attachment")
+                       .first
     end
 
     def podcast_edit_path
