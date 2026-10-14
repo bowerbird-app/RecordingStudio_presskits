@@ -53,6 +53,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb",
       "db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
       "test/dummy/db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
+      "db/migrate/20261014200000_create_recording_studio_podcasts.rb",
+      "test/dummy/db/migrate/20261014200000_create_recording_studio_podcasts.rb",
       "db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb"
     ].each do |path|
@@ -1427,11 +1429,15 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.join(root, "Gemfile"))
 
     assert_includes routes, "resources :videos"
+    assert_includes routes, "resources :podcasts"
+    assert_includes routes, "podcast_images"
     assert_includes routes, "resources :locations"
     refute_includes routes, "resources :library_images"
     refute_includes routes, "resources :images, only: :destroy"
     assert_includes routes, "video_order"
     assert_includes initializer, '"RecordingStudioPresskits::VideoSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::PodcastSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::Podcast"'
     assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.2.0"'

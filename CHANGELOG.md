@@ -23,6 +23,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **View** is a FlatPack primary button at `size: :lg` with `arrow-right`. Do not add `rounded-full` or an icon-order override.
 - `Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action`. The public page no longer renders `recording_studio_downloadable_button` under the header. Download kit on the cover links to `recording_package_path`.
 
+## [0.55.0] - 2026-10-14
+
+### Added
+- A podcast section. `PodcastSection` is an empty recording under a kit section. Each episode is a `Podcast` child with a link, optional title, show, date, and duration, and an optional cover image.
+- The public section is a horizontal row of square cards. About three fit on a desktop and about 1.2 on a phone. CSS scroll-snap slides the row. Previous and next appear only when the row overflows. The card stays a square cover.
+- Play on Spotify or Apple Podcasts opens a `FlatPack::Modal` with only that platform's player and a close control. The episode title is visually hidden and names the dialog. The iframe is added when the dialog opens and removed when it closes. Spotify's player is 352px tall. Apple's is 175px. Any other link opens in a new tab. **Listen on** and **Copy link** stay on the card.
+- On save, Press Kits stores a copy of artwork from Spotify oEmbed or from the page's Open Graph image. The uploaded cover wins. Otherwise the card uses the stored copy, then a tile in the kit brand colour. A blank show is filled when the page names one. A platform name is not stored as the show.
+- The kit section payload adds `podcasts` when the content is a podcast section. A podcast exposes show and update. The kit text file lists the show, title, date, duration, and link.
+- Version `0.55.0`
+
+### Upgrade notes
+- `0.54.0` already shipped. This release is `0.55.0`.
+- Bump to `0.55.0`. Register `RecordingStudioPresskits::PodcastSection` and `RecordingStudioPresskits::Podcast` in `recordable_types`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration creates `recording_studio_podcast_sections` and `recording_studio_podcasts`.
+- Rebuild Tailwind so the carousel card widths generate. Reload Press Kits JavaScript so the podcast carousel and player controllers load.
+
 ## [0.54.0] - 2026-10-14
 
 ### Changed

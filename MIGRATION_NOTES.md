@@ -12,6 +12,36 @@ Hosts that replaced the header editor should add `FlatPack::DateInput` named `pr
 
 Below 640px of the cover container, hide the subtitle on every cover (`hidden`, then `@min-[640px]:block`). Hide the short description below that width only when `context: :grid` (`hidden @min-[640px]:line-clamp-3`). `context: :header` keeps `line-clamp-3` at every width. Pass `context:` from the caller. The index uses `:grid`. The public kit and the editor use `:header`. Do not infer the choice from which buttons are in the slot. Rebuild Tailwind so `@min-[640px]:block` and `@min-[640px]:line-clamp-3` generate.
 
+## 0.55.0
+
+`0.54.0` already shipped. Bump to `0.55.0`.
+
+Register both new types:
+
+```ruby
+"RecordingStudioPresskits::PodcastSection",
+"RecordingStudioPresskits::Podcast",
+```
+
+Run the new migration. It creates `recording_studio_podcast_sections` (an empty snapshot, `created_at` only) and `recording_studio_podcasts` (`url`, optional `title`, `show_name`, `aired_on`, `duration`, `artwork_source_url`, `created_at`). There is no backfill.
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+`PodcastSection` includes Trashable and allows `KitSection` as its parent. `Podcast` includes Trashable and Attachable (one image, 10MB) and allows `PodcastSection` as its parent. Neither is Orderable. Episodes stay in the order they were added.
+
+The editor link is + Podcast. The episode screen asks for the link and optional title, show, date, and duration. The cover upload is on that screen after the episode exists. Removing the cover trashes the uploaded image. Removing an episode trashes that recording. Removing the section trashes the kit section and the episodes under it.
+
+On save, Press Kits fetches artwork for an https link when there is no uploaded cover and the stored copy is missing or stale. Spotify uses `https://open.spotify.com/oembed`. Other pages use `og:image`, then `twitter:image`. The bytes are attached to the episode snapshot. The public card never hotlinks that picture. A timeout, a non-image response, or a private address is skipped. The next save tries again. A title or show someone already typed is left as they typed it. A blank show is filled when the page names one: Spotify's oEmbed author, otherwise the episode description, the document title, or a podcast heading. Platform names such as Spotify, Apple Podcasts, and Pocket Casts are not stored as the show.
+
+The public row uses CSS scroll-snap. Previous and next are hidden until the row overflows, including when JavaScript has not run. The card stays a square cover. Play on Spotify or Apple Podcasts opens `FlatPack::Modal` (`scroll: :page`) with only the player and the close control. The episode title is in the header slot, visually hidden, so Flatpack's `aria-labelledby` names the dialog. The iframe is added when that dialog opens and removed when it closes, so audio stops. Spotify's frame is 352px tall. Apple's is 175px. Other links are a play control that opens a new tab. Spotify embeds are `https://open.spotify.com/embed/episode|show/ID`. Apple episode links use `https://embed.podcasts.apple.com/{country}/episode/{id}` when the link has an episode id, otherwise the Apple path.
+
+The kit section payload includes `podcasts` only for a podcast section: `title`, `show_name`, `url`, `aired_on`, `duration`, `service`, `embed_url`. A podcast's own show and update use `url`, `title`, `show_name`, `aired_on`, and `duration`. Saving from the editor fetches artwork. An API update does not.
+
+Rebuild Tailwind. The card widths are `w-[83.333%]` and `md:w-[calc((100%-2rem)/3)]`. Reload Press Kits JavaScript so `recording-studio-presskits--podcast-carousel` and `recording-studio-presskits--podcast-player` load. Copy link still uses `recording-studio-presskits--copy-link`.
+
 ## 0.54.0
 
 No presskits migration. Pin `recording_studio_trashable` to `~> 0.9` (tag `v0.9.0`). Pin `recording_studio_video` to `~> 0.2.0` (tag `v0.2.0`).
