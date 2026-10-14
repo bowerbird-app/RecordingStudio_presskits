@@ -3,6 +3,20 @@
 module RecordingStudioPresskits
   module Cover
     module GridCard
+      # "line-clamp-3" "hidden @min-[640px]:line-clamp-3"
+      # "text-base leading-6 text-[var(--surface-muted-content-color)]"
+      DESCRIPTION_TYPE = "text-base leading-6 text-[var(--surface-muted-content-color)]"
+      HEADER_DESCRIPTION_CLASSES = "line-clamp-3 #{DESCRIPTION_TYPE}".freeze
+      GRID_DESCRIPTION_CLASSES = "hidden @min-[640px]:line-clamp-3 #{DESCRIPTION_TYPE}".freeze
+
+      def grid?
+        @context == :grid
+      end
+
+      def description_classes
+        grid? ? GRID_DESCRIPTION_CLASSES : HEADER_DESCRIPTION_CLASSES
+      end
+
       # Tailwind scans these literals: "@container" "shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
       def grid_card_classes
         "@container h-full w-full shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"

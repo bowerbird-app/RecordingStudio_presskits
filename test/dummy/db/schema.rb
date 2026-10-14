@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_210000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -281,6 +281,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_200000) do
     t.string "subtitle"
     t.string "brand_color"
     t.string "font_family"
+    t.date "release_date"
   end
 
   create_table "recording_studio_presskits_kit_settings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

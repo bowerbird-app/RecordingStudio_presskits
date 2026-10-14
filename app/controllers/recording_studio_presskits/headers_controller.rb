@@ -30,7 +30,7 @@ module RecordingStudioPresskits
 
     def press_kit_params
       params.fetch(:press_kit, {}).permit(
-        :title, :subtitle, :description, :brand_color, :font_family, :brand_source
+        :title, :subtitle, :description, :brand_color, :font_family, :brand_source, :release_date
       )
     end
 
@@ -66,7 +66,9 @@ module RecordingStudioPresskits
 
     def revise_header(fields)
       current_presskits_root.revise(@press_kit_recording) do |press_kit|
-        press_kit.assign_attributes(fields.slice(:title, :subtitle, :description, :brand_color, :font_family))
+        press_kit.assign_attributes(
+          fields.slice(:title, :subtitle, :description, :brand_color, :font_family, :release_date)
+        )
       end
       @press_kit_recording.reload
     end
@@ -93,6 +95,7 @@ module RecordingStudioPresskits
     def assign_header_fields(overrides = {})
       recordable = @press_kit_recording.recordable
       assign_header_brand(overrides, recordable)
+      @header_release_date = field_or_saved(overrides, :release_date, recordable.release_date)
       @header_location = kit_location_recording&.recordable || RecordingStudio::Location::Location.new
     end
 

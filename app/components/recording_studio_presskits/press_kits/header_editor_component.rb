@@ -3,14 +3,19 @@
 module RecordingStudioPresskits
   module PressKits
     class HeaderEditorComponent < ViewComponent::Base
-      def initialize(press_kit_recording:, brand_color: nil,
-                     font_family: nil, brand_source: nil, location: nil)
+      def initialize(press_kit_recording:, brand_color: nil, # rubocop:disable Metrics/ParameterLists
+                     font_family: nil, brand_source: nil, location: nil, release_date: nil)
         super()
         @press_kit_recording = press_kit_recording
         @brand_color = brand_color
         @font_family = font_family
         @brand_source = brand_source
         @location = location
+        @release_date = release_date
+      end
+
+      def release_date_value
+        @release_date
       end
 
       def header_location

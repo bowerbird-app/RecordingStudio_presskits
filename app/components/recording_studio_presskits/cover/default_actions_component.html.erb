@@ -1,0 +1,15 @@
+<% if grid? && view_button %>
+  <% @cover.with_action do %>
+    <%= render view_button %>
+  <% end %>
+<% end %>
+<% if (download = download_button) %>
+  <% @cover.with_action do %>
+    <%= render download %>
+  <% end %>
+<% end %>
+<% if (contact = contact_button) %>
+  <% @cover.with_action do %>
+    <%= render contact %>
+  <% end %>
+<% end %>

@@ -68,15 +68,21 @@ class KitDownloadTest < Minitest::Test
   def test_public_kit_renders_downloadable_button_helper
     html_path = "../app/components/recording_studio_presskits/press_kits/public_show_component.html.erb"
     html = File.read(File.expand_path(html_path, __dir__))
-    component_path = "../app/components/recording_studio_presskits/press_kits/public_show_component.rb"
-    component = File.read(File.expand_path(component_path, __dir__))
+    actions = %w[
+      ../app/components/recording_studio_presskits/cover/default_actions_component.rb
+      ../app/components/recording_studio_presskits/cover/action_links.rb
+    ].map { |path| File.read(File.expand_path(path, __dir__)) }.join
 
-    assert_includes html, "presskits-kit-download"
-    assert_includes html, "recording_studio_downloadable_button"
-    assert_includes html, "show_download?"
-    assert_includes component, "return false if preview?"
-    assert_includes component, "KitDownload.allowed?"
-    assert_includes component, "helpers.current_user"
+    assert_includes html, "DefaultActionsComponent"
+    assert_includes html, "context: :header"
+    assert_includes html, "preview: preview?"
+    refute_includes html, "recording_studio_downloadable_button"
+    refute_includes html, "presskits-kit-download"
+    assert_includes actions, "return if grid? || @preview"
+    assert_includes actions, "KitDownload.allowed?"
+    assert_includes actions, "helpers.current_user"
+    assert_includes actions, "recording_package_path"
+    assert_includes actions, "data: { cover_download: true }"
     controller = File.read(
       File.expand_path("../app/controllers/recording_studio_presskits/public_press_kits_controller.rb", __dir__)
     )

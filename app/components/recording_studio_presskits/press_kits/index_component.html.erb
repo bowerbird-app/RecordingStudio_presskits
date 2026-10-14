@@ -83,8 +83,15 @@
             <%= render RecordingStudioPresskits::Cover::Component.new(
               recording: recording,
               size: :card,
-              href: @show_path.call(recording)
-            ) %>
+              context: :grid
+            ) do |cover| %>
+              <%= render RecordingStudioPresskits::Cover::DefaultActionsComponent.new(
+                cover: cover,
+                recording: recording,
+                context: :grid,
+                href: @show_path.call(recording)
+              ) %>
+            <% end %>
           <% end %>
         <% end %>
       <% end %>
