@@ -1,6 +1,17 @@
 <%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>
   <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
-    <%= render heading_component %>
+    <% if (action = images_download_button) %>
+      <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0 flex-1">
+          <%= render heading_component %>
+        </div>
+        <div class="shrink-0">
+          <%= render action %>
+        </div>
+      </div>
+    <% else %>
+      <%= render heading_component %>
+    <% end %>
 
     <% if (view = content_view) %>
       <%= render view %>

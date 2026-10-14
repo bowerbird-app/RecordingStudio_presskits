@@ -249,22 +249,80 @@ begin
   )
   ensure_credits_section.call(unpublished_kit_recording, "Credits", [[tom, "Creative Direction"]])
 
-  ensure_images_section = lambda do |kit_recording, title|
+  press_image_seeds = [
+    ["hero-pendant.jpg", "Hero — Pendant", "Oat ceramic pendant against plaster."],
+    ["detail-glow.jpg", "Detail — Glow", "Warm light under the shade."],
+    ["detail-brass.jpg", "Detail — Brass cap", "Brass cap where the cord meets the shade."],
+    ["full-drop.jpg", "Pendant — Full drop", "The full drop of the pendant."],
+    ["studio-wide.jpg", "Studio — Wide", "The pendant in a quiet studio."],
+    ["lifestyle-wall.jpg", "Lifestyle — Wall", "Morning light beside the wall."],
+    ["detail-shade.jpg", "Detail — Shade", "The ceramic surface of the shade."],
+    ["light-study.jpg", "Light study — Wall", "A pool of light on plaster."],
+    ["detail-cord.jpg", "Detail — Cord", "Black cord and brass cap."],
+    ["lifestyle-table.jpg", "Lifestyle — Table", "The pendant over a pale oak table."],
+    ["studio-room.jpg", "Studio — Room", "The lamp lit in the evening room."],
+    ["overhead-shade.jpg", "Overhead — Shade", "Looking down on the shade."],
+    ["evening-insitu.jpg", "Evening — In situ", "The pendant lit after dusk."],
+    ["detail-cap.jpg", "Detail — Cap", "The cap and the top of the shade."]
+  ]
+  ensure_images_section = lambda do |kit_recording|
     next unless defined?(RecordingStudioAttachable)
 
     existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
-      section.recordable.title == title
+      RecordingStudioPresskits::KitQuery.section_content(section)&.recordable.is_a?(RecordingStudioPresskits::Images)
     end
+    brand = RecordingStudioPresskits::Cover::Company.name_for(kit_recording).presence || "Harbour Studio"
+    subtitle = RecordingStudioPresskits::ImagesCredit.line_for(brand)
     section = existing || RecordingStudioPresskits.create_section!(
       press_kit_recording: kit_recording,
       content_type: "RecordingStudioPresskits::Images",
       actor: user,
-      title: title
+      title: "Images",
+      subtitle: subtitle
     )
+    if existing && (existing.recordable.title != "Images" || existing.recordable.subtitle != subtitle)
+      root_recording.revise(existing, actor: user) do |recordable|
+        recordable.title = "Images"
+        recordable.subtitle = subtitle
+      end
+      section = existing.reload
+    end
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    attach_harbour_photo.call(content, source: "press_photos")
+    RecordingStudioPresskits::DirectImages.list(content).each do |photo|
+      next unless photo.recordable.original_filename == "harbour-gallery.jpg"
+
+      photo.recording_studio_trashable_trash!(actor: user)
+    end
+    press_image_seeds.each do |filename, name, alt|
+      path = Rails.root.join("db/seed_images/press", filename)
+      next unless path.file?
+
+      already = RecordingStudioPresskits::DirectImages.list(content).find do |photo|
+        photo.recordable.original_filename == filename
+      end
+      if already
+        RecordingStudioPresskits::ImagePixelSize.ensure_blob!(already.recordable.file.blob)
+        next
+      end
+
+      photo = File.open(path, "rb") do |io|
+        content.import_attachment(
+          io: io,
+          filename: filename,
+          content_type: "image/jpeg",
+          name: name,
+          actor: user,
+          source: "press_photos"
+        )
+      end
+      next if photo.blank?
+
+      photo.revise_attachment_metadata(actor: user, alt_text: alt)
+      content.recording_studio_orderable_append!(photo, actor: user)
+      RecordingStudioPresskits::ImagePixelSize.ensure_blob!(photo.recordable.file.blob)
+    end
   end
-  ensure_images_section.call(press_kit_recording, "Press photos")
+  ensure_images_section.call(press_kit_recording)
 
   ensure_stats_section = lambda do |kit_recording, title, columns, stats|
     existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|

@@ -10,6 +10,8 @@ RecordingStudioPresskits::Engine.routes.draw do
     end
   end
 
+  resources :image_archives, only: :show
+
   resources :press_kits, only: %i[index show new create edit] do
     member do
       get :preview
