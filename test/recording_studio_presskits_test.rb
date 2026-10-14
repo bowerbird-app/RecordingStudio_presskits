@@ -792,7 +792,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes cover, "data-cover-edit=\"stacked\""
     assert_includes cover, "data-cover-edit=\"wide\""
     assert_includes cover, "flex items-center gap-2"
-    assert_includes cover, "with_item(placement: :top_right, inset: :sm, class: \"@min-[640px]:top-18\", data: { cover_heart: true })"
+    assert_includes(
+      cover,
+      "with_item(placement: :top_right, inset: :sm, class: \"@min-[640px]:top-18\", data: { cover_heart: true })"
+    )
     assert_includes cover, "company_heart_clearance_classes"
     refute_includes cover, "flex items-start gap-3"
     refute_includes cover, "flex-col-reverse"
