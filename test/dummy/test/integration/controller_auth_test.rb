@@ -135,6 +135,21 @@ class ControllerAuthTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "falls back to Current.actor when current_actor_method is unset" do
+    assert_equal :current_then_method,
+                 RecordingStudioPresskits::ApplicationController.recording_studio_auth_options[:actor_resolution]
+
+    with_current_actor_method(nil) do
+      assert_authorized_via_planted_current_actor
+    end
+  end
+
+  test "falls back to Current.actor when current_actor_method is undefined" do
+    with_current_actor_method(:not_a_real_actor_method) do
+      assert_authorized_via_planted_current_actor
+    end
+  end
+
   test "kit edit forbids a viewer who cannot edit" do
     kit = @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = "View only kit" }
     viewer = User.create!(
@@ -182,5 +197,54 @@ class ControllerAuthTest < ActionDispatch::IntegrationTest
   def refute_response_redirected_to_sign_in
     refute_equal new_user_session_path, response.redirect_url.to_s.sub(%r{\Ahttps?://[^/]+}, "")
     refute_includes [301, 302, 303, 307, 401], response.status
+  end
+
+  def with_current_actor_method(method_name)
+    previous = RecordingStudioPresskits.configuration.current_actor_method
+    RecordingStudioPresskits.configuration.current_actor_method = method_name
+    yield
+  ensure
+    RecordingStudioPresskits.configuration.current_actor_method = previous
+  end
+
+  # CurrentAttributes resets between requests, so plant inside the request
+  # before ControllerAuth resolves the actor (same shape as Accessible's demos).
+  def assert_authorized_via_planted_current_actor
+    stranger = User.create!(
+      email: "controller-auth-planted-#{SecureRandom.hex(4)}@example.com",
+      password: "Password123!",
+      password_confirmation: "Password123!"
+    )
+    sign_in @user
+    switch_to_root(@root)
+    sign_in stranger
+
+    plant_current_actor_during_request(@user) do
+      get recording_studio_presskits.press_kits_path
+    end
+
+    assert_response :success
+    assert_equal @user, Current.actor
+  end
+
+  def plant_current_actor_during_request(actor)
+    controller = RecordingStudioPresskits::ApplicationController
+    planted = actor
+    controller.class_eval do
+      prepend_before_action :plant_controller_auth_current_actor_for_test
+
+      define_method(:plant_controller_auth_current_actor_for_test) do
+        Current.actor = planted
+      end
+      private :plant_controller_auth_current_actor_for_test
+    end
+
+    yield
+  ensure
+    controller.class_eval do
+      skip_before_action :plant_controller_auth_current_actor_for_test, raise: false
+      remove_method :plant_controller_auth_current_actor_for_test if method_defined?(:plant_controller_auth_current_actor_for_test) ||
+                                                                    private_method_defined?(:plant_controller_auth_current_actor_for_test)
+    end
   end
 end
