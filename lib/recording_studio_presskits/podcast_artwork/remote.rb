@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-require "json"
 require "uri"
-require "recording_studio_presskits/podcast_artwork/page"
+require "recording_studio_presskits/podcast_artwork/details"
 
 module RecordingStudioPresskits
   class PodcastArtwork
@@ -25,7 +24,7 @@ module RecordingStudioPresskits
         page = https_uri(page_url)
         return unless page
 
-        meta = spotify?(page) ? spotify_meta(page) : page_meta(page)
+        meta = Details.for(page, method(:read))
         download(meta)
       rescue JSON::ParserError, IOError, SystemCallError, Timeout::Error, SocketError
         nil
@@ -46,31 +45,6 @@ module RecordingStudioPresskits
           title: meta[:title],
           show_name: meta[:show_name]
         )
-      end
-
-      def spotify_meta(page)
-        status, body, = read(oembed_uri(page), HTML_LIMIT)
-        return unless status == 200
-
-        data = JSON.parse(body.to_s)
-        return unless data.is_a?(Hash)
-
-        {
-          image: data["thumbnail_url"].to_s,
-          title: data["title"].to_s.strip.presence,
-          show_name: data["author_name"].to_s.strip.presence
-        }
-      end
-
-      def page_meta(page)
-        status, body, type = read(page, HTML_LIMIT)
-        return unless status == 200 && type.to_s.start_with?("text/html")
-
-        {
-          image: Page.image(body),
-          title: Page.title(body),
-          show_name: nil
-        }
       end
 
       def read(uri, limit, hops: 1)
@@ -104,16 +78,6 @@ module RecordingStudioPresskits
 
       def redirect?(status)
         [301, 302, 303, 307, 308].include?(status)
-      end
-
-      def oembed_uri(page)
-        query = URI.encode_www_form_component(page.to_s)
-        https_uri("https://open.spotify.com/oembed?url=#{query}")
-      end
-
-      def spotify?(page)
-        host = page.host.to_s.downcase.delete_prefix("www.")
-        %w[open.spotify.com spotify.com].include?(host)
       end
 
       def https_uri(value)

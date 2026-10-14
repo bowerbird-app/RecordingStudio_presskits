@@ -67,9 +67,30 @@ module RecordingStudioPresskits
 
     def apple_embed
       return unless host == "podcasts.apple.com"
-      return if @uri.path.blank? || @uri.path == "/"
 
-      "https://embed.podcasts.apple.com#{@uri.path}#{query}"
+      episode_embed || show_embed
+    end
+
+    def episode_embed
+      episode = apple_episode_id
+      country = apple_country
+      return if episode.blank? || country.blank?
+
+      "https://embed.podcasts.apple.com/#{country}/episode/#{episode}"
+    end
+
+    def show_embed
+      return if path.blank? || path == "/"
+
+      "https://embed.podcasts.apple.com#{path}#{query}"
+    end
+
+    def apple_episode_id
+      @uri.query.to_s[/(?:^|&)i=(\d+)/, 1]
+    end
+
+    def apple_country
+      path[%r{\A/([a-z]{2})/}i, 1]&.downcase
     end
 
     def path

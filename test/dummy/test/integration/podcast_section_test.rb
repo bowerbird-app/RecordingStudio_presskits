@@ -198,7 +198,7 @@ class PodcastSectionTest < ActionDispatch::IntegrationTest
     assert_select "[data-podcast-fallback]"
     assert_includes response.body, RecordingStudioPresskits::KitBranding.for(kit.reload).brand_color
     assert_select "iframe[data-podcast-embed][src='https://open.spotify.com/embed/episode/4iV5W9uYEdYUVa79Axb7Rh']"
-    assert_select "iframe[data-podcast-embed][src='https://embed.podcasts.apple.com/us/podcast/example/id123?i=100']"
+    assert_select "iframe[data-podcast-embed][src='https://embed.podcasts.apple.com/us/episode/100']"
     assert_includes response.body, "Listen on Spotify"
     assert_includes response.body, "Listen on Apple Podcasts"
     assert_includes response.body, "Copy link"
