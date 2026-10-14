@@ -75,7 +75,7 @@ begin
     "Spring launch",
     root_recording,
     root_recording,
-    description: "Doors at noon. The one-sheet is inside, with the photos, the credits, and the facts.",
+    description: "Doors at noon. The one-sheet is inside, with the photos, the credits, and the stats.",
     subtitle: "Collection released"
   )
   [root_recording, accessible_root_recording, private_root_recording, admin_root_recording].each do |recording|
@@ -134,7 +134,7 @@ begin
   end
   attach_harbour_photo.call(press_kit_recording, source: "press_kit_cover")
   spring_cover = press_kit_recording.recordable
-  spring_description = "Doors at noon. The one-sheet is inside, with the photos, the credits, and the facts."
+  spring_description = "Doors at noon. The one-sheet is inside, with the photos, the credits, and the stats."
   if spring_cover.subtitle != "Collection released" || spring_cover.description != spring_description
     root_recording.revise(press_kit_recording) do |press_kit|
       press_kit.subtitle = "Collection released"
@@ -335,57 +335,55 @@ begin
   end
   ensure_images_section.call(press_kit_recording)
 
-  ensure_facts_section = lambda do |kit_recording, title, display_style, columns, facts|
+  ensure_stats_section = lambda do |kit_recording, title, stats|
     existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
       section.recordable.title == title
     end
     section = existing || RecordingStudioPresskits.create_section!(
       press_kit_recording: kit_recording,
-      content_type: "RecordingStudioPresskits::FactsSection",
+      content_type: "RecordingStudioPresskits::StatsSection",
       actor: user,
       title: title
     )
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    if content.recordable.display_style != display_style || content.recordable.columns != columns
-      root_recording.revise(content, actor: user) do |recordable|
-        recordable.display_style = display_style
-        recordable.columns = columns
-      end
-    end
-    facts.each do |label, value, unit|
-      already = RecordingStudioPresskits::FactsSection.active_facts(content).any? do |child|
+    stats.each do |label, value, unit, icon|
+      existing = RecordingStudioPresskits::StatsSection.active_stats(content).find do |child|
         child.recordable.label == label && child.recordable.value == value
       end
-      next if already
+      if existing
+        next if existing.recordable.icon == icon
 
-      content.record(RecordingStudioPresskits::Fact, parent_recording: content, actor: user) do |fact|
-        fact.label = label
-        fact.value = value
-        fact.unit = unit
+        root_recording.revise(existing, actor: user) do |stat|
+          stat.icon = icon
+        end
+        next
+      end
+
+      content.record(RecordingStudioPresskits::Stat, parent_recording: content, actor: user) do |stat|
+        stat.label = label
+        stat.value = value
+        stat.unit = unit
+        stat.icon = icon
       end
     end
   end
 
-  ensure_facts_section.call(
+  ensure_stats_section.call(
     press_kit_recording,
     "Company statistics",
-    "cards",
-    3,
     [
-      ["Projects", "120", nil],
-      ["Countries", "15", nil],
-      ["Employees", "85", nil]
+      ["Projects", "120", nil, "chart-bar"],
+      ["Countries", "15", nil, "globe-alt"],
+      ["Employees", "85", nil, "users"]
     ]
   )
-  ensure_facts_section.call(
+  ensure_stats_section.call(
     press_kit_recording,
     "Project specifications",
-    "list",
-    3,
     [
-      ["Floor area", "420", "m²"],
-      ["Completion", "2025", nil],
-      ["Project cost", "2.4 million", "AUD"]
+      ["Floor area", "420", "m²", "building-office-2"],
+      ["Completion", "2025", nil, "calendar-days"],
+      ["Project cost", "2.4 million", "AUD", "currency-dollar"]
     ]
   )
 

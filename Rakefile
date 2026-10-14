@@ -8,7 +8,7 @@ DUMMY_TEST_FILES = [
   File.expand_path("test/quote_payload_test.rb", __dir__),
   File.expand_path("test/credit_payload_test.rb", __dir__),
   File.expand_path("test/video_payload_test.rb", __dir__),
-  File.expand_path("test/fact_payload_test.rb", __dir__),
+  File.expand_path("test/stat_payload_test.rb", __dir__),
   File.expand_path("test/location_payload_test.rb", __dir__)
 ].freeze
 DUMMY_GEMFILE = File.expand_path("test/dummy/Gemfile", __dir__)
@@ -20,7 +20,7 @@ ROOT_TEST_EXCLUSIONS = %w[
   test/quote_payload_test.rb
   test/credit_payload_test.rb
   test/video_payload_test.rb
-  test/fact_payload_test.rb
+  test/stat_payload_test.rb
   test/location_payload_test.rb
   test/rename_verification_test.rb
 ].freeze

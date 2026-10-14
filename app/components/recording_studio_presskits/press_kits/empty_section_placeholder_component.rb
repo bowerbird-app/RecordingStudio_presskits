@@ -7,7 +7,7 @@ module RecordingStudioPresskits
         "RecordingStudioPresskits::Text" => "text",
         "RecordingStudioPresskits::Images" => "images",
         "RecordingStudioPresskits::QuoteSection" => "quotes",
-        "RecordingStudioPresskits::FactsSection" => "facts",
+        "RecordingStudioPresskits::StatsSection" => "stats",
         "RecordingStudioPresskits::CreditsSection" => "credits",
         "RecordingStudioPresskits::VideoSection" => "video",
         "RecordingStudioPresskits::PodcastSection" => "podcasts",

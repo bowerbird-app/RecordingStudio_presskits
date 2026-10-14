@@ -1,5 +1,30 @@
 # Upgrade notes
 
+## 0.56.0
+
+`0.55.0` already shipped. Bump to `0.56.0`.
+
+Stats replace Facts & Figures. A stats section always renders as cards: three on a large screen, two from the medium breakpoint, and one on a phone. Each card is centered. An optional icon sits above the value as `FlatPack::Shared::IconComponent` at size `:xl`. The value is `text-4xl` and bold, the unit sits beside it at `text-xl`, the label is `text-lg` and semibold, and the description is `text-sm` and muted. A blank icon is left off the card. List, table, `display_style`, and `columns` are gone.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections` and `recording_studio_facts` to `recording_studio_stats` when those old tables are still present. It drops `display_style`. It rewrites `recordable_type` from `RecordingStudioPresskits::FactsSection` to `RecordingStudioPresskits::StatsSection` and from `RecordingStudioPresskits::Fact` to `RecordingStudioPresskits::Stat`. The following migration drops `columns` from `recording_studio_stats_sections` when that column is still present. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats` when those columns are still present. The one after that adds optional `icon` on `recording_studio_stats` when that column is missing. A database that already has the stats tables and the icon column is left in place. There is no down migration and no Ruby alias for the old names.
+
+`recording_studio_stats_sections` stores `created_at`. `recording_studio_stats` stores `label`, `value`, optional `unit`, `description`, and optional `icon`. `icon` is a Heroicons name from `RecordingStudioPresskits::Stat::ICONS`, or blank. There is no foreign key between the tables. The recording tree is the parent.
+
+Replace the old types in `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::StatsSection",
+"RecordingStudioPresskits::Stat"
+```
+
+`StatsSection` allows a kit section. `Stat` allows a stats section. Orderable on the stats section allows stats. Trashable is on both. Publishable and Duplicatable stay off them. Duplicating a kit copies the stats section and the stats in order.
+
+Create the section with `RecordingStudioPresskits.create_section!` and `content_type: "RecordingStudioPresskits::StatsSection"`. Record a stat under the stats section. Reorder with `recording_studio_orderable_reorder!` or `recording_studio_orderable_move!` on the stats section.
+
+The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A stats section also includes `stats`. `display`, `facts`, and `columns` are not in the payload. MCP uses that same payload.
+
+The public stats heading uses `FlatPack::CopyButton` (`style: :default`, `size: :sm`, label Copy, clipboard icon) on the right of the title. The first line is the saved section title when that title is present. Each following line is the value, then the unit when it is present, then the label. A description is appended as ` – ` plus that description. The icon name is not in the text. After a click the label becomes Copied.
+
 ## 0.55.0
 
 `0.54.0` already shipped. Bump to `0.55.0`.

@@ -1,0 +1,48 @@
+<div class="flex flex-col gap-6">
+  <% unless helpers.presskits_editor_dialog? %>
+    <%= render FlatPack::PageTitle::Component.new(title: heading, variant: :h1) %>
+  <% end %>
+
+  <%= form_with url: form_path, method: form_method, local: true, class: "flex flex-col gap-6", data: form_data do %>
+    <%= hidden_field_tag :from_kit_editor, "1" if helpers.presskits_editor_dialog? %>
+    <div id="presskits-stat-actions" class="flex flex-wrap items-center gap-3">
+      <%= render FlatPack::Button::Component.new(text: "Save", style: :primary, type: "submit") %>
+      <%= render FlatPack::Button::Component.new(text: "Cancel", style: :default, href: cancel_path, data: helpers.presskits_editor_nav(:back)) %>
+    </div>
+
+    <%= render FlatPack::TextInput::Component.new(
+      name: "stat[value]",
+      value: stat.value,
+      label: "Value",
+      required: true,
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "stat[unit]",
+      value: stat.unit,
+      label: "Unit",
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "stat[label]",
+      value: stat.label,
+      label: "Label",
+      required: true,
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextArea::Component.new(
+      name: "stat[description]",
+      value: stat.description,
+      label: "Description",
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::RadioGroup::Component.new(
+      name: "stat[icon]",
+      label: "Icon",
+      value: stat.icon.to_s,
+      options: icon_options,
+      variant: :cards,
+      error: stat.errors[:icon].to_sentence.presence
+    ) %>
+  <% end %>
+</div>

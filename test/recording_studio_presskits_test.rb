@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.55.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.56.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -18,6 +18,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261008120000_create_recording_studio_credits.rb",
       "db/migrate/20261014190000_add_icon_to_recording_studio_credit_lines.rb",
       "db/migrate/20261008180000_create_recording_studio_facts.rb",
+      "db/migrate/20261014120000_rename_recording_studio_facts_to_stats.rb",
+      "db/migrate/20261014130000_drop_columns_from_recording_studio_stats_sections.rb",
+      "db/migrate/20261014140000_drop_source_and_as_of_from_recording_studio_stats.rb",
+      "db/migrate/20261014150000_add_icon_to_recording_studio_stats.rb",
       "db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
       "db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
@@ -32,6 +36,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
       "test/dummy/db/migrate/20261014190000_add_icon_to_recording_studio_credit_lines.rb",
       "test/dummy/db/migrate/20261008180000_create_recording_studio_facts.rb",
+      "test/dummy/db/migrate/20261014120000_rename_recording_studio_facts_to_stats.rb",
+      "test/dummy/db/migrate/20261014130000_drop_columns_from_recording_studio_stats_sections.rb",
+      "test/dummy/db/migrate/20261014140000_drop_source_and_as_of_from_recording_studio_stats.rb",
+      "test/dummy/db/migrate/20261014150000_add_icon_to_recording_studio_stats.rb",
       "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
       "test/dummy/db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",

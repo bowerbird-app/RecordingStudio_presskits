@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/api/video_payload"
+require "recording_studio_presskits/api/stat_payload"
 require "recording_studio_presskits/api/podcast_payload"
-require "recording_studio_presskits/api/fact_payload"
 require "recording_studio_presskits/api/location_payload"
 
 module RecordingStudioPresskits
@@ -28,8 +28,8 @@ module RecordingStudioPresskits
         case content&.recordable_type
         when VideoSection.name
           { videos: VideoPayload.for_recording(content) }
-        when FactsSection.name
-          FactPayload.for_recording(content)
+        when StatsSection.name
+          StatPayload.for_recording(content)
         when LocationSection.name
           { locations: LocationPayload.for_recording(content) }
         when PodcastSection.name
