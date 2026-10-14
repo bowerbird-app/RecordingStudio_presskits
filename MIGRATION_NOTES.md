@@ -1,8 +1,8 @@
 # Upgrade notes
 
-## 0.59.0
+## 0.60.0
 
-`0.58.0` already shipped. Bump to `0.59.0`.
+`0.59.0` already shipped. Bump to `0.60.0`.
 
 
 A Lists section is a press kit section. The list section stores no heading. Each item is its own recording.
@@ -29,6 +29,10 @@ The section editor is `FlatPack::CollectionEditor::Component`. **Save** records,
 Bump Flatpack to `>= 0.1.239` (dummy tag `v0.1.239`). Rebuild Tailwind so the key/value grid classes generate. Reload Flatpack CSS so the description-list divider paints. `FlatPack::Card` no longer accepts `theme:` or the old structural styles (`outlined`, `elevated`, `flat`, `interactive`, `list`). Press Kits maps those names onto the new colour, border, shadow, and hover until Location and Trashable pass the new API. The kit cover keeps the brand colour on the wrapper through `--color-primary` and `--color-primary-text`.
 
 Finding a list item uses `where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)`. A hidden line uses `recording_studio_trashable_trashed?`.
+
+## 0.59.0
+
+No migration. Update the host `recording_studio_metrics` pin to `~> 0.3` (tag `v0.3.1`).
 
 ## 0.58.0
 
