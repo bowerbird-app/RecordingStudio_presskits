@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-10-14
+
+### Added
+- A Lists section. `RecordingStudioPresskits::ListSection` is an empty recording under a kit section. It orders `RecordingStudioPresskits::ListItem` children. Each item stores an optional Flatpack icon name, a required `key`, and a required `value`.
+- The + Section menu shows List (`list-bullet`). + Item opens a screen for Icon, Key, and Value. Preview and the public page show the icon, the key, and the value. An empty list stays off those pages.
+- `kit.txt` prints each line as `Key: Value`. The icon name is not in the zip.
+- The kit section API payload includes `items` for a list section. A list item exposes `icon`, `key`, and `value`.
+- Version `0.48.0`
+
+### Upgrade notes
+- Bump to `0.48.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
+- Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
+- This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
+
 ## [0.47.0] - 2026-10-13
 
 ### Changed

@@ -15,12 +15,14 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     RecordingStudioPresskits::CreditsSection
     RecordingStudioPresskits::VideoSection
     RecordingStudioPresskits::LocationSection
+    RecordingStudioPresskits::ListSection
   ].freeze
 
   PICKER_TYPES_EXCLUDED = %w[
     FakeBlock
     RecordingStudioPresskits::Quote
     RecordingStudioPresskits::Fact
+    RecordingStudioPresskits::ListItem
     RecordingStudioPresskits::Credit
     RecordingStudioPresskits::CreditLine
     RecordingStudioVideo::Video
@@ -378,6 +380,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Text")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::QuoteSection")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::VideoSection")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::ListSection")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::ListItem")
     assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Quote")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
 
@@ -436,6 +440,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "user-group", RecordingStudioPresskits::CreditsSection.section_menu_icon
     assert_equal "video-camera", RecordingStudioPresskits::VideoSection.section_menu_icon
     assert_equal "map-pin", RecordingStudioPresskits::LocationSection.section_menu_icon
+    assert_equal "list-bullet", RecordingStudioPresskits::ListSection.section_menu_icon
     assert_nil FakeBlock.try(:section_menu_icon)
   end
 
@@ -504,6 +509,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Fact")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::VideoSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::LocationSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::ListSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::ListItem")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudio::Location::Location")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
@@ -537,6 +544,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Fact")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::VideoSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::LocationSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::ListSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::ListItem")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Page")
@@ -559,6 +568,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::Fact")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::VideoSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::LocationSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::ListSection")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::ListItem")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Page")
@@ -694,6 +705,53 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal 3, section.recordable.columns
     assert_nil kit_section.recordable.title
     assert_equal "Facts & Figures", RecordingStudioPresskits.section_heading(kit_section)
+  end
+
+  test "list section parent is a kit section and a list item parent is the list section" do
+    assert_equal(
+      ["RecordingStudioPresskits::KitSection"],
+      RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::ListSection")
+    )
+    assert_equal(
+      ["RecordingStudioPresskits::ListSection"],
+      RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::ListItem")
+    )
+  end
+
+  test "list section orders only list items" do
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::ListSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::ListItem")
+
+    options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::ListSection").to_h
+    assert_equal ["RecordingStudioPresskits::ListItem"], Array(options[:allows]).map(&:to_s)
+  end
+
+  test "list section sits under a kit section and items sit under the list section" do
+    root, kit = spring_kit
+    kit_section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::ListSection"
+    )
+    section = RecordingStudioPresskits::KitQuery.section_content(kit_section)
+
+    assert_equal "List", RecordingStudio.recordable_type_label("RecordingStudioPresskits::ListSection")
+    assert_equal "Item", RecordingStudio.recordable_type_label("RecordingStudioPresskits::ListItem")
+    refute RecordingStudio.root_allowed?("RecordingStudioPresskits::ListSection")
+    refute RecordingStudio.root_allowed?("RecordingStudioPresskits::ListItem")
+    assert_kind_of RecordingStudioPresskits::KitSection, kit_section.recordable
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::ListSection",
+      parent_recording: kit_section
+    )
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::ListSection", parent_recording: kit)
+    refute RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::ListSection", parent_recording: root)
+    assert RecordingStudio.parent_allowed?(child_type: "RecordingStudioPresskits::ListItem", parent_recording: section)
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::ListItem",
+      parent_recording: kit_section
+    )
+    refute section.recordable.respond_to?(:title=)
+    assert_equal "List", RecordingStudioPresskits.section_heading(kit_section)
   end
 
   test "quote attachable allows one image" do

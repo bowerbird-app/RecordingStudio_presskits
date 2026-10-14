@@ -1,0 +1,16 @@
+<% if items.any? %>
+  <div id="presskits-list-lines" class="flex flex-col gap-4">
+    <% items.each do |item_recording| %>
+      <% item = item_recording.recordable %>
+      <div class="flex items-start gap-3" data-list-item>
+        <% if item.icon.present? %>
+          <%= render icon_component(item) %>
+        <% end %>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm text-(--surface-muted-content-color)"><%= item.key %></p>
+          <p class="text-base font-medium text-(--surface-content-color)"><%= item.value %></p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

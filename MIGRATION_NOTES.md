@@ -1,5 +1,26 @@
 # Upgrade notes
 
+## 0.48.0
+
+A Lists section is a press kit section. The list section stores no heading. Each item is its own recording.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds two tables and does not change existing kit rows.
+
+`recording_studio_list_sections` is the section content under a kit section, the same shape as a quote section. `recording_studio_kit_list_items` stores optional `icon`, required `key`, and required `value`. `icon` is a Flatpack icon name, such as `star`. There is no foreign key between the tables. The recording tree is the parent. This table is not `recording_studio_list_items`. That table belongs to Recording Studio Lists.
+
+Add these to `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::ListSection",
+"RecordingStudioPresskits::ListItem"
+```
+
+`ListSection` allows a kit section. `ListItem` allows a list section. Orderable on the list section allows items. Trashable is on both. Publishable, Duplicatable, and Attachable stay off them. Duplicating a kit copies the list section and the items in order.
+
+Create the section with `RecordingStudioPresskits.create_section!`. Record an item under the list section. Reorder with `recording_studio_orderable_reorder!` or `recording_studio_orderable_move!` on the list section. Trash an item with `recording_studio_trashable_trash!`.
+
+The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A list section also includes `items`. Each item is `icon`, `key`, and `value`. A blank icon is nil. `kit.txt` prints `Key: Value` and leaves the icon name out.
+
 ## 0.47.0
 
 No migration. Bump to `0.47.0`. Flatpack is `>= 0.1.233` (dummy tag `v0.1.233`). Rebuild Tailwind so the masonry column classes (`columns-1`, `md:columns-2`, `lg:columns-4`) and the Section Title trailing-row utilities (`flex-wrap`, `flex-1`, `max-w-max`, `break-words`, `shrink-0`) are generated.

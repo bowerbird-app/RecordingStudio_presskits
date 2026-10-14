@@ -10,7 +10,8 @@ module RecordingStudioPresskits
         "RecordingStudioPresskits::FactsSection" => "facts",
         "RecordingStudioPresskits::CreditsSection" => "credits",
         "RecordingStudioPresskits::VideoSection" => "video",
-        "RecordingStudioPresskits::LocationSection" => "location"
+        "RecordingStudioPresskits::LocationSection" => "location",
+        "RecordingStudioPresskits::ListSection" => "list"
       }.freeze
 
       def initialize(content_type:, edit_path:)

@@ -20,6 +20,8 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::CreditLine",
     "RecordingStudioPresskits::VideoSection",
     "RecordingStudioPresskits::LocationSection",
+    "RecordingStudioPresskits::ListSection",
+    "RecordingStudioPresskits::ListItem",
     "RecordingStudioVideo::Video",
     "RecordingStudioPublishable::Publishable",
     "RecordingStudio::AccessConstraint",
