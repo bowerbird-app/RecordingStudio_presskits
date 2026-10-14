@@ -21,6 +21,8 @@ Create the section with `RecordingStudioPresskits.create_section!`. Record an it
 
 The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A list section also includes `items`. Each item is `icon`, `key`, and `value`. A blank icon is nil. `kit.txt` prints `Key: Value` and leaves the icon name out.
 
+The section editor is `FlatPack::CollectionEditor::Component`. **Save** records, revises, and trashes the rows. The public page and the kit preview use `FlatPack::Table::Component` with columns for the icon, the key, and the value. Key and value do not wrap.
+
 ## 0.49.0
 
 No migration. Bump to `0.49.0`. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.233`.

@@ -128,7 +128,7 @@ Picker copy, looked up as `picker_descriptions.list_section` because the key is 
 
 ## Editing
 
-Follow facts and quotes, not the credits collection editor. A list line is written here. It is not picked from a workspace catalog, so a search column and a modal create do not fit.
+A list line is written here. It is not picked from a workspace catalog, so a search column and a modal create do not fit. The section editor uses `FlatPack::CollectionEditor::Component`, the same component credits uses, with a row of Icon, Key, and Value instead of a drill-down list.
 
 `ListSection::EditComponent` takes `recording:` and `update_path:`. Class methods:
 
@@ -138,7 +138,7 @@ Follow facts and quotes, not the credits collection editor. A list line is writt
 
 `SectionEditorComponent` then renders `section_actions` and the editor outside the shared content form. Title, subtitle, and Update stay on `SectionHeadingEditorComponent`. The content screen has no display-style form, because the section stores none.
 
-**+ Item** is a primary button with a Heroicons plus icon and the label Item. It links to `new_press_kit_section_list_item_path`. That matches + Fact. Quotes can create a blank row because body and name default to `""`. Key and value are required, so the new screen collects them before `record`, the same as facts.
+**Item** is the collection editor add button. It inserts a row. It does not record a blank item. Key and value are required, so **Save** rejects a row that is missing either one. Icon is a Flatpack select of outline names, with None for no icon.
 
 The item screen is `ListItem::EditComponent` on `list_items/new` and `list_items/edit`, with the modal wrapper facts use when `presskits_editor_dialog?` is set. Fields, in order:
 
@@ -148,7 +148,7 @@ The item screen is `ListItem::EditComponent` on `list_items/new` and `list_items
 
 Save revises the item. A missing key, a missing value, or an unknown icon name re-renders the form.
 
-The content tab lists active items in order inside `FlatPack::List` (`orderable: true`, `divider: true`) and `FlatPack::Card`, with `recording-studio-presskits--section-order` pointed at the item order path. The row keeps `arrows-up-down` as the drag icon, the same as facts. Inside the row, show the chosen icon when present, then `key`, with `value` as the muted second line. Trash posts delete and calls `recording_studio_trashable_trash!` on that item only. The empty state is `FlatPack::EmptyState` with title "No lines yet" and description "Add a label and a short line."
+The content tab is that collection editor. Headers are Icon, Key, and Value. Dragging a saved row posts `moving_recording_id` and `target_position` to the item order route, which `QuoteOrder` already accepts. **Save** walks the rows: record a new line, `revise` a changed line, and `recording_studio_trashable_trash!` a removed line. The empty text is "No lines yet".
 
 Routes, nested under `press_kits` / `sections` like facts:
 
@@ -172,7 +172,7 @@ Removing the section stays on `SectionsController#destroy`. That trashes the kit
 - Preview uses the same frame, so an empty list stays out of the preview column.
 - `KitDownload::TextFile` and `KitDownload::Manifest` skip the section. See below.
 
-Each public row is the icon, the key, and the value, in saved order. Render the icon with the same Flatpack `icon:` argument the rest of the kit uses, so the name becomes `data-flat-pack--icon-name-value`. A blank icon leaves that slot empty and does not invent a default glyph. Key uses the muted label size from the facts list. Value uses the medium body size. No link, no second paragraph, no bullets, no numbers.
+The public page and the kit preview render `FlatPack::Table::Component` with one column for the icon, one for the key, and one for the value, in saved order. Render the icon with the same Flatpack `icon:` argument the rest of the kit uses, so the name becomes `data-flat-pack--icon-name-value`. A blank icon leaves that cell empty and does not invent a default glyph. Key and value do not wrap: `whitespace-nowrap` and `truncate`. Key stays muted. Value stays medium. No link, no second paragraph, no bullets, no numbers.
 
 The component does not print the kit-section title or subtitle.
 
@@ -184,9 +184,9 @@ Two levels, both already in the app.
 
 **Sections.** The press kit's Orderable allows only `KitSection`. A list section is a kit section, so it shows up in `KitQuery.sections_for`, the Order modal (`SectionsOrderComponent`), and `OrdersController`. Drag posts `recording_id` plus `before_recording_id` or `after_recording_id` through `section_order_controller.js` to the kit order route. `SectionsController#create` still honors `after_recording_id` when the menu inserts a section under another one. Create, update, and destroy turbo streams already refresh `presskits-section-list`. Nothing new at this level.
 
-**Items.** `ListSection` is Orderable for `ListItem` only. The editor list uses the same Stimulus controller. `ListItemOrdersController#update` calls `QuoteOrder` with `recordable_type: "RecordingStudioPresskits::ListItem"`. That class already accepts `ordered_recording_ids`, or a move via `recording_id` / `moving_recording_id` and `before_recording_id`, `after_recording_id`, or `target_position`. Facts and credit lines use it the same way. Do not add a second order class.
+**Items.** `ListSection` is Orderable for `ListItem` only. The collection editor's drag handle posts `moving_recording_id` and `target_position`. `ListItemOrdersController#update` calls `QuoteOrder` with `recordable_type: "RecordingStudioPresskits::ListItem"`. That class already accepts `ordered_recording_ids`, or a move via `recording_id` / `moving_recording_id` and `before_recording_id`, `after_recording_id`, or `target_position`. Facts and credit lines use it the same way. Do not add a second order class.
 
-A saved item reorder redirects to the section edit with "Order saved.", matching facts. It does not get the credits live-preview script. Credits need that script because their rows are an unsaved collection form. List rows are already saved recordings.
+A JSON reorder returns `{ ok: true }`, which is what the collection editor drag expects. An HTML reorder redirects to the section edit with "Order saved." Saving the collection also writes the row order. There is no credits live-preview script.
 
 Position lives on the item recordings. Reorder history is an event on the list section recording, written by Orderable.
 

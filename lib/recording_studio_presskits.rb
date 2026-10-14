@@ -55,6 +55,8 @@ require "recording_studio_presskits/credits"
 require "recording_studio_presskits/credits/picker"
 require "recording_studio_presskits/credit_line_batch"
 require "recording_studio_presskits/credit_line_batch/sync"
+require "recording_studio_presskits/list_item_batch"
+require "recording_studio_presskits/list_item_batch/sync"
 
 module RecordingStudioPresskits
   class << self

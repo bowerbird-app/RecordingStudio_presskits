@@ -25,38 +25,25 @@ module RecordingStudioPresskits
         end
       end
 
-      def items
-        ListSection.active_items(@recording)
+      def batch
+        supplied = helpers.controller.instance_variable_get(:@list_item_batch)
+        supplied || ListItemBatch.for_section(@recording)
       end
 
-      def section_actions
-        ActionsComponent.new(recording: @recording)
+      def blank_line
+        ListItemBatch::LineDraft.new
+      end
+
+      def lines_path
+        helpers.press_kit_section_list_lines_path(kit_recording, kit_section_recording)
       end
 
       def order_path
         helpers.press_kit_section_list_item_order_path(kit_recording, kit_section_recording)
       end
 
-      def edit_path(item_recording)
-        helpers.edit_press_kit_section_list_item_path(kit_recording, kit_section_recording, item_recording)
-      end
-
-      def remove_path(item_recording)
-        helpers.press_kit_section_list_item_path(kit_recording, kit_section_recording, item_recording)
-      end
-
-      def item_key(item_recording)
-        item_recording.recordable.key.to_s.strip.presence || "Item"
-      end
-
-      def item_value(item_recording)
-        item_recording.recordable.value.to_s.strip.presence
-      end
-
-      def icon_component(recordable)
-        return if recordable.icon.blank?
-
-        FlatPack::Shared::IconComponent.new(name: recordable.icon, size: :sm)
+      def icon_options
+        [["None", ""]] + Icons.choices
       end
 
       private

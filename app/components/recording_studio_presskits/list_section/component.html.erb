@@ -1,16 +1,13 @@
 <% if items.any? %>
-  <div id="presskits-list-lines" class="flex flex-col gap-4">
-    <% items.each do |item_recording| %>
-      <% item = item_recording.recordable %>
-      <div class="flex items-start gap-3" data-list-item>
-        <% if item.icon.present? %>
-          <%= render icon_component(item) %>
-        <% end %>
-        <div class="min-w-0 flex-1">
-          <p class="text-sm text-(--surface-muted-content-color)"><%= item.key %></p>
-          <p class="text-base font-medium text-(--surface-content-color)"><%= item.value %></p>
-        </div>
-      </div>
+  <div id="presskits-list-lines">
+    <%= render FlatPack::Table::Component.new(
+      data: items,
+      min_width: :none,
+      class: "[&_table]:table-fixed [&_th]:whitespace-nowrap [&_td]:overflow-hidden [&_td]:whitespace-nowrap"
+    ) do |table| %>
+      <% table.column(title: "Icon", html: ->(recording) { icon_cell(recording) }) %>
+      <% table.column(title: "Key", html: ->(recording) { clipped(recording.recordable.key, muted: true) }) %>
+      <% table.column(title: "Value", html: ->(recording) { clipped(recording.recordable.value, muted: false) }) %>
     <% end %>
   </div>
 <% end %>

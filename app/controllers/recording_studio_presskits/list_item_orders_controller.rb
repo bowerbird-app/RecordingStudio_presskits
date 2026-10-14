@@ -18,15 +18,18 @@ module RecordingStudioPresskits
     attr_reader :section_recording, :list_section_recording
 
     def apply_reorder
-      if QuoteOrder.new(
+      saved = reorder.present?
+      return render json: { ok: saved }, status: (saved ? :ok : :unprocessable_entity) if request.format.json?
+
+      redirect_to section_edit_path, **(saved ? { notice: "Order saved." } : { alert: "Nothing to reorder." })
+    end
+
+    def reorder
+      QuoteOrder.new(
         list_section_recording,
         params,
         recordable_type: "RecordingStudioPresskits::ListItem"
       ).apply(presskits_actor)
-        redirect_to section_edit_path, notice: "Order saved."
-      else
-        redirect_to section_edit_path, alert: "Nothing to reorder."
-      end
     end
 
     def section_edit_path

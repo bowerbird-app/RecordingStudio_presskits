@@ -1,0 +1,33 @@
+<% row.with_field do %>
+  <%= render FlatPack::Select::Component.new(
+    name: row_form.field_name(:icon),
+    id: row_form.field_id(:icon),
+    value: row_form.object.icon.to_s,
+    label: "Icon",
+    options: icon_options,
+    chrome: :cell,
+    error: row_form.object.errors.full_messages_for(:icon).first
+  ) %>
+<% end %>
+<% row.with_field do %>
+  <%= render FlatPack::TextInput::Component.new(
+    name: row_form.field_name(:key),
+    id: row_form.field_id(:key),
+    value: row_form.object.key,
+    label: "Key",
+    required: true,
+    chrome: :cell,
+    error: row_form.object.errors.full_messages_for(:key).first
+  ) %>
+<% end %>
+<% row.with_field do %>
+  <%= render FlatPack::TextInput::Component.new(
+    name: row_form.field_name(:value),
+    id: row_form.field_id(:value),
+    value: row_form.object.value,
+    label: "Value",
+    required: true,
+    chrome: :cell,
+    error: row_form.object.errors.full_messages_for(:value).first
+  ) %>
+<% end %>

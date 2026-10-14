@@ -1322,6 +1322,31 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show_component, "lines.any?"
   end
 
+  def test_list_section_uses_a_table_and_a_collection_editor
+    show = File.read(presskits_path("app/components/recording_studio_presskits/list_section/component.html.erb"))
+    show_rb = File.read(presskits_path("app/components/recording_studio_presskits/list_section/component.rb"))
+    editor = File.read(presskits_path("app/components/recording_studio_presskits/list_section/edit_component.html.erb"))
+    fields = File.read(presskits_path("app/views/recording_studio_presskits/list_section/_line_fields.html.erb"))
+    routes = File.read(presskits_path("config/routes.rb"))
+
+    assert_includes show, "FlatPack::Table::Component"
+    assert_includes show, 'title: "Icon"'
+    assert_includes show, 'title: "Key"'
+    assert_includes show, 'title: "Value"'
+    assert_includes show_rb, "whitespace-nowrap"
+    assert_includes show_rb, "truncate"
+    assert_includes editor, "FlatPack::CollectionEditor::Component"
+    assert_includes editor, 'add_label: "Item"'
+    assert_includes editor, 'empty_text: "No lines yet"'
+    assert_includes editor, 'headers: ["Icon", "Key", "Value"]'
+    assert_includes editor, "moving_recording_id"
+    assert_includes editor, "target_position"
+    assert_includes editor, 'text: "Save"'
+    assert_includes fields, "chrome: :cell"
+    assert_includes routes, "resource :list_lines, only: :update"
+    refute File.exist?(presskits_path("app/components/recording_studio_presskits/list_section/actions_component.rb"))
+  end
+
   def test_video_routes_initializer_and_gemfile_pins
     root = File.expand_path("..", __dir__)
     routes = File.read(File.join(root, "config/routes.rb"))

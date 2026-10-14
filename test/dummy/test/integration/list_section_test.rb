@@ -83,62 +83,71 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     section = list_section(kit)
-    new_item = recording_studio_presskits.new_press_kit_section_list_item_path(kit, section)
     assert_equal "List", section.recordable.title
     assert_select ".fp-section-title h2", text: "List"
     assert_select "#presskits-section-placeholder", text: /Add a line/
 
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_select "h1", text: "List"
-    assert_select "#presskits-section-actions a[href='#{new_item}']", text: "Item"
-    assert_select "[data-flat-pack--icon-name-value='plus']"
+    assert_select "#presskits-list-editor.flat-pack-collection-editor, #presskits-list-editor .flat-pack-collection-editor"
+    assert_select ".flat-pack-collection-editor-header span", text: "Icon"
+    assert_select ".flat-pack-collection-editor-header span", text: "Key"
+    assert_select ".flat-pack-collection-editor-header span", text: "Value"
+    assert_select "[data-flat-pack--collection-editor-target='addButton']", text: "Item"
+    assert_select "#presskits-list-lines-save button", text: "Save"
+    assert_select "[data-flat-pack--list-orderable-param-uuid-name-value='moving_recording_id']"
+    assert_select "[data-flat-pack--list-orderable-param-target-position-name-value='target_position']"
     assert_includes response.body, "No lines yet"
+    refute_select "#presskits-section-actions a", text: "Item"
     refute_section_preview_card
 
-    get new_item
-    assert_response :success
-    assert_select "select[name='list_item[icon]'] option[value='star']"
-    assert_select "input[name='list_item[key]']"
-    assert_select "input[name='list_item[value]']"
+    assert_no_difference -> { RecordingStudioPresskits::ListItem.count } do
+      patch recording_studio_presskits.press_kit_section_list_lines_path(kit, section), params: {
+        list_lines: { lines_attributes: { "0" => { icon: "star", key: "", value: "120 seats" } } }
+      }
+    end
+    assert_response :unprocessable_entity
+    assert_select "li.is-invalid"
 
     assert_no_difference -> { RecordingStudioPresskits::ListItem.count } do
-      post recording_studio_presskits.press_kit_section_list_items_path(kit, section), params: {
-        list_item: { icon: "star", key: "", value: "120 seats" }
+      patch recording_studio_presskits.press_kit_section_list_lines_path(kit, section), params: {
+        list_lines: { lines_attributes: { "0" => { icon: "not-a-real-icon", key: "Capacity", value: "120 seats" } } }
       }
     end
     assert_response :unprocessable_entity
 
-    assert_no_difference -> { RecordingStudioPresskits::ListItem.count } do
-      post recording_studio_presskits.press_kit_section_list_items_path(kit, section), params: {
-        list_item: { icon: "not-a-real-icon", key: "Capacity", value: "120 seats" }
-      }
-    end
-    assert_response :unprocessable_entity
-
-    assert_difference -> { RecordingStudioPresskits::ListItem.count }, 1 do
-      post recording_studio_presskits.press_kit_section_list_items_path(kit, section), params: {
-        list_item: { icon: "", key: "Capacity", value: "120 seats", decoy: "nope" }
+    assert_difference -> { RecordingStudioPresskits::ListItem.count }, 2 do
+      patch recording_studio_presskits.press_kit_section_list_lines_path(kit, section), params: {
+        list_lines: {
+          lines_attributes: {
+            "0" => { icon: "", key: "Capacity", value: "120 seats", decoy: "nope" },
+            "1" => { icon: "search", key: "Find", value: "Us" }
+          }
+        }
       }
     end
     follow_redirect!
     assert_response :success
     first = live_items(section).first
+    second = live_items(section).last
     assert_nil first.recordable.icon
     assert_equal "Capacity", first.recordable.key
     assert_equal "120 seats", first.recordable.value
     refute_includes first.recordable.attributes.values, "nope"
-
-    post recording_studio_presskits.press_kit_section_list_items_path(kit, section), params: {
-      list_item: { icon: "search", key: "Find", value: "Us" }
-    }
-    second = live_items(section).last
     assert_equal "magnifying-glass", second.recordable.icon
 
-    patch recording_studio_presskits.press_kit_section_list_item_path(kit, section, first), params: {
-      list_item: { icon: "star", key: "Capacity", value: "140 seats" }
+    previous = first.recordable
+    patch recording_studio_presskits.press_kit_section_list_lines_path(kit, section), params: {
+      list_lines: {
+        lines_attributes: {
+          "0" => { id: first.id, icon: "star", key: "Capacity", value: "140 seats" },
+          "1" => { id: second.id, icon: "magnifying-glass", key: "Find", value: "Us" }
+        }
+      }
     }
     assert_equal "star", first.reload.recordable.icon
     assert_equal "140 seats", first.recordable.value
+    refute_equal previous.id, first.recordable.id
 
     patch recording_studio_presskits.press_kit_section_path(kit, section), params: {
       kit_section: { title: "At a glance", subtitle: "The short version" }
@@ -150,11 +159,7 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     assert_response :success
     preview = css_select("#presskits-editor-preview").first
     assert_select preview, ".fp-section-title h2", text: "At a glance"
-    assert_select preview, "[data-list-item]", count: 2
-    assert_select preview, "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
-    assert_select preview, "[data-list-item] [data-flat-pack--icon-name-value='magnifying-glass']", count: 1
-    assert_includes preview.text, "Capacity"
-    assert_includes preview.text, "140 seats"
+    assert_list_table(preview)
 
     patch recording_studio_presskits.press_kit_section_list_item_order_path(kit, section), params: {
       recording_id: second.id,
@@ -163,13 +168,48 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_equal [second.id, first.id], live_items(section).map(&:id)
 
-    delete recording_studio_presskits.press_kit_section_list_item_path(kit, section, second)
+    patch recording_studio_presskits.press_kit_section_list_item_order_path(kit, section),
+          params: { moving_recording_id: first.id, target_position: 1 },
+          as: :json
+    assert_response :success
+    assert_equal true, JSON.parse(response.body)["ok"]
+    assert_equal [first.id, second.id], live_items(section).map(&:id)
+
+    patch recording_studio_presskits.press_kit_section_list_lines_path(kit, section), params: {
+      list_lines: {
+        lines_attributes: {
+          "0" => { id: second.id, icon: "magnifying-glass", key: "Find", value: "Us", _destroy: "1" },
+          "1" => { id: first.id, icon: "star", key: "Capacity", value: "140 seats" }
+        }
+      }
+    }
     follow_redirect!
     assert second.reload.trashed_at.present?
     assert_nil first.reload.trashed_at
     assert_nil section.reload.trashed_at
     refute_includes response.body, "Find"
     assert_includes response.body, "Capacity"
+  end
+
+  test "the item screen still saves one line" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    section = add_list_section(kit, title: "At a glance")
+
+    get recording_studio_presskits.new_press_kit_section_list_item_path(kit, section)
+    assert_response :success
+    assert_select "select[name='list_item[icon]'] option[value='star']"
+    assert_select "input[name='list_item[key]']"
+    assert_select "input[name='list_item[value]']"
+
+    assert_difference -> { RecordingStudioPresskits::ListItem.count }, 1 do
+      post recording_studio_presskits.press_kit_section_list_items_path(kit, section), params: {
+        list_item: { icon: "star", key: "Capacity", value: "120 seats" }
+      }
+    end
+    follow_redirect!
+    assert_equal "star", live_items(section).first.recordable.icon
   end
 
   test "the public page shows the icon key and value and hides an empty list" do
@@ -185,12 +225,7 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-list"
     assert_response :success
     assert_select ".fp-section-title h2", text: "At a glance"
-    assert_select "[data-list-item]", count: 2
-    assert_select "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
-    assert_includes response.body, "Capacity"
-    assert_includes response.body, "120 seats"
-    assert_includes response.body, "Floor"
-    assert_includes response.body, "Oak"
+    assert_list_table(response.body)
 
     empty = add_list_section(kit, title: "Empty list")
     get recording_studio_presskits.edit_press_kit_path(kit)
@@ -304,5 +339,31 @@ class ListSectionTest < ActionDispatch::IntegrationTest
 
   def refute_section_preview_card
     refute_select "#presskits-section-preview"
+  end
+
+  def assert_list_table(scope)
+    root = scope.is_a?(String) ? nil : scope
+    if root
+      assert_select root, "th", text: "Icon"
+      assert_select root, "th", text: "Key"
+      assert_select root, "th", text: "Value"
+      assert_select root, "[data-list-item]", count: 2
+      assert_select root, "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
+      assert_select root, "[data-list-item] [data-flat-pack--icon-name-value='magnifying-glass']", count: 1
+      assert_select root, "td .truncate.whitespace-nowrap", text: "Capacity"
+      assert_select root, "td .truncate.whitespace-nowrap", text: "140 seats"
+      assert_includes root.to_html, "whitespace-nowrap"
+    else
+      assert_select "th", text: "Icon"
+      assert_select "th", text: "Key"
+      assert_select "th", text: "Value"
+      assert_select "[data-list-item]", count: 2
+      assert_select "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
+      assert_select "td .truncate.whitespace-nowrap", text: "Capacity"
+      assert_select "td .truncate.whitespace-nowrap", text: "120 seats"
+      assert_select "td .truncate.whitespace-nowrap", text: "Floor"
+      assert_select "td .truncate.whitespace-nowrap", text: "Oak"
+      assert_includes scope, "whitespace-nowrap"
+    end
   end
 end
