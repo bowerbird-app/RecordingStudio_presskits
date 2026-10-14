@@ -1,5 +1,22 @@
 # Upgrade notes
 
+## 0.48.0
+
+Bump to `0.48.0`. Flatpack stays at `>= 0.1.233` (dummy tag `v0.1.233`). Rebuild Tailwind. Reload Press Kits JavaScript. The copy-link controller is `recording-studio-presskits--copy-link`.
+
+`recording_studio_videos` gains `duration_seconds` (integer) and `thumbnail_url` (text). Those columns belong to Recording Studio Video's table. Press Kits adds them here because duration and the thumbnail override are part of the video snapshot, and `revise` already copies that row. A second recording would split the snapshot. Run the Video gem's migrations first so the table exists, then:
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+The editor asks for length as `m:ss` (`1:24`) and stores seconds. A blank length is allowed. The thumbnail field is an optional http or https override. When it is blank, YouTube uses `https://i.ytimg.com/vi/{id}/hqdefault.jpg`. Vimeo uses `https://vimeo.com/api/oembed.json` and caches the thumbnail. Press Kits still does not call `RecordingStudio::ExternalEmbed.register`. Vimeo works after the host registers that provider.
+
+`VideoSection` includes Orderable for `RecordingStudioVideo::Video`. `active_videos` follows that order. A video with no position yet sorts after positioned ones, then by `created_at`. The public page features the first and puts the rest in `FlatPack::Grid` `cols: 2`. The card uses `FlatPack::VideoPreview`: poster, centred play control, and `recording_studio_video_player` inside `with_player` so the iframe stays in a template until play. **Copy link** dispatches `toast:add`. **Watch on YouTube** and **Watch on Vimeo** open the canonical URL in a new tab. The public card does not show the description.
+
+The video payload adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the poster the card would show, not only the override. The kit text file adds a `Provider · m:ss` line between the title and the URL.
+
 ## 0.46.0
 
 No migration. Link `stylesheet_link_tag "recording_studio_presskits/brand_buttons"` on every layout that renders a kit, next to `flat_pack/application`. That sheet paints the pressed fill of a primary button from `--button-primary-active-background-color`. Without it, hover and the focus ring still follow the brand, and the pressed fill stays on Flatpack's hover.

@@ -44,7 +44,15 @@ module RecordingStudioPresskits
       end
 
       def video_url(video_recording)
-        video_recording.recordable.url
+        video = video_recording.recordable
+        meta = [video.try(:provider_name), video.try(:duration_label)].compact
+        return meta.join(" · ") if meta.any?
+
+        video.url
+      end
+
+      def order_path
+        helpers.press_kit_section_video_order_path(kit_recording, kit_section_recording)
       end
 
       private

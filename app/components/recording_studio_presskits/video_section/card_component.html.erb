@@ -1,0 +1,60 @@
+<article
+  id="<%= dom_id %>"
+  class="flex w-full min-w-0 flex-col gap-3"
+  data-presskits-video-card
+  data-presskits-video-featured="<%= featured? %>"
+>
+  <%= render FlatPack::VideoPreview::Component.new(label: play_label) do |preview| %>
+    <% preview.with_media do %>
+      <% if poster_url.present? %>
+        <%= image_tag poster_url, alt: "" %>
+      <% else %>
+        <div class="h-full w-full bg-(--surface-muted-background-color)" role="img" aria-label="<%= title %>"></div>
+      <% end %>
+    <% end %>
+    <% if duration_label.present? %>
+      <% preview.with_item(placement: :bottom_left, inset: :sm) do %>
+        <span class="inline-flex rounded-full bg-black/70 px-2.5 py-1.5 text-[13px] font-semibold leading-none text-white"><%= duration_label %></span>
+      <% end %>
+    <% end %>
+    <% preview.with_player do %>
+      <%= player %>
+    <% end %>
+  <% end %>
+
+  <div class="flex w-full flex-col gap-2 min-[720px]:flex-row min-[720px]:items-center min-[720px]:justify-between">
+    <div class="min-w-0 flex-1">
+      <p class="<%= title_class %>"><%= title %></p>
+      <% if meta.present? %>
+        <p class="truncate text-[13px] font-normal text-(--surface-muted-content-color)"><%= meta %></p>
+      <% end %>
+    </div>
+    <div
+      class="flex shrink-0 flex-wrap items-center gap-2"
+      data-controller="recording-studio-presskits--copy-link"
+      data-recording-studio-presskits--copy-link-url-value="<%= watch_url %>"
+      data-recording-studio-presskits--copy-link-copied-value="<%= I18n.t("recording_studio_presskits.videos.copied") %>"
+      data-recording-studio-presskits--copy-link-failed-value="<%= I18n.t("recording_studio_presskits.videos.copy_failed") %>"
+    >
+      <%= render FlatPack::Button::Component.new(
+        text: I18n.t("recording_studio_presskits.videos.copy_link"),
+        icon: "link",
+        style: :default,
+        size: :sm,
+        type: "button",
+        class: "rounded-full",
+        data: { action: "recording-studio-presskits--copy-link#copy" }
+      ) %>
+      <% if watch_url.present? %>
+        <%= render FlatPack::Button::Component.new(
+          text: watch_label,
+          style: :default,
+          size: :sm,
+          href: watch_url,
+          target: "_blank",
+          class: "rounded-full"
+        ) %>
+      <% end %>
+    </div>
+  </div>
+</article>

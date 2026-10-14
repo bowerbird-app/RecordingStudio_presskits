@@ -10,7 +10,7 @@ class VideoPayloadTest < ActiveSupport::TestCase
   ZOO_URL = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
   RICK_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-  test "a saved video payload is the six public readers" do
+  test "a saved video payload includes the poster and the stored length" do
     root, kit = kit_tree
     user = owner_for(root)
     content = video_content(kit, user)
@@ -19,7 +19,9 @@ class VideoPayloadTest < ActiveSupport::TestCase
       actor: user,
       url: ZOO_URL,
       title: "Me at the zoo",
-      description: "The first video uploaded to YouTube."
+      description: "The first video uploaded to YouTube.",
+      duration: "1:24",
+      thumbnail_url: "https://cdn.example.com/zoo.jpg"
     )
 
     assert_equal(
@@ -29,13 +31,17 @@ class VideoPayloadTest < ActiveSupport::TestCase
         description: "The first video uploaded to YouTube.",
         provider: "youtube",
         canonical_url: ZOO_URL,
-        content_type: "video"
+        content_type: "video",
+        duration_seconds: 84,
+        thumbnail_url: "https://cdn.example.com/zoo.jpg"
       },
       RecordingStudioPresskits::Api::VideoPayload.for(video.recordable)
     )
-    payload = RecordingStudioPresskits::Api::VideoPayload.for(video.recordable)
+    derived = record_video(content, actor: user, url: RICK_URL, title: "Second reel", description: "Later")
+    payload = RecordingStudioPresskits::Api::VideoPayload.for(derived.recordable)
+    assert_nil payload[:duration_seconds]
+    assert_equal "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg", payload[:thumbnail_url]
     refute payload.key?(:summary)
-    refute payload.key?(:thumbnail_url)
     refute payload.key?(:caption)
   end
 
@@ -69,7 +75,7 @@ class VideoPayloadTest < ActiveSupport::TestCase
     assert_equal "RecordingStudioPresskits::VideoSection", payload[:content_type]
     assert_equal content.id, payload[:content_id]
     assert_equal [ZOO_URL, RICK_URL], urls
-    assert_equal %i[title url description provider canonical_url content_type], videos.first.keys
+    assert_equal %i[title url description provider canonical_url content_type duration_seconds thumbnail_url], videos.first.keys
     assert_equal ["Me at the zoo", "Second reel"], titles
     refute_includes titles, "Gone"
   end
@@ -142,11 +148,13 @@ class VideoPayloadTest < ActiveSupport::TestCase
     RecordingStudioPresskits::KitQuery.section_content(section)
   end
 
-  def record_video(content, actor:, url:, title:, description:)
+  def record_video(content, actor:, url:, title:, description:, duration: nil, thumbnail_url: nil)
     content.record(RecordingStudioVideo::Video, parent_recording: content, actor: actor) do |video|
       video.url = url
       video.title = title
       video.description = description
+      video.duration = duration if duration
+      video.thumbnail_url = thumbnail_url if thumbnail_url
     end
   end
 

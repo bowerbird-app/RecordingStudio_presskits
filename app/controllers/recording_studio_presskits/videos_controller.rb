@@ -76,7 +76,7 @@ module RecordingStudioPresskits
     end
 
     def video_params
-      params.require(:video).permit(:title, :url, :description)
+      params.require(:video).permit(:title, :url, :description, :duration, :thumbnail_url)
     end
 
     def invalid_video(error)

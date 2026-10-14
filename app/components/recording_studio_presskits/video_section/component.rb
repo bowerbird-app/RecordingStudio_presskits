@@ -13,11 +13,7 @@ module RecordingStudioPresskits
       end
 
       def videos
-        VideoSection.active_videos(@recording)
-      end
-
-      def player_for(video_recording)
-        helpers.recording_studio_video_player(video_recording)
+        @videos ||= VideoSection.active_videos(@recording).to_a
       end
     end
   end

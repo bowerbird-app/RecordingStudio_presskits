@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-10-13
+
+### Changed
+- A video section's public cards use `FlatPack::VideoPreview`. The first video is a full-width card. The rest sit in `FlatPack::Grid` with two columns. One video is only that featured card. Flatpack is `>= 0.1.233`.
+- Videos in a section are orderable. Drag a row in the content editor. That order is the public order, and the first video is the featured card.
+- Each card shows the poster, a length pill, the title, a muted provider and length line, **Copy link**, and **Watch on YouTube** or **Watch on Vimeo**. The description stays on the edit screen and in the API. It is not on the public card.
+- Length is entered as `m:ss` and stored as `duration_seconds` on `recording_studio_videos`. An optional `thumbnail_url` overrides the provider picture. A blank thumbnail uses YouTube's `hqdefault` image, or Vimeo's oEmbed thumbnail.
+- The video API entry adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the picture the card shows. The kit download text file adds a `Provider · m:ss` line under each video title.
+- Version `0.48.0`
+
+### Upgrade notes
+- Bump to `0.48.0`. Flatpack stays at `>= 0.1.233` (tag `v0.1.233`), which ships `FlatPack::VideoPreview`. Rebuild Tailwind so the video preview utilities generate. Reload Press Kits JavaScript so the copy-link controller loads.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds `duration_seconds` and `thumbnail_url` to `recording_studio_videos`. Run the Video gem's migrations first if that table is not there yet. Existing videos keep a blank length and a blank thumbnail override.
+- Press Kits still does not register Vimeo. A host that wants Vimeo registers that provider with External Embed before the catalog freezes. YouTube needs no extra registration.
+- Hosts that replaced the video section component should render `FlatPack::VideoPreview` with `with_player` around `recording_studio_video_player`, and should list `active_videos` so the first recording is the featured card.
+
 ## [0.46.0] - 2026-10-13
 
 ### Changed
