@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.66.0
+
+Bump to `0.66.0`. Accessible stays `~> 0.19` (git tag `v0.19.0`) as on main; ControllerAuth needs Accessible `0.18` or newer. There is no presskits migration.
+
+Engine screens use `RecordingStudioAccessible::ControllerAuth` for authenticate, `Current.actor`, authorize, and current root. The include and `recording_studio_auth` call sit after `protect_from_forgery`, so a signed-out write with a bad CSRF token still returns 422 before auth redirects. The public helper names are unchanged: `authenticate_presskits_actor!`, `presskits_actor`, `current_presskits_root`, `authorize_recording!`, and `require_root!`. Host overrides of those private helpers still win. Behavior matches main: missing auth method → `head :unauthorized`; missing or denied access → `head :forbidden`; Devise `authenticate_user!` still redirects to sign in when that is the configured authentication method.
+
 ## 0.65.0
 
 `0.64.0` already shipped. Bump to `0.65.0`. There is no presskits migration.

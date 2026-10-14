@@ -408,7 +408,7 @@ Use `PressKit.indexable` / `indexable?` for publish state. Use `KitQuery.discove
 
 ## Displaying press kits in a host
 
-A press center, or any other host page, renders kits with the components in this section. The mounted index, kit editor, and owner preview stay on the engine. Those screens call `authenticate_presskits_actor!`, use the current root from Root Switchable, The kit editor and owner preview render inside `recording_studio/default_layout`. The kits index uses `recording_studio_presskits/library`. The editor modals are Turbo frames `pk-editor-md`, `pk-editor`, `pk-editor-xl`, and `pk-editor-2xl`. Use the components below on a host page. Leave the engine routes for people editing kits.
+A press center, or any other host page, renders kits with the components in this section. The mounted index, kit editor, and owner preview stay on the engine. Those screens use `RecordingStudioAccessible::ControllerAuth` (`authenticate_presskits_actor!`, `presskits_actor`, `current_presskits_root`, `authorize_recording!`), take the current root from Root Switchable, and render the kit editor and owner preview inside `recording_studio/default_layout`. The kits index uses `recording_studio_presskits/library`. The editor modals are Turbo frames `pk-editor-md`, `pk-editor`, `pk-editor-xl`, and `pk-editor-2xl`. Use the components below on a host page. Leave the engine routes for people editing kits.
 
 In this section, **preview** means the audience preview: `Visibility.presentation_for` returns `:preview`, and the component is `RecordingStudioPresskits::PressKits::PreviewShowComponent`. **Owner preview** means `RecordingStudioPresskits::PressKits::PublicShowComponent` with `preview: true`, the authenticated page at engine `GET press_kits/:id/preview`.
 
