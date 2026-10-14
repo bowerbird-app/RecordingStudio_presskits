@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.58.0] - 2026-10-14
+
+### Added
+- `RecordingStudioPresskits::Files` is a kit section for documents. People upload PDF, Word, Excel, CSV, PowerPoint, text, and zip files straight onto the section. Images, HTML, and SVG are refused. Each file can be 25 MB. A section holds 10 files in total, including files already there. The editor and the public kit show an icon, the name, the extension, the size, and the description. The public kit and the section API do not link to a single file.
+- The kit download zip puts each Files section in its own folder, named from the section title. Two sections with the same title become `Title` and `Title-2`. `KitDownload::FolderNames` keeps that one folder. Downloadable would otherwise flatten every zip entry.
+- A direct attachment link for a file in a Files section uses the same publish and embargo check as the kit download.
+- The section API payload includes `files` with the name, description, original filename, type, byte size, and position, and no URL.
+- Version `0.58.0`
+
+### Upgrade notes
+- `0.57.0` already shipped. This release is `0.58.0`.
+- Copy `db/migrate/20261014220000_create_recording_studio_files.rb` into the host app and migrate. Add `RecordingStudioPresskits::Files` to `recordable_types`. A kit that has no Files section keeps working. There is no per-file download to turn off. The kit zip gains one folder per Files section.
+
 ## [0.57.0] - 2026-10-14
 
 ### Changed
@@ -1101,7 +1114,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.57.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.58.0...HEAD
+[0.58.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.57.0...v0.58.0
 [0.57.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.56.0...v0.57.0
 [0.56.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.55.0...v0.56.0
 [0.55.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.54.0...v0.55.0

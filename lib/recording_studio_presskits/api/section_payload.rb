@@ -4,6 +4,7 @@ require "recording_studio_presskits/api/video_payload"
 require "recording_studio_presskits/api/stat_payload"
 require "recording_studio_presskits/api/podcast_payload"
 require "recording_studio_presskits/api/location_payload"
+require "recording_studio_presskits/api/file_payload"
 
 module RecordingStudioPresskits
   module Api
@@ -24,17 +25,21 @@ module RecordingStudioPresskits
       end
       private_class_method :withheld
 
-      def self.extras_for(content)
-        case content&.recordable_type
-        when VideoSection.name
-          { videos: VideoPayload.for_recording(content) }
-        when StatsSection.name
-          StatPayload.for_recording(content)
-        when LocationSection.name
+      EXTRA_FOR = {
+        "RecordingStudioPresskits::VideoSection" => ->(content) { { videos: VideoPayload.for_recording(content) } },
+        "RecordingStudioPresskits::StatsSection" => ->(content) { StatPayload.for_recording(content) },
+        "RecordingStudioPresskits::LocationSection" => lambda { |content|
           { locations: LocationPayload.for_recording(content) }
-        when PodcastSection.name
+        },
+        "RecordingStudioPresskits::PodcastSection" => lambda { |content|
           { podcasts: PodcastPayload.for_recording(content) }
-        end
+        },
+        "RecordingStudioPresskits::Files" => ->(content) { { files: FilePayload.for_recording(content) } }
+      }.freeze
+      private_constant :EXTRA_FOR
+
+      def self.extras_for(content)
+        EXTRA_FOR[content&.recordable_type]&.call(content)
       end
       private_class_method :extras_for
 

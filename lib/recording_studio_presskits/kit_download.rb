@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/kit_download/filenames"
+require "recording_studio_presskits/kit_download/folder_names"
 require "recording_studio_presskits/kit_download/manifest"
 require "recording_studio_presskits/kit_download/text_file"
 

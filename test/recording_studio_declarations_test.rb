@@ -16,6 +16,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     RecordingStudioPresskits::VideoSection
     RecordingStudioPresskits::PodcastSection
     RecordingStudioPresskits::LocationSection
+    RecordingStudioPresskits::Files
   ].freeze
 
   PICKER_TYPES_EXCLUDED = %w[
@@ -396,6 +397,35 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute images_recording.recordable.respond_to?(:title=)
   end
 
+  test "files is allowed under a kit section and attaches documents" do
+    _root, kit_recording = spring_kit
+    section = record_section(kit_recording)
+
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::Files",
+      parent_recording: section
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::Files",
+      parent_recording: kit_recording
+    )
+    assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Files")
+    refute RecordingStudio.capability_enabled?(:library_placement, for: "RecordingStudioPresskits::Files")
+    options = RecordingStudio.capability_options(:attachable, for: "RecordingStudioPresskits::Files").to_h
+    assert_equal [:file], Array(options[:enabled_attachment_kinds]).map(&:to_sym)
+    assert_equal RecordingStudioPresskits::Files::MAX_FILE_BYTES, options[:max_file_size]
+    assert_equal RecordingStudioPresskits::Files::MAX_FILES, options[:max_file_count]
+    assert_includes options[:allowed_content_types], "application/pdf"
+    assert_includes options[:allowed_content_types], "text/csv"
+    refute_includes options[:allowed_content_types], "image/jpeg"
+    refute_includes options[:allowed_content_types], "text/html"
+    refute_includes options[:allowed_content_types], "image/svg+xml"
+    assert_equal RecordingStudioPresskits::FileAccess, options[:authorize_with]
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Files")
+    orderable = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::Files").to_h
+    assert_equal ["RecordingStudioAttachable::Attachment"], Array(orderable[:allows]).map(&:to_s)
+  end
+
   test "picker types skip dummy placeholders and types that do not allow press kit" do
     types = RecordingStudioPresskits.picker_types
     PICKER_TYPES_INCLUDED.each { |type| assert_includes types, type }
@@ -446,6 +476,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "video-camera", RecordingStudioPresskits::VideoSection.section_menu_icon
     assert_equal "microphone", RecordingStudioPresskits::PodcastSection.section_menu_icon
     assert_equal "map-pin", RecordingStudioPresskits::LocationSection.section_menu_icon
+    assert_equal "paper-clip", RecordingStudioPresskits::Files.section_menu_icon
     assert_nil FakeBlock.try(:section_menu_icon)
   end
 
@@ -521,6 +552,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::PodcastSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Podcast")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::LocationSection")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Files")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudio::Location::Location")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
@@ -556,6 +588,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::PodcastSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Podcast")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::LocationSection")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Files")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Page")

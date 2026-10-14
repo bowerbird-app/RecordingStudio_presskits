@@ -12,10 +12,13 @@ module RecordingStudioPresskits
       end
 
       def self.count_for(content, recordable)
-        if recordable.is_a?(Images)
+        case recordable
+        when Images
           DirectImages.list(content).size
-        elsif recordable.is_a?(VideoSection)
+        when VideoSection
           VideoSection.active_videos(content).size
+        when Files
+          DirectFiles.list(content).size
         end
       end
       private_class_method :count_for

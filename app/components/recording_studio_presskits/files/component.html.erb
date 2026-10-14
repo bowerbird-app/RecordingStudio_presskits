@@ -1,0 +1,16 @@
+<ul class="flex flex-col gap-4" data-presskits-files>
+  <% rows.each do |row| %>
+    <li class="flex items-start gap-3" data-presskits-file-id="<%= row[:id] %>">
+      <span class="mt-0.5 shrink-0 text-[var(--surface-content-color)]" aria-hidden="true">
+        <%= render FlatPack::Shared::IconComponent.new(name: row[:icon], size: :md) %>
+      </span>
+      <div class="min-w-0">
+        <p class="text-base font-medium text-[var(--surface-content-color)]" data-presskits-file-name><%= row[:name] %></p>
+        <p class="text-sm text-[var(--surface-muted-content-color)]" data-presskits-file-meta><%= row[:meta] %></p>
+        <% if row[:description].present? %>
+          <p class="mt-1 text-sm text-[var(--surface-muted-content-color)]" data-presskits-file-description><%= row[:description] %></p>
+        <% end %>
+      </div>
+    </li>
+  <% end %>
+</ul>

@@ -335,6 +335,43 @@ begin
   end
   ensure_images_section.call(press_kit_recording)
 
+  ensure_files_section = lambda do |kit_recording|
+    existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
+      section.recordable.title == "Documents"
+    end
+    section = existing || RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit_recording,
+      content_type: "RecordingStudioPresskits::Files",
+      actor: user,
+      title: "Documents",
+      subtitle: "One-sheets, bios, and the logo pack."
+    )
+    content = RecordingStudioPresskits::KitQuery.section_content(section)
+    [
+      ["one-sheet.pdf", "One-sheet", "Short description of the spring film.", "application/pdf", "%PDF-1.1\n%%EOF\n"],
+      ["bios.txt", "Bios", "Director and producer biographies.", "text/plain", "Spring film bios\n"],
+      ["dates.csv", "Dates", "Screening dates for the spring film.", "text/csv", "city,date\nMelbourne,2026-04-01\n"]
+    ].each do |filename, name, description, type, body|
+      already = RecordingStudioPresskits::DirectFiles.list(content).any? do |file|
+        file.recordable.original_filename == filename
+      end
+      next if already
+      file = content.import_attachment(
+        io: StringIO.new(body),
+        filename: filename,
+        content_type: type,
+        name: name,
+        actor: user,
+        source: "press_documents"
+      )
+      next if file.blank?
+
+      file.revise_attachment_metadata(actor: user, description: description)
+      content.recording_studio_orderable_append!(file, actor: user)
+    end
+  end
+  ensure_files_section.call(press_kit_recording)
+
   ensure_stats_section = lambda do |kit_recording, title, stats|
     existing = RecordingStudioPresskits::KitQuery.sections_for(kit_recording).find do |section|
       section.recordable.title == title

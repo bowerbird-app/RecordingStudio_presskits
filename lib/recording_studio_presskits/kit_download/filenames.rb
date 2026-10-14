@@ -14,6 +14,17 @@ module RecordingStudioPresskits
         uniquify(name)
       end
 
+      # A file inside a section folder. The folder name is already unique.
+      # The same filename may exist in another folder.
+      def unique_entry(directory, filename)
+        folder = sanitize(directory)
+        base = sanitize(filename)
+        candidate = "#{folder}/#{base}"
+        return remember(candidate) unless taken?(candidate)
+
+        uniquify_entry(folder, base)
+      end
+
       private
 
       def uniquify(name)
@@ -22,6 +33,18 @@ module RecordingStudioPresskits
         n = 2
         loop do
           candidate = "#{stem}-#{n}#{ext}"
+          return remember(candidate) unless taken?(candidate)
+
+          n += 1
+        end
+      end
+
+      def uniquify_entry(directory, base)
+        stem = File.basename(base, ".*")
+        ext = File.extname(base)
+        n = 2
+        loop do
+          candidate = "#{directory}/#{stem}-#{n}#{ext}"
           return remember(candidate) unless taken?(candidate)
 
           n += 1

@@ -1,5 +1,15 @@
 # Upgrade notes
 
+## 0.58.0
+
+`0.57.0` already shipped. Bump to `0.58.0`.
+
+Files sections are new. A kit that has none keeps working. The new table is `recording_studio_files`. Copy `db/migrate/20261014220000_create_recording_studio_files.rb` into the host app and migrate. Add `RecordingStudioPresskits::Files` to `recordable_types`.
+
+A Files section holds up to 10 documents, 25 MB each. Allowed types are PDF, Word, Excel, CSV, PowerPoint, plain text, and zip. The kit download zip adds one folder per Files section, using the section title. Two sections with the same title get `Title` and `Title-2`. Downloadable flattens zip entry names. This gem keeps that one folder and still flattens every other name.
+
+There is no per-file download on the public kit or in the section API. A direct attachment URL for a file in the section is allowed only when the kit download is allowed. Trashing the section trashes its files. Restoring the section restores files that were trashed with it. Duplicating a kit copies the files and their blobs. The section API payload includes `files` and no file URLs.
+
 ## 0.57.0
 
 Bump to `0.57.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds a nullable `release_date` date column on `recording_studio_press_kits`. There is no backfill. Existing kits keep a blank date, and the card hides the line. Flatpack stays `>= 0.1.235`.

@@ -15,7 +15,7 @@ module RecordingStudioPresskits
       def files
         return [] if @recording.blank? || !defined?(RecordingStudioDownloadable::DownloadFile)
 
-        image_files + [text_file]
+        image_files + document_files + [text_file]
       end
 
       private
@@ -70,6 +70,38 @@ module RecordingStudioPresskits
         file.blob
       rescue StandardError
         nil
+      end
+
+      def document_files
+        files = []
+        visible_file_sections.each do |section|
+          content = KitQuery.section_content(section)
+          folder = @names.unique(section_folder(section))
+          DirectFiles.list(content).each do |item|
+            append_document(files, item, folder: folder)
+          end
+        end
+        files
+      end
+
+      def visible_file_sections
+        KitQuery.sections_for(@recording).select do |section|
+          content = KitQuery.section_content(section)
+          content&.recordable.is_a?(Files) &&
+            PressKits::SectionFrameComponent.new(section_recording: section).content_visible?
+        end
+      end
+
+      def append_document(files, item, folder:)
+        blob = blob_for(item)
+        return if blob.blank?
+
+        filename = @names.unique_entry(folder, original_name(item, blob))
+        files << RecordingStudioDownloadable::DownloadFile.from_blob(blob, filename: filename)
+      end
+
+      def section_folder(section)
+        RecordingStudioPresskits.section_heading(section).to_s
       end
 
       def section_prefix(section)
