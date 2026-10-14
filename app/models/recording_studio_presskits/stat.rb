@@ -4,8 +4,6 @@ module RecordingStudioPresskits
   class Stat < ApplicationRecord
     self.table_name = "recording_studio_stats"
 
-    HTTP_URL = %r{\Ahttps?://[^\s]+\z}i
-
     recording_studio_recordable label: "Stat",
                                 root: false,
                                 allowed_parent_types: ["RecordingStudioPresskits::StatsSection"]
@@ -14,10 +12,6 @@ module RecordingStudioPresskits
 
     validates :label, presence: true
     validates :value, presence: true
-    validates :source_url, format: {
-      with: HTTP_URL,
-      message: "must be an HTTP or HTTPS link"
-    }, allow_blank: true
 
     before_validation :clear_blank_details
 
@@ -32,7 +26,6 @@ module RecordingStudioPresskits
       self.value = stripped(value)
       self.unit = blank_to_nil(unit)
       self.description = blank_to_nil(description)
-      self.source_url = blank_to_nil(source_url)
     end
 
     def stripped(value)

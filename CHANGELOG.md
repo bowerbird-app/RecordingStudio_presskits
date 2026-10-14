@@ -10,14 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.48.0] - 2026-10-14
 
 ### Changed
-- Stats replace Facts & Figures. `RecordingStudioPresskits::StatsSection` sits under the kit section. Each `RecordingStudioPresskits::Stat` is a child recording with a required label and value, plus optional unit, description, source URL, and as-of date.
+- Stats replace Facts & Figures. `RecordingStudioPresskits::StatsSection` sits under the kit section. Each `RecordingStudioPresskits::Stat` is a child recording with a required label and value, plus optional unit and description.
 - Stats always render as cards: three on a large screen, two from the medium breakpoint, and one on a phone. List, table, `display_style`, and `columns` are gone.
-- The content editor shows **+ Stat** and the stat list. There is no Columns control and no Show as control.
+- The content editor shows **+ Stat** and the stat list. There is no Columns control and no Show as control. A stat's fields are Value, Unit, Label, and Description. Label and value are required.
 - A stats section payload is `stats`. The kit section payload includes `stats` when the content is a stats section.
 - Version `0.48.0`
 
 ### Upgrade notes
-- Bump to `0.48.0` and run the migrations. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections`, renames `recording_studio_facts` to `recording_studio_stats`, drops `display_style`, and rewrites recording types from `FactsSection` / `Fact` to `StatsSection` / `Stat`. The next migration drops `columns` from `recording_studio_stats_sections`.
+- Bump to `0.48.0` and run the migrations. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections`, renames `recording_studio_facts` to `recording_studio_stats`, drops `display_style`, and rewrites recording types from `FactsSection` / `Fact` to `StatsSection` / `Stat`. The next migration drops `columns` from `recording_studio_stats_sections`. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats`.
 - Register `RecordingStudioPresskits::StatsSection` and `RecordingStudioPresskits::Stat`. Drop `FactsSection` and `Fact`.
 - Call `register_stats!` paths through `RecordingStudioPresskits::Api.register!`. Read `stats`. `display`, `facts`, and `columns` are gone.
 - There are no Ruby aliases for the old class names, routes, or payload keys.

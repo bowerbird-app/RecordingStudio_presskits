@@ -10,9 +10,7 @@ module RecordingStudioPresskits
           label: recordable.label,
           value: recordable.value,
           unit: blank_to_nil(recordable.unit),
-          description: blank_to_nil(recordable.description),
-          source_url: blank_to_nil(recordable.source_url),
-          as_of_date: recordable.as_of_date
+          description: blank_to_nil(recordable.description)
         }
       end
 
@@ -25,7 +23,7 @@ module RecordingStudioPresskits
       end
 
       def self.withheld_stat
-        { label: nil, value: nil, unit: nil, description: nil, source_url: nil, as_of_date: nil }
+        { label: nil, value: nil, unit: nil, description: nil }
       end
       private_class_method :withheld_stat
 

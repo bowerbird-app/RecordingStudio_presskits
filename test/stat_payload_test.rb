@@ -12,9 +12,7 @@ class StatPayloadTest < ActiveSupport::TestCase
       label: "Floor area",
       value: "420",
       unit: " m² ",
-      description: " Total internal floor area ",
-      source_url: "https://example.com/area",
-      as_of_date: Date.new(2025, 1, 1)
+      description: " Total internal floor area "
     )
 
     assert_equal(
@@ -22,9 +20,7 @@ class StatPayloadTest < ActiveSupport::TestCase
         label: "Floor area",
         value: "420",
         unit: "m²",
-        description: "Total internal floor area",
-        source_url: "https://example.com/area",
-        as_of_date: Date.new(2025, 1, 1)
+        description: "Total internal floor area"
       },
       RecordingStudioPresskits::Api::StatPayload.for(stat)
     )
@@ -38,9 +34,7 @@ class StatPayloadTest < ActiveSupport::TestCase
         label: "Completed",
         value: "2025",
         unit: nil,
-        description: nil,
-        source_url: nil,
-        as_of_date: nil
+        description: nil
       },
       RecordingStudioPresskits::Api::StatPayload.for(stat)
     )
@@ -78,7 +72,9 @@ class StatPayloadTest < ActiveSupport::TestCase
     refute payload.key?(:display)
     refute payload.key?(:facts)
     assert_equal ["Floor area", "Completed"], labels
-    assert_equal %i[label value unit description source_url as_of_date], stats.first.keys
+    assert_equal %i[label value unit description], stats.first.keys
+    refute stats.first.key?(:source_url)
+    refute stats.first.key?(:as_of_date)
     assert_equal "m²", stats.first[:unit]
     refute_includes labels, "Gone"
   end
@@ -97,17 +93,19 @@ class StatPayloadTest < ActiveSupport::TestCase
     refute serialized.key?(:display)
   end
 
-  test "stat requires label and value and accepts an http source" do
-    stat = RecordingStudioPresskits::Stat.new(label: "", value: "", source_url: "ftp://example.com")
+  test "stat requires label and value" do
+    stat = RecordingStudioPresskits::Stat.new(label: "", value: "")
 
+    refute stat.respond_to?(:source_url)
+    refute stat.respond_to?(:as_of_date)
     refute stat.valid?
     assert_includes stat.errors[:label], "can't be blank"
     assert_includes stat.errors[:value], "can't be blank"
-    assert_includes stat.errors[:source_url], "must be an HTTP or HTTPS link"
 
     stat.label = "Employees"
     stat.value = "85"
-    stat.source_url = "https://example.com/team"
+    stat.unit = "people"
+    stat.description = "Studio staff"
     assert stat.valid?
   end
 
@@ -170,6 +168,32 @@ class StatPayloadTest < ActiveSupport::TestCase
       connection.remove_column :recording_studio_stats_sections, :columns
     end
     RecordingStudioPresskits::StatsSection.reset_column_information
+  end
+
+  test "drop source and as of migration removes those columns" do
+    connection = ActiveRecord::Base.connection
+    connection.add_column :recording_studio_stats, :source_url, :string
+    connection.add_column :recording_studio_stats, :as_of_date, :date
+    RecordingStudioPresskits::Stat.reset_column_information
+    assert connection.column_exists?(:recording_studio_stats, :source_url)
+    assert connection.column_exists?(:recording_studio_stats, :as_of_date)
+
+    load Rails.root.join("db/migrate/20261014140000_drop_source_and_as_of_from_recording_studio_stats.rb")
+    DropSourceAndAsOfFromRecordingStudioStats.drop_source_and_as_of
+    RecordingStudioPresskits::Stat.reset_column_information
+
+    refute connection.column_exists?(:recording_studio_stats, :source_url)
+    refute connection.column_exists?(:recording_studio_stats, :as_of_date)
+    refute RecordingStudioPresskits::Stat.new.respond_to?(:source_url)
+    refute RecordingStudioPresskits::Stat.new.respond_to?(:as_of_date)
+  ensure
+    if connection&.column_exists?(:recording_studio_stats, :source_url)
+      connection.remove_column :recording_studio_stats, :source_url
+    end
+    if connection&.column_exists?(:recording_studio_stats, :as_of_date)
+      connection.remove_column :recording_studio_stats, :as_of_date
+    end
+    RecordingStudioPresskits::Stat.reset_column_information
   end
 
   private

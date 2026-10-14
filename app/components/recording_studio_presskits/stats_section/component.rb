@@ -21,19 +21,7 @@ module RecordingStudioPresskits
       end
 
       def supporting_text(recordable)
-        [
-          recordable.description.to_s.strip.presence,
-          as_of_text(recordable)
-        ].compact
-      end
-
-      private
-
-      def as_of_text(recordable)
-        date = recordable.as_of_date
-        return if date.blank?
-
-        "As of #{date}"
+        [recordable.description.to_s.strip.presence].compact
       end
     end
   end

@@ -114,12 +114,16 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
 
     get new_stat
     assert_response :success
-    assert_select "input[name='stat[label]']"
-    assert_select "input[name='stat[value]']"
+    assert_select "input[name='stat[value]'][required]"
     assert_select "input[name='stat[unit]']"
+    assert_select "input[name='stat[label]'][required]"
     assert_select "textarea[name='stat[description]']"
-    assert_select "input[name='stat[source_url]']"
-    assert_select "input[name='stat[as_of_date]']"
+    refute_select "input[name='stat[source_url]']"
+    refute_select "input[name='stat[as_of_date]']"
+    refute_includes response.body, "More detail"
+    assert_operator response.body.index("name=\"stat[value]\""), :<, response.body.index("name=\"stat[unit]\"")
+    assert_operator response.body.index("name=\"stat[unit]\""), :<, response.body.index("name=\"stat[label]\"")
+    assert_operator response.body.index("name=\"stat[label]\""), :<, response.body.index("name=\"stat[description]\"")
 
     assert_no_difference -> { RecordingStudioPresskits::Stat.count } do
       post recording_studio_presskits.press_kit_section_stats_path(kit, section), params: {
@@ -130,7 +134,15 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
 
     assert_difference -> { RecordingStudioPresskits::Stat.count }, 1 do
       post recording_studio_presskits.press_kit_section_stats_path(kit, section), params: {
-        stat: { label: "Projects", value: "120", unit: "", description: "Shipped work", decoy: "nope" }
+        stat: {
+          label: "Projects",
+          value: "120",
+          unit: "",
+          description: "Shipped work",
+          source_url: "https://example.com",
+          as_of_date: "2026-01-01",
+          decoy: "nope"
+        }
       }
     end
     follow_redirect!
@@ -138,6 +150,9 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     first = live_stats(section).first
     assert_equal "Projects", first.recordable.label
     assert_equal "120", first.recordable.value
+    assert_equal "Shipped work", first.recordable.description
+    refute first.recordable.respond_to?(:source_url)
+    refute first.recordable.respond_to?(:as_of_date)
     refute_includes first.recordable.attributes.values, "nope"
 
     post recording_studio_presskits.press_kit_section_stats_path(kit, section), params: {
@@ -161,7 +176,9 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_includes css_select("#presskits-editor-preview").first.to_html, "lg:grid-cols-3"
     assert_includes response.body, "Projects"
     assert_includes response.body, "120"
+    assert_includes response.body, "Shipped work"
     assert_includes response.body, "Employees"
+    refute_includes response.body, "As of"
 
     patch recording_studio_presskits.press_kit_section_stat_order_path(kit, section), params: {
       recording_id: second.id,
@@ -198,6 +215,8 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_stats_grid(preview)
     assert_includes preview, "420 m²"
     assert_includes preview, "Floor area"
+    assert_includes preview, "Total internal floor area"
+    refute_includes preview, "As of"
     refute_includes preview, "<th"
     refute_includes preview, "<dt"
 
@@ -206,6 +225,8 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_select ".fp-section-title h2", text: "Project specifications"
     assert_stats_grid(response.body)
     assert_includes response.body, "420 m²"
+    assert_includes response.body, "Total internal floor area"
+    refute_includes response.body, "As of"
     refute_includes response.body, "<th"
 
     empty = add_stats_section(kit)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -360,8 +360,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_130000) do
     t.text "value", default: "", null: false
     t.string "unit"
     t.text "description"
-    t.string "source_url"
-    t.date "as_of_date"
     t.datetime "created_at", null: false
   end
 

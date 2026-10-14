@@ -11,13 +11,6 @@
     </div>
 
     <%= render FlatPack::TextInput::Component.new(
-      name: "stat[label]",
-      value: stat.label,
-      label: "Label",
-      required: true,
-      class: "w-full"
-    ) %>
-    <%= render FlatPack::TextInput::Component.new(
       name: "stat[value]",
       value: stat.value,
       label: "Value",
@@ -30,31 +23,18 @@
       label: "Unit",
       class: "w-full"
     ) %>
-
-    <details class="flex flex-col gap-4">
-      <summary class="cursor-pointer text-sm font-medium text-(--surface-content-color)">
-        More detail
-      </summary>
-      <%= render FlatPack::TextArea::Component.new(
-        name: "stat[description]",
-        value: stat.description,
-        label: "Description",
-        class: "w-full"
-      ) %>
-      <%= render FlatPack::TextInput::Component.new(
-        name: "stat[source_url]",
-        value: stat.source_url,
-        label: "Source",
-        placeholder: "https://",
-        class: "w-full"
-      ) %>
-      <%= render FlatPack::TextInput::Component.new(
-        name: "stat[as_of_date]",
-        value: stat.as_of_date,
-        label: "As of",
-        type: "date",
-        class: "w-full"
-      ) %>
-    </details>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "stat[label]",
+      value: stat.label,
+      label: "Label",
+      required: true,
+      class: "w-full"
+    ) %>
+    <%= render FlatPack::TextArea::Component.new(
+      name: "stat[description]",
+      value: stat.description,
+      label: "Description",
+      class: "w-full"
+    ) %>
   <% end %>
 </div>
