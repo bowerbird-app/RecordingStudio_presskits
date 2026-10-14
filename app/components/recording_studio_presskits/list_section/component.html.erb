@@ -1,19 +1,13 @@
 <% if items.any? %>
-  <div id="presskits-list-lines" class="max-w-[65ch]">
-    <%= render FlatPack::List::Component.new do %>
-      <% items.each do |recording| %>
-        <% item = recording.recordable %>
-        <%= render FlatPack::List::Item.new(
-              icon: item.icon.presence,
-              class: "!items-center",
-              data: { list_item: true }
-            ) do %>
-          <div class="flex flex-wrap items-baseline justify-between gap-3">
-            <span class="text-sm text-(--surface-muted-content-color)"><%= item.key %></span>
-            <span class="text-base font-medium text-(--surface-content-color)"><%= item.value %></span>
-          </div>
+  <div id="presskits-list-lines" class="<%= measure_class %>">
+    <% if wide? %>
+      <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start, class: "w-full") do %>
+        <% line_columns.each do |column| %>
+          <%= render "recording_studio_presskits/list_section/lines", column: column %>
         <% end %>
       <% end %>
+    <% else %>
+      <%= render "recording_studio_presskits/list_section/lines", column: items %>
     <% end %>
   </div>
 <% end %>

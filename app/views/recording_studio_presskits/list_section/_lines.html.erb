@@ -1,0 +1,15 @@
+<%= render FlatPack::List::Component.new do %>
+  <% column.each do |recording| %>
+    <% item = recording.recordable %>
+    <%= render FlatPack::List::Item.new(
+          icon: item.icon.presence,
+          class: "!items-center",
+          data: { list_item: true }
+        ) do %>
+      <div class="flex flex-wrap items-baseline justify-between gap-3">
+        <span class="text-sm text-(--surface-muted-content-color)"><%= item.key %></span>
+        <span class="text-base font-medium text-(--surface-content-color)"><%= item.value %></span>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

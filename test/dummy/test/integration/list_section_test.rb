@@ -236,6 +236,44 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Empty list"
   end
 
+  test "six lines stay one list and the seventh starts the second" do
+    component = RecordingStudioPresskits::ListSection::Component
+
+    assert_equal [[1, 2, 3, 4, 5, 6]], component.line_columns([1, 2, 3, 4, 5, 6])
+    assert_equal [[1, 2, 3, 4], [5, 6, 7]], component.line_columns([1, 2, 3, 4, 5, 6, 7])
+  end
+
+  test "more than six lines split in order across two lists" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    section = add_list_section(kit, title: "At a glance")
+    content = section_content(section)
+    6.times do |index|
+      record_item(content, key: "Line #{index + 1}", value: "Value #{index + 1}", icon: index.zero? ? "star" : nil)
+    end
+    publish_list_kit!(kit)
+
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-list"
+    assert_response :success
+    assert_includes response.body, "max-w-[65ch]"
+    refute_includes response.body, "md:grid-cols-2"
+    assert_select "#presskits-list-lines ul.flat-pack-list", count: 1
+    assert_select "#presskits-list-lines [data-list-item]", count: 6
+
+    4.times do |index|
+      record_item(content, key: "Line #{index + 7}", value: "Value #{index + 7}")
+    end
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_split_lists(css_select("#presskits-editor-preview").first)
+
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-list"
+    assert_response :success
+    assert_split_lists(nil)
+  end
+
   test "duplicating a kit copies items icon and order" do
     kit = record_kit("Spring launch")
     section = add_list_section(kit, title: "At a glance")
@@ -342,12 +380,34 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-section-preview"
   end
 
+  def assert_split_lists(root)
+    html = root ? root.to_html : response.body
+    assert_includes html, "max-w-[calc(130ch+1.5rem)]"
+    assert_includes html, "grid-cols-1"
+    assert_includes html, "md:grid-cols-2"
+    lists = if root
+      assert_select root, "#presskits-list-lines ul.flat-pack-list", count: 2
+    else
+      assert_select "#presskits-list-lines ul.flat-pack-list", count: 2
+    end
+    keys = lists.map do |list|
+      list.css("[data-list-item]").map do |item|
+        item.css("span").map { |node| node.text.strip }.find(&:present?)
+      end
+    end
+    assert_equal ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5"], keys.first
+    assert_equal ["Line 6", "Line 7", "Line 8", "Line 9", "Line 10"], keys.last
+  end
+
   def assert_list_lines(scope)
     html = scope.is_a?(String) ? scope : scope.to_html
     assert_includes html, "max-w-[65ch]"
     assert_includes html, "flat-pack-list"
     refute_includes html, "_thead]:hidden"
+    refute_includes html, "md:grid-cols-2"
+    refute_includes html, "max-w-[calc(130ch+1.5rem)]"
     root = scope.is_a?(String) ? nil : scope
+    assert_select (root || css_select("body").first), "#presskits-list-lines ul.flat-pack-list", count: 1
     if root
       assert_select root, "#presskits-list-lines table", count: 0
       assert_select root, "#presskits-list-lines ul.flat-pack-list [data-list-item]", count: 2

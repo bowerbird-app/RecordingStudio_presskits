@@ -1369,18 +1369,23 @@ class RecordingStudioPresskitsTest < Minitest::Test
   def test_list_section_uses_a_list_and_a_collection_editor
     show = File.read(presskits_path("app/components/recording_studio_presskits/list_section/component.html.erb"))
     show_rb = File.read(presskits_path("app/components/recording_studio_presskits/list_section/component.rb"))
+    lines = File.read(presskits_path("app/views/recording_studio_presskits/list_section/_lines.html.erb"))
     editor = File.read(presskits_path("app/components/recording_studio_presskits/list_section/edit_component.html.erb"))
     fields = File.read(presskits_path("app/views/recording_studio_presskits/list_section/_line_fields.html.erb"))
     routes = File.read(presskits_path("config/routes.rb"))
 
-    assert_includes show, "FlatPack::List::Component"
-    assert_includes show, "FlatPack::List::Item"
-    assert_includes show, 'class="max-w-[65ch]"'
-    assert_includes show, "icon: item.icon.presence"
-    assert_includes show, "justify-between"
+    assert_includes show, "FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :start"
+    assert_includes show, "measure_class"
+    assert_includes lines, "FlatPack::List::Component"
+    assert_includes lines, "FlatPack::List::Item"
+    assert_includes lines, "icon: item.icon.presence"
+    assert_includes lines, "justify-between"
+    assert_includes show_rb, 'NARROW_MEASURE = "max-w-[65ch]"'
+    assert_includes show_rb, 'WIDE_MEASURE = "max-w-[calc(130ch+1.5rem)]"'
+    assert_includes show_rb, "SINGLE_LIST_LIMIT = 6"
     refute_includes show, "FlatPack::Table::Component"
     refute_includes show, "[&_thead]:hidden"
-    refute_includes show_rb, "whitespace-nowrap"
+    refute_includes lines, "whitespace-nowrap"
     assert_includes editor, "FlatPack::CollectionEditor::Component"
     assert_includes editor, 'add_label: "Item"'
     assert_includes editor, 'empty_text: "No lines yet"'
