@@ -66,7 +66,10 @@ module RecordingStudioPresskits
       def find_line(section_recording, id)
         return if section_recording.blank? || id.blank?
 
-        section_recording.child_recordings.where(line_scope).find_by(id: id)
+        section_recording.child_recordings
+                         .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                         .where(recordable_type: CreditLine.name)
+                         .find_by(id: id)
       end
 
       def visible_lines(section_recording)
@@ -81,7 +84,9 @@ module RecordingStudioPresskits
       end
 
       def shown_credit?(credit_recording)
-        credit_recording.present? && credit_recording.trashed_at.nil? && credit_recording.recordable.is_a?(Credit)
+        credit_recording.present? &&
+          credit_recording.recording_studio_trashable_kept? &&
+          credit_recording.recordable.is_a?(Credit)
       end
 
       private
@@ -121,11 +126,7 @@ module RecordingStudioPresskits
       end
 
       def hidden_line?(child)
-        child.trashed_at.present? || !child.recordable.is_a?(CreditLine)
-      end
-
-      def line_scope
-        { trashed_at: nil, recordable_type: CreditLine.name }
+        child.recording_studio_trashable_trashed? || !child.recordable.is_a?(CreditLine)
       end
     end
   end

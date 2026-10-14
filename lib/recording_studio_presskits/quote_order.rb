@@ -45,11 +45,10 @@ module RecordingStudioPresskits
     end
 
     def find_quote(id)
-      section_recording.child_recordings.where(quote_scope).find_by(id: id)
-    end
-
-    def quote_scope
-      { trashed_at: nil, recordable_type: recordable_type }
+      section_recording.child_recordings
+                       .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                       .where(recordable_type: recordable_type)
+                       .find_by(id: id)
     end
 
     def insertion_index(child)

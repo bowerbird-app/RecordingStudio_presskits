@@ -94,11 +94,10 @@ module RecordingStudioPresskits
     end
 
     def find_fact(id)
-      facts_section_recording.child_recordings.where(fact_scope).find_by(id: id)
-    end
-
-    def fact_scope
-      { trashed_at: nil, recordable_type: "RecordingStudioPresskits::Fact" }
+      facts_section_recording.child_recordings
+                             .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                             .where(recordable_type: "RecordingStudioPresskits::Fact")
+                             .find_by(id: id)
     end
 
     def section_edit_path

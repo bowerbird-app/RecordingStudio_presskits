@@ -10,6 +10,18 @@ Hosts that replaced the header editor should add `FlatPack::DateInput` named `pr
 
 `Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action` (`renders_many :actions`). An empty slot hides the row. The public page no longer renders `recording_studio_downloadable_button` under the header. **Download kit** on the cover links to `recording_package_path` when that route exists, otherwise the first images section. It shows when `KitDownload.allowed?`. **Contact** shows for a Press contact credit or a section titled Contact. The index passes **View**. The header does not.
 
+## 0.54.0
+
+No presskits migration. Pin `recording_studio_trashable` to `~> 0.9` (tag `v0.9.0`). Pin `recording_studio_video` to `~> 0.2.0` (tag `v0.2.0`).
+
+Where main used `where(trashed_at: nil)`, use `where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)` on the same relation (section `child_recordings` finders, Metrics `relation`). That ANDs with a host `default_scope` the same way main’s filter did.
+
+Where main already used `recording_studio_trashable_active` — credits `live_credits`, `KitQuery.live_kits`, and the kit-query `merge(active)` child helpers — keep `_active`. Do not rewrite those to `kept_sql`; `_active` unscopes `trashed_at` first and that is main’s behavior for those sites.
+
+Kept/trashed checks use `recording_studio_trashable_kept?` and `recording_studio_trashable_trashed?`. User trash and restore stay on `recording_studio_trashable_trash!` / `recording_studio_trashable_restore!`.
+
+`LegacySectionTree` still copies `trashed_at` and `trash_root` with `update!` during the one-time section-tree upgrade. Do not switch that path to `RecordingStudioTrashable.void_recording!` — void writes through `update_columns`, does not set `trash_root`, and would change restore/trash-bin behavior for upgraded trees.
+
 ## 0.53.0
 
 No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.
