@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.48.0
+## 0.50.0
 
 A Lists section is a press kit section. The list section stores no heading. Each item is its own recording.
 
@@ -20,6 +20,30 @@ Add these to `config.recordable_types`:
 Create the section with `RecordingStudioPresskits.create_section!`. Record an item under the list section. Reorder with `recording_studio_orderable_reorder!` or `recording_studio_orderable_move!` on the list section. Trash an item with `recording_studio_trashable_trash!`.
 
 The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A list section also includes `items`. Each item is `icon`, `key`, and `value`. A blank icon is nil. `kit.txt` prints `Key: Value` and leaves the icon name out.
+
+## 0.49.0
+
+No migration. Bump to `0.49.0`. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.233`.
+
+On a cover card whose container is at least 640px wide, the company name, title, subtitle, list heart, and description sit lower. The body still has `pt-7`. The copy adds `pt-16`, so the company name starts about 6rem from the top of the card. A narrower card keeps only the body's `pt-7`.
+
+**View** stays in the footer with `mt-auto`. **Edit image** stays on the cover overlay.
+
+On the kit editor, **Edit** is out of the copy row. Below 640px of container width it sits on the cover overlay, in the same top-right item as **Edit image** and immediately to its left (`gap-2`). From 640px that copy is hidden, and **Edit** is the body overlay item (`placement: :top_right`, `inset: :lg`). Only one is shown. The copy keeps the body's `pt-7` below 640px, and adds `@min-[640px]:pt-16` from 640px.
+
+The list heart is also out of the copy. It is `with_item(placement: :top_right, inset: :sm)` on the body overlay. The company line has `pr-16`. Title, subtitle, description, and location stay full width. From 640px, `@min-[640px]:top-18` moves the heart down to the company line, under **Edit**.
+
+## 0.48.0
+
+No migration. Rebuild Tailwind so the text-section utilities generate.
+
+On the public kit and the owner preview, a text section heading is `TextSectionHeadingComponent`: bold, `text-[2rem]`, `--surface-content-color`, with an empty `data-presskits-text-copy-slot` on the right. Do not put a copy button there yet. Other section types still render `SectionTitle` with its anchor, including the Images count badge and **Download all images**. Section cards stay `rounded-[var(--radius-lg)]` (1.5rem / 24px).
+
+The public text body uses `--surface-muted-content-color`, `text-base`, `leading-7`, and `max-w-[65ch]`. It does not use `.ProseMirror`. Copy longer than 700 characters clamps to eight lines (`max-h-[14rem]`) with a fade and **Show more** / **Show less** (`aria-expanded`). That control is `FlatPack::Button` `style: :default`. Shorter copy has no toggle. The kit editor always shows the full body and still edits it with `FlatPack::InlineEdit` `mode: :rich` (the bubble toolbar). A text section's editor title uses the same bold classes. Other sections stay semibold `text-2xl`.
+
+`FlatPack::Collapse` hides a whole region behind a title. It is not this clamp.
+
+Hosts that replaced `SectionFrameComponent` should render `TextSectionHeadingComponent` for a text section and leave the copy slot empty. Images sections still use the download row and the count badge.
 
 ## 0.47.0
 

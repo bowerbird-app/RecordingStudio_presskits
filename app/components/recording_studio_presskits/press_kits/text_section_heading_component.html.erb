@@ -1,0 +1,10 @@
+<%# Heading left, empty slot right. Flatpack's copy control lands in the slot. %>
+<div class="flex w-full items-center justify-between gap-4">
+  <div class="min-w-0">
+    <h2 class="<%= title_classes %>"><%= title %></h2>
+    <% if subtitle.present? %>
+      <p class="<%= subtitle_classes %>"><%= subtitle %></p>
+    <% end %>
+  </div>
+  <div class="shrink-0" data-presskits-text-copy-slot></div>
+</div>

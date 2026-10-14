@@ -7,19 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.48.0] - 2026-10-14
+## [0.50.0] - 2026-10-14
 
 ### Added
 - A Lists section. `RecordingStudioPresskits::ListSection` is an empty recording under a kit section. It orders `RecordingStudioPresskits::ListItem` children. Each item stores an optional Flatpack icon name, a required `key`, and a required `value`.
 - The + Section menu shows List (`list-bullet`). + Item opens a screen for Icon, Key, and Value. Preview and the public page show the icon, the key, and the value. An empty list stays off those pages.
 - `kit.txt` prints each line as `Key: Value`. The icon name is not in the zip.
 - The kit section API payload includes `items` for a list section. A list item exposes `icon`, `key`, and `value`.
+- Version `0.50.0`
+
+### Upgrade notes
+- Bump to `0.50.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
+- Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
+- This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
+
+## [0.49.0] - 2026-10-14
+
+### Changed
+- On `Cover::Component` at `:card`, a container at least 640px wide adds `pt-16` above the copy (`@min-[640px]:pt-16` on the company, title, subtitle, heart, and description). The body keeps `pt-7`, so that block starts about 6rem from the top of the card. Below 640px of container width the extra padding stays off.
+- **View** stays in the `mt-auto` footer. **Edit image** stays on the cover overlay.
+- On the editor card, **Edit** is rendered twice and a container query shows one. Below 640px it sits on the cover overlay, in the same `top_right` item as **Edit image**, immediately to its left, with `gap-2`. From 640px that copy is `@min-[640px]:hidden`, and **Edit** is the body overlay item (`placement: :top_right`, `inset: :lg`). The copy row does not reserve space for it. Below 640px the copy has no extra top padding. At 640px and wider, `@min-[640px]:pt-16` still applies.
+- The list heart is a body overlay item (`placement: :top_right`, `inset: :sm`), not a column beside the copy. Company, title, subtitle, description, and location use the full body width. The company line adds `pr-16` so it does not run under the heart. From 640px the heart uses `@min-[640px]:top-18`, which lines it up with the company line and sits below **Edit**.
+- Version `0.49.0`
+
+### Upgrade notes
+- Bump to `0.49.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.233`. Hosts that reserved a flex column for header **Edit** or the list heart should drop it. The cover places those as overlay items. On a narrow card, **Edit** shares the cover's top-right overlay with **Edit image**.
+
+## [0.48.0] - 2026-10-14
+
+### Changed
+- A text section on the public kit and the owner preview uses a heading row: the title is bold and dark (`text-[2rem]`, `font-bold`, `--surface-content-color`) on the left, and an empty right-aligned slot (`data-presskits-text-copy-slot`) waits for Flatpack's copy control. The slot is empty. There is no copy button and no clipboard script. Other section types still use `SectionTitle`.
+- Section cards already use Flatpack `--radius-lg` (1.5rem / 24px). That matches the text-block corners, so the radius is unchanged and still shared.
+- Public and owner-preview text body no longer borrows `.ProseMirror` styles. It uses the theme muted text token other sections use for body copy (`--surface-muted-content-color`), `text-base`, `leading-7`, paragraph spacing, and `max-w-[65ch]`.
+- Long public text (plain text longer than 700 characters) clamps to eight lines with a fade into the card colour and a **Show more** / **Show less** control (`aria-expanded`). The control is `FlatPack::Button` `style: :default` (the standard raised button). Shorter copy, including the designed three-paragraph blurb, has no toggle. The kit editor always shows the full body. `FlatPack::Collapse` is a titled disclosure, so this stays a small Stimulus controller.
+- Text editing on the kit stays `FlatPack::InlineEdit` `mode: :rich`, which is the bubble toolbar. The editor heading for a text section uses the same bold title. Other sections stay `text-2xl` semibold.
 - Version `0.48.0`
 
 ### Upgrade notes
-- Bump to `0.48.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
-- Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
-- This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
+- Bump to `0.48.0`. There is no migration. Rebuild Tailwind so the text-section utilities generate. The public text heading is `TextSectionHeadingComponent`. Hosts that replaced `SectionFrameComponent` and still want this heading should branch on a text section. The copy slot is `data-presskits-text-copy-slot`. Leave it empty until Flatpack's copy control is ready.
+- Show more is public and owner preview only. The editor does not mount `recording-studio-presskits--text-collapse`.
 
 ## [0.47.0] - 2026-10-13
 
