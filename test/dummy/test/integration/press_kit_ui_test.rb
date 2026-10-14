@@ -1501,7 +1501,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       video: {
         title: "Me at the zoo",
         url: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
-        description: "The first video uploaded to YouTube."
+        description: "The first video uploaded to YouTube.",
+        duration: "1:24"
       }
     }
     video = RecordingStudioPresskits::VideoSection.active_videos(section_content(section)).first
@@ -1517,7 +1518,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
       video: {
         title: "Second reel",
         url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        description: "Another clip"
+        description: "Another clip",
+        duration: "3:05",
+        thumbnail_url: "https://cdn.example.com/second.jpg"
       }
     }
     follow_redirect!
@@ -1539,10 +1542,36 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     rick = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
     assert_operator preview.index("Trailer"), :<, preview.index(zoo)
     assert_operator preview.index("Two minutes"), :<, preview.index(zoo)
-    assert_operator preview.index("Me at the zoo"), :<, preview.index(zoo)
-    assert_operator preview.index(zoo), :<, preview.index(rick)
-    assert_includes preview, "The first video uploaded to YouTube."
+    assert_operator preview.index("Me at the zoo"), :<, preview.index("YouTube · 1:24")
+    assert_operator preview.index("YouTube · 1:24"), :<, preview.index(rick)
     assert_includes preview, "Second reel"
+    assert_includes preview, "YouTube · 3:05"
+    assert_includes preview, "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg"
+    assert_includes preview, "https://cdn.example.com/second.jpg"
+    card = css_select("[data-presskits-video-featured='true']").first.to_html
+    assert_includes card, "Copy link"
+    assert_includes card, 'aria-label="Copy link"'
+    assert_includes card, "sm:hidden"
+    assert_includes card, "hidden sm:inline-flex"
+    assert_includes card, "break-words"
+    refute_includes card, "Watch on YouTube"
+    refute_includes card, "data-presskits-brand"
+    assert_includes preview, 'data-presskits-video-featured="true"'
+    assert_includes preview, "data-presskits-video-grid"
+    refute_includes preview, "The first video uploaded to YouTube."
+    refute_includes preview, "Another clip"
+    editor_section = css_select("#presskits-editor-preview section").find do |node|
+      field = node.at_css("[name='kit_section[title]']")
+      field && field["value"] == "Trailer"
+    end
+    assert editor_section
+    assert_select editor_section, "span", text: "2", count: 0
+
+    featured = preview.index('data-presskits-video-featured="true"')
+    grid = preview.index("data-presskits-video-grid")
+    assert_operator featured, :<, grid
+    assert_operator preview.index("Me at the zoo"), :<, grid
+    assert_operator grid, :<, preview.index("Second reel")
 
     publish_video_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-videos"
@@ -1551,6 +1580,22 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_operator response.body.index("Two minutes"), :<, response.body.index(zoo)
     assert_includes response.body, zoo
     assert_includes response.body, rick
+    assert_includes response.body, "YouTube · 1:24"
+    heading = css_select("h2").find { |node| node.text == "Trailer" }
+    assert_equal "Trailer", heading.text
+    row = heading.parent
+    badge = row.css("span.shrink-0").find { |node| node.text.strip == "2" }
+    assert badge
+    assert_includes badge.at_css("span")["class"], "rounded-full"
+    assert_equal "Copy link to Trailer", row.at_css("a")["aria-label"]
+    refute_includes row.at_css("a").text, "2"
+    public_card = css_select("[data-presskits-video-featured='true']").first.to_html
+    assert_includes public_card, "Copy link"
+    assert_includes public_card, 'aria-label="Copy link"'
+    assert_includes public_card, "sm:hidden"
+    refute_includes public_card, "Watch on YouTube"
+    refute_includes response.body, "The first video uploaded to YouTube."
+    assert_select "[data-controller='flat-pack--toasts-region']"
   end
 
   test "a vimeo url stays on the video form and a text section has no video button" do
@@ -1675,7 +1720,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "input[name='video[title]']"
     assert_select "input[name='video[url]']"
     assert_select "textarea[name='video[description]']"
+    assert_select "input[name='video[duration]']"
+    assert_select "input[name='video[thumbnail_url]']"
     assert_includes response.body, "Paste a link to a supported video, such as YouTube."
+    assert_includes response.body, "Minutes and seconds, like 1:24."
   end
 
   def publish_video_kit!(kit)

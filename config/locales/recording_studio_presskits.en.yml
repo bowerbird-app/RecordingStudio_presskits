@@ -35,6 +35,7 @@ en:
       invalid: "That choice is not available for this kit."
       save: "Update"
     text:
+      copy: "Copy text"
       show_more: "Show more"
       show_less: "Show less"
     editor:
@@ -93,6 +94,17 @@ en:
         location_section: "Where they can find you, or the work."
         list_section: "Labeled lines, in the order you want."
         generic: "Another block for the kit."
+    videos:
+      length: "Length"
+      length_hint: "Minutes and seconds, like 1:24."
+      length_error: "Use minutes and seconds, like 1:24."
+      thumbnail: "Thumbnail"
+      thumbnail_hint: "Leave blank to use the picture from YouTube or Vimeo."
+      thumbnail_error: "That needs to be an http or https link."
+      copy_link: "Copy link"
+      copied: "Link copied."
+      copy_failed: "Couldn't copy that link."
+      play: "Play: %{title}"
     visibility:
       title: "Visibility"
       subtitle: "Who can view this press kit"

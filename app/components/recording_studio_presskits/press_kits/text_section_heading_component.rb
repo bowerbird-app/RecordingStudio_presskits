@@ -17,9 +17,12 @@ module RecordingStudioPresskits
       # "mt-1" "text-base" "text-[var(--surface-muted-content-color)]"
       SUBTITLE_CLASSES = "mt-1 text-base text-[var(--surface-muted-content-color)]"
 
-      def initialize(section_recording:)
+      def initialize(section_recording:, clipboard_text: nil)
         super()
         @section_recording = section_recording
+        @clipboard_text = clipboard_text
+        @clipboard_text = clipboard_text_from_section if @clipboard_text.nil?
+        @clipboard_text = @clipboard_text.to_s.strip.presence
       end
 
       def title
@@ -36,6 +39,28 @@ module RecordingStudioPresskits
 
       def subtitle_classes
         SUBTITLE_CLASSES
+      end
+
+      # Public and owner preview only. The editor heading does not use this component.
+      # Outlined pill: secondary is the flat bordered button; sm plus the button
+      # radius reads as a pill. The string is the full plain body, not the clamped HTML.
+      def clipboard_text_from_section
+        content = RecordingStudioPresskits::KitQuery.section_content(@section_recording)
+        return unless content&.recordable.is_a?(RecordingStudioPresskits::Text)
+
+        RecordingStudioPresskits::Text.clipboard_text(content.recordable.body)
+      end
+
+      def copy_button
+        return if @clipboard_text.blank?
+
+        FlatPack::CopyButton::Component.new(
+          text: @clipboard_text,
+          label: I18n.t("recording_studio_presskits.text.copy"),
+          icon: "clipboard-document",
+          style: :secondary,
+          size: :sm
+        )
       end
     end
   end

@@ -270,6 +270,12 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.video_details" do
+      config.to_prepare do
+        RecordingStudioPresskits::VideoDetails.install!
+      end
+    end
+
     initializer "recording_studio_presskits.text_section" do
       config.to_prepare do
         RecordingStudioPresskits::Engine.register_builtin_sections

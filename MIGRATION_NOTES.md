@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.51.0
+## 0.54.0
 
 A Lists section is a press kit section. The list section stores no heading. Each item is its own recording.
 
@@ -22,6 +22,41 @@ Create the section with `RecordingStudioPresskits.create_section!`. Record an it
 The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A list section also includes `items`. Each item is `icon`, `key`, and `value`. A blank icon is nil. `kit.txt` prints `Key: Value` and leaves the icon name out.
 
 The section editor is `FlatPack::CollectionEditor::Component`. **Save** records, revises, and trashes the rows. The icon column is `7rem`. The public page and the kit preview use `FlatPack::Table::Component` with columns for the icon, the key, and the value, no header row, and `max-w-[65ch]` like a text section. Key and value do not wrap.
+
+## 0.53.0
+
+No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.
+
+`JPG · width×height · ratio` is a `FlatPack::Badge` (`size: :xs`) at `placement: :bottom_left`, `inset: :sm` on `FlatPack::Media::Component`. The line under the photo is the attachment name. `ImageFacts#caption` is gone. Use `name` and `meta`.
+
+## 0.52.0
+
+No migration. Bump to `0.52.0`. Flatpack stays `>= 0.1.235`.
+
+On the public kit and the owner preview, the text heading slot (`data-presskits-text-copy-slot`) renders `FlatPack::CopyButton`: **Copy text**, `style: :secondary` (outlined, flat), `size: :sm`, icon `clipboard-document`. The clipboard string is `Text.clipboard_text`, the full plain body with a blank line between paragraphs. **Show more** only clamps the visible HTML. The kit editor does not render the button.
+
+`TextSectionHeadingComponent` reads the text body itself. Pass `clipboard_text:` to use a different string. An empty string leaves the slot empty. The `flat_pack/clipboard` and `flat_pack/copy` pins are the same ones `0.50.0` already requires for **Copy credits**.
+
+## 0.51.0
+
+Bump to `0.51.0`. Flatpack is `>= 0.1.235` (dummy tag `v0.1.235`). Rebuild Tailwind. Reload Press Kits JavaScript. The copy-link controller is `recording-studio-presskits--copy-link`.
+
+`FlatPack::SectionTitle` `with_trailing` is where a count badge sits, after the heading and outside the copy-link anchor. The public video heading passes `FlatPack::Badge` (`size: :sm`) with the number of videos. A section with no videos does not render, so the badge is absent then. The editor still edits the title with `FlatPack::InlineEdit` and does not show the count. Text sections keep `TextSectionHeadingComponent`. Images keep their own count badge.
+
+Flatpack 0.1.235 removes `FlatPack::Masonry::Image`. The images gallery still uses `FlatPack::Masonry::Component`. Each photo is `FlatPack::Media::Component` inside `with_item`. The caption is host text under the picture: attachment name, then `JPG · width×height · ratio`. Hosts that copied `with_image` should switch to that.
+
+`recording_studio_videos` gains `duration_seconds` (integer) and `thumbnail_url` (text). Those columns belong to Recording Studio Video's table. Press Kits adds them here because duration and the thumbnail override are part of the video snapshot, and `revise` already copies that row. A second recording would split the snapshot. Run the Video gem's migrations first so the table exists, then:
+
+```bash
+bin/rails generate recording_studio_presskits:migrations
+bin/rails db:migrate
+```
+
+The editor asks for length as `m:ss` (`1:24`) and stores seconds. A blank length is allowed. The thumbnail field is an optional http or https override. When it is blank, YouTube uses `https://i.ytimg.com/vi/{id}/hqdefault.jpg`. Vimeo uses `https://vimeo.com/api/oembed.json` and caches the thumbnail. Press Kits still does not call `RecordingStudio::ExternalEmbed.register`. Vimeo works after the host registers that provider.
+
+`VideoSection` includes Orderable for `RecordingStudioVideo::Video`. `active_videos` follows that order. A video with no position yet sorts after positioned ones, then by `created_at`. The public page features the first and puts the rest in `FlatPack::Grid` `cols: 2`. The card uses `FlatPack::VideoPreview`: poster, centred play control, and `recording_studio_video_player` inside `with_player` so the iframe stays in a template until play. **Copy link** dispatches `toast:add`. Below `sm` it is icon-only, with `aria-label` and a tooltip of **Copy link**. From `sm` up the label is visible. The title wraps on the same row. The public card does not show a watch-on-provider link or the description. The public heading shows the video count in the trailing slot.
+
+The video payload adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the poster the card would show, not only the override. The kit text file adds a `Provider · m:ss` line between the title and the URL.
 
 ## 0.50.0
 

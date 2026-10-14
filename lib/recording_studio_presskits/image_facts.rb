@@ -44,11 +44,6 @@ module RecordingStudioPresskits
       "#{type} · #{width}×#{height} · #{ratio_label}"
     end
 
-    # Masonry::Image takes one caption string. The whole line is muted text-sm.
-    def caption
-      [name, meta].compact.join(" · ")
-    end
-
     def width
       pixels&.first
     end

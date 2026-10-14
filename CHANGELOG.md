@@ -7,19 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.51.0] - 2026-10-14
+## [0.54.0] - 2026-10-14
 
 ### Added
 - A Lists section. `RecordingStudioPresskits::ListSection` is an empty recording under a kit section. It orders `RecordingStudioPresskits::ListItem` children. Each item stores an optional Flatpack icon name, a required `key`, and a required `value`.
 - The + Section menu shows List (`list-bullet`). The section editor is a Flatpack collection editor for Icon, Key, and Value. The icon column is `7rem`. Preview and the public page render a Flatpack table with no header row, capped at `max-w-[65ch]` like a text section. The key and the value stay on one line. An empty list stays off those pages.
 - `kit.txt` prints each line as `Key: Value`. The icon name is not in the zip.
 - The kit section API payload includes `items` for a list section. A list item exposes `icon`, `key`, and `value`.
+- Version `0.54.0`
+
+### Upgrade notes
+- Bump to `0.54.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
+- Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
+- This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
+
+## [0.53.0] - 2026-10-14
+
+### Changed
+- `JPG · width×height · ratio` is a `FlatPack::Badge` (`size: :xs`) on the photo: `with_item(placement: :bottom_left, inset: :sm)`. The line under the photo is the attachment name.
+- Version `0.53.0`
+
+### Upgrade notes
+- No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.
+- `ImageFacts#caption` is gone. Use `name` and `meta`. The combined muted caption under the photo is gone.
+
+## [0.52.0] - 2026-10-14
+
+### Changed
+- The public kit and the owner preview put `FlatPack::CopyButton` in the text heading slot (`data-presskits-text-copy-slot`). The button is **Copy text**, `style: :secondary`, `size: :sm`, with the `clipboard-document` icon. It copies the full plain body, including lines hidden by **Show more**. Paragraphs stay separated by a blank line (`Text.clipboard_text`). The kit editor does not render the button.
+- Version `0.52.0`
+
+### Upgrade notes
+- No migration. Bump to `0.52.0`. `TextSectionHeadingComponent` copies `Text.clipboard_text` for that section. Pass `clipboard_text:` to override it. An empty string leaves the slot empty. Flatpack stays `>= 0.1.235`. The `flat_pack/clipboard` pin already shipped in `0.50.0`.
+
+## [0.51.0] - 2026-10-14
+
+### Changed
+- A video section's public cards use `FlatPack::VideoPreview`. The first video is a full-width card. The rest sit in `FlatPack::Grid` with two columns. One video is only that featured card. Flatpack is `>= 0.1.235` (tag `v0.1.235`).
+- Videos in a section are orderable. Drag a row in the content editor. That order is the public order, and the first video is the featured card.
+- Each card shows the poster, a length pill, the title, a muted provider and length line, and **Copy link**. Below `sm` that button is the link icon only, with the same words as its accessible name and tooltip. From `sm` up the words show. The title wraps beside the button. The description stays on the edit screen and in the API. It is not on the public card.
+- The public video heading passes a `FlatPack::Badge` (`size: :sm`) with the video count through `FlatPack::SectionTitle` `with_trailing`. The badge sits after the title and outside the copy-link anchor. The editor heading stays inline edit and does not show that badge.
+- Flatpack 0.1.235 removes `FlatPack::Masonry::Image`. Each photo is `FlatPack::Media::Component` inside `with_item`. The caption is the same muted line under the picture.
+- Length is entered as `m:ss` and stored as `duration_seconds` on `recording_studio_videos`. An optional `thumbnail_url` overrides the provider picture. A blank thumbnail uses YouTube's `hqdefault` image, or Vimeo's oEmbed thumbnail.
+- The video API entry adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the picture the card shows. The kit download text file adds a `Provider · m:ss` line under each video title.
 - Version `0.51.0`
 
 ### Upgrade notes
-- Bump to `0.51.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
-- Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
-- This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
+- Bump to `0.51.0`. Flatpack is `>= 0.1.235` (tag `v0.1.235`). That release keeps `FlatPack::VideoPreview` and the Section Title trailing slot, and it removes `FlatPack::Masonry::Image`. Rebuild Tailwind. Reload Press Kits JavaScript so the copy-link controller loads.
+- Hosts that rendered `FlatPack::Masonry::Image` should put `FlatPack::Media::Component` in `with_item` and print the caption under the picture. Hosts that replaced the video section heading should pass a `FlatPack::Badge` (`size: :sm`, text is the video count) through `SectionTitle` `with_trailing`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds `duration_seconds` and `thumbnail_url` to `recording_studio_videos`. Run the Video gem's migrations first if that table is not there yet. Existing videos keep a blank length and a blank thumbnail override.
+- Press Kits still does not register Vimeo. A host that wants Vimeo registers that provider with External Embed before the catalog freezes. YouTube needs no extra registration.
+- Hosts that replaced the video section component should render `FlatPack::VideoPreview` with `with_player` around `recording_studio_video_player`, and should list `active_videos` so the first recording is the featured card.
 
 ## [0.50.0] - 2026-10-14
 

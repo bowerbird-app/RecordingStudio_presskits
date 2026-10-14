@@ -1,7 +1,23 @@
 <%= helpers.turbo_frame_tag frame_id do %>
   <%= render FlatPack::Masonry::Component.new(columns: columns, gap: :lg, order: :columns) do |masonry| %>
     <% visible_tiles.each do |tile| %>
-      <% masonry.with_image(**tile) %>
+      <% masonry.with_item do %>
+        <%= render FlatPack::Media::Component.new(
+          src: tile.fetch(:src),
+          alt: tile.fetch(:alt),
+          width: tile.fetch(:width),
+          height: tile.fetch(:height)
+        ) do |media| %>
+          <% if tile[:meta].present? %>
+            <% media.with_item(placement: :bottom_left, inset: :sm) do %>
+              <%= render FlatPack::Badge::Component.new(text: tile[:meta], size: :xs) %>
+            <% end %>
+          <% end %>
+        <% end %>
+        <% if tile[:name].present? %>
+          <span class="mt-2 block text-sm text-[var(--surface-muted-content-color)]"><%= tile[:name] %></span>
+        <% end %>
+      <% end %>
     <% end %>
   <% end %>
 

@@ -64,7 +64,8 @@ module RecordingStudioPresskits
           alt: DirectImages.alt_for(item),
           width: facts.width,
           height: facts.height,
-          caption: facts.caption.presence
+          name: facts.name,
+          meta: facts.meta
         }
       end
 

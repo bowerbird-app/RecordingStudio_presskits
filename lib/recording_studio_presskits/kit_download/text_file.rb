@@ -176,7 +176,13 @@ module RecordingStudioPresskits
         url = video.try(:url).to_s.strip.presence
         return if title.blank? && url.blank?
 
-        [title, url].compact.join("\n")
+        [title, video_meta(video), url].compact.join("\n")
+      end
+
+      def video_meta(video)
+        provider = video.try(:provider_name).to_s.strip.presence
+        length = video.try(:duration_label).to_s.strip.presence
+        [provider, length].compact.join(" · ").presence
       end
 
       def company_name
