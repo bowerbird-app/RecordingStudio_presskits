@@ -213,9 +213,8 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_response :success
     preview = css_select("#presskits-editor-preview").first.to_html
     assert_stats_grid(preview)
-    assert_includes preview, "420 m²"
-    assert_includes preview, "Floor area"
-    assert_includes preview, "Total internal floor area"
+    assert_stat_card(preview, value: "420", unit: "m²", label: "Floor area", description: "Total internal floor area")
+    assert_stat_card(preview, value: "2025", label: "Completion")
     refute_includes preview, "As of"
     refute_includes preview, "<th"
     refute_includes preview, "<dt"
@@ -224,8 +223,8 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".fp-section-title h2", text: "Project specifications"
     assert_stats_grid(response.body)
-    assert_includes response.body, "420 m²"
-    assert_includes response.body, "Total internal floor area"
+    assert_stat_card(response.body, value: "420", unit: "m²", label: "Floor area", description: "Total internal floor area")
+    assert_stat_card(response.body, value: "2025", label: "Completion")
     refute_includes response.body, "As of"
     refute_includes response.body, "<th"
 
@@ -375,5 +374,31 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     assert_includes html, "lg:grid-cols-3"
     refute_includes html, "lg:grid-cols-2"
     refute_includes html, "lg:grid-cols-4"
+  end
+
+  def assert_stat_card(html, value:, label:, unit: nil, description: nil)
+    fragment = Nokogiri::HTML.fragment(html)
+    card = fragment.css(".text-center").find { |node| node.at_css(".text-4xl")&.text == value }
+    assert card, "expected a centered stat card for #{value}"
+    assert_includes card.at_css(".text-4xl")["class"], "font-bold"
+    assert_includes card.at_css(".fp-tabular-nums")["class"], "fp-tabular-nums"
+    assert_equal label, card.at_css(".text-lg")&.text
+    assert_includes card.at_css(".text-lg")["class"], "font-semibold"
+
+    unit_node = card.at_css(".text-xl")
+    if unit
+      assert_equal " #{unit}", unit_node.text
+      assert_includes unit_node["class"], "font-medium"
+    else
+      assert_nil unit_node
+    end
+
+    description_node = card.at_css(".text-sm")
+    if description
+      assert_equal description, description_node.text
+      assert_includes description_node["class"], "text-(--surface-muted-content-color)"
+    else
+      assert_nil description_node
+    end
   end
 end

@@ -3,11 +3,18 @@
     <% stats.each do |stat_recording| %>
       <% stat = stat_recording.recordable %>
       <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
-        <p class="text-2xl font-medium text-(--surface-content-color)"><%= formatted_value(stat) %></p>
-        <p class="mt-1 text-sm text-(--surface-muted-content-color)"><%= stat.label %></p>
-        <% supporting_text(stat).each do |line| %>
-          <p class="mt-2 text-sm text-(--surface-muted-content-color)"><%= line %></p>
-        <% end %>
+        <div class="text-center">
+          <p class="fp-tabular-nums text-(--surface-content-color)">
+            <span class="text-4xl font-bold"><%= stat.value %></span>
+            <% if (unit = stat.unit.to_s.strip.presence) %>
+              <span class="text-xl font-medium"><%= " #{unit}" %></span>
+            <% end %>
+          </p>
+          <p class="mt-2 text-lg font-semibold text-(--surface-content-color) fp-text-balance"><%= stat.label %></p>
+          <% if (description = stat.description.to_s.strip.presence) %>
+            <p class="mt-2 text-sm text-(--surface-muted-content-color) fp-text-pretty"><%= description %></p>
+          <% end %>
+        </div>
       <% end %>
     <% end %>
   <% end %>

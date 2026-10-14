@@ -2,7 +2,7 @@
 
 ## 0.48.0
 
-Stats replace Facts & Figures. A stats section always renders as cards: three on a large screen, two from the medium breakpoint, and one on a phone. List, table, `display_style`, and `columns` are gone.
+Stats replace Facts & Figures. A stats section always renders as cards: three on a large screen, two from the medium breakpoint, and one on a phone. Each card is centered. The value is `text-4xl` and bold, the unit sits beside it at `text-xl`, the label is `text-lg` and semibold, and the description is `text-sm` and muted. List, table, `display_style`, and `columns` are gone.
 
 Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections` and `recording_studio_facts` to `recording_studio_stats` when those old tables are still present. It drops `display_style`. It rewrites `recordable_type` from `RecordingStudioPresskits::FactsSection` to `RecordingStudioPresskits::StatsSection` and from `RecordingStudioPresskits::Fact` to `RecordingStudioPresskits::Stat`. The following migration drops `columns` from `recording_studio_stats_sections` when that column is still present. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats` when those columns are still present. A database that already has the stats tables without those columns is left in place. There is no down migration and no Ruby alias for the old names.
 

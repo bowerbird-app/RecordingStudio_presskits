@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Stats replace Facts & Figures. `RecordingStudioPresskits::StatsSection` sits under the kit section. Each `RecordingStudioPresskits::Stat` is a child recording with a required label and value, plus optional unit and description.
-- Stats always render as cards: three on a large screen, two from the medium breakpoint, and one on a phone. List, table, `display_style`, and `columns` are gone.
+- Stats always render as cards: three on a large screen, two from the medium breakpoint, and one on a phone. List, table, `display_style`, and `columns` are gone. Card copy is centered. The value is `text-4xl` and bold, the unit sits beside it at `text-xl`, the label is `text-lg` and semibold, and the description is `text-sm` and muted.
 - The content editor shows **+ Stat** and the stat list. There is no Columns control and no Show as control. A stat's fields are Value, Unit, Label, and Description. Label and value are required.
 - A stats section payload is `stats`. The kit section payload includes `stats` when the content is a stats section.
 - Version `0.48.0`

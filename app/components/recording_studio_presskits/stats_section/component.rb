@@ -15,14 +15,6 @@ module RecordingStudioPresskits
       def stats
         StatsSection.active_stats(@recording)
       end
-
-      def formatted_value(recordable)
-        recordable.formatted_value
-      end
-
-      def supporting_text(recordable)
-        [recordable.description.to_s.strip.presence].compact
-      end
     end
   end
 end
