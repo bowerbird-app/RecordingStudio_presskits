@@ -1,5 +1,9 @@
 # Upgrade notes
 
+## 0.61.0
+
+No migration. The press kits index accepts `published=1` and `publish_from` / `publish_to` (on the current Publishable `publish_at`, `from <= publish_at < to`), matching `press_kits.published_over_time`.
+
 ## 0.60.0
 
 `0.59.0` already shipped. Bump to `0.60.0`.

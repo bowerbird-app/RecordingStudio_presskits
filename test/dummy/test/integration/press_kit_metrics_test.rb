@@ -135,6 +135,35 @@ class PressKitMetricsTest < ActiveSupport::TestCase
     assert_equal 0, narrowed.data.sum { |row| row[:value].to_i }
   end
 
+  test "index published and publish_at filters match published_over_time" do
+    draft = @root.record(RecordingStudioPresskits::PressKit) { |kit| kit.title = "Index draft kit" }
+    later = @root.record(RecordingStudioPresskits::PressKit) { |kit| kit.title = "Index later kit" }
+    never = @root.record(RecordingStudioPresskits::PressKit) { |kit| kit.title = "Index never kit" }
+    travel_to(Time.utc(2025, 3, 5, 12)) do
+      publish!(@live)
+      publish!(draft)
+    end
+    travel_to(Time.utc(2025, 3, 8, 12)) { publish!(later) }
+    travel_to(Time.utc(2025, 3, 9, 12)) { draft_transition!(draft, "unpublish") }
+    index = RecordingStudioPresskits::KitQuery.for_root(@root)
+    filter = ->(**options) { RecordingStudioPresskits::PublishedKits.filter_index(index, **options).map(&:id) }
+
+    assert_equal index.map(&:id), filter.call
+    published = filter.call(published: true)
+    assert_includes published, @live.id
+    assert_includes published, later.id
+    refute_includes published, draft.id
+    refute_includes published, never.id
+
+    window = filter.call(publish_from: Time.utc(2025, 3, 5), publish_to: Time.utc(2025, 3, 8, 12))
+    assert_equal [@live.id], window
+    assert_equal [later.id], filter.call(publish_from: Time.utc(2025, 3, 8, 12))
+
+    metric = execute_metric("press_kits.published_over_time", interval: :day,
+                                                              start_at: Time.utc(2025, 3, 5), end_at: Time.utc(2025, 3, 8, 12))
+    assert_equal window.size, metric.data.sum { |row| row[:value].to_i }
+  end
+
   test "published_over_time catalog carries unit, title and description and has no group_by" do
     metadata = RecordingStudioMetrics.find("press_kits.published_over_time").catalog_metadata
     assert_equal "count", metadata[:unit]

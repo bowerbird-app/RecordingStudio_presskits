@@ -2,6 +2,8 @@
 
 module RecordingStudioPresskits
   class PressKitsController < ApplicationController
+    INDEX_FILTER_KEYS = %i[published publish_from publish_to].freeze
+
     before_action :require_root!
     before_action :set_press_kit, only: %i[show preview edit]
 
@@ -9,7 +11,9 @@ module RecordingStudioPresskits
       authorize_recording!(current_presskits_root, role: :view)
       return if performed?
 
-      @press_kit_recordings = KitQuery.for_root(current_presskits_root)
+      @index_filters = index_filter_params
+      kits = KitQuery.for_root(current_presskits_root)
+      @press_kit_recordings = PublishedKits.filter_index(kits, **index_filter_values)
       @view = table_view? ? "table" : "cards"
     end
 
@@ -63,6 +67,27 @@ module RecordingStudioPresskits
       return if @press_kit_recording.present?
 
       head :not_found
+    end
+
+    def index_filter_params
+      params.permit(*INDEX_FILTER_KEYS).to_h.symbolize_keys.compact_blank
+    end
+
+    def index_filter_values
+      {
+        published: ActiveModel::Type::Boolean.new.cast(@index_filters[:published]) || false,
+        publish_from: index_time(@index_filters[:publish_from]),
+        publish_to: index_time(@index_filters[:publish_to])
+      }
+    end
+
+    # ISO 8601 date (start of that day in Time.zone) or timestamp; invalid values are ignored.
+    def index_time(value)
+      return if value.blank?
+
+      value.match?(/\A\d{4}-\d{2}-\d{2}\z/) ? Date.iso8601(value).in_time_zone : Time.iso8601(value)
+    rescue ArgumentError
+      nil
     end
 
     def table_view?

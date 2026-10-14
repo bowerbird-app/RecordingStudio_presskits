@@ -6,8 +6,8 @@
 <%= render RecordingStudioPresskits::PressKits::IndexComponent.new(
   press_kit_recordings: @press_kit_recordings,
   view: @view,
-  cards_path: press_kits_path(view: "cards"),
-  table_path: press_kits_path(view: "table"),
+  cards_path: press_kits_path(view: "cards", **@index_filters.to_h),
+  table_path: press_kits_path(view: "table", **@index_filters.to_h),
   new_path: new_press_kit_path,
   show_path: ->(recording) { edit_press_kit_path(recording) },
   credits_path: credits_path
