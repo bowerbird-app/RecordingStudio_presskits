@@ -385,6 +385,7 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     assert_includes html, "max-w-[calc(130ch+1.5rem)]"
     assert_includes html, "grid-cols-1"
     assert_includes html, "md:grid-cols-2"
+    assert_includes html, "flat-pack-list-divided"
     lists = if root
       assert_select root, "#presskits-list-lines ul.flat-pack-list", count: 2
     else
@@ -392,36 +393,45 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     end
     keys = lists.map do |list|
       list.css("[data-list-item]").map do |item|
-        item.css("span").map { |node| node.text.strip }.find(&:present?)
+        item.css("span").map { |node| node.text.strip }.find(&:present?)&.delete_suffix(":")
       end
     end
     assert_equal ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5"], keys.first
     assert_equal ["Line 6", "Line 7", "Line 8", "Line 9", "Line 10"], keys.last
+    assert_includes lists.first.text.gsub(/\s+/, " "), "Line 1: Value 1"
+    assert_includes lists.last.text.gsub(/\s+/, " "), "Line 10: Value 10"
   end
 
   def assert_list_lines(scope)
     html = scope.is_a?(String) ? scope : scope.to_html
+    root = scope.is_a?(String) ? nil : scope
+    lines = if root
+      assert_select(root, "#presskits-list-lines").first
+    else
+      assert_select("#presskits-list-lines").first
+    end
+    lines_html = lines.to_html
     assert_includes html, "max-w-[65ch]"
-    assert_includes html, "flat-pack-list"
+    assert_includes lines_html, "flat-pack-list-divided"
+    refute_includes lines_html, "justify-between"
     refute_includes html, "_thead]:hidden"
     refute_includes html, "md:grid-cols-2"
     refute_includes html, "max-w-[calc(130ch+1.5rem)]"
-    root = scope.is_a?(String) ? nil : scope
     assert_select (root || css_select("body").first), "#presskits-list-lines ul.flat-pack-list", count: 1
     if root
       assert_select root, "#presskits-list-lines table", count: 0
       assert_select root, "#presskits-list-lines ul.flat-pack-list [data-list-item]", count: 2
       assert_select root, "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
       assert_select root, "[data-list-item] [data-flat-pack--icon-name-value='magnifying-glass']", count: 1
-      assert_select root, "#presskits-list-lines span", text: "Capacity"
+      assert_select root, "#presskits-list-lines span", text: "Capacity:"
       assert_select root, "#presskits-list-lines span", text: "140 seats"
     else
       assert_select "#presskits-list-lines table", count: 0
       assert_select "#presskits-list-lines ul.flat-pack-list [data-list-item]", count: 2
       assert_select "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
-      assert_select "#presskits-list-lines span", text: "Capacity"
+      assert_select "#presskits-list-lines span", text: "Capacity:"
       assert_select "#presskits-list-lines span", text: "120 seats"
-      assert_select "#presskits-list-lines span", text: "Floor"
+      assert_select "#presskits-list-lines span", text: "Floor:"
       assert_select "#presskits-list-lines span", text: "Oak"
     end
   end

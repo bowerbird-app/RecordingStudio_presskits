@@ -1378,8 +1378,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "measure_class"
     assert_includes lines, "FlatPack::List::Component"
     assert_includes lines, "FlatPack::List::Item"
+    assert_includes lines, "divider: true"
     assert_includes lines, "icon: item.icon.presence"
-    assert_includes lines, "justify-between"
+    assert_includes lines, '<%= item.key %>:'
+    refute_includes lines, "justify-between"
     assert_includes show_rb, 'NARROW_MEASURE = "max-w-[65ch]"'
     assert_includes show_rb, 'WIDE_MEASURE = "max-w-[calc(130ch+1.5rem)]"'
     assert_includes show_rb, "SINGLE_LIST_LIMIT = 6"
