@@ -1,33 +1,38 @@
-<article id="<%= dom_id %>" class="<%= card_classes %>" data-podcast-card>
+<article
+  id="<%= dom_id %>"
+  class="<%= card_classes %>"
+  data-podcast-card
   <% if embed_url.present? %>
-    <%= render FlatPack::VideoPreview::Component.new(label: play_label, aspect_ratio: "1/1") do |preview| %>
-      <% preview.with_media do %>
-        <% if image_url.present? %>
-          <%= image_tag image_url, alt: "", data: { podcast_cover: true } %>
-        <% else %>
-          <div class="h-full w-full" style="background-color: <%= brand_color %>" data-podcast-fallback role="img" aria-label="<%= title %>"></div>
-        <% end %>
-      <% end %>
-      <% preview.with_player do %>
-        <iframe
-          src="<%= embed_url %>"
-          title="<%= play_label %>"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"
-          data-podcast-embed
-        ></iframe>
+    data-controller="recording-studio-presskits--podcast-player"
+    data-recording-studio-presskits--podcast-player-embed-url-value="<%= embed_url %>"
+    data-recording-studio-presskits--podcast-player-title-value="<%= play_label %>"
+    data-action="click->recording-studio-presskits--podcast-player#clear keydown.esc->recording-studio-presskits--podcast-player#clear"
+  <% end %>
+>
+  <%= render FlatPack::Overlay::Component.new(class: "aspect-square w-full overflow-hidden rounded-[var(--radius-lg)]") do |overlay| %>
+    <% overlay.with_media do %>
+      <% if image_url.present? %>
+        <%= image_tag image_url, alt: "", class: "h-full w-full object-cover", data: { podcast_cover: true } %>
+      <% else %>
+        <div class="absolute inset-0 h-full w-full" style="background-color: <%= brand_color %>" data-podcast-fallback role="img" aria-label="<%= title %>"></div>
       <% end %>
     <% end %>
-  <% else %>
-    <%= render FlatPack::Overlay::Component.new(class: "aspect-square w-full overflow-hidden rounded-[var(--radius-lg)]") do |overlay| %>
-      <% overlay.with_media do %>
-        <% if image_url.present? %>
-          <%= image_tag image_url, alt: "", class: "h-full w-full object-cover", data: { podcast_cover: true } %>
-        <% else %>
-          <div class="absolute inset-0 h-full w-full" style="background-color: <%= brand_color %>" data-podcast-fallback role="img" aria-label="<%= title %>"></div>
-        <% end %>
-      <% end %>
-      <% overlay.with_item(placement: :center) do %>
+    <% overlay.with_item(placement: :center) do %>
+      <% if embed_url.present? %>
+        <%= render FlatPack::Button::Component.new(
+          icon: "play",
+          icon_only: true,
+          style: :default,
+          size: :lg,
+          type: "button",
+          class: "rounded-full",
+          aria: { label: play_label },
+          data: {
+            modal_id: modal_id,
+            action: "recording-studio-presskits--podcast-player#mount"
+          }
+        ) %>
+      <% else %>
         <%= render FlatPack::Button::Component.new(
           icon: "play",
           icon_only: true,
@@ -80,4 +85,26 @@
       ) %>
     </div>
   </div>
+
+  <% if embed_url.present? %>
+    <%= render FlatPack::Modal::Component.new(id: modal_id, title: title, size: :lg, scroll: :page) do |modal| %>
+      <% modal.body do %>
+        <% if show_name.present? %>
+          <p class="text-sm text-(--surface-muted-content-color)"><%= show_name %></p>
+        <% end %>
+        <%# "h-full" "w-full" "border-0" %>
+        <div class="<%= player_frame_classes %>" data-recording-studio-presskits--podcast-player-target="stage"></div>
+      <% end %>
+      <% modal.footer do %>
+        <%= render FlatPack::Button::Component.new(
+          text: listen_label,
+          style: :default,
+          size: :sm,
+          href: url,
+          target: "_blank",
+          class: "rounded-full"
+        ) %>
+      <% end %>
+    <% end %>
+  <% end %>
 </article>

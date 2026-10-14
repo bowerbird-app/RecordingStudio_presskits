@@ -7,6 +7,11 @@ module RecordingStudioPresskits
       # "w-[83.333%]" "shrink-0" "snap-start" "md:w-[calc((100%-2rem)/3)]"
       # "flex" "min-w-0" "flex-col" "gap-3"
       CARD_CLASSES = "flex w-[83.333%] shrink-0 snap-start flex-col gap-3 md:w-[calc((100%-2rem)/3)]"
+      # Spotify's tall embed is 352px. Apple's card embed is 175px.
+      PLAYER_HEIGHT = {
+        "Spotify" => "h-[352px]",
+        "Apple Podcasts" => "h-[175px]"
+      }.freeze
 
       def initialize(podcast_recording:)
         super()
@@ -70,6 +75,15 @@ module RecordingStudioPresskits
 
       def dom_id
         "presskits-podcast-#{@podcast_recording.id}"
+      end
+
+      def modal_id
+        "#{dom_id}-player"
+      end
+
+      def player_frame_classes
+        height = PLAYER_HEIGHT.fetch(podcast.embed.service, "h-[352px]")
+        "#{height} w-full overflow-hidden rounded-[var(--radius-lg)]"
       end
 
       private
