@@ -390,8 +390,6 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::VideoSection")
     refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::PodcastSection")
     assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Podcast")
-    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::ListSection")
-    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::ListItem")
     assert RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::Quote")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioAttachable::Attachment")
 
@@ -770,6 +768,8 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
       ["RecordingStudioPresskits::ListSection"],
       RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::ListItem")
     )
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::ListSection")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::ListItem")
   end
 
   test "list section orders only list items" do
