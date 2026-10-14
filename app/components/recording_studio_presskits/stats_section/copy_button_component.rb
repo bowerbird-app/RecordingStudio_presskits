@@ -9,9 +9,7 @@ module RecordingStudioPresskits
       end
 
       def call
-        render FlatPack::Tooltip::Component.new(text: "Copy", placement: :top) do
-          render button
-        end
+        render button
       end
 
       private
@@ -20,11 +18,8 @@ module RecordingStudioPresskits
         FlatPack::Button::Component.new(
           text: "Copy",
           icon: "clipboard-document",
-          icon_only: true,
-          style: :ghost,
-          size: :sm,
+          style: :default,
           type: "button",
-          aria: { label: "Copy stats" },
           data: copy_data
         )
       end

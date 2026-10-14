@@ -34,15 +34,15 @@ module RecordingStudioPresskits
           title: title,
           subtitle: subtitle,
           size: :lg,
-          spacing: images_download_button ? :none : :md,
+          spacing: header_action ? :none : :md,
           level: :h2,
           anchor_link: true,
-          trailing: heading_trailing
+          trailing: images_count_badge
         )
       end
 
-      def heading_trailing
-        images_count_badge || stats_copy_button
+      def header_action
+        images_download_button || stats_copy_button
       end
 
       def images_download_button

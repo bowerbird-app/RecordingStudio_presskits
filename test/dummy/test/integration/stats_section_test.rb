@@ -291,18 +291,21 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-stats"
     assert_response :success
     heading = css_select("h2").find { |node| node.text == "Company statistics" }
-    row = heading.parent
-    button = row.at_css("button[aria-label='Copy stats']")
-    assert button
-    assert_equal "ghost", button["data-fp-style"]
-    assert_equal "clipboard-document", row.at_css("button [data-flat-pack--icon-name-value]")["data-flat-pack--icon-name-value"]
+    header = stats_header(heading)
+    button = header.at_css("button")
+    assert_equal "Copy", button.text.strip
+    assert_equal "default", button["data-fp-style"]
+    assert_nil button["aria-label"]
+    assert_equal "clipboard-document", button.at_css("[data-flat-pack--icon-name-value]")["data-flat-pack--icon-name-value"]
     assert_equal expected, button["data-recording-studio-presskits--copy-text-text-value"]
-    assert_equal "Copy link to Company statistics", row.at_css("a")["aria-label"]
-    assert_select "button[aria-label='Copy stats']", count: 2
-    assert_select ".text-center button[aria-label='Copy stats']", count: 0
+    assert_nil heading.parent.at_css("button")
+    assert_equal "Copy link to Company statistics", heading.parent.at_css("a")["aria-label"]
+    assert_select "button", text: "Copy", count: 2
+    assert_select ".text-center button", text: "Copy", count: 0
 
     fallback = css_select("h2").find { |node| node.text == "Stats" }
-    fallback_button = fallback.parent.at_css("button[aria-label='Copy stats']")
+    fallback_button = stats_header(fallback).at_css("button")
+    assert_equal "Copy", fallback_button.text.strip
     assert_equal "15 Countries", fallback_button["data-recording-studio-presskits--copy-text-text-value"]
   end
 
@@ -408,6 +411,10 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
 
   def live_stats(section)
     RecordingStudioPresskits::StatsSection.active_stats(section_content(section))
+  end
+
+  def stats_header(heading)
+    heading.ancestors.find { |node| node["class"].to_s.include?("sm:justify-between") }
   end
 
   def publish_stats_kit!(kit)
