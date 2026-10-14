@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -151,6 +151,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_150000) do
     t.datetime "created_at", null: false
     t.uuid "credit_recording_id", null: false
     t.string "role"
+    t.string "icon"
     t.index ["credit_recording_id"], name: "index_recording_studio_credit_lines_on_credit_recording_id"
   end
 
@@ -390,6 +391,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_150000) do
     t.text "url", null: false
     t.text "description"
     t.datetime "created_at", null: false
+    t.integer "duration_seconds"
+    t.text "thumbnail_url"
   end
 
   create_table "showcases", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

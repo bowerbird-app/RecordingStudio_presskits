@@ -19,7 +19,7 @@ module RecordingStudioPresskits
     end
 
     def self.hidden_stat?(child)
-      child.trashed_at.present? || !child.recordable.is_a?(Stat)
+      child.recording_studio_trashable_trashed? || !child.recordable.is_a?(Stat)
     end
 
     def self.copy_text(stats, title: nil)

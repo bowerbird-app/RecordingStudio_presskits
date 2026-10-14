@@ -191,7 +191,16 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert badge
     assert_equal "Copy link to Images", row.at_css("a")["aria-label"]
     refute_includes row.at_css("a").text, "13"
-    assert_includes response.body, "JPG · 64×28 · 16:7"
+    meta = "JPG · 64×28 · 16:7"
+    tile = css_select("#{frame} .fp-masonry__item").first
+    overlay = tile.at_css("[data-fp-placement='bottom_left']")
+    assert_equal "sm", overlay["data-fp-inset"]
+    assert_equal meta, overlay.text.strip
+    name = tile.element_children.find { |child| child.name == "span" }
+    assert_equal "shot-0", name.text.strip
+    refute_includes name.text, meta
+    refute_includes response.body, "shot-0 · #{meta}"
+    assert_select "#{frame} figcaption", count: 0
     assert_includes response.body, "Credit the studio."
     refute_includes response.body, "aspect-video"
 
@@ -205,6 +214,7 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
     assert_select "#presskits-editor-preview .fp-masonry img", count: 12
+    assert_select "#presskits-editor-preview [data-fp-placement='bottom_left']", text: "JPG · 64×28 · 16:7"
     assert_select "#presskits-editor-preview a", text: "Show more images (13)"
     images_section = css_select("#presskits-editor-preview section").find do |node|
       node.at_css("[name='kit_section[title]'][value='Images']")

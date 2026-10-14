@@ -118,6 +118,12 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-kit-cover [data-cover-title]", text: "Spring launch"
     assert_select "#presskits-kit-cover [data-cover-eyebrow]", text: "Press kit"
     assert_select "#presskits-kit-cover [data-cover-description]", text: "Doors at noon."
+    public_copy = css_select("#presskits-kit-cover [data-cover-copy]").first
+    assert_equal "min-w-0 @min-[640px]:pt-16", public_copy["class"]
+    refute_includes public_copy["class"], "pt-12"
+    public_body = css_select("#presskits-kit-cover [data-cover-row] > div").last
+    assert_includes public_body["class"], "pt-7"
+    refute_includes public_body["class"], "@min-[640px]:pt-16"
     refute_select "[data-presskits-header-actions]"
     refute_select "[data-presskits-header-image-actions]"
     refute_includes css_select("#presskits-kit-cover [data-cover-frame]").first.to_html, "Doors at noon."
@@ -159,6 +165,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   end
 
   test "hosts can override the card eyebrow" do
+    I18n.t("recording_studio_presskits.cover.eyebrow")
     I18n.backend.store_translations(:en, recording_studio_presskits: { cover: { eyebrow: "Media kit" } })
     kit = record_kit("Spring launch")
     publish_kit!(kit)
@@ -235,15 +242,34 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_default_eyebrow("[data-brand-color='#BFDBFE'] [data-cover-eyebrow]", absent: "#BFDBFE")
     assert_default_eyebrow("[data-brand-color='#D97706'] [data-cover-eyebrow]", absent: "#D97706")
     assert_select "a[data-cover-view][href='#{recording_studio_presskits.edit_press_kit_path(first)}']", text: /View/
-    assert_includes css_select("a[data-cover-view]").first.parent["class"], "mt-auto"
+    view = css_select("a[data-cover-view]").first
+    assert_includes view.parent["class"], "mt-auto"
+    assert_includes view.parent["class"], "pb-8"
+    refute view.ancestors.any? { |node| node["data-cover-copy"] }
+    copy = css_select("[data-cover-copy]").first
+    assert_equal "min-w-0 @min-[640px]:pt-16", copy["class"]
+    refute_includes copy["class"], "gap-3"
+    refute_includes copy["class"], "pt-12"
+    body = css_select("[data-cover-row] > div").last
+    assert_includes body["class"], "pt-7"
+    refute_includes body["class"], "@min-[640px]:pt-16"
     assert_select ".grid.items-stretch"
     assert_select "a[data-cover-card]", count: 0
+    heart = css_select("[data-cover-list]").first
+    assert heart
+    heart_item = heart.ancestors.find { |node| node["data-cover-heart"] }
+    assert_equal "top_right", heart_item["data-fp-placement"]
+    assert_equal "sm", heart_item["data-fp-inset"]
+    assert_includes heart_item["class"], "@min-[640px]:top-18"
+    refute heart.ancestors.any? { |node| node["data-cover-copy"] }
     assert_select "[data-cover-list] button[type=button] svg.w-6.h-6"
 
     RecordingStudioCompany.create(@root, actor: @user, name: "Harbour Studio")
     get recording_studio_presskits.press_kits_path
     assert_select "[data-cover-company]", text: "Harbour Studio", count: 2
-    harbour = css_select("[data-cover-card][data-brand-color='#BFDBFE']").first.to_html
+    harbour_card = css_select("[data-cover-card][data-brand-color='#BFDBFE']").first
+    harbour = harbour_card.to_html
+    assert_includes harbour_card.css("[data-cover-brand-name]").first["class"], "pr-16"
     assert_operator harbour.index("data-cover-company"), :<, harbour.index("data-cover-title")
     assert_operator harbour.index("gap-[14px]"), :<, harbour.index("data-cover-title")
   end
@@ -286,8 +312,44 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes frame["class"], "@min-[640px]:w-1/2"
     assert_includes frame["class"], "@min-[640px]:aspect-auto"
     body = css_select("#presskits-kit-header [data-cover-row] > div").last
-    assert_includes body["class"], "flex flex-1 flex-col"
+    assert_includes body["class"], "fp-overlay"
+    assert_includes body["class"], "inline-flex"
+    assert_includes body["class"], "flex-1"
+    assert_includes body["class"], "flex-col"
+    assert_includes body["class"], "px-8"
+    assert_includes body["class"], "pt-7"
     assert_includes body["class"], "@min-[640px]:min-w-0"
+    refute_includes body["class"], "@min-[640px]:pt-16"
+    copy = css_select("#presskits-kit-header [data-cover-copy]").first
+    assert_equal "min-w-0 @min-[640px]:pt-16", copy["class"]
+    refute_includes copy["class"], "gap-3"
+    refute_includes copy["class"], "pt-12"
+    editor_heart = css_select("#presskits-kit-header [data-cover-list]").first
+    editor_heart_item = editor_heart.ancestors.find { |node| node["data-cover-heart"] }
+    assert_equal "top_right", editor_heart_item["data-fp-placement"]
+    assert_equal "sm", editor_heart_item["data-fp-inset"]
+    assert_includes editor_heart_item["class"], "@min-[640px]:top-18"
+    refute editor_heart.ancestors.any? { |node| node["data-cover-copy"] }
+    title = css_select("#presskits-kit-header [data-cover-title]").first
+    refute_includes title.parent["class"], "pr-16"
+    assert_select "#presskits-kit-header [data-presskits-header-actions]", count: 2
+    css_select("#presskits-kit-header [data-presskits-header-actions]").each do |actions|
+      refute actions.ancestors.any? { |node| node["data-cover-copy"] }
+    end
+    wide_edit = css_select("#presskits-kit-header [data-cover-edit='wide']").first
+    assert_includes wide_edit["class"], "hidden"
+    assert_includes wide_edit["class"], "@min-[640px]:contents"
+    wide_item = wide_edit.ancestors.find { |node| node["data-fp-placement"] }
+    assert_equal "top_right", wide_item["data-fp-placement"]
+    assert_equal "lg", wide_item["data-fp-inset"]
+    refute wide_edit.ancestors.any? { |node| node["data-cover-frame"] }
+    stacked_edit = css_select("#presskits-kit-header [data-cover-edit='stacked']").first
+    assert_equal "@min-[640px]:hidden", stacked_edit["class"]
+    assert stacked_edit.ancestors.any? { |node| node["data-cover-frame"] }
+    body_overlay = css_select("#presskits-kit-header [data-cover-body]").first
+    assert_includes body_overlay["class"], "fp-overlay"
+    assert_includes body_overlay["class"], "px-8"
+    assert_includes body_overlay["class"], "pt-7"
     assert_select "#presskits-kit-header [data-cover-tag]", text: "Press kit"
     assert_default_eyebrow("#presskits-kit-header [data-cover-eyebrow]", absent: "#0F766E")
     assert_select "#presskits-kit-header [data-cover-title] h1", text: "Spring launch"
@@ -302,8 +364,13 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     badge = css_select("#presskits-kit-header [data-cover-tag]").first
     assert_equal "top_left", badge.parent["data-fp-placement"]
     image_actions = css_select("#presskits-kit-header [data-presskits-header-image-actions]").first
-    assert_equal "top_right", image_actions.parent["data-fp-placement"]
-    assert_equal "md", image_actions.parent["data-fp-inset"]
+    image_group = image_actions.parent
+    assert_includes image_group["class"], "gap-2"
+    assert_equal image_group, stacked_edit.parent
+    assert_operator image_group.to_html.index(">Edit<"), :<, image_group.to_html.index(">Edit image<")
+    image_item = image_group.parent
+    assert_equal "top_right", image_item["data-fp-placement"]
+    assert_equal "md", image_item["data-fp-inset"]
     refute_includes header.to_html, "Share"
     refute_includes header.to_html, "RELEASE DATE"
     refute_select "#presskits-cover-hero"

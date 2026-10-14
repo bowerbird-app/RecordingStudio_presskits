@@ -34,21 +34,37 @@ module RecordingStudioPresskits
           title: title,
           subtitle: subtitle,
           size: :lg,
-          spacing: header_action ? :none : :md,
+          spacing: heading_action? ? :none : :md,
           level: :h2,
           anchor_link: true,
-          trailing: images_count_badge
+          trailing: section_count_badge
         )
-      end
-
-      def header_action
-        images_download_button || stats_copy_button
       end
 
       def images_download_button
         return @images_download_button if defined?(@images_download_button)
 
         @images_download_button = build_images_download_button
+      end
+
+      def credits_copy_button
+        return @credits_copy_button if defined?(@credits_copy_button)
+
+        @credits_copy_button = build_credits_copy_button
+      end
+
+      def stats_copy_button
+        return @stats_copy_button if defined?(@stats_copy_button)
+
+        @stats_copy_button = build_stats_copy_button
+      end
+
+      def text_section?
+        content_recording&.recordable.is_a?(RecordingStudioPresskits::Text)
+      end
+
+      def text_heading
+        TextSectionHeadingComponent.new(section_recording: @section_recording)
       end
 
       def content_view
@@ -82,26 +98,12 @@ module RecordingStudioPresskits
         helpers
       end
 
-      def stats_copy_button
-        content = @content_recording
-        return unless content&.recordable.is_a?(StatsSection)
-
-        stats = StatsSection.active_stats(content)
-        return if stats.empty?
-
-        StatsSection::CopyButtonComponent.new(
-          text: StatsSection.copy_text(stats, title: saved_title)
-        )
+      def section_count_badge
+        SectionCountBadge.for(@content_recording)
       end
 
-      def images_count_badge
-        content = @content_recording
-        return unless content&.recordable.is_a?(Images)
-
-        count = DirectImages.list(content).size
-        return if count.zero?
-
-        FlatPack::Badge::Component.new(text: count.to_s, size: :sm)
+      def heading_action?
+        images_download_button.present? || credits_copy_button.present? || stats_copy_button.present?
       end
 
       def build_images_download_button
@@ -116,6 +118,17 @@ module RecordingStudioPresskits
           href: image_archive_href(content),
           data: { turbo: false }
         )
+      end
+
+      def build_credits_copy_button
+        view = content_view
+        return unless view.respond_to?(:copy_button)
+
+        view.copy_button
+      end
+
+      def build_stats_copy_button
+        StatsSection::CopyButtonComponent.for(@content_recording, title: saved_title)
       end
     end
   end

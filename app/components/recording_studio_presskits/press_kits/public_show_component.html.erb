@@ -23,6 +23,8 @@
     <% end %>
   <% end %>
 
+  <%= render RecordingStudioPresskits::ToastsRegionComponent.new %>
+
   <div id="presskits-public-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
     <% if preview? && !live? %>
       <%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>

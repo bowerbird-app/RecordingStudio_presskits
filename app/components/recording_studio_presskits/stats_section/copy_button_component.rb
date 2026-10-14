@@ -3,32 +3,36 @@
 module RecordingStudioPresskits
   class StatsSection
     class CopyButtonComponent < ViewComponent::Base
+      def self.for(content, title:)
+        return unless content&.recordable.is_a?(StatsSection)
+
+        stats = StatsSection.active_stats(content)
+        return if stats.empty?
+
+        text = StatsSection.copy_text(stats, title: title)
+        return if text.blank?
+
+        new(text: text)
+      end
+
       def initialize(text:)
         super()
         @text = text
       end
 
       def call
-        render button
+        render FlatPack::CopyButton::Component.new(**button_options)
       end
 
       private
 
-      def button
-        FlatPack::Button::Component.new(
-          text: "Copy",
+      def button_options
+        {
+          text: @text,
+          label: "Copy",
           icon: "clipboard-document",
           style: :default,
-          type: "button",
-          data: copy_data
-        )
-      end
-
-      def copy_data
-        {
-          controller: "recording-studio-presskits--copy-text",
-          recording_studio_presskits__copy_text_text_value: @text,
-          action: "click->recording-studio-presskits--copy-text#copy"
+          size: :sm
         }
       end
     end

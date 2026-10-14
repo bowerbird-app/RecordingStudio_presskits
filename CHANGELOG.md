@@ -7,21 +7,111 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.48.0] - 2026-10-14
+## [0.55.0] - 2026-10-14
 
 ### Changed
 - Stats replace Facts & Figures. `RecordingStudioPresskits::StatsSection` sits under the kit section. Each `RecordingStudioPresskits::Stat` is a child recording with a required label and value, plus optional unit, description, and icon.
 - Stats always render as cards: three on a large screen, two from the medium breakpoint, and one on a phone. List, table, `display_style`, and `columns` are gone. Card copy is centered. An icon, when set, sits above the value as `FlatPack::Shared::IconComponent` at size `:xl`. The value is `text-4xl` and bold, the unit sits beside it at `text-xl`, the label is `text-lg` and semibold, and the description is `text-sm` and muted. A blank icon is left off the card.
 - The content editor shows **+ Stat** and the stat list. There is no Columns control and no Show as control. A stat's fields are Value, Unit, Label, Description, and Icon. Label and value are required. Icon is a short list of Heroicons, and None leaves it blank.
-- The public stats heading has one copy button on the right of the title, the same row as **Download all images**. It is a default Flatpack button with the clipboard icon and the visible label Copy. It copies the saved title when there is one, then one stat per line as value, optional unit, and label, with ` – ` and the description when that is set. Icons are left out. The label stays Copy. Cards do not have their own copy button.
+- The public stats heading has one `FlatPack::CopyButton` on the right of the title, the same row as **Copy credits**. It uses the clipboard icon, `style: :default`, `size: :sm`, and the visible label Copy. After a click the label becomes Copied. It copies the saved title when there is one, then one stat per line as value, optional unit, and label, with ` – ` and the description when that is set. Icons are left out. Cards do not have their own copy button.
 - A stats section payload is `stats`. The kit section payload includes `stats` when the content is a stats section.
-- Version `0.48.0`
+- Version `0.55.0`
 
 ### Upgrade notes
-- Bump to `0.48.0` and run the migrations. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections`, renames `recording_studio_facts` to `recording_studio_stats`, drops `display_style`, and rewrites recording types from `FactsSection` / `Fact` to `StatsSection` / `Stat`. The next migration drops `columns` from `recording_studio_stats_sections`. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats`. The one after that adds optional `icon` on `recording_studio_stats` when that column is missing. Icon values are Heroicons names from `Stat::ICONS`.
+- Bump to `0.55.0` and run the migrations. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections`, renames `recording_studio_facts` to `recording_studio_stats`, drops `display_style`, and rewrites recording types from `FactsSection` / `Fact` to `StatsSection` / `Stat`. The next migration drops `columns` from `recording_studio_stats_sections`. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats`. The one after that adds optional `icon` on `recording_studio_stats` when that column is missing. Icon values are Heroicons names from `Stat::ICONS`.
 - Register `RecordingStudioPresskits::StatsSection` and `RecordingStudioPresskits::Stat`. Drop `FactsSection` and `Fact`.
 - Call `register_stats!` paths through `RecordingStudioPresskits::Api.register!`. Read `stats`. `display`, `facts`, and `columns` are gone.
 - There are no Ruby aliases for the old class names, routes, or payload keys.
+
+## [0.54.0] - 2026-10-14
+
+### Changed
+- Depend on Recording Studio Trashable `~> 0.9` (tag `v0.9.0`). Call sites that used `where(trashed_at: nil)` now use `where(recording_studio_trashable_kept_sql)` (quotes/facts/credits finders, metrics). Predicates use `recording_studio_trashable_kept?` / `recording_studio_trashable_trashed?`. Sites that already used `recording_studio_trashable_active` on main stay on `_active` (credits `live_credits`, `KitQuery.live_kits`, and kit-query child merges).
+- Pin `recording_studio_video` to `~> 0.2.0` (tag `v0.2.0`).
+- Version `0.54.0`
+
+### Upgrade notes
+- Bump to `0.54.0` and pin `recording_studio_trashable` to `~> 0.9` (tag `v0.9.0`). There is no presskits migration. Reload so Recording scopes pick up Trashable’s sibling helpers.
+- Replace raw `where(trashed_at: nil)` with `where(recording_studio_trashable_kept_sql)` on the same relation. Keep `recording_studio_trashable_active` / `merge(active)` only where main already used `_active` — that scope unscopes `trashed_at` first and is not equivalent to additive `where(trashed_at: nil)`.
+- User-facing trash and restore stay on `recording_studio_trashable_trash!` / `recording_studio_trashable_restore!`. The one-time `LegacySectionTree` upgrade still copies `trashed_at` and `trash_root` with `update!`. It does not use `void_recording!`, which would drop `trash_root` and skip validations/callbacks.
+- Pin `recording_studio_video` to `~> 0.2.0` (tag `v0.2.0`).
+
+## [0.53.0] - 2026-10-14
+
+### Changed
+- `JPG · width×height · ratio` is a `FlatPack::Badge` (`size: :xs`) on the photo: `with_item(placement: :bottom_left, inset: :sm)`. The line under the photo is the attachment name.
+- Version `0.53.0`
+
+### Upgrade notes
+- No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.
+- `ImageFacts#caption` is gone. Use `name` and `meta`. The combined muted caption under the photo is gone.
+
+## [0.52.0] - 2026-10-14
+
+### Changed
+- The public kit and the owner preview put `FlatPack::CopyButton` in the text heading slot (`data-presskits-text-copy-slot`). The button is **Copy text**, `style: :secondary`, `size: :sm`, with the `clipboard-document` icon. It copies the full plain body, including lines hidden by **Show more**. Paragraphs stay separated by a blank line (`Text.clipboard_text`). The kit editor does not render the button.
+- Version `0.52.0`
+
+### Upgrade notes
+- No migration. Bump to `0.52.0`. `TextSectionHeadingComponent` copies `Text.clipboard_text` for that section. Pass `clipboard_text:` to override it. An empty string leaves the slot empty. Flatpack stays `>= 0.1.235`. The `flat_pack/clipboard` pin already shipped in `0.50.0`.
+
+## [0.51.0] - 2026-10-14
+
+### Changed
+- A video section's public cards use `FlatPack::VideoPreview`. The first video is a full-width card. The rest sit in `FlatPack::Grid` with two columns. One video is only that featured card. Flatpack is `>= 0.1.235` (tag `v0.1.235`).
+- Videos in a section are orderable. Drag a row in the content editor. That order is the public order, and the first video is the featured card.
+- Each card shows the poster, a length pill, the title, a muted provider and length line, and **Copy link**. Below `sm` that button is the link icon only, with the same words as its accessible name and tooltip. From `sm` up the words show. The title wraps beside the button. The description stays on the edit screen and in the API. It is not on the public card.
+- The public video heading passes a `FlatPack::Badge` (`size: :sm`) with the video count through `FlatPack::SectionTitle` `with_trailing`. The badge sits after the title and outside the copy-link anchor. The editor heading stays inline edit and does not show that badge.
+- Flatpack 0.1.235 removes `FlatPack::Masonry::Image`. Each photo is `FlatPack::Media::Component` inside `with_item`. The caption is the same muted line under the picture.
+- Length is entered as `m:ss` and stored as `duration_seconds` on `recording_studio_videos`. An optional `thumbnail_url` overrides the provider picture. A blank thumbnail uses YouTube's `hqdefault` image, or Vimeo's oEmbed thumbnail.
+- The video API entry adds `duration_seconds` and `thumbnail_url`. `thumbnail_url` is the picture the card shows. The kit download text file adds a `Provider · m:ss` line under each video title.
+- Version `0.51.0`
+
+### Upgrade notes
+- Bump to `0.51.0`. Flatpack is `>= 0.1.235` (tag `v0.1.235`). That release keeps `FlatPack::VideoPreview` and the Section Title trailing slot, and it removes `FlatPack::Masonry::Image`. Rebuild Tailwind. Reload Press Kits JavaScript so the copy-link controller loads.
+- Hosts that rendered `FlatPack::Masonry::Image` should put `FlatPack::Media::Component` in `with_item` and print the caption under the picture. Hosts that replaced the video section heading should pass a `FlatPack::Badge` (`size: :sm`, text is the video count) through `SectionTitle` `with_trailing`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds `duration_seconds` and `thumbnail_url` to `recording_studio_videos`. Run the Video gem's migrations first if that table is not there yet. Existing videos keep a blank length and a blank thumbnail override.
+- Press Kits still does not register Vimeo. A host that wants Vimeo registers that provider with External Embed before the catalog freezes. YouTube needs no extra registration.
+- Hosts that replaced the video section component should render `FlatPack::VideoPreview` with `with_player` around `recording_studio_video_player`, and should list `active_videos` so the first recording is the featured card.
+
+## [0.50.0] - 2026-10-14
+
+### Changed
+- A credits section on the public kit and the owner preview is a `FlatPack::Grid` (`cols: 4`): one column on a phone, two from `md`, four from `lg`. Each credit is a small uppercase role and a bold name. A name with a URL is a link with an `arrow-up-right` icon.
+- **Copy credits** sits on the right of that section's heading. It is `FlatPack::CopyButton` (`style: :default`, `size: :sm`). The clipboard text is `Role: Name`, one credit per line.
+- A credit line can store an optional `icon`, chosen in the collection editor from a short curated list. Nothing is guessed from the role. When any visible line has an icon, lines without one keep an empty icon-sized space so the names line up. When none have an icon, that space stays off. Icons are decorative.
+- Version `0.50.0`
+
+### Upgrade notes
+- Bump to `0.50.0`. Run the new migration. It adds `icon` (string) on `recording_studio_credit_lines`. There is no backfill.
+- Flatpack is `>= 0.1.234` (dummy tag `v0.1.234`) for `FlatPack::CopyButton`. Rebuild Tailwind so the credits grid utilities generate.
+- A host that pins Flatpack scripts by hand should add `flat_pack/clipboard` and `flat_pack/copy`. Flatpack's own importmap already pins both. Section title anchors use the clipboard controller too.
+
+## [0.49.0] - 2026-10-14
+
+### Changed
+- On `Cover::Component` at `:card`, a container at least 640px wide adds `pt-16` above the copy (`@min-[640px]:pt-16` on the company, title, subtitle, heart, and description). The body keeps `pt-7`, so that block starts about 6rem from the top of the card. Below 640px of container width the extra padding stays off.
+- **View** stays in the `mt-auto` footer. **Edit image** stays on the cover overlay.
+- On the editor card, **Edit** is rendered twice and a container query shows one. Below 640px it sits on the cover overlay, in the same `top_right` item as **Edit image**, immediately to its left, with `gap-2`. From 640px that copy is `@min-[640px]:hidden`, and **Edit** is the body overlay item (`placement: :top_right`, `inset: :lg`). The copy row does not reserve space for it. Below 640px the copy has no extra top padding. At 640px and wider, `@min-[640px]:pt-16` still applies.
+- The list heart is a body overlay item (`placement: :top_right`, `inset: :sm`), not a column beside the copy. Company, title, subtitle, description, and location use the full body width. The company line adds `pr-16` so it does not run under the heart. From 640px the heart uses `@min-[640px]:top-18`, which lines it up with the company line and sits below **Edit**.
+- Version `0.49.0`
+
+### Upgrade notes
+- Bump to `0.49.0`. There is no migration. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.233`. Hosts that reserved a flex column for header **Edit** or the list heart should drop it. The cover places those as overlay items. On a narrow card, **Edit** shares the cover's top-right overlay with **Edit image**.
+
+## [0.48.0] - 2026-10-14
+
+### Changed
+- A text section on the public kit and the owner preview uses a heading row: the title is bold and dark (`text-[2rem]`, `font-bold`, `--surface-content-color`) on the left, and an empty right-aligned slot (`data-presskits-text-copy-slot`) waits for Flatpack's copy control. The slot is empty. There is no copy button and no clipboard script. Other section types still use `SectionTitle`.
+- Section cards already use Flatpack `--radius-lg` (1.5rem / 24px). That matches the text-block corners, so the radius is unchanged and still shared.
+- Public and owner-preview text body no longer borrows `.ProseMirror` styles. It uses the theme muted text token other sections use for body copy (`--surface-muted-content-color`), `text-base`, `leading-7`, paragraph spacing, and `max-w-[65ch]`.
+- Long public text (plain text longer than 700 characters) clamps to eight lines with a fade into the card colour and a **Show more** / **Show less** control (`aria-expanded`). The control is `FlatPack::Button` `style: :default` (the standard raised button). Shorter copy, including the designed three-paragraph blurb, has no toggle. The kit editor always shows the full body. `FlatPack::Collapse` is a titled disclosure, so this stays a small Stimulus controller.
+- Text editing on the kit stays `FlatPack::InlineEdit` `mode: :rich`, which is the bubble toolbar. The editor heading for a text section uses the same bold title. Other sections stay `text-2xl` semibold.
+- Version `0.48.0`
+
+### Upgrade notes
+- Bump to `0.48.0`. There is no migration. Rebuild Tailwind so the text-section utilities generate. The public text heading is `TextSectionHeadingComponent`. Hosts that replaced `SectionFrameComponent` and still want this heading should branch on a text section. The copy slot is `data-presskits-text-copy-slot`. Leave it empty until Flatpack's copy control is ready.
+- Show more is public and owner preview only. The editor does not mount `recording-studio-presskits--text-collapse`.
 
 ## [0.47.0] - 2026-10-13
 
@@ -978,7 +1068,35 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.29.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.55.0...HEAD
+[0.55.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.54.0...v0.55.0
+[0.54.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.53.0...v0.54.0
+[0.53.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.52.0...v0.53.0
+[0.52.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.51.0...v0.52.0
+[0.51.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.50.0...v0.51.0
+[0.50.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.49.0...v0.50.0
+[0.49.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.48.0...v0.49.0
+[0.48.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.47.0...v0.48.0
+[0.47.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.46.0...v0.47.0
+[0.46.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.45.0...v0.46.0
+[0.45.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.44.0...v0.45.0
+[0.44.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.43.0...v0.44.0
+[0.43.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.42.0...v0.43.0
+[0.42.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.41.0...v0.42.0
+[0.41.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.40.0...v0.41.0
+[0.40.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.39.0...v0.40.0
+[0.39.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.38.1...v0.39.0
+[0.38.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.38.0...v0.38.1
+[0.38.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.37.0...v0.38.0
+[0.37.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.36.1...v0.37.0
+[0.36.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.36.0...v0.36.1
+[0.36.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.35.0...v0.36.0
+[0.35.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.34.0...v0.35.0
+[0.34.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.33.0...v0.34.0
+[0.33.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.32.0...v0.33.0
+[0.32.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.31.0...v0.32.0
+[0.31.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.30.0...v0.31.0
+[0.30.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.26.1...v0.27.0

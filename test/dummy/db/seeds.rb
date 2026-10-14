@@ -215,16 +215,27 @@ begin
       title: title
     )
     content = RecordingStudioPresskits::KitQuery.section_content(section)
-    lines.each do |credit_recording, role|
-      already = RecordingStudioPresskits::Credits.lines_for(content).any? do |line|
+    lines.each do |credit_recording, role, icon|
+      existing = RecordingStudioPresskits::Credits.lines_for(content).find do |line|
         line.recordable.credit_recording_id == credit_recording.id && line.recordable.role == role
       end
-      next if already
+      if existing
+        next if existing.recordable.icon.to_s == icon.to_s
+
+        RecordingStudioPresskits::Credits.revise_line!(
+          line_recording: existing,
+          root_recording: root_recording,
+          role: role,
+          icon: icon
+        )
+        next
+      end
 
       RecordingStudioPresskits::Credits.add!(
         credits_section_recording: content,
         credit_recording: credit_recording,
         role: role,
+        icon: icon,
         actor: user
       )
     end
@@ -240,14 +251,14 @@ begin
     press_kit_recording,
     "Project credits",
     [
-      [studio_bright, "Architecture"],
-      [flack, "Interior Design"],
-      [tom, "Photography"],
-      [marsha, "Styling"],
-      [vitra, "Furniture"]
+      [studio_bright, "Architecture", "building-office-2"],
+      [flack, "Interior Design", "swatch"],
+      [tom, "Photography", nil],
+      [marsha, "Styling", "paint-brush"],
+      [vitra, "Furniture", nil]
     ]
   )
-  ensure_credits_section.call(unpublished_kit_recording, "Credits", [[tom, "Creative Direction"]])
+  ensure_credits_section.call(unpublished_kit_recording, "Credits", [[tom, "Creative Direction", nil]])
 
   press_image_seeds = [
     ["hero-pendant.jpg", "Hero — Pendant", "Oat ceramic pendant against plaster."],

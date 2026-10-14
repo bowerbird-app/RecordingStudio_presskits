@@ -86,13 +86,25 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     refute_includes sections["class"], "md:p-8"
     refute_includes sections["class"], "lg:p-10"
     refute_select "#presskits-kit-header .fp-fab"
-    header_actions = css_select("#presskits-kit-header [data-presskits-header-actions]").first
-    assert_includes header_actions["class"], "max-sm:opacity-100"
-    assert_includes header_actions["class"], "self-end"
-    assert_includes header_actions["class"], "[@media(hover:none)]:opacity-100"
-    assert_includes header_actions["class"], "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
-    assert_includes header_actions.parent["class"], "flex-col-reverse"
-    assert_includes header_actions.parent["class"], "sm:justify-between"
+    header_actions = css_select("#presskits-kit-header [data-presskits-header-actions]")
+    assert_equal 2, header_actions.size
+    header_actions.each do |actions|
+      assert_includes actions["class"], "max-sm:opacity-100"
+      assert_includes actions["class"], "self-end"
+      assert_includes actions["class"], "[@media(hover:none)]:opacity-100"
+      assert_includes actions["class"], "[@media(hover:hover)]:group-hover/pk-edit:opacity-100"
+      refute_includes actions.parent["class"], "flex-col-reverse"
+      refute_includes actions.parent["class"], "sm:justify-between"
+    end
+    wide_edit = css_select("#presskits-kit-header [data-cover-edit='wide']").first
+    assert_includes wide_edit["class"], "hidden"
+    assert_includes wide_edit["class"], "@min-[640px]:contents"
+    wide_item = wide_edit.ancestors.find { |node| node["data-fp-placement"] }
+    assert_equal "top_right", wide_item["data-fp-placement"]
+    assert_equal "lg", wide_item["data-fp-inset"]
+    stacked_edit = css_select("#presskits-kit-header [data-cover-edit='stacked']").first
+    assert_equal "@min-[640px]:hidden", stacked_edit["class"]
+    assert stacked_edit.ancestors.any? { |node| node["data-cover-frame"] }
     edit = css_select("#presskits-kit-header [data-presskits-header-actions] a[aria-label='Edit']").first
     assert_includes edit["class"], "px-[var(--button-padding-x-sm)]"
     assert_includes edit["class"], "text-xs"
@@ -100,8 +112,15 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     image_actions = css_select("#presskits-kit-header [data-presskits-header-image-actions]").first
     assert_includes image_actions["class"], "[@media(hover:none)]:opacity-100"
     refute_includes image_actions["class"], "self-end"
-    assert_equal "top_right", image_actions.parent["data-fp-placement"]
-    assert_equal "md", image_actions.parent["data-fp-inset"]
+    image_group = image_actions.parent
+    assert_includes image_group["class"], "flex"
+    assert_includes image_group["class"], "items-center"
+    assert_includes image_group["class"], "gap-2"
+    assert_equal image_group, stacked_edit.parent
+    assert_operator image_group.to_html.index("pencil"), :<, image_group.to_html.index("photo")
+    image_item = image_group.parent
+    assert_equal "top_right", image_item["data-fp-placement"]
+    assert_equal "md", image_item["data-fp-inset"]
     assert_select "h1", text: "Spring launch"
     assert_select "#presskits-toasts"
     assert_select "#presskits-sections-modal"
@@ -178,7 +197,10 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-#{section.id} input[name='text[body]']"
     title = css_select("#presskits-section-#{section.id} .fp-inline-edit--text h2").first
     assert title
-    assert_includes title["class"], "text-2xl"
+    assert_includes title["class"], "text-[2rem]"
+    assert_includes title["class"], "font-bold"
+    assert_includes title["class"], "text-[var(--surface-content-color)]"
+    refute_includes title["class"], "font-semibold"
     title_edit = css_select("#presskits-section-#{section.id} .fp-inline-edit").find { |node| node.at_css("h2") }
     assert_equal remove, title_edit["data-flat-pack--inline-edit-update-url-value"]
 
@@ -198,6 +220,11 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_includes edit_link["class"], "max-sm:[&>span]:sr-only"
     refute_includes edit_link["class"], "fp-hit-target"
     refute_select "#presskits-section-#{images.id} [data-flat-pack--inline-edit-mode-value='rich']"
+    image_title = css_select("#presskits-section-#{images.id} .fp-inline-edit--text h2").first
+    assert_includes image_title["class"], "text-2xl"
+    assert_includes image_title["class"], "font-semibold"
+    refute_includes image_title["class"], "text-[2rem]"
+    refute_select "#presskits-section-#{images.id} [data-presskits-text-copy-slot]"
   end
 
   test "adding a section saves the type title and returns to the kit" do

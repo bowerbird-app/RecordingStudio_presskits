@@ -1,7 +1,29 @@
 <%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>
-  <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %>">
-    <% if (action = header_action) %>
+  <%# Text sections use gap-7 (28px) between the heading and the body. Card radius stays --radius-lg (1.5rem / 24px). Tailwind scans: "flex" "flex-col" "gap-7" %>
+  <div class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %><%= " flex flex-col gap-7" if text_section? %>" <% if text_section? %>data-presskits-text-section="true"<% end %>>
+    <% if text_section? %>
+      <%= render text_heading %>
+    <% elsif (action = images_download_button) %>
       <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0 flex-1">
+          <%= render heading_component %>
+        </div>
+        <div class="shrink-0">
+          <%= render action %>
+        </div>
+      </div>
+    <% elsif (action = credits_copy_button) %>
+      <%# Tailwind scans: "mb-8" "flex" "items-start" "justify-between" "gap-3" "sm:mb-10" "min-w-0" "flex-1" "shrink-0" %>
+      <div class="mb-8 flex items-start justify-between gap-3 sm:mb-10" data-credit-copy>
+        <div class="min-w-0 flex-1">
+          <%= render heading_component %>
+        </div>
+        <div class="shrink-0">
+          <%= render action %>
+        </div>
+      </div>
+    <% elsif (action = stats_copy_button) %>
+      <div class="mb-8 flex items-start justify-between gap-3 sm:mb-10" data-stats-copy>
         <div class="min-w-0 flex-1">
           <%= render heading_component %>
         </div>

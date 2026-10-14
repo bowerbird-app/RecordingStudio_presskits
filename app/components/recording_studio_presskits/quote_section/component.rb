@@ -39,7 +39,7 @@ module RecordingStudioPresskits
       end
 
       def skip?(child)
-        child.trashed_at.present? || !child.recordable.is_a?(Quote)
+        child.recording_studio_trashable_trashed? || !child.recordable.is_a?(Quote)
       end
     end
   end

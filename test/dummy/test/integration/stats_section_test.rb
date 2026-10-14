@@ -293,20 +293,20 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     heading = css_select("h2").find { |node| node.text == "Company statistics" }
     header = stats_header(heading)
     button = header.at_css("button")
-    assert_equal "Copy", button.text.strip
+    assert_equal "Copy", button["aria-label"]
     assert_equal "default", button["data-fp-style"]
-    assert_nil button["aria-label"]
-    assert_equal "clipboard-document", button.at_css("[data-flat-pack--icon-name-value]")["data-flat-pack--icon-name-value"]
-    assert_equal expected, button["data-recording-studio-presskits--copy-text-text-value"]
+    assert_equal "clipboard-document", button.at_css("[data-icon='idle'] [data-flat-pack--icon-name-value]")["data-flat-pack--icon-name-value"]
+    assert_equal expected, button.parent["data-flat-pack--clipboard-text-value"]
+    assert_equal "Copied", button.parent["data-flat-pack--clipboard-copied-label-value"]
     assert_nil heading.parent.at_css("button")
     assert_equal "Copy link to Company statistics", heading.parent.at_css("a")["aria-label"]
-    assert_select "button", text: "Copy", count: 2
-    assert_select ".text-center button", text: "Copy", count: 0
+    assert_select "button[aria-label='Copy']", count: 2
+    assert_select ".text-center button[aria-label='Copy']", count: 0
 
     fallback = css_select("h2").find { |node| node.text == "Stats" }
     fallback_button = stats_header(fallback).at_css("button")
-    assert_equal "Copy", fallback_button.text.strip
-    assert_equal "15 Countries", fallback_button["data-recording-studio-presskits--copy-text-text-value"]
+    assert_equal "Copy", fallback_button["aria-label"]
+    assert_equal "15 Countries", fallback_button.parent["data-flat-pack--clipboard-text-value"]
   end
 
   test "duplicating a kit copies stat order" do
@@ -414,7 +414,7 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
   end
 
   def stats_header(heading)
-    heading.ancestors.find { |node| node["class"].to_s.include?("sm:justify-between") }
+    heading.ancestors.find { |node| node["data-stats-copy"] }
   end
 
   def publish_stats_kit!(kit)
