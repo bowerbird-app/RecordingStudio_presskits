@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.53.0] - 2026-10-14
+
+### Changed
+- `JPG · width×height · ratio` is a `FlatPack::Badge` (`size: :xs`) on the photo: `with_item(placement: :bottom_left, inset: :sm)`. The line under the photo is the attachment name.
+- Version `0.53.0`
+
+### Upgrade notes
+- No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.
+- `ImageFacts#caption` is gone. Use `name` and `meta`. The combined muted caption under the photo is gone.
+
 ## [0.52.0] - 2026-10-14
 
 ### Changed

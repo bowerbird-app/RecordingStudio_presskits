@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.53.0
+
+No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.
+
+`JPG · width×height · ratio` is a `FlatPack::Badge` (`size: :xs`) at `placement: :bottom_left`, `inset: :sm` on `FlatPack::Media::Component`. The line under the photo is the attachment name. `ImageFacts#caption` is gone. Use `name` and `meta`.
+
 ## 0.52.0
 
 No migration. Bump to `0.52.0`. Flatpack stays `>= 0.1.235`.

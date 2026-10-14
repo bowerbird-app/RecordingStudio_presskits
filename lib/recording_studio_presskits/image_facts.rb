@@ -44,11 +44,6 @@ module RecordingStudioPresskits
       "#{type} · #{width}×#{height} · #{ratio_label}"
     end
 
-    # The gallery caption is one muted line under FlatPack::Media.
-    def caption
-      [name, meta].compact.join(" · ")
-    end
-
     def width
       pixels&.first
     end
