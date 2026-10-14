@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.50.0
+## 0.51.0
 
 A Lists section is a press kit section. The list section stores no heading. Each item is its own recording.
 
@@ -22,6 +22,25 @@ Create the section with `RecordingStudioPresskits.create_section!`. Record an it
 The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A list section also includes `items`. Each item is `icon`, `key`, and `value`. A blank icon is nil. `kit.txt` prints `Key: Value` and leaves the icon name out.
 
 The section editor is `FlatPack::CollectionEditor::Component`. **Save** records, revises, and trashes the rows. The public page and the kit preview use `FlatPack::Table::Component` with columns for the icon, the key, and the value. Key and value do not wrap.
+
+## 0.50.0
+
+Run the new migration. It adds `icon` (string, optional) on `recording_studio_credit_lines`. There is no backfill and no compatibility shim. Existing lines stay without an icon until an editor picks one.
+
+Bump to `0.50.0`. Flatpack is `>= 0.1.234` (dummy tag `v0.1.234`). Rebuild Tailwind so the credits grid utilities generate (`grid-cols-1`, `md:grid-cols-2`, `lg:grid-cols-4` come from `FlatPack::Grid`).
+
+**Copy credits** is `FlatPack::CopyButton` on the public credits heading. A host that pins Flatpack scripts by hand needs:
+
+```ruby
+pin "flat_pack/clipboard", to: "flat_pack/clipboard.js", preload: false
+pin "flat_pack/copy", to: "flat_pack/copy.js", preload: false
+```
+
+Flatpack's engine importmap already includes both. Section title anchors use the same clipboard controller.
+
+The public credits section is a four-column grid (two from `md`, one on a phone). The role is uppercase. The name is bold. A URL adds `arrow-up-right`. An icon is optional and comes from `CreditIcons`. If any visible line has one, the others keep an empty icon-sized space. If none do, the plain layout is used. An empty section stays hidden.
+
+`Credits.add!` and `Credits.revise_line!` take `icon:`. `Credits.revise_role!` still changes only the role and keeps the icon. The line API accepts `icon` on show, update, and `add_credit`. A blank or unknown icon is stored as nil and left out of the payload.
 
 ## 0.49.0
 

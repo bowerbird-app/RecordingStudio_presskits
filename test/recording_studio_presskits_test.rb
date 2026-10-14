@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.50.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.51.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -16,6 +16,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
       "db/migrate/20261007120000_create_recording_studio_video_sections.rb",
       "db/migrate/20261008120000_create_recording_studio_credits.rb",
+      "db/migrate/20261014190000_add_icon_to_recording_studio_credit_lines.rb",
       "db/migrate/20261008180000_create_recording_studio_facts.rb",
       "db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
@@ -30,6 +31,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261006160000_introduce_recording_studio_kit_sections.rb",
       "test/dummy/db/migrate/20261007120000_create_recording_studio_video_sections.rb",
       "test/dummy/db/migrate/20261008120000_create_recording_studio_credits.rb",
+      "test/dummy/db/migrate/20261014190000_add_icon_to_recording_studio_credit_lines.rb",
       "test/dummy/db/migrate/20261008180000_create_recording_studio_facts.rb",
       "test/dummy/db/migrate/20261009120000_add_cover_to_recording_studio_press_kits.rb",
       "test/dummy/db/migrate/20261013120000_replace_press_kit_cover_with_brand.rb",
@@ -68,7 +70,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.233"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.234"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
@@ -88,7 +90,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.233"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.234"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
@@ -423,7 +425,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "v0.8.0"
     assert_includes readme, "tag: \"v0.5.0\""
-    assert_includes readme, "tag: \"v0.1.233\""
+    assert_includes readme, "tag: \"v0.1.234\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.2"'
     assert_includes readme, 'gem "recording_studio_lists", "~> 0.5"'
@@ -459,7 +461,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[430/368]"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.233"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.234"'
     assert_includes readme, "FlatPack::FontSwatch"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
@@ -1273,7 +1275,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute File.exist?(presskits_path(
                          "app/components/recording_studio_presskits/credits_section/actions_component.rb"
                        ))
+    assert_includes editor, 'headers: ["Credit", "Role on this kit", "Icon"]'
     assert_includes fields, 'label: "Role on this kit"'
+    assert_includes fields, 'label: "Icon"'
+    assert_includes fields, "CreditIcons.options"
+    assert_includes fields, "placeholder: nil"
     assert_includes fields, "chrome: :cell"
     assert_includes fields, 'label: "Credit"'
     assert_includes fields, 'search_placeholder: "Search credits"'
@@ -1299,10 +1305,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     show = File.read(presskits_path(
                        "app/components/recording_studio_presskits/credits_section/component.html.erb"
                      ))
-    assert_includes show, "data-credit-lines"
+    assert_includes show, "credit_lines: true"
+    assert_includes show, "FlatPack::Grid::Component"
+    assert_includes show, "cols: 4"
     assert_includes show, "data-credit-line-id"
     assert_includes show, "data-credit-role"
     assert_includes show, "data-credit-name"
+    assert_includes show, "data-credit-icon"
+    assert_includes show, "data-credit-icon-spacer"
+    assert_includes show, "arrow-up-right"
+    assert_includes show, "FlatPack::Avatar::Component"
+    assert_includes show, "reserve_icon_space?"
     refute_includes show, "if lines.any?"
     preview = File.read(presskits_path(
                           "app/javascript/recording_studio_presskits/controllers/credit_preview_controller.js"
@@ -1320,6 +1333,31 @@ class RecordingStudioPresskitsTest < Minitest::Test
                                ))
     assert_includes show_component, "def render?"
     assert_includes show_component, "lines.any?"
+    assert_includes show_component, "def copy_button"
+    assert_includes show_component, 'label: "Copy credits"'
+    assert_includes show_component, "FlatPack::CopyButton::Component"
+    assert_includes show_component, "def reserve_icon_space?"
+    frame = File.read(presskits_path(
+                        "app/components/recording_studio_presskits/press_kits/section_frame_component.html.erb"
+                      ))
+    frame_ruby = File.read(presskits_path(
+                             "app/components/recording_studio_presskits/press_kits/section_frame_component.rb"
+                           ))
+    assert_includes frame, "credits_copy_button"
+    assert_includes frame, "data-credit-copy"
+    assert_includes frame_ruby, "def credits_copy_button"
+    refute_includes frame, "Copy text"
+  end
+
+  def test_credit_icons_keep_a_curated_name_and_drop_the_rest
+    assert_equal "camera", RecordingStudioPresskits::CreditIcons.normalize(" camera ")
+    assert_nil RecordingStudioPresskits::CreditIcons.normalize("not-an-icon")
+    assert_nil RecordingStudioPresskits::CreditIcons.normalize(" ")
+    assert_nil RecordingStudioPresskits::CreditIcons.normalize(nil)
+    options = RecordingStudioPresskits::CreditIcons.options
+    assert_equal ["No icon", ""], options.first
+    assert_includes options, %w[Photography camera]
+    refute_includes options.map(&:last), "not-an-icon"
   end
 
   def test_list_section_uses_a_table_and_a_collection_editor

@@ -40,7 +40,7 @@ module RecordingStudioPresskits
       bag = params[:credit_lines]
       return ActionController::Parameters.new if bag.blank?
 
-      bag.permit(credit_lines_attributes: %i[id credit_recording_id role _destroy])
+      bag.permit(credit_lines_attributes: %i[id credit_recording_id role icon _destroy])
     end
 
     def section_edit_path

@@ -7,19 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.50.0] - 2026-10-14
+## [0.51.0] - 2026-10-14
 
 ### Added
 - A Lists section. `RecordingStudioPresskits::ListSection` is an empty recording under a kit section. It orders `RecordingStudioPresskits::ListItem` children. Each item stores an optional Flatpack icon name, a required `key`, and a required `value`.
 - The + Section menu shows List (`list-bullet`). The section editor is a Flatpack collection editor for Icon, Key, and Value. Preview and the public page render a Flatpack table, one column each, and keep the key and the value on one line. An empty list stays off those pages.
 - `kit.txt` prints each line as `Key: Value`. The icon name is not in the zip.
 - The kit section API payload includes `items` for a list section. A list item exposes `icon`, `key`, and `value`.
+- Version `0.51.0`
+
+### Upgrade notes
+- Bump to `0.51.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
+- Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
+- This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
+
+## [0.50.0] - 2026-10-14
+
+### Changed
+- A credits section on the public kit and the owner preview is a `FlatPack::Grid` (`cols: 4`): one column on a phone, two from `md`, four from `lg`. Each credit is a small uppercase role and a bold name. A name with a URL is a link with an `arrow-up-right` icon.
+- **Copy credits** sits on the right of that section's heading. It is `FlatPack::CopyButton` (`style: :default`, `size: :sm`). The clipboard text is `Role: Name`, one credit per line.
+- A credit line can store an optional `icon`, chosen in the collection editor from a short curated list. Nothing is guessed from the role. When any visible line has an icon, lines without one keep an empty icon-sized space so the names line up. When none have an icon, that space stays off. Icons are decorative.
 - Version `0.50.0`
 
 ### Upgrade notes
-- Bump to `0.50.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_list_sections` and `recording_studio_kit_list_items`. It does not change existing kit rows.
-- Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
-- This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
+- Bump to `0.50.0`. Run the new migration. It adds `icon` (string) on `recording_studio_credit_lines`. There is no backfill.
+- Flatpack is `>= 0.1.234` (dummy tag `v0.1.234`) for `FlatPack::CopyButton`. Rebuild Tailwind so the credits grid utilities generate.
+- A host that pins Flatpack scripts by hand should add `flat_pack/clipboard` and `flat_pack/copy`. Flatpack's own importmap already pins both. Section title anchors use the clipboard controller too.
 
 ## [0.49.0] - 2026-10-14
 

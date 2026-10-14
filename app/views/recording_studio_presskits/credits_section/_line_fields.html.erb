@@ -39,3 +39,14 @@
     chrome: :cell
   ) %>
 <% end %>
+<% row.with_field do %>
+  <%= render FlatPack::Select::Component.new(
+    name: row_form.field_name(:icon),
+    id: row_form.field_id(:icon),
+    label: "Icon",
+    options: RecordingStudioPresskits::CreditIcons.options,
+    value: row_form.object.icon,
+    placeholder: nil,
+    chrome: :cell
+  ) %>
+<% end %>
