@@ -1,5 +1,27 @@
 # Upgrade notes
 
+## 0.61.0
+
+`0.60.0` already shipped. Bump to `0.61.0`.
+
+A Menu section is a press kit section. The picker label is Menu. A new menu saves the title Contents and the subtitle "Jump to any section of the press kit."
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_menu_sections` and does not change existing kit rows. Columns are `layout` (`grid` or `list`, default `grid`), `show_counts` (default true), `show_icons` (default true), and `excluded_section_ids` (json, default `[]`). There is no `updated_at`.
+
+Add this to `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::MenuSection"
+```
+
+`MenuSection` allows a kit section. Trashable is on. Publishable, Duplicatable, Orderable, and Attachable stay off. Create it with `RecordingStudioPresskits.create_section!`. A blank title or subtitle uses `MenuSection.default_title` and `MenuSection.default_subtitle`.
+
+`RecordingStudioPresskits.section_anchor_id` is the heading fragment. It parameterizes `section_heading`, falls back to `section-{id}`, and de-duplicates in kit order (`-2`, `-3`, …). Section titles pass that id to `FlatPack::SectionTitle`. A text heading keeps `text-[2rem]` and `font-bold` and puts the id on its wrapper, because SectionTitle cannot restyle the heading. Cover Download kit and Contact use the same helper. A single section titled Contact stays `#contact`. Two sections that parameterize to the same id no longer share one fragment.
+
+The menu lists sibling sections in `KitQuery` order that `SectionFrameComponent#content_visible?` would show. It skips itself, other menus, and `excluded_section_ids`. An empty menu stays off the public page. Each link is a `FlatPack::Button` (`href: "#…"`, `style: :default`). The icon is the content class's `section_menu_icon` when `show_icons` is on. The count is `SectionCountBadge` (`FlatPack::Badge`, `size: :sm`) for Images, Videos, and Files when `show_counts` is on. Buttons have no trailing slot, so the badge sits beside the link. Its accessible name is the count and the noun, such as "2 images". Grid layout is `grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]`. List layout is one column. Rebuild Tailwind so that grid class generates. The links are a `nav` labelled by the menu heading, as a `ul` of `li`. `FlatPack::Grid` cannot supply that list or the auto-fill track.
+
+`kit.txt` prints the menu heading and subtitle. It does not print the jump list.
+
 ## 0.60.0
 
 `0.59.0` already shipped. Bump to `0.60.0`.

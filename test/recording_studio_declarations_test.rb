@@ -18,6 +18,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     RecordingStudioPresskits::LocationSection
     RecordingStudioPresskits::ListSection
     RecordingStudioPresskits::Files
+    RecordingStudioPresskits::MenuSection
   ].freeze
 
   PICKER_TYPES_EXCLUDED = %w[
@@ -480,6 +481,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal "map-pin", RecordingStudioPresskits::LocationSection.section_menu_icon
     assert_equal "list-bullet", RecordingStudioPresskits::ListSection.section_menu_icon
     assert_equal "paper-clip", RecordingStudioPresskits::Files.section_menu_icon
+    assert_equal "queue-list", RecordingStudioPresskits::MenuSection.section_menu_icon
     assert_nil FakeBlock.try(:section_menu_icon)
   end
 
@@ -558,6 +560,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::ListSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::ListItem")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::Files")
+    assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioPresskits::MenuSection")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudioVideo::Video")
     assert RecordingStudio.capability_enabled?(:trashable, for: "RecordingStudio::Location::Location")
     refute RecordingStudio.capability_enabled?(:trashable, for: "Workspace")
@@ -596,6 +599,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::ListSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::ListItem")
     refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::Files")
+    refute RecordingStudio.capability_enabled?(:publishable, for: "RecordingStudioPresskits::MenuSection")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:publishable, for: "Page")
@@ -622,6 +626,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::ListSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::ListItem")
+    refute RecordingStudio.capability_enabled?(:duplicatable, for: "RecordingStudioPresskits::MenuSection")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Workspace")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:duplicatable, for: "Page")
@@ -806,6 +811,42 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     )
     refute section.recordable.respond_to?(:title=)
     assert_equal "List", RecordingStudioPresskits.section_heading(kit_section)
+  end
+
+  test "menu section parent is a kit section and the saved heading defaults to Contents" do
+    _root, kit = spring_kit
+    kit_section = RecordingStudioPresskits.create_section!(
+      press_kit_recording: kit,
+      content_type: "RecordingStudioPresskits::MenuSection"
+    )
+    section = RecordingStudioPresskits::KitQuery.section_content(kit_section)
+    menu = section.recordable
+
+    assert_equal(
+      ["RecordingStudioPresskits::KitSection"],
+      RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::MenuSection")
+    )
+    assert_equal "Menu", RecordingStudio.recordable_type_label("RecordingStudioPresskits::MenuSection")
+    refute RecordingStudio.root_allowed?("RecordingStudioPresskits::MenuSection")
+    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::MenuSection")
+    refute RecordingStudio.capability_enabled?(:attachable, for: "RecordingStudioPresskits::MenuSection")
+    assert_kind_of RecordingStudioPresskits::KitSection, kit_section.recordable
+    assert RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::MenuSection",
+      parent_recording: kit_section
+    )
+    refute RecordingStudio.parent_allowed?(
+      child_type: "RecordingStudioPresskits::MenuSection",
+      parent_recording: kit
+    )
+    assert_equal "Contents", kit_section.recordable.title
+    assert_equal "Jump to any section of the press kit.", kit_section.recordable.subtitle
+    assert_equal "Contents", RecordingStudioPresskits.section_heading(kit_section)
+    assert_equal "grid", menu.layout
+    assert menu.show_counts
+    assert menu.show_icons
+    assert_equal [], menu.excluded_section_ids
+    refute menu.respond_to?(:title=)
   end
 
   test "quote attachable allows one image" do

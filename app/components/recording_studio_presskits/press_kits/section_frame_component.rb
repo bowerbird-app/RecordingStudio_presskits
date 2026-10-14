@@ -37,6 +37,7 @@ module RecordingStudioPresskits
           spacing: heading_action? ? :none : :md,
           level: :h2,
           anchor_link: true,
+          anchor_id: RecordingStudioPresskits.section_anchor_id(@section_recording),
           trailing: section_count_badge
         )
       end

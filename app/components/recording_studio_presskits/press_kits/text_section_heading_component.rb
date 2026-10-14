@@ -29,6 +29,12 @@ module RecordingStudioPresskits
         RecordingStudioPresskits.section_heading(@section_recording)
       end
 
+      # SectionTitle cannot host this 2rem bold heading. The wrapper carries the
+      # same id, and the same scroll offset, that SectionTitle puts on its container.
+      def anchor_id
+        RecordingStudioPresskits.section_anchor_id(@section_recording)
+      end
+
       def subtitle
         @section_recording.recordable.subtitle.to_s.strip.presence
       end

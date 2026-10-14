@@ -24,6 +24,7 @@ module RecordingStudioPresskits
         register_location_section
         register_list_section
         register_files_section
+        register_menu_section
       end
 
       private
@@ -143,6 +144,20 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::Files",
           component: "RecordingStudioPresskits::Files::Component",
           editor: "RecordingStudioPresskits::Files::EditComponent"
+        )
+      end
+
+      def register_menu_section
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::MenuSection",
+          component: "RecordingStudioPresskits::MenuSection::Component",
+          editor: "RecordingStudioPresskits::MenuSection::EditComponent",
+          prepare: lambda { |recordable, **|
+            recordable.layout = MenuSection::DEFAULT_LAYOUT if recordable.layout.blank?
+            recordable.show_counts = true if recordable.show_counts.nil?
+            recordable.show_icons = true if recordable.show_icons.nil?
+            recordable.excluded_section_ids = [] if recordable.excluded_section_ids.blank?
+          }
         )
       end
     end

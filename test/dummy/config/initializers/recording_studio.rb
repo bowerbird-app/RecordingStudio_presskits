@@ -25,6 +25,7 @@ RecordingStudio.configure do |config|
     "RecordingStudioPresskits::ListSection",
     "RecordingStudioPresskits::ListItem",
     "RecordingStudioPresskits::Files",
+    "RecordingStudioPresskits::MenuSection",
     "RecordingStudioVideo::Video",
     "RecordingStudioPublishable::Publishable",
     "RecordingStudio::AccessConstraint",

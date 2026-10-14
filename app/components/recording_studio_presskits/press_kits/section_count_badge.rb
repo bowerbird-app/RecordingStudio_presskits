@@ -3,12 +3,15 @@
 module RecordingStudioPresskits
   module PressKits
     class SectionCountBadge
-      def self.for(content)
+      def self.for(content, accessible: false)
         recordable = content&.recordable
         count = count_for(content, recordable)
         return if count.nil? || count.zero?
 
-        FlatPack::Badge::Component.new(text: count.to_s, size: :sm)
+        options = { text: count.to_s, size: :sm }
+        label = accessible_name(recordable, count) if accessible
+        options[:aria] = { label: label } if label.present?
+        FlatPack::Badge::Component.new(**options)
       end
 
       def self.count_for(content, recordable)
@@ -21,7 +24,22 @@ module RecordingStudioPresskits
           DirectFiles.list(content).size
         end
       end
-      private_class_method :count_for
+
+      def self.accessible_name(recordable, count)
+        noun = count_noun(recordable)
+        return if noun.blank?
+
+        "#{count} #{noun.pluralize(count)}"
+      end
+
+      def self.count_noun(recordable)
+        case recordable
+        when Images then "image"
+        when VideoSection then "video"
+        when Files then "file"
+        end
+      end
+      private_class_method :count_for, :accessible_name, :count_noun
     end
   end
 end

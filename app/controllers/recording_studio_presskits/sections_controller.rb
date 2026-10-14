@@ -150,7 +150,7 @@ module RecordingStudioPresskits
         content_type: section_type_name,
         actor: presskits_actor,
         title: section_create_title,
-        subtitle: params[:subtitle]
+        subtitle: section_create_subtitle
       )
       @after_recording_id = params[:after_recording_id].presence
       position_section(recording)
@@ -158,7 +158,20 @@ module RecordingStudioPresskits
     end
 
     def section_create_title
-      params[:title].presence || RecordingStudio.recordable_type_label(section_type_name)
+      params[:title].presence ||
+        section_type_default(:default_title) ||
+        RecordingStudio.recordable_type_label(section_type_name)
+    end
+
+    def section_create_subtitle
+      params[:subtitle].presence || section_type_default(:default_subtitle)
+    end
+
+    def section_type_default(method_name)
+      type = section_type_name.to_s.safe_constantize
+      return unless type&.respond_to?(method_name)
+
+      type.public_send(method_name).presence
     end
 
     def position_section(recording) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength

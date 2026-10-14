@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-10-14
+
+### Added
+- A Menu section. `RecordingStudioPresskits::MenuSection` is a Contents list of jump links to the other sections in the kit. The picker label is Menu (`queue-list`). A new menu saves the title Contents and the subtitle "Jump to any section of the press kit." The content row stores `layout` (`grid` or `list`, default `grid`), `show_counts` (default true), `show_icons` (default true), and `excluded_section_ids`.
+- The public kit and the owner preview list sibling sections in kit order that already have something to show. The menu leaves itself out, leaves other menus out, and leaves excluded ids out. Nothing to list keeps the section off the page. Each jump is a standard `FlatPack::Button` link to `#` plus `section_anchor_id`, with that section's menu icon and, for photos, videos, and files, the existing count badge. Grid is an auto-fill of about 14rem. List is one column.
+- `RecordingStudioPresskits.section_anchor_id` is the shared heading id. It is the parameterized heading, or `section-{id}` when that is blank. Within a kit, in kit order, the first section keeps that id and later collisions become `{id}-2`, `{id}-3`, skipping an id another section already took. Section titles pass it to `FlatPack::SectionTitle` as `anchor_id:`. A text heading keeps its own type and puts the same id on its wrapper. Cover Download kit and Contact use the helper.
+- Version `0.61.0`
+
+### Upgrade notes
+- `0.60.0` already shipped. This release is `0.61.0`. Bump to `0.61.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_menu_sections`. It does not change existing kit rows.
+- Add `"RecordingStudioPresskits::MenuSection"` to `config.recordable_types`.
+- Rebuild Tailwind so `grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]` generates.
+- Heading fragments can change when two sections share a parameterized title. The first in kit order keeps the base id. A single Contact section stays `#contact`.
+- `FlatPack::Button` has no trailing slot, so the count sits beside the link. `FlatPack::SectionTitle` cannot restyle a text heading, so the text heading wrapper carries the anchor id. `FlatPack::Grid` is not a list and cannot do auto-fill `minmax`, so the menu list is a `ul`.
+
 ## [0.60.0] - 2026-10-14
 
 ### Added
@@ -1139,7 +1154,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.61.0...HEAD
+[0.61.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...v0.61.0
 [0.60.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.59.0...v0.60.0
 [0.59.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.58.0...v0.59.0
 [0.58.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.57.0...v0.58.0

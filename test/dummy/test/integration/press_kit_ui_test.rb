@@ -223,6 +223,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AListSection'] span",
                   text: "Labeled lines, in the order you want."
     assert_section_menu_icon("RecordingStudioPresskits::ListSection", "list-bullet")
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AMenuSection'] span",
+                  text: "Menu"
+    assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AMenuSection'] span",
+                  text: "Jump to any section of the kit."
+    assert_section_menu_icon("RecordingStudioPresskits::MenuSection", "queue-list")
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AFiles'] span", text: "Files"
     assert_select "#presskits-section-picker-list a[href*='type=RecordingStudioPresskits%3A%3AFiles'] span",
                   text: "Sheets, decks, and zip files they can take with the kit."
