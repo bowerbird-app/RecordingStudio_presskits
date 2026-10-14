@@ -42,5 +42,7 @@ class ControllerAuthTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.19"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.10"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.18"'
+    refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", ">= 0.18.0"'
+    refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", ">= 0.18.1"'
   end
 end

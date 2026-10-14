@@ -32,9 +32,15 @@ gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presski
 
 ```ruby
 # gemspec / host Gemfile constraints
+<<<<<<< HEAD
 gem "recording_studio", "~> 4.7"
 gem "recording_studio_accessible", "~> 0.19"
 gem "recording_studio_admin", "~> 2.3"
+=======
+gem "recording_studio", "~> 4.2"
+gem "recording_studio_accessible", "~> 0.18"
+gem "recording_studio_admin", "~> 2.0"
+>>>>>>> 72cfaaa (Keep CSRF verify before ControllerAuth filters; gemspec ~> 0.18)
 gem "recording_studio_orderable", "~> 0.3"
 gem "recording_studio_trashable", "~> 0.10"
 gem "recording_studio_duplicatable", "~> 0.5"

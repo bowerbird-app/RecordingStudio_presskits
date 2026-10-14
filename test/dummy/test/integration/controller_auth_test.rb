@@ -50,6 +50,38 @@ class ControllerAuthTest < ActionDispatch::IntegrationTest
     refute_includes methods, "require_root!"
   end
 
+  test "verify_authenticity_token runs before ControllerAuth before_actions" do
+    filters = RecordingStudioPresskits::ApplicationController
+               ._process_action_callbacks
+               .select { |callback| callback.kind == :before }
+               .map(&:filter)
+
+    verify_at = filters.index(:verify_authenticity_token)
+    authenticate_at = filters.index(:authenticate_presskits_actor!)
+    set_actor_at = filters.index(:set_presskits_current_actor)
+
+    assert verify_at, "expected :verify_authenticity_token in before filters"
+    assert authenticate_at, "expected :authenticate_presskits_actor! in before filters"
+    assert set_actor_at, "expected :set_presskits_current_actor in before filters"
+    assert_operator verify_at, :<, authenticate_at
+    assert_operator verify_at, :<, set_actor_at
+  end
+
+  test "signed-out write with a bad CSRF token returns 422 before auth redirect" do
+    with_forgery_protection do
+      assert_no_difference -> { RecordingStudio::Recording.where(recordable_type: "RecordingStudioPresskits::PressKit").count } do
+        post recording_studio_presskits.press_kits_path,
+             params: {
+               authenticity_token: "bad-token",
+               press_kit: { title: "CSRF should block this" }
+             }
+      end
+    end
+
+    assert_response :unprocessable_entity
+    refute_response_redirected_to_sign_in
+  end
+
   test "press kits index authenticates through ControllerAuth and sets Current.actor" do
     sign_in @user
     switch_to_root(@root)
@@ -137,5 +169,18 @@ class ControllerAuthTest < ActionDispatch::IntegrationTest
       }
     }
     follow_redirect! if response.redirect?
+  end
+
+  def with_forgery_protection
+    previous = ActionController::Base.allow_forgery_protection
+    ActionController::Base.allow_forgery_protection = true
+    yield
+  ensure
+    ActionController::Base.allow_forgery_protection = previous
+  end
+
+  def refute_response_redirected_to_sign_in
+    refute_equal new_user_session_path, response.redirect_url.to_s.sub(%r{\Ahttps?://[^/]+}, "")
+    refute_includes [301, 302, 303, 307, 401], response.status
   end
 end
