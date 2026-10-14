@@ -237,10 +237,12 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_includes description["class"], "@min-[640px]:line-clamp-3"
     sky = css_select("[data-brand-color='#BFDBFE']").first
     amber = css_select("[data-brand-color='#D97706']").first
-    assert_includes sky["style"], "--button-primary-background-color: #BFDBFE"
-    assert_includes sky["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#BFDBFE')}"
-    assert_includes amber["style"], "--button-primary-background-color: #D97706"
     sky_brand = sky.parent
+    amber_brand = amber.parent
+    assert_includes sky_brand["style"], "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast.text_on('#BFDBFE')}"
+    assert_includes sky_brand["style"], "--button-primary-background-color: var(--color-primary)"
+    assert_includes amber_brand["style"], "--button-primary-background-color: var(--color-primary)"
+    assert_includes amber_brand["style"], "--color-primary: #D97706"
     assert_equal "true", sky_brand["data-presskits-brand"]
     assert_includes sky_brand["style"], "--color-primary: #BFDBFE"
     assert_includes sky_brand["style"], "--color-primary-hover: oklch(from var(--color-primary) calc(l - 0.1) c h)"

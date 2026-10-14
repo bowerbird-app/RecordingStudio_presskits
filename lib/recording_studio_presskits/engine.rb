@@ -147,6 +147,15 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.flatpack_card_styles" do
+      config.to_prepare do
+        component = FlatPack::Card::Component
+        next if component.ancestors.include?(RecordingStudioPresskits::FlatpackCardStyles)
+
+        component.prepend(RecordingStudioPresskits::FlatpackCardStyles)
+      end
+    end
+
     initializer "recording_studio_presskits.require_attachable",
                 before: "recording_studio_presskits.before_initialize" do
       require "recording_studio_attachable"

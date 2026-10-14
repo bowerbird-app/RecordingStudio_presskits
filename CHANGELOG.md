@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - A Lists section. `RecordingStudioPresskits::ListSection` is an empty recording under a kit section. It orders `RecordingStudioPresskits::ListItem` children. Each item stores an optional Flatpack icon name, a required `key`, and a required `value`.
-- The + Section menu shows List (`list-bullet`). The section editor is a Flatpack collection editor for Icon, Key, and Value. The icon column is `7rem`. Preview and the public page render a Flatpack list with `divider: true`. Each line reads `Key: Value`, with the key muted. Six lines or fewer stay one list, capped at `max-w-[65ch]` like a text section. More than six split in order into two lists, side by side from the `md` breakpoint, capped at two text measures plus the grid gap. An empty list stays off those pages.
+- The + Section menu shows List (`list-bullet`). The section editor is a Flatpack collection editor for Icon, Key, and Value. The icon column is `7rem`. Preview and the public page render a Flatpack list with `layout: :key_value` and `divider: true`. Each row passes `key:` and puts the value in the block. Six lines or fewer stay one list, capped at `max-w-[65ch]` like a text section. More than six split in order into two lists, side by side from the `md` breakpoint, capped at two text measures plus the grid gap. An empty list stays off those pages.
 - `kit.txt` prints each line as `Key: Value`. The icon name is not in the zip.
 - The kit section API payload includes `items` for a list section. A list item exposes `icon`, `key`, and `value`.
 - Version `0.59.0`
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `"RecordingStudioPresskits::ListSection"` and `"RecordingStudioPresskits::ListItem"` to `config.recordable_types`.
 - This is not Recording Studio Lists. Do not point a list item at `recording_studio_list_items`.
 - List item lookup uses `recording_studio_trashable_kept_sql`. A hidden list line uses `recording_studio_trashable_trashed?`.
+- Flatpack is `>= 0.1.239` (dummy tag `v0.1.239`). Rebuild Tailwind so the key/value list grid classes generate. Reload Flatpack CSS so the description-list divider paints. `FlatPack::Card` no longer accepts `theme:` or the old structural styles (`outlined`, `elevated`, `flat`, `interactive`, `list`). Press Kits maps those names onto the new colour, border, shadow, and hover until Location and Trashable pass the new API. The kit cover keeps the brand colour on `--color-primary` and `--color-primary-text`.
 
 ## [0.58.0] - 2026-10-14
 

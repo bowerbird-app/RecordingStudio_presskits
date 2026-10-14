@@ -96,8 +96,12 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "[data-cover-card][data-brand-color='#DB2777']", count: 1
     cover = css_select("[data-brand-color='#DB2777']").first
     assert_includes cover.to_html, "Spring launch"
-    assert_includes cover["style"], "--button-primary-background-color: #DB2777"
-    assert_includes cover["style"], "--button-primary-text-color: #{RecordingStudioPresskits::Cover::Contrast.text_on('#DB2777')}"
+    brand = cover.parent
+    assert_equal "true", brand["data-presskits-brand"]
+    assert_includes brand["style"], "--color-primary: #DB2777"
+    assert_includes brand["style"], "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast.text_on('#DB2777')}"
+    assert_includes brand["style"], "--button-primary-background-color: var(--color-primary)"
+    assert_includes brand["style"], "--button-primary-text-color: var(--color-primary-text)"
     pill = css_select("[data-brand-color='#DB2777'] [data-cover-eyebrow]").first
     assert_equal "top_left", pill.parent["data-fp-placement"]
     assert_equal "md", pill.parent["data-fp-inset"]

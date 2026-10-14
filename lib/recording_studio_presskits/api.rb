@@ -40,6 +40,7 @@ module RecordingStudioPresskits
         return unless defined?(::RecordingStudioApi)
 
         register_recordable_types
+        register_lists!
         register_section_actions
       end
 
@@ -54,7 +55,6 @@ module RecordingStudioPresskits
         register_video_section
         register_podcasts!
         register_location_section
-        register_lists!
       end
 
       private
@@ -135,11 +135,7 @@ module RecordingStudioPresskits
       end
 
       def empty_section_options
-        {
-          operations: %i[index show],
-          serializer: empty_serializer,
-          output_keys: []
-        }
+        { operations: %i[index show], serializer: empty_serializer, output_keys: [] }
       end
 
       def empty_serializer

@@ -1,13 +1,12 @@
-<%= render FlatPack::List::Component.new(divider: true) do %>
+<%= render FlatPack::List::Component.new(layout: :key_value, divider: true) do %>
   <% column.each do |recording| %>
     <% item = recording.recordable %>
     <%= render FlatPack::List::Item.new(
+          key: item.key,
           icon: item.icon.presence,
-          class: "!items-center",
           data: { list_item: true }
         ) do %>
-      <span class="text-(--surface-muted-content-color)"><%= item.key %>:</span>
-      <span><%= item.value %></span>
+      <%= item.value %>
     <% end %>
   <% end %>
 <% end %>
