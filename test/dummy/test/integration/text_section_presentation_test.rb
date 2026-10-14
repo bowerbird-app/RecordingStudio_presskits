@@ -24,6 +24,15 @@ class TextSectionPresentationTest < ActionDispatch::IntegrationTest
     Current.actor = @previous_actor
   end
 
+  test "clipboard text keeps a blank line between paragraphs" do
+    html = "<p>First paragraph.</p><p>Second paragraph.</p><h2>Notes</h2><ul><li>Photos</li><li>Bio</li></ul>"
+    text = RecordingStudioPresskits::Text.clipboard_text(html)
+
+    assert_equal "First paragraph.\n\nSecond paragraph.\n\nNotes\n\nPhotos\n\nBio", text
+    assert_nil RecordingStudioPresskits::Text.clipboard_text("<p>  </p>")
+    assert_nil RecordingStudioPresskits::Text.clipboard_text(nil)
+  end
+
   test "the text component collapses only long copy" do
     short = component_for("<p>Short note.</p>")
     designed = component_for(designed_blurb)
@@ -64,7 +73,7 @@ class TextSectionPresentationTest < ActionDispatch::IntegrationTest
     assert_includes heading["class"], "text-[2rem]"
     assert_includes heading["class"], "text-[var(--surface-content-color)]"
     assert_select "[data-presskits-text-section] [data-presskits-text-copy-slot]", count: 1
-    refute_includes text.to_html, "Copy text"
+    assert_copy_button(designed_blurb)
     body = css_select("[data-presskits-text-body]").first
     assert_includes body["class"], "text-base"
     assert_includes body["class"], "leading-7"
@@ -101,6 +110,7 @@ class TextSectionPresentationTest < ActionDispatch::IntegrationTest
     assert_includes toggle.to_html, "Show more"
     refute_includes toggle.to_html, "Show less"
     assert_includes toggle["data-action"], "recording-studio-presskits--text-collapse#toggle"
+    assert_copy_button(long_body)
 
     sign_in @user
     switch_to_root(@root)
@@ -109,6 +119,7 @@ class TextSectionPresentationTest < ActionDispatch::IntegrationTest
     assert_select "[data-presskits-text-section] h2", text: "About the collection"
     assert_select "[data-presskits-text-body].max-h-\\[14rem\\]"
     assert_select "[data-presskits-text-collapse] button[aria-expanded='false']"
+    assert_copy_button(long_body)
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
@@ -116,6 +127,8 @@ class TextSectionPresentationTest < ActionDispatch::IntegrationTest
     assert_includes editor.text, "Last line of the notes"
     refute_includes editor.to_html, "recording-studio-presskits--text-collapse"
     refute_includes editor.to_html, "Show more"
+    refute_includes editor.to_html, "Copy text"
+    refute_includes editor.to_html, "flat-pack--clipboard"
     assert_select "#presskits-section-#{section.id} [data-flat-pack--inline-edit-mode-value='rich']"
     assert_select "#presskits-section-#{section.id} .flat-pack-richtext-bubble-menu"
     editor_title = css_select("#presskits-section-#{section.id} .fp-inline-edit--text h2").first
@@ -131,7 +144,29 @@ class TextSectionPresentationTest < ActionDispatch::IntegrationTest
 
   private
 
-  def component_for(html)
+  def assert_copy_button(html)
+      button = css_select("[data-presskits-text-copy-slot] button").first
+      assert button
+      assert_equal "Copy text", button["aria-label"]
+      assert_equal "secondary", button["data-fp-style"]
+      assert_equal "idle", button["data-fp-clipboard-state"]
+      assert_includes button["class"], "fp-copy-button"
+      assert_includes button["class"], "fp-button-flat"
+      assert_includes button["class"], "border"
+      assert_includes button["class"], "rounded-[var(--button-border-radius)]"
+      assert_includes button["class"], "px-[var(--button-padding-x-sm)]"
+      assert_includes button["data-action"], "click->flat-pack--clipboard#copy"
+      assert_select "[data-presskits-text-copy-slot] [data-icon='idle'] svg[data-flat-pack--icon-name-value='clipboard-document']"
+      host = css_select("[data-presskits-text-copy-slot] [data-controller='flat-pack--clipboard']").first
+      assert_equal "text", host["data-flat-pack--clipboard-source-value"]
+      copied = host["data-flat-pack--clipboard-text-value"]
+      expected = RecordingStudioPresskits::Text.clipboard_text(html)
+      assert_equal expected, copied
+      assert_includes copied, "\n\n"
+      refute_includes copied, "<p"
+    end
+
+    def component_for(html)
     recording = Struct.new(:id, :recordable).new("text-1", Struct.new(:body).new(html))
     RecordingStudioPresskits::Text::Component.new(recording: recording)
   end

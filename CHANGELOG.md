@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.52.0] - 2026-10-14
+
+### Changed
+- The public kit and the owner preview put `FlatPack::CopyButton` in the text heading slot (`data-presskits-text-copy-slot`). The button is **Copy text**, `style: :secondary`, `size: :sm`, with the `clipboard-document` icon. It copies the full plain body, including lines hidden by **Show more**. Paragraphs stay separated by a blank line (`Text.clipboard_text`). The kit editor does not render the button.
+- Version `0.52.0`
+
+### Upgrade notes
+- No migration. Bump to `0.52.0`. `TextSectionHeadingComponent` copies `Text.clipboard_text` for that section. Pass `clipboard_text:` to override it. An empty string leaves the slot empty. Flatpack stays `>= 0.1.235`. The `flat_pack/clipboard` pin already shipped in `0.50.0`.
+
 ## [0.51.0] - 2026-10-14
 
 ### Changed
