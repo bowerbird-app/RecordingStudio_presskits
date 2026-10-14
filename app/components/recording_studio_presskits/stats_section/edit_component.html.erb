@@ -1,0 +1,50 @@
+<div class="flex w-full flex-col gap-6">
+  <% if stats.any? %>
+    <div
+      id="presskits-stat-list"
+      data-controller="recording-studio-presskits--section-order"
+      data-action="list:reordered->recording-studio-presskits--section-order#save"
+      data-recording-studio-presskits--section-order-url-value="<%= order_path %>"
+    >
+      <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do %>
+        <%= render FlatPack::List::Component.new(orderable: true, divider: true, class: "w-full") do %>
+          <% stats.each do |stat_recording| %>
+            <%= render FlatPack::List::Item.new(id: stat_recording.id, icon: "arrows-up-down", hover: true) do %>
+              <div class="flex w-full items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <%= link_to edit_path(stat_recording), draggable: "false", class: "block min-w-0", data: helpers.presskits_editor_nav(:push) do %>
+                    <span class="block truncate text-sm font-medium text-(--surface-content-color)">
+                      <%= stat_label(stat_recording) %>
+                    </span>
+                    <% if (summary = stat_summary(stat_recording)) %>
+                      <span class="block truncate text-sm text-(--surface-muted-content-color)">
+                        <%= summary %>
+                      </span>
+                    <% end %>
+                  <% end %>
+                </div>
+                <%= form_with url: remove_path(stat_recording), method: :delete, local: true, html: { draggable: "false" } do %>
+                  <%= render FlatPack::Button::Component.new(
+                    icon: "trash",
+                    icon_only: true,
+                    style: :ghost,
+                    size: :sm,
+                    type: "submit",
+                    draggable: "false",
+                    aria: { label: "Remove stat" }
+                  ) %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: "No stats yet",
+      description: "Add a number, a date, or a short line.",
+      icon: :inbox
+    ) %>
+  <% end %>
+</div>

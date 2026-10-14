@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  class FactsSection
+  class StatsSection
     class ActionsComponent < ViewComponent::Base
       def initialize(recording:)
         super()
@@ -9,7 +9,7 @@ module RecordingStudioPresskits
       end
 
       def add_path
-        helpers.new_press_kit_section_fact_path(kit_recording, kit_section_recording)
+        helpers.new_press_kit_section_stat_path(kit_recording, kit_section_recording)
       end
 
       private

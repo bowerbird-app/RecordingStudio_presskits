@@ -1,23 +1,33 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  class Fact < ApplicationRecord
-    self.table_name = "recording_studio_facts"
+  class Stat < ApplicationRecord
+    self.table_name = "recording_studio_stats"
 
-    HTTP_URL = %r{\Ahttps?://[^\s]+\z}i
-
-    recording_studio_recordable label: "Fact",
+    recording_studio_recordable label: "Stat",
                                 root: false,
-                                allowed_parent_types: ["RecordingStudioPresskits::FactsSection"]
+                                allowed_parent_types: ["RecordingStudioPresskits::StatsSection"]
 
     include RecordingStudio::Capabilities::Trashable.to
 
+    ICONS = [
+      %w[Chart chart-bar],
+      %w[People users],
+      %w[Places globe-alt],
+      %w[Building building-office-2],
+      %w[Awards trophy],
+      %w[Date calendar-days],
+      %w[Money currency-dollar],
+      %w[Pin map-pin],
+      %w[Growth arrow-trending-up],
+      %w[Time clock],
+      %w[Star star],
+      %w[Home home]
+    ].freeze
+
     validates :label, presence: true
     validates :value, presence: true
-    validates :source_url, format: {
-      with: HTTP_URL,
-      message: "must be an HTTP or HTTPS link"
-    }, allow_blank: true
+    validates :icon, inclusion: { in: ICONS.map(&:last) }, allow_blank: true
 
     before_validation :clear_blank_details
 
@@ -32,7 +42,7 @@ module RecordingStudioPresskits
       self.value = stripped(value)
       self.unit = blank_to_nil(unit)
       self.description = blank_to_nil(description)
-      self.source_url = blank_to_nil(source_url)
+      self.icon = blank_to_nil(icon)
     end
 
     def stripped(value)

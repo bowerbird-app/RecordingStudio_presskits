@@ -1,8 +1,8 @@
 # Upgrade notes
 
-## 0.56.0
+## 0.57.0
 
-Bump to `0.56.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds a nullable `release_date` date column on `recording_studio_press_kits`. There is no backfill. Existing kits keep a blank date, and the card hides the line. Flatpack stays `>= 0.1.235`.
+Bump to `0.57.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration adds a nullable `release_date` date column on `recording_studio_press_kits`. There is no backfill. Existing kits keep a blank date, and the card hides the line. Flatpack stays `>= 0.1.235`.
 
 Rebuild Tailwind so `@min-[640px]:flex`, `flex-wrap`, `gap-x-4`, `gap-y-1.5`, `w-full`, and `@min-[640px]:w-auto` generate.
 
@@ -11,6 +11,31 @@ Hosts that replaced the header editor should add `FlatPack::DateInput` named `pr
 `Cover::Component` no longer paints **View** from `href`. Pass buttons with `with_action` (`renders_many :actions`). An empty slot hides the row. The public page no longer renders `recording_studio_downloadable_button` under the header. **Download kit** on the cover links to `recording_package_path` when that route exists, otherwise the first images section. It shows when `KitDownload.allowed?`. **Contact** shows for a Press contact credit or a section titled Contact. The index passes **View**. The header does not. **View** is that same primary FlatPack button (`size: :lg`, `arrow-right`), with the button's own radius.
 
 Below 640px of the cover container, hide the subtitle on every cover (`hidden`, then `@min-[640px]:block`). Hide the short description below that width only when `context: :grid` (`hidden @min-[640px]:line-clamp-3`). `context: :header` keeps `line-clamp-3` at every width. Pass `context:` from the caller. The index uses `:grid`. The public kit and the editor use `:header`. Do not infer the choice from which buttons are in the slot. Rebuild Tailwind so `@min-[640px]:block` and `@min-[640px]:line-clamp-3` generate.
+
+## 0.56.0
+
+`0.55.0` already shipped. Bump to `0.56.0`.
+
+Stats replace Facts & Figures. A stats section always renders as cards: three on a large screen, two from the medium breakpoint, and one on a phone. Each card is centered. An optional icon sits above the value as `FlatPack::Shared::IconComponent` at size `:xl`. The value is `text-4xl` and bold, the unit sits beside it at `text-xl`, the label is `text-lg` and semibold, and the description is `text-sm` and muted. A blank icon is left off the card. List, table, `display_style`, and `columns` are gone.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The rename migration renames `recording_studio_facts_sections` to `recording_studio_stats_sections` and `recording_studio_facts` to `recording_studio_stats` when those old tables are still present. It drops `display_style`. It rewrites `recordable_type` from `RecordingStudioPresskits::FactsSection` to `RecordingStudioPresskits::StatsSection` and from `RecordingStudioPresskits::Fact` to `RecordingStudioPresskits::Stat`. The following migration drops `columns` from `recording_studio_stats_sections` when that column is still present. The one after that drops `source_url` and `as_of_date` from `recording_studio_stats` when those columns are still present. The one after that adds optional `icon` on `recording_studio_stats` when that column is missing. A database that already has the stats tables and the icon column is left in place. There is no down migration and no Ruby alias for the old names.
+
+`recording_studio_stats_sections` stores `created_at`. `recording_studio_stats` stores `label`, `value`, optional `unit`, `description`, and optional `icon`. `icon` is a Heroicons name from `RecordingStudioPresskits::Stat::ICONS`, or blank. There is no foreign key between the tables. The recording tree is the parent.
+
+Replace the old types in `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::StatsSection",
+"RecordingStudioPresskits::Stat"
+```
+
+`StatsSection` allows a kit section. `Stat` allows a stats section. Orderable on the stats section allows stats. Trashable is on both. Publishable and Duplicatable stay off them. Duplicating a kit copies the stats section and the stats in order.
+
+Create the section with `RecordingStudioPresskits.create_section!` and `content_type: "RecordingStudioPresskits::StatsSection"`. Record a stat under the stats section. Reorder with `recording_studio_orderable_reorder!` or `recording_studio_orderable_move!` on the stats section.
+
+The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A stats section also includes `stats`. `display`, `facts`, and `columns` are not in the payload. MCP uses that same payload.
+
+The public stats heading uses `FlatPack::CopyButton` (`style: :default`, `size: :sm`, label Copy, clipboard icon) on the right of the title. The first line is the saved section title when that title is present. Each following line is the value, then the unit when it is present, then the label. A description is appended as ` – ` plus that description. The icon name is not in the text. After a click the label becomes Copied.
 
 ## 0.55.0
 

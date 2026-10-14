@@ -294,27 +294,27 @@ class TrashableSiblingApiParityIntegrationTest < ActiveSupport::TestCase
     end
   end
 
-  test "facts and credits hide trashed children through trashable predicates" do
-    facts_section = RecordingStudioPresskits.create_section!(
+  test "stats and credits hide trashed children through trashable predicates" do
+    stats_section = RecordingStudioPresskits.create_section!(
       press_kit_recording: @kit,
-      content_type: "RecordingStudioPresskits::FactsSection",
+      content_type: "RecordingStudioPresskits::StatsSection",
       actor: @user,
-      title: "Facts"
+      title: "Stats"
     )
-    facts = RecordingStudioPresskits::KitQuery.section_content(facts_section)
-    kept = facts.record(RecordingStudioPresskits::Fact, parent_recording: facts, actor: @user) do |fact|
-      fact.label = "Kept"
-      fact.value = "1"
+    stats = RecordingStudioPresskits::KitQuery.section_content(stats_section)
+    kept = stats.record(RecordingStudioPresskits::Stat, parent_recording: stats, actor: @user) do |stat|
+      stat.label = "Kept"
+      stat.value = "1"
     end
-    trashed = facts.record(RecordingStudioPresskits::Fact, parent_recording: facts, actor: @user) do |fact|
-      fact.label = "Gone"
-      fact.value = "0"
+    trashed = stats.record(RecordingStudioPresskits::Stat, parent_recording: stats, actor: @user) do |stat|
+      stat.label = "Gone"
+      stat.value = "0"
     end
     trashed.recording_studio_trashable_trash!(actor: @user)
 
-    refute RecordingStudioPresskits::FactsSection.hidden_fact?(kept)
-    assert RecordingStudioPresskits::FactsSection.hidden_fact?(trashed.reload)
-    assert_equal [kept.id], RecordingStudioPresskits::FactsSection.active_facts(facts).map(&:id)
+    refute RecordingStudioPresskits::StatsSection.hidden_stat?(kept)
+    assert RecordingStudioPresskits::StatsSection.hidden_stat?(trashed.reload)
+    assert_equal [kept.id], RecordingStudioPresskits::StatsSection.active_stats(stats).map(&:id)
 
     credit = RecordingStudioPresskits::Credits.create!(
       root_recording: @root,
