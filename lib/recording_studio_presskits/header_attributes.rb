@@ -4,7 +4,7 @@ module RecordingStudioPresskits
   class HeaderAttributes
     class << self
       def from(submitted)
-        copy(submitted).merge(brand(submitted)).merge(source(submitted))
+        copy(submitted).merge(brand(submitted)).merge(source(submitted)).merge(release_date(submitted))
       end
 
       def copy(submitted)
@@ -39,6 +39,17 @@ module RecordingStudioPresskits
         return {} if value.blank?
 
         { brand_source: value }
+      end
+
+      def release_date(submitted)
+        return {} unless submitted.key?(:release_date)
+
+        text = submitted[:release_date].to_s.strip
+        return { release_date: nil } if text.blank?
+
+        { release_date: Date.iso8601(text) }
+      rescue Date::Error
+        { release_date: nil }
       end
 
       def alert_for(error)

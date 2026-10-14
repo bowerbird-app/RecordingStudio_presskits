@@ -55,6 +55,19 @@ class HeaderAttributesTest < Minitest::Test
     refute fields.key?(:brand_color)
     refute fields.key?(:font_family)
     refute fields.key?(:brand_source)
+    refute fields.key?(:release_date)
+  end
+
+  def test_release_date_parses_an_iso_date_and_a_blank_clears_it
+    fields = RecordingStudioPresskits::HeaderAttributes.from(release_date: "2026-10-14")
+
+    assert_equal Date.new(2026, 10, 14), fields[:release_date]
+
+    cleared = RecordingStudioPresskits::HeaderAttributes.from(release_date: "  ")
+    assert_nil cleared[:release_date]
+
+    invalid = RecordingStudioPresskits::HeaderAttributes.from(release_date: "not-a-date")
+    assert_nil invalid[:release_date]
   end
 
   def test_omitted_copy_stays_out_of_the_header_write

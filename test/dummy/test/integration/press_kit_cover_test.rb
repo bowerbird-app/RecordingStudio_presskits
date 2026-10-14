@@ -402,6 +402,66 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     refute component.show_add_to_list?
   end
 
+  test "a release date sits under the description on a wide card and stays off when blank" do
+    kit = record_kit("Spring launch")
+    @root.revise(kit) { |press_kit| press_kit.description = "Doors at noon." }
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    refute_select "#presskits-kit-header [data-cover-release]"
+
+    get recording_studio_presskits.edit_press_kit_header_path(kit)
+    assert_response :success
+    assert_select "input[name='press_kit[release_date]'][type='date']"
+    assert_select "label", text: "Release date"
+    form = css_select("form#presskits-header-form").first.to_html
+    assert_operator form.index('name="location[title]"'), :<, form.index('name="press_kit[release_date]"')
+    assert_operator form.index('name="press_kit[release_date]"'), :<, form.index('name="press_kit[brand_color]"')
+
+    original_id = kit.recordable_id
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { release_date: "2026-10-14" }
+    }
+    assert_redirected_to recording_studio_presskits.edit_press_kit_header_path(kit)
+    kit.reload
+    assert_not_equal original_id, kit.recordable_id
+    assert_equal Date.new(2026, 10, 14), kit.recordable.release_date
+    assert_nil RecordingStudioPresskits::PressKit.find(original_id).release_date
+    assert_equal "Doors at noon.", kit.recordable.description
+
+    get recording_studio_presskits.edit_press_kit_header_path(kit)
+    assert_select "input[name='press_kit[release_date]'][value='2026-10-14']"
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_release_line("#presskits-kit-header")
+
+    get recording_studio_presskits.press_kits_path
+    assert_release_line("[data-cover-card]")
+
+    record_block(kit, "Hero")
+    publish_kit!(kit)
+    get kit.publishable_public_path
+    assert_response :success
+    assert_release_line("#presskits-kit-cover")
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { title: "Spring launch" }
+    }
+    assert_equal Date.new(2026, 10, 14), kit.reload.recordable.release_date
+
+    patch recording_studio_presskits.press_kit_header_path(kit), params: {
+      press_kit: { release_date: "  " }
+    }
+    assert_nil kit.reload.recordable.release_date
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    refute_select "#presskits-kit-header [data-cover-release]"
+    get kit.publishable_public_path
+    refute_select "[data-cover-release]"
+  end
+
   test "the header preview can leave the list heart off" do
     kit = record_kit("Spring launch")
     Current.actor = @user
@@ -429,6 +489,21 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_release_line(scope)
+    line = css_select("#{scope} [data-cover-release]").first
+    assert line, "expected a release line in #{scope}"
+    assert_equal "Released 14 Oct 2026", line.text.squish
+    assert_includes line["class"], "hidden"
+    assert_includes line["class"], "@min-[640px]:flex"
+    assert_includes line["class"], "text-sm"
+    assert_includes line["class"], "text-[var(--surface-muted-content-color)]"
+    assert_includes line.to_html, "calendar-days"
+    copy = line.ancestors.find { |node| node["data-cover-copy"] }
+    assert copy, "expected the release line inside the copy"
+    html = copy.to_html
+    assert_operator html.index("data-cover-description"), :<, html.index("data-cover-release")
+  end
 
   def assert_default_eyebrow(selector, absent:)
     badge = css_select(selector).first

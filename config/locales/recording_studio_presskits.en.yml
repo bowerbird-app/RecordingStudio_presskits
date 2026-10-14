@@ -3,6 +3,7 @@ en:
     cover:
       eyebrow: "Press kit"
       view: "View"
+      released: "Released %{date}"
     download:
       button: "Download kit"
       preparing: "Getting it ready…"
@@ -49,6 +50,7 @@ en:
       kit_title: "Title"
       kit_subtitle: "Subtitle"
       kit_description: "Short description"
+      release_date: "Release date"
       title_placeholder: "Add a title"
       description_placeholder: "Add a short description"
       edit: "Edit"

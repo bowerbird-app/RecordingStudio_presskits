@@ -4,7 +4,19 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.53.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.54.0", ::RecordingStudioPresskits::VERSION
+  end
+
+  def test_release_date_migration_adds_a_nullable_date
+    root = File.expand_path("..", __dir__)
+    [
+      "db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb"
+    ].each do |path|
+      source = File.read(File.join(root, path))
+      assert_includes source, "add_column :recording_studio_press_kits, :release_date, :date"
+      refute_includes source, "null: false"
+    end
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -40,7 +52,9 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb",
       "db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
-      "test/dummy/db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb"
+      "test/dummy/db/migrate/20261013233000_add_presskit_details_to_recording_studio_videos.rb",
+      "db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb",
+      "test/dummy/db/migrate/20261014210000_add_release_date_to_recording_studio_press_kits.rb"
     ].each do |path|
       assert File.exist?(File.join(root, path)), path
     end
@@ -856,6 +870,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes header, 'name: "press_kit[subtitle]"'
     refute_includes header, 'name: "press_kit[description]"'
     assert_includes header, 'id="presskits-header-location"'
+    assert_includes header, 'id="presskits-header-release"'
+    assert_includes header, "FlatPack::DateInput::Component"
+    assert_includes header, 'name: "press_kit[release_date]"'
+    assert_operator header.index("fields_for :location"), :<, header.index("presskits-header-release")
+    assert_operator header.index("presskits-header-release"), :<, header.index("presskits-header-brand")
     assert_includes header, "fields_for :location"
     assert_includes header, "recording_studio_location_search_fields"
     assert_includes header, 'id="press_kit_cover_image"'
@@ -978,6 +997,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes inline_copy, "event.stopPropagation()"
     cover = File.read(File.expand_path("cover/component.html.erb", components))
     assert_operator cover.index("inline_edit?"), :<, cover.index("HeaderInlineCopyComponent")
+    assert_includes cover, "data-cover-release"
+    assert_includes cover, "hidden @min-[640px]:flex"
+    assert_includes cover, 'name: "calendar"'
+    assert_includes cover, "FlatPack::Shared::IconComponent"
+    assert_operator cover.index("data-cover-description"), :<, cover.index("data-cover-release")
+    assert_operator cover.index("data-cover-release"), :<, cover.index("data-cover-location")
     assert_operator cover.index("HeaderInlineCopyComponent"), :<, cover.index("cover_title: true")
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"

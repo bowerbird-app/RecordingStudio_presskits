@@ -42,6 +42,16 @@ module RecordingStudioPresskits
         text.to_s.strip.presence
       end
 
+      def release_line
+        date = release_date
+        return if date.blank?
+
+        I18n.t(
+          "recording_studio_presskits.cover.released",
+          date: I18n.l(date.to_date, format: "%-d %b %Y")
+        )
+      end
+
       def subtitle
         text = @subtitle.nil? ? recordable&.try(:subtitle) : @subtitle
         text.to_s.strip.presence
@@ -104,6 +114,10 @@ module RecordingStudioPresskits
 
       def recordable
         @recording&.recordable
+      end
+
+      def release_date
+        recordable&.try(:release_date)
       end
     end
   end
