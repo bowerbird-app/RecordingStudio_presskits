@@ -46,20 +46,19 @@ module RecordingStudioPresskits
     end
 
     def find_quote
-      quote_section_recording.child_recordings.where(
-        trashed_at: nil,
-        recordable_type: "RecordingStudioPresskits::Quote"
-      ).find_by(id: params[:quote_id])
+      quote_section_recording.child_recordings
+                             .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                             .where(recordable_type: "RecordingStudioPresskits::Quote")
+                             .find_by(id: params[:quote_id])
     end
 
     def find_attachment
       return unless quote_recording
 
-      quote_recording.child_recordings.where(attachment_scope).first
-    end
-
-    def attachment_scope
-      { trashed_at: nil, recordable_type: "RecordingStudioAttachable::Attachment" }
+      quote_recording.child_recordings
+                     .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                     .where(recordable_type: "RecordingStudioAttachable::Attachment")
+                     .first
     end
 
     def quote_edit_path

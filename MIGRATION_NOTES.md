@@ -1,6 +1,6 @@
 # Upgrade notes
 
-## 0.54.0
+## 0.55.0
 
 A Lists section is a press kit section. The list section stores no heading. Each item is its own recording.
 
@@ -21,7 +21,21 @@ Create the section with `RecordingStudioPresskits.create_section!`. Record an it
 
 The kit section payload keeps `title`, `subtitle`, `content_type`, and `content_id`. A list section also includes `items`. Each item is `icon`, `key`, and `value`. A blank icon is nil. `kit.txt` prints `Key: Value` and leaves the icon name out.
 
-The section editor is `FlatPack::CollectionEditor::Component`. **Save** records, revises, and trashes the rows. The icon column is `7rem`. The public page and the kit preview use `FlatPack::List::Component` with `divider: true`. Each row is a `FlatPack::List::Item`. The line reads `Key: Value`, with the key muted and the value in the normal text colour. A blank icon leaves that slot empty. Six items or fewer stay one list at `max-w-[65ch]`, the same measure as a text section. More than six split in saved order into two halves. Each half is its own list inside `FlatPack::Grid::Component` `cols: 2` (`grid-cols-1 md:grid-cols-2`), so a phone stays one column and a wider window shows them side by side. That pair is capped at `max-w-[calc(130ch+1.5rem)]`, two text measures plus the large grid gap.
+The section editor is `FlatPack::CollectionEditor::Component`. **Save** records, revises, and trashes the rows. The icon column is `7rem`. The public page and the kit preview use `FlatPack::List::Component` with `divider: true`. Each row is a `FlatPack::List::Item`. The line reads `Key: Value`, with the key muted and the value in the normal text colour. A blank icon leaves that slot empty. Six items or fewer stay one list at `max-w-[65ch]`, the same measure as a text section. More than six split in saved order into two halves. Each half is its own list inside `FlatPack::Grid::Component` `cols: 2` (`grid-cols-1 md:grid-cols-2`), so a phone stays one column and a wider window shows them side by side. That pair is capped at `max-w-[calc(130ch+1.5rem)]`.
+
+Finding a list item uses `where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)`. A hidden line uses `recording_studio_trashable_trashed?`.
+
+## 0.54.0
+
+No presskits migration. Pin `recording_studio_trashable` to `~> 0.9` (tag `v0.9.0`). Pin `recording_studio_video` to `~> 0.2.0` (tag `v0.2.0`).
+
+Where main used `where(trashed_at: nil)`, use `where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)` on the same relation (section `child_recordings` finders, Metrics `relation`). That ANDs with a host `default_scope` the same way main’s filter did.
+
+Where main already used `recording_studio_trashable_active` — credits `live_credits`, `KitQuery.live_kits`, and the kit-query `merge(active)` child helpers — keep `_active`. Do not rewrite those to `kept_sql`; `_active` unscopes `trashed_at` first and that is main’s behavior for those sites.
+
+Kept/trashed checks use `recording_studio_trashable_kept?` and `recording_studio_trashable_trashed?`. User trash and restore stay on `recording_studio_trashable_trash!` / `recording_studio_trashable_restore!`.
+
+`LegacySectionTree` still copies `trashed_at` and `trash_root` with `update!` during the one-time section-tree upgrade. Do not switch that path to `RecordingStudioTrashable.void_recording!` — void writes through `update_columns`, does not set `trash_root`, and would change restore/trash-bin behavior for upgraded trees.
 
 ## 0.53.0
 

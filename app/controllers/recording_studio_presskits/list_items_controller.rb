@@ -94,11 +94,10 @@ module RecordingStudioPresskits
     end
 
     def find_item(id)
-      list_section_recording.child_recordings.where(item_scope).find_by(id: id)
-    end
-
-    def item_scope
-      { trashed_at: nil, recordable_type: "RecordingStudioPresskits::ListItem" }
+      list_section_recording.child_recordings
+                            .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+                            .where(recordable_type: "RecordingStudioPresskits::ListItem")
+                            .find_by(id: id)
     end
 
     def section_edit_path

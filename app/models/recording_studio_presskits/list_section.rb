@@ -19,7 +19,7 @@ module RecordingStudioPresskits
     end
 
     def self.hidden_item?(child)
-      child.trashed_at.present? || !child.recordable.is_a?(ListItem)
+      child.recording_studio_trashable_trashed? || !child.recordable.is_a?(ListItem)
     end
 
     include RecordingStudio::Capabilities::Trashable.to
