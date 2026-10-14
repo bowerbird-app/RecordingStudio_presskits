@@ -1,8 +1,8 @@
 # Upgrade notes
 
-## 0.52.0
+## 0.54.0
 
-`0.50.0` and `0.51.0` already shipped. Bump to `0.52.0`.
+`0.53.0` already shipped. Bump to `0.54.0`.
 
 Register both new types:
 
@@ -28,7 +28,21 @@ The public row uses CSS scroll-snap. Previous and next are hidden until the row 
 
 The kit section payload includes `podcasts` only for a podcast section: `title`, `show_name`, `url`, `aired_on`, `duration`, `service`, `embed_url`. A podcast's own show and update use `url`, `title`, `show_name`, `aired_on`, and `duration`. Saving from the editor fetches artwork. An API update does not.
 
-Rebuild Tailwind. The card widths are `w-[83.333%]` and `md:w-[calc((100%-2rem)/3)]`. Reload Press Kits JavaScript so `recording-studio-presskits--podcast-carousel` loads. Copy link still uses `recording-studio-presskits--copy-link`.
+Rebuild Tailwind. The card widths are `w-[83.333%]` and `md:w-[calc((100%-2rem)/3)]`. Reload Press Kits JavaScript so `recording-studio-presskits--podcast-carousel` and `recording-studio-presskits--podcast-player` load. Copy link still uses `recording-studio-presskits--copy-link`.
+
+## 0.53.0
+
+No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.
+
+`JPG · width×height · ratio` is a `FlatPack::Badge` (`size: :xs`) at `placement: :bottom_left`, `inset: :sm` on `FlatPack::Media::Component`. The line under the photo is the attachment name. `ImageFacts#caption` is gone. Use `name` and `meta`.
+
+## 0.52.0
+
+No migration. Bump to `0.52.0`. Flatpack stays `>= 0.1.235`.
+
+On the public kit and the owner preview, the text heading slot (`data-presskits-text-copy-slot`) renders `FlatPack::CopyButton`: **Copy text**, `style: :secondary` (outlined, flat), `size: :sm`, icon `clipboard-document`. The clipboard string is `Text.clipboard_text`, the full plain body with a blank line between paragraphs. **Show more** only clamps the visible HTML. The kit editor does not render the button.
+
+`TextSectionHeadingComponent` reads the text body itself. Pass `clipboard_text:` to use a different string. An empty string leaves the slot empty. The `flat_pack/clipboard` and `flat_pack/copy` pins are the same ones `0.50.0` already requires for **Copy credits**.
 
 ## 0.51.0
 

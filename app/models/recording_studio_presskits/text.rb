@@ -28,6 +28,12 @@ module RecordingStudioPresskits
       OPENING_BODY
     end
 
+    # Full plain body for the public copy button. Block breaks stay as a blank
+    # line. This is not `.text.squish`, which the collapse check uses.
+    def self.clipboard_text(html)
+      Loofah.fragment(html.to_s).to_text.gsub(/\r\n?/, "\n").gsub(/\n{3,}/, "\n\n").strip.presence
+    end
+
     private
 
     def sanitize_body

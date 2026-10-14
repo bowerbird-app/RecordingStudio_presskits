@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.52.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.54.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_engine_and_dummy_keep_header_text_title_and_images_heading_migrations
@@ -1117,6 +1117,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "FlatPack::Media::Component"
     refute_includes show, "with_image"
     refute_includes show, "Masonry::Image"
+    assert_includes show, "placement: :bottom_left"
     refute_includes show, "aspect-video"
     refute_includes section_editor, 'id: "presskits-section-grid"'
     refute_includes section_editor, "cols: 2"

@@ -7,21 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.52.0] - 2026-10-14
+## [0.54.0] - 2026-10-14
 
 ### Added
 - A podcast section. `PodcastSection` is an empty recording under a kit section. Each episode is a `Podcast` child with a link, optional title, show, date, and duration, and an optional cover image.
-- The public section is a horizontal row of square cards. About three fit on a desktop and about 1.2 on a phone. CSS scroll-snap slides the row. Previous and next appear only when the row overflows.
-- Play swaps in a Spotify or Apple Podcasts player when the link is one of those. Any other link opens in a new tab. **Listen on** follows the same link. **Copy link** copies it.
-- On save, Press Kits stores a copy of artwork from Spotify oEmbed or from the page's Open Graph image. The uploaded cover wins. Otherwise the card uses the stored copy, then a tile in the kit brand colour.
+- The public section is a horizontal row of square cards. About three fit on a desktop and about 1.2 on a phone. CSS scroll-snap slides the row. Previous and next appear only when the row overflows. The card stays a square cover.
+- Play on Spotify or Apple Podcasts opens a `FlatPack::Modal` with only that platform's player and a close control. The episode title is visually hidden and names the dialog. The iframe is added when the dialog opens and removed when it closes. Spotify's player is 352px tall. Apple's is 175px. Any other link opens in a new tab. **Listen on** and **Copy link** stay on the card.
+- On save, Press Kits stores a copy of artwork from Spotify oEmbed or from the page's Open Graph image. The uploaded cover wins. Otherwise the card uses the stored copy, then a tile in the kit brand colour. A blank show is filled when the page names one. A platform name is not stored as the show.
 - The kit section payload adds `podcasts` when the content is a podcast section. A podcast exposes show and update. The kit text file lists the show, title, date, duration, and link.
+- Version `0.54.0`
+
+### Upgrade notes
+- `0.53.0` already shipped. This release is `0.54.0`.
+- Bump to `0.54.0`. Register `RecordingStudioPresskits::PodcastSection` and `RecordingStudioPresskits::Podcast` in `recordable_types`.
+- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration creates `recording_studio_podcast_sections` and `recording_studio_podcasts`.
+- Rebuild Tailwind so the carousel card widths generate. Reload Press Kits JavaScript so the podcast carousel and player controllers load.
+
+## [0.53.0] - 2026-10-14
+
+### Changed
+- `JPG · width×height · ratio` is a `FlatPack::Badge` (`size: :xs`) on the photo: `with_item(placement: :bottom_left, inset: :sm)`. The line under the photo is the attachment name.
+- Version `0.53.0`
+
+### Upgrade notes
+- No migration. Bump to `0.53.0`. Flatpack stays `>= 0.1.235`. Rebuild Tailwind so Media and Overlay utilities generate, including `rounded-[var(--media-radius)]`, `outline-[var(--media-outline-color)]`, `group/media`, and the overlay inset classes.
+- `ImageFacts#caption` is gone. Use `name` and `meta`. The combined muted caption under the photo is gone.
+
+## [0.52.0] - 2026-10-14
+
+### Changed
+- The public kit and the owner preview put `FlatPack::CopyButton` in the text heading slot (`data-presskits-text-copy-slot`). The button is **Copy text**, `style: :secondary`, `size: :sm`, with the `clipboard-document` icon. It copies the full plain body, including lines hidden by **Show more**. Paragraphs stay separated by a blank line (`Text.clipboard_text`). The kit editor does not render the button.
 - Version `0.52.0`
 
 ### Upgrade notes
-- `0.50.0` and `0.51.0` already shipped. This release is `0.52.0`.
-- Bump to `0.52.0`. Register `RecordingStudioPresskits::PodcastSection` and `RecordingStudioPresskits::Podcast` in `recordable_types`.
-- Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The new migration creates `recording_studio_podcast_sections` and `recording_studio_podcasts`.
-- Rebuild Tailwind so the carousel card widths generate. Reload Press Kits JavaScript so the podcast carousel controller loads.
+- No migration. Bump to `0.52.0`. `TextSectionHeadingComponent` copies `Text.clipboard_text` for that section. Pass `clipboard_text:` to override it. An empty string leaves the slot empty. Flatpack stays `>= 0.1.235`. The `flat_pack/clipboard` pin already shipped in `0.50.0`.
 
 ## [0.51.0] - 2026-10-14
 
