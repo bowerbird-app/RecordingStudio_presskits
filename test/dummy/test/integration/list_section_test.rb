@@ -90,6 +90,7 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     get recording_studio_presskits.edit_press_kit_section_path(kit, section)
     assert_select "h1", text: "List"
     assert_select "#presskits-list-editor.flat-pack-collection-editor, #presskits-list-editor .flat-pack-collection-editor"
+    assert_includes response.body, "--collection-editor-columns: auto 7rem minmax(0, 1fr) minmax(0, 1.4fr) auto"
     assert_select ".flat-pack-collection-editor-header span", text: "Icon"
     assert_select ".flat-pack-collection-editor-header span", text: "Key"
     assert_select ".flat-pack-collection-editor-header span", text: "Value"
@@ -342,28 +343,25 @@ class ListSectionTest < ActionDispatch::IntegrationTest
   end
 
   def assert_list_table(scope)
+    html = scope.is_a?(String) ? scope : scope.to_html
+    assert_includes html, "max-w-[65ch]"
+    assert_match(/\[&(?:amp;)?_thead\]:hidden/, html)
     root = scope.is_a?(String) ? nil : scope
     if root
-      assert_select root, "th", text: "Icon"
-      assert_select root, "th", text: "Key"
-      assert_select root, "th", text: "Value"
       assert_select root, "[data-list-item]", count: 2
       assert_select root, "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
       assert_select root, "[data-list-item] [data-flat-pack--icon-name-value='magnifying-glass']", count: 1
       assert_select root, "td .truncate.whitespace-nowrap", text: "Capacity"
       assert_select root, "td .truncate.whitespace-nowrap", text: "140 seats"
-      assert_includes root.to_html, "whitespace-nowrap"
+      assert_includes html, "whitespace-nowrap"
     else
-      assert_select "th", text: "Icon"
-      assert_select "th", text: "Key"
-      assert_select "th", text: "Value"
       assert_select "[data-list-item]", count: 2
       assert_select "[data-list-item] [data-flat-pack--icon-name-value='star']", count: 1
       assert_select "td .truncate.whitespace-nowrap", text: "Capacity"
       assert_select "td .truncate.whitespace-nowrap", text: "120 seats"
       assert_select "td .truncate.whitespace-nowrap", text: "Floor"
       assert_select "td .truncate.whitespace-nowrap", text: "Oak"
-      assert_includes scope, "whitespace-nowrap"
+      assert_includes html, "whitespace-nowrap"
     end
   end
 end

@@ -148,7 +148,7 @@ The item screen is `ListItem::EditComponent` on `list_items/new` and `list_items
 
 Save revises the item. A missing key, a missing value, or an unknown icon name re-renders the form.
 
-The content tab is that collection editor. Headers are Icon, Key, and Value. Dragging a saved row posts `moving_recording_id` and `target_position` to the item order route, which `QuoteOrder` already accepts. **Save** walks the rows: record a new line, `revise` a changed line, and `recording_studio_trashable_trash!` a removed line. The empty text is "No lines yet".
+The content tab is that collection editor. Headers are Icon, Key, and Value. The icon column is `7rem`. Key and Value take the remaining width. Dragging a saved row posts `moving_recording_id` and `target_position` to the item order route, which `QuoteOrder` already accepts. **Save** walks the rows: record a new line, `revise` a changed line, and `recording_studio_trashable_trash!` a removed line. The empty text is "No lines yet".
 
 Routes, nested under `press_kits` / `sections` like facts:
 
@@ -172,7 +172,7 @@ Removing the section stays on `SectionsController#destroy`. That trashes the kit
 - Preview uses the same frame, so an empty list stays out of the preview column.
 - `KitDownload::TextFile` and `KitDownload::Manifest` skip the section. See below.
 
-The public page and the kit preview render `FlatPack::Table::Component` with one column for the icon, one for the key, and one for the value, in saved order. Render the icon with the same Flatpack `icon:` argument the rest of the kit uses, so the name becomes `data-flat-pack--icon-name-value`. A blank icon leaves that cell empty and does not invent a default glyph. Key and value do not wrap: `whitespace-nowrap` and `truncate`. Key stays muted. Value stays medium. No link, no second paragraph, no bullets, no numbers.
+The public page and the kit preview render `FlatPack::Table::Component` with one column for the icon, one for the key, and one for the value, in saved order. The table has no header row. It is capped at `max-w-[65ch]`, the same measure as a text section. Render the icon with the same Flatpack `icon:` argument the rest of the kit uses, so the name becomes `data-flat-pack--icon-name-value`. A blank icon leaves that cell empty and does not invent a default glyph. Key and value do not wrap: `whitespace-nowrap` and `truncate`. Key stays muted. Value stays medium. No link, no second paragraph, no bullets, no numbers.
 
 The component does not print the kit-section title or subtitle.
 

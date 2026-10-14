@@ -1,9 +1,9 @@
 <% if items.any? %>
-  <div id="presskits-list-lines">
+  <div id="presskits-list-lines" class="max-w-[65ch]">
     <%= render FlatPack::Table::Component.new(
       data: items,
       min_width: :none,
-      class: "[&_table]:table-fixed [&_th]:whitespace-nowrap [&_td]:overflow-hidden [&_td]:whitespace-nowrap"
+      class: "[&_table]:table-fixed [&_thead]:hidden [&_td]:overflow-hidden [&_td]:whitespace-nowrap"
     ) do |table| %>
       <% table.column(title: "Icon", html: ->(recording) { icon_cell(recording) }) %>
       <% table.column(title: "Key", html: ->(recording) { clipped(recording.recordable.key, muted: true) }) %>

@@ -1368,6 +1368,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     routes = File.read(presskits_path("config/routes.rb"))
 
     assert_includes show, "FlatPack::Table::Component"
+    assert_includes show, 'class="max-w-[65ch]"'
+    assert_includes show, "[&_thead]:hidden"
     assert_includes show, 'title: "Icon"'
     assert_includes show, 'title: "Key"'
     assert_includes show, 'title: "Value"'
@@ -1377,6 +1379,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor, 'add_label: "Item"'
     assert_includes editor, 'empty_text: "No lines yet"'
     assert_includes editor, 'headers: ["Icon", "Key", "Value"]'
+    assert_includes editor, 'column_widths: ["7rem", "minmax(0, 1fr)", "minmax(0, 1.4fr)"]'
     assert_includes editor, "moving_recording_id"
     assert_includes editor, "target_position"
     assert_includes editor, 'text: "Save"'
