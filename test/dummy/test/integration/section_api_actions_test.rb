@@ -145,6 +145,10 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     podcast = registry.types.fetch("RecordingStudioPresskits::Podcast")
     assert_equal %i[show update], podcast[:operations]
     assert_equal %i[url title show_name aired_on duration], podcast[:writable_attributes]
+    assert_includes kit_section[:output_keys], :files
+    registered_files = registry.types.fetch("RecordingStudioPresskits::Files")
+    assert_equal %i[index show], registered_files[:operations]
+    assert_equal %i[files], registered_files[:output_keys]
 
     registered_location = registry.types.fetch("RecordingStudioPresskits::LocationSection")
     assert_equal %i[index show], registered_location[:operations]

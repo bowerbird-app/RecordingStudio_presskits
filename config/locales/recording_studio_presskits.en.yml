@@ -86,6 +86,7 @@ en:
         video: "Add a video"
         podcasts: "Add an episode"
         location: "Add a place"
+        files: "Add a file"
         generic: "Add something here"
       picker_descriptions:
         text: "The story, in your own words."
@@ -96,6 +97,7 @@ en:
         video_section: "A clip they can watch without a hunt."
         podcast_section: "A show they can press play on."
         location_section: "Where they can find you, or the work."
+        files: "Sheets, decks, and zip files they can take with the kit."
         generic: "Another block for the kit."
     podcasts:
       previous: "Previous episodes"

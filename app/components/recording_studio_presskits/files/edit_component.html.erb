@@ -1,0 +1,101 @@
+<div class="flex w-full flex-col gap-6">
+  <div class="flex flex-wrap items-center gap-3">
+    <%= helpers.render partial: "recording_studio_attachable/attachment_file_buttons/button",
+          locals: upload_button_locals %>
+  </div>
+
+  <% if collection.rows.empty? %>
+    <p class="text-sm text-[var(--surface-muted-content-color)]"><%= collection.empty_message %></p>
+  <% else %>
+    <% collection.rows.each do |row| %>
+      <%= form_with url: remove_path(row),
+                    method: :delete,
+                    id: "#{collection.form_id}-trash-#{row.member.id}",
+                    html: { hidden: true } do %>
+      <% end %>
+    <% end %>
+
+    <%= form_with url: save_path,
+                  method: :patch,
+                  id: collection.form_id,
+                  class: "flex w-full flex-col gap-4",
+                  data: { controller: "flat-pack--unsaved-changes" } do %>
+      <%= hidden_field_tag "attachment_collection[signed_editor]", collection.signed_editor %>
+      <% redirect_fields.each do |key, value| %>
+        <%= hidden_field_tag key, value %>
+      <% end %>
+
+      <ol class="flex flex-col gap-4" data-controller="recording-studio-attachable--collection-order">
+        <% collection.rows.each do |row| %>
+          <% presentation = presentation_for(row) %>
+          <li data-recording-studio-attachable--collection-order-target="row" data-presskits-file-editor="<%= row.recording.id %>">
+            <%= render FlatPack::Card::Component.new(style: :default, class: "w-full") do |card| %>
+              <% card.body do %>
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+                  <%= render FlatPack::Button::Component.new(
+                        text: "Drag",
+                        icon: "bars-2",
+                        icon_only: true,
+                        style: :ghost,
+                        size: :md,
+                        type: "button",
+                        data: {
+                          action: "pointerdown->recording-studio-attachable--collection-order#grab pointermove->recording-studio-attachable--collection-order#move pointerup->recording-studio-attachable--collection-order#release pointercancel->recording-studio-attachable--collection-order#release"
+                        }
+                      ) %>
+                  <span class="mt-2 shrink-0 text-[var(--surface-content-color)]" aria-hidden="true">
+                    <%= render FlatPack::Shared::IconComponent.new(name: presentation.icon_name, size: :md) %>
+                  </span>
+                  <div class="flex min-w-0 flex-1 flex-col gap-4">
+                    <p class="text-sm text-[var(--surface-muted-content-color)]" data-presskits-file-meta><%= presentation.meta %></p>
+                    <%= hidden_field_tag collection.input_name(:recording_id), row.member.id, form: collection.form_id %>
+                    <%= render FlatPack::TextInput::Component.new(
+                          name: collection.input_name(:name),
+                          label: "Name",
+                          value: row.values[:name],
+                          required: true,
+                          form: collection.form_id
+                        ) %>
+                    <div>
+                      <label class="mb-2 block text-sm font-medium" for="file-description-<%= row.recording.id %>">Description</label>
+                      <%= text_area_tag collection.input_name(:description),
+                                        row.values[:description],
+                                        id: "file-description-#{row.recording.id}",
+                                        form: collection.form_id,
+                                        class: "min-h-24 w-full rounded-lg border border-[var(--surface-border-color)] bg-transparent px-3 py-2" %>
+                    </div>
+                    <%= hidden_field_tag collection.input_name(:order),
+                                          row.order,
+                                          form: collection.form_id,
+                                          data: { recording_studio_attachable__collection_order_target: "order" } %>
+                    <div class="inline-flex">
+                      <%= render FlatPack::Button::Component.new(
+                            text: "Remove",
+                            icon: "trash",
+                            style: :danger,
+                            size: :md,
+                            type: "submit",
+                            form: "#{collection.form_id}-trash-#{row.member.id}"
+                          ) %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+
+      <div class="inline-flex">
+        <%= render FlatPack::Button::Component.new(
+              text: "Save",
+              style: :default,
+              size: :md,
+              type: "submit",
+              form: collection.form_id,
+              data: { flat_pack__unsaved_changes_target: "submit" }
+            ) %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

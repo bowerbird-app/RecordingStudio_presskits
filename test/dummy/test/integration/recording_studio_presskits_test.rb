@@ -45,12 +45,14 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::VideoSection")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PodcastSection")
     assert_equal [ "RecordingStudioPresskits::PodcastSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Podcast")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Files")
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::VideoSection"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::PodcastSection"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Podcast"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::LocationSection"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::StatsSection"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Stat"
+    assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Files"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioVideo::Video"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudio::Location::Location"
     assert_equal "Text", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Text)
@@ -77,6 +79,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.column_exists?(:recording_studio_texts, :body)
     refute connection.column_exists?(:recording_studio_texts, :title)
     assert connection.table_exists?(:recording_studio_images)
+    assert connection.table_exists?(:recording_studio_files)
     refute connection.column_exists?(:recording_studio_images, :title)
     refute connection.column_exists?(:recording_studio_images, :subtitle)
     refute connection.column_exists?(:recording_studio_images, :caption)
@@ -214,7 +217,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     spring_sections = RecordingStudioPresskits::KitQuery.sections_for(press_kit_recording)
     autumn_sections = RecordingStudioPresskits::KitQuery.sections_for(unpublished_kit_recording)
     assert_equal(
-      ["Project credits", "Images", "Company statistics", "Project specifications", "Where to find us"],
+      ["Project credits", "Images", "Documents", "Company statistics", "Project specifications", "Where to find us"],
       spring_sections.map { |section| section.recordable.title }
     )
     assert_equal ["Credits"], autumn_sections.map { |section| section.recordable.title }
@@ -231,6 +234,11 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     cover = RecordingStudioPresskits::DirectImages.list(press_kit_recording)
     assert_equal 1, cover.size
     assert_equal "harbour-gallery.jpg", cover.first.recordable.original_filename
+    documents = spring_sections.find { |section| section.recordable.title == "Documents" }
+    document_files = RecordingStudioPresskits::DirectFiles.list(
+      RecordingStudioPresskits::KitQuery.section_content(documents)
+    )
+    assert_equal ["one-sheet.pdf", "bios.txt", "dates.csv"], document_files.map { |file| file.recordable.original_filename }
     spring_lines = RecordingStudioPresskits::Credits.visible_lines(
       RecordingStudioPresskits::KitQuery.section_content(spring_sections.first)
     )
