@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A Lists section. `RecordingStudioPresskits::ListSection` is an empty recording under a kit section. It orders `RecordingStudioPresskits::ListItem` children. Each item stores an optional Flatpack icon name, a required `key`, and a required `value`.
 - The + Section menu shows List (`list-bullet`). The section editor is a Flatpack collection editor for Icon, Key, and Value. The icon column is `7rem`. Preview and the public page render a Flatpack list with `layout: :key_value` and `divider: true`. Each row passes `key:` and puts the value in the block. Six lines or fewer stay one list, capped at `max-w-[65ch]` like a text section. More than six split in order into two lists, side by side from the `md` breakpoint, capped at two text measures plus the grid gap. An empty list stays off those pages.
 - `kit.txt` prints each line as `Key: Value`. The icon name is not in the zip.
+- The public kit and the owner preview put `FlatPack::CopyButton` on the right of a list heading, the same row as **Copy** on a stats section. It uses the clipboard icon, `style: :default`, `size: :sm`, and the visible label Copy. It copies each visible line as `Key: Value`, the same lines as `kit.txt`. The kit editor does not show that button.
 - The kit section API payload includes `items` for a list section. A list item exposes `icon`, `key`, and `value`.
 - Version `0.60.0`
 

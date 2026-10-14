@@ -236,6 +236,40 @@ class ListSectionTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Empty list"
   end
 
+  test "the public header copies each line as key and value" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    section = add_list_section(kit, title: "At a glance")
+    content = section_content(section)
+    record_item(content, key: "Capacity", value: "120 seats", icon: "star")
+    record_item(content, key: "Floor", value: "Oak")
+    hidden = record_item(content, key: "Gone", value: "Hidden", icon: "map")
+    hidden.recording_studio_trashable_trash!(actor: @user)
+    publish_list_kit!(kit)
+
+    expected = "Capacity: 120 seats\nFloor: Oak"
+    assert_equal expected, RecordingStudioPresskits::ListSection.copy_text(live_items(section))
+    refute_includes expected, "star"
+    refute_includes expected, "Gone"
+    assert_nil RecordingStudioPresskits::ListSection.copy_text([])
+
+    get "/published/#{kit.publishable_child_recording.id}/spring-launch-list"
+    assert_response :success
+    assert_list_copy_button(expected)
+
+    get recording_studio_presskits.preview_press_kit_path(kit)
+    assert_response :success
+    assert_list_copy_button(expected)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    editor = css_select("#presskits-section-#{section.id}").first
+    assert_includes editor.text, "Capacity"
+    assert_select editor, "[data-list-copy]", count: 0
+    assert_select editor, "button[aria-label='Copy']", count: 0
+  end
+
   test "six lines stay one list and the seventh starts the second" do
     component = RecordingStudioPresskits::ListSection::Component
 
@@ -378,6 +412,20 @@ class ListSectionTest < ActionDispatch::IntegrationTest
 
   def refute_section_preview_card
     refute_select "#presskits-section-preview"
+  end
+
+  def assert_list_copy_button(expected)
+    heading = css_select("h2").find { |node| node.text == "At a glance" }
+    header = heading.ancestors.find { |node| node["data-list-copy"] }
+    button = header.at_css("button")
+    assert_equal "Copy", button["aria-label"]
+    assert_equal "default", button["data-fp-style"]
+    assert_includes button["class"], "px-[var(--button-padding-x-sm)]"
+    assert_includes button["class"], "fp-copy-button"
+    assert_equal "clipboard-document", button.at_css("[data-icon='idle'] [data-flat-pack--icon-name-value]")["data-flat-pack--icon-name-value"]
+    assert_equal expected, button.parent["data-flat-pack--clipboard-text-value"]
+    assert_equal "Copied", button.parent["data-flat-pack--clipboard-copied-label-value"]
+    assert_select "[data-list-copy]", count: 1
   end
 
   def assert_split_lists(root)

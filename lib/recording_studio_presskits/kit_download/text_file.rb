@@ -147,15 +147,7 @@ module RecordingStudioPresskits
       end
 
       def list_lines(content, _recordable)
-        ListSection.active_items(content).filter_map { |child| list_line(child.recordable) }
-      end
-
-      def list_line(item)
-        key = item.key.to_s.strip.presence
-        value = item.value.to_s.strip.presence
-        return if key.blank? || value.blank?
-
-        "#{key}: #{value}"
+        ListSection.active_items(content).filter_map { |child| ListSection.copy_line(child.recordable) }
       end
 
       def podcast_lines(content, _recordable)

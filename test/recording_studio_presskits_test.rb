@@ -1474,6 +1474,26 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes fields, "chrome: :cell"
     assert_includes routes, "resource :list_lines, only: :update"
     refute File.exist?(presskits_path("app/components/recording_studio_presskits/list_section/actions_component.rb"))
+
+    model = File.read(presskits_path("app/models/recording_studio_presskits/list_section.rb"))
+    copy_button = File.read(presskits_path(
+                              "app/components/recording_studio_presskits/list_section/copy_button_component.rb"
+                            ))
+    frame = File.read(presskits_path(
+                        "app/components/recording_studio_presskits/press_kits/section_frame_component.html.erb"
+                      ))
+    text_file = File.read(presskits_path("lib/recording_studio_presskits/kit_download/text_file.rb"))
+    assert_includes model, "def self.copy_text"
+    assert_includes model, "def self.copy_line"
+    assert_match(/#\{key\}: #\{value\}/, model)
+    assert_includes copy_button, "FlatPack::CopyButton::Component"
+    assert_includes copy_button, 'label: "Copy"'
+    assert_includes copy_button, 'icon: "clipboard-document"'
+    assert_includes copy_button, "style: :default"
+    assert_includes copy_button, "size: :sm"
+    assert_includes frame, "lists_copy_button"
+    assert_includes frame, "data-list-copy"
+    assert_includes text_file, "ListSection.copy_line"
   end
 
   def test_video_routes_initializer_and_gemfile_pins
