@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.50.0] - 2026-10-14
+
+### Changed
+- A credits section on the public kit and the owner preview is a `FlatPack::Grid` (`cols: 4`): one column on a phone, two from `md`, four from `lg`. Each credit is a small uppercase role and a bold name. A name with a URL is a link with an `arrow-up-right` icon.
+- **Copy credits** sits on the right of that section's heading. It is `FlatPack::CopyButton` (`style: :default`, `size: :sm`). The clipboard text is `Role: Name`, one credit per line.
+- A credit line can store an optional `icon`, chosen in the collection editor from a short curated list. Nothing is guessed from the role. When any visible line has an icon, lines without one keep an empty icon-sized space so the names line up. When none have an icon, that space stays off. Icons are decorative.
+- Version `0.50.0`
+
+### Upgrade notes
+- Bump to `0.50.0`. Run the new migration. It adds `icon` (string) on `recording_studio_credit_lines`. There is no backfill.
+- Flatpack is `>= 0.1.234` (dummy tag `v0.1.234`) for `FlatPack::CopyButton`. Rebuild Tailwind so the credits grid utilities generate.
+- A host that pins Flatpack scripts by hand should add `flat_pack/clipboard` and `flat_pack/copy`. Flatpack's own importmap already pins both. Section title anchors use the clipboard controller too.
+
 ## [0.49.0] - 2026-10-14
 
 ### Changed

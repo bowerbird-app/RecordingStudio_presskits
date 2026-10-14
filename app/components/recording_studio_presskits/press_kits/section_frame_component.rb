@@ -34,7 +34,7 @@ module RecordingStudioPresskits
           title: title,
           subtitle: subtitle,
           size: :lg,
-          spacing: images_download_button ? :none : :md,
+          spacing: heading_action? ? :none : :md,
           level: :h2,
           anchor_link: true,
           trailing: images_count_badge
@@ -45,6 +45,12 @@ module RecordingStudioPresskits
         return @images_download_button if defined?(@images_download_button)
 
         @images_download_button = build_images_download_button
+      end
+
+      def credits_copy_button
+        return @credits_copy_button if defined?(@credits_copy_button)
+
+        @credits_copy_button = build_credits_copy_button
       end
 
       def text_section?
@@ -86,6 +92,10 @@ module RecordingStudioPresskits
         helpers
       end
 
+      def heading_action?
+        images_download_button.present? || credits_copy_button.present?
+      end
+
       def images_count_badge
         content = @content_recording
         return unless content&.recordable.is_a?(Images)
@@ -108,6 +118,13 @@ module RecordingStudioPresskits
           href: image_archive_href(content),
           data: { turbo: false }
         )
+      end
+
+      def build_credits_copy_button
+        view = content_view
+        return unless view.respond_to?(:copy_button)
+
+        view.copy_button
       end
     end
   end

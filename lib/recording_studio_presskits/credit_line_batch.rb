@@ -33,13 +33,14 @@ module RecordingStudioPresskits
     class LineDraft
       include ActiveModel::Model
 
-      attr_accessor :id, :credit_recording_id, :role, :title
+      attr_accessor :id, :credit_recording_id, :role, :icon, :title
 
       def self.from(line)
         new(
           id: line.id,
           credit_recording_id: line.recordable.credit_recording_id,
           role: line.recordable.role,
+          icon: line.recordable.icon,
           title: title_for(line)
         )
       end
