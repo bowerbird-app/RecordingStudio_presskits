@@ -172,6 +172,22 @@ class CreditsTest < ActionDispatch::IntegrationTest
       RecordingStudioPresskits::Api::SectionPayload.for(section.recordable, section)
     )
 
+    lined = RecordingStudioPresskits::Api::AddCredit.call(
+      action_context(content, params: { credit_id: tom.id, role: "Stills", icon: "camera" })
+    )
+    assert_equal "camera", lined.recordable.icon
+    assert_equal "camera", RecordingStudioPresskits::Api::CreditLinePayload.for(lined)[:icon]
+
+    dropped = RecordingStudioPresskits::Credits.add!(
+      credits_section_recording: content,
+      credit_recording: tom,
+      role: "Guessed",
+      icon: "not-a-real-icon",
+      actor: @user
+    )
+    assert_nil dropped.recordable.icon
+    refute RecordingStudioPresskits::Api::CreditLinePayload.for(dropped).key?(:icon)
+
     RecordingStudioPresskits::Api::RemoveCredit.call(action_context(line, params: {}))
 
     assert line.reload.trashed_at.present?
@@ -503,6 +519,70 @@ class CreditsTest < ActionDispatch::IntegrationTest
 
   private
 
+  test "a credits section lines up optional icons and copies role and name" do
+    sign_in @user
+    studio = create_credit("Studio Bright", usual_role: "Architecture", url: "https://studiobright.com.au")
+    tom = create_credit("Tom Ross", usual_role: "Photography", url: nil)
+    kit = record_kit("Icon launch")
+    section = add_credits_section(kit, "Project credits")
+    plain = add_credits_section(kit, "Thanks")
+
+    save_lines(kit, section, {
+      "0" => { credit_recording_id: studio.id, role: "Architecture", icon: "building-office-2" },
+      "1" => { credit_recording_id: tom.id, role: "Photography", icon: "" }
+    })
+    lines = RecordingStudioPresskits::Credits.lines_for(credits_content(section))
+    studio_line = lines.find { |line| line.recordable.role == "Architecture" }
+    tom_line = lines.find { |line| line.recordable.role == "Photography" }
+    assert_equal "building-office-2", studio_line.recordable.icon
+    assert_nil tom_line.recordable.icon
+
+    save_lines(kit, section, {
+      "0" => { id: studio_line.id, role: "Lead architecture", _destroy: "0" },
+      "1" => { id: tom_line.id, role: "Photography", _destroy: "0" }
+    })
+    assert_equal "Lead architecture", studio_line.reload.recordable.role
+    assert_equal "building-office-2", studio_line.recordable.icon
+
+    save_lines(kit, section, {
+      "0" => { id: studio_line.id, role: "Architecture", icon: "building-office-2", _destroy: "0" },
+      "1" => { id: tom_line.id, role: "Photography", icon: "", _destroy: "0" }
+    })
+    assert_nil tom_line.reload.recordable.icon
+
+    save_lines(kit, plain, {
+      "0" => { credit_recording_id: tom.id, role: "Creative Direction", icon: "" }
+    })
+
+    get recording_studio_presskits.edit_press_kit_section_path(kit, section)
+    assert_response :success
+    assert_select "th, span", text: "Icon"
+    studio_select = css_select("select[name='credit_lines[credit_lines_attributes][0][icon]']").first
+    assert studio_select
+    assert_includes studio_select.text, "No icon"
+    assert_includes studio_select.text, "Architecture"
+    selected = css_select("select[name='credit_lines[credit_lines_attributes][0][icon]'] option[selected]").first
+    assert_equal "building-office-2", selected["value"]
+    assert_select "select[name='credit_lines[credit_lines_attributes][1][icon]'] option[value='camera']"
+    assert_select "select[name='credit_lines[credit_lines_attributes][1][icon]'] option[selected]", count: 0
+
+    publish_kit!(kit, slug: "icon-launch")
+    get "/published/#{kit.publishable_child_recording.id}/icon-launch"
+    assert_response :success
+    project, thanks = response.body.split("Thanks", 2)
+    assert_includes project, "lg:grid-cols-4"
+    assert_includes project, "Copy credits"
+    assert_includes project, "Architecture: Studio Bright"
+    assert_includes project, "Photography: Tom Ross"
+    assert_includes project, "data-credit-icon-spacer"
+    assert_includes project, "arrow-up-right"
+    assert_includes project, "building-office-2"
+    refute_includes thanks, "data-credit-icon-spacer"
+    refute_includes thanks, "arrow-up-right"
+    assert_includes thanks, "Creative Direction: Tom Ross"
+    assert_includes thanks, "Copy credits"
+  end
+
   def create_credit(name, usual_role:, url:)
     RecordingStudioPresskits::Credits.create!(
       root_recording: @root,
@@ -567,11 +647,11 @@ class CreditsTest < ActionDispatch::IntegrationTest
           params: { credit_lines: { credit_lines_attributes: rows } }
   end
 
-  def publish_kit!(kit)
+  def publish_kit!(kit, slug: "spring-launch-credits")
     result = RecordingStudioPublishable::Services::Publishables::Update.call(
       parent_recording: kit,
       actor: @user,
-      attributes: { slug: "spring-launch-credits", status: "published", meta_robots: "index,follow" }
+      attributes: { slug: slug, status: "published", meta_robots: "index,follow" }
     )
     raise result.error if result.failure?
 

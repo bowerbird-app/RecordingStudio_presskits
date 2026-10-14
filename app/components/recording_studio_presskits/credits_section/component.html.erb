@@ -1,17 +1,38 @@
-<div class="flex flex-col gap-5" data-credit-lines>
+<%# Tailwind scans: "flex" "items-start" "gap-3" "shrink-0" "min-w-0" "inline-block" "h-8" "w-8" "text-xs" "font-medium" "uppercase" "tracking-wide" "text-base" "font-semibold" "mt-1" "inline-flex" "items-center" "gap-1" %>
+<%= render FlatPack::Grid::Component.new(cols: 4, gap: :lg, align: :start, data: { credit_lines: true }) do %>
   <% lines.each do |line| %>
     <% credit = credit_for(line) %>
-    <div data-credit-line-id="<%= line.id %>">
-      <% if (role = line.recordable.role.to_s.strip.presence) %>
-        <p class="text-sm text-(--surface-muted-content-color)" data-credit-role><%= role %></p>
+    <div class="flex items-start gap-3" data-credit-line-id="<%= line.id %>">
+      <% if reserve_icon_space? %>
+        <div class="shrink-0" data-credit-icon aria-hidden="true">
+          <% if (icon = icon_name(line)) %>
+            <%= render FlatPack::Avatar::Component.new(
+                  icon: icon,
+                  size: :sm,
+                  shape: :circle,
+                  show_tooltip: false,
+                  aria: { hidden: "true" }
+                ) %>
+          <% else %>
+            <span class="inline-block h-8 w-8" data-credit-icon-spacer></span>
+          <% end %>
+        </div>
       <% end %>
-      <p class="text-base text-(--surface-content-color)" data-credit-name>
-        <% if (url = credit_url(credit)) %>
-          <%= link_to credit.name, url, target: "_blank", rel: "noopener noreferrer" %>
-        <% else %>
-          <%= credit.name %>
+      <div class="min-w-0">
+        <% if (role = line.recordable.role.to_s.strip.presence) %>
+          <p class="text-xs font-medium uppercase tracking-wide text-[var(--surface-muted-content-color)]" data-credit-role><%= role %></p>
         <% end %>
-      </p>
+        <p class="mt-1 text-base font-semibold text-[var(--surface-content-color)]" data-credit-name>
+          <% if (url = credit_url(credit)) %>
+            <%= link_to url, target: "_blank", rel: "noopener noreferrer", class: "inline-flex items-center gap-1" do %>
+              <span><%= credit.name %></span>
+              <%= render FlatPack::Shared::IconComponent.new(name: "arrow-up-right", size: :sm) %>
+            <% end %>
+          <% else %>
+            <%= credit.name %>
+          <% end %>
+        </p>
+      </div>
     </div>
   <% end %>
-</div>
+<% end %>

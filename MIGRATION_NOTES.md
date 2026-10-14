@@ -1,5 +1,24 @@
 # Upgrade notes
 
+## 0.50.0
+
+Run the new migration. It adds `icon` (string, optional) on `recording_studio_credit_lines`. There is no backfill and no compatibility shim. Existing lines stay without an icon until an editor picks one.
+
+Bump to `0.50.0`. Flatpack is `>= 0.1.234` (dummy tag `v0.1.234`). Rebuild Tailwind so the credits grid utilities generate (`grid-cols-1`, `md:grid-cols-2`, `lg:grid-cols-4` come from `FlatPack::Grid`).
+
+**Copy credits** is `FlatPack::CopyButton` on the public credits heading. A host that pins Flatpack scripts by hand needs:
+
+```ruby
+pin "flat_pack/clipboard", to: "flat_pack/clipboard.js", preload: false
+pin "flat_pack/copy", to: "flat_pack/copy.js", preload: false
+```
+
+Flatpack's engine importmap already includes both. Section title anchors use the same clipboard controller.
+
+The public credits section is a four-column grid (two from `md`, one on a phone). The role is uppercase. The name is bold. A URL adds `arrow-up-right`. An icon is optional and comes from `CreditIcons`. If any visible line has one, the others keep an empty icon-sized space. If none do, the plain layout is used. An empty section stays hidden.
+
+`Credits.add!` and `Credits.revise_line!` take `icon:`. `Credits.revise_role!` still changes only the role and keeps the icon. The line API accepts `icon` on show, update, and `add_credit`. A blank or unknown icon is stored as nil and left out of the payload.
+
 ## 0.49.0
 
 No migration. Bump to `0.49.0`. Rebuild Tailwind so `@min-[640px]:pt-16`, `@min-[640px]:top-18`, `@min-[640px]:hidden`, `@min-[640px]:contents`, and `pr-16` generate. Flatpack stays `>= 0.1.233`.
