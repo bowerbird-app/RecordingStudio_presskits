@@ -3,12 +3,14 @@
 module RecordingStudioPresskits
   module PressKits
     class HeaderEditorComponent < ViewComponent::Base
-      def initialize(press_kit_recording:, brand_color: nil, # rubocop:disable Metrics/ParameterLists
-                     font_family: nil, brand_source: nil, location: nil, release_date: nil)
+      def initialize(press_kit_recording:, brand_color: nil, font_family: nil, # rubocop:disable Metrics/ParameterLists
+                     text_color: nil, corner_style: nil, brand_source: nil, location: nil, release_date: nil)
         super()
         @press_kit_recording = press_kit_recording
         @brand_color = brand_color
         @font_family = font_family
+        @text_color = text_color
+        @corner_style = corner_style
         @brand_source = brand_source
         @location = location
         @release_date = release_date
@@ -32,7 +34,8 @@ module RecordingStudioPresskits
         source = @brand_source.to_s
         return source == "press_center" if source.present?
 
-        explicit_color.blank? && explicit_font_key.blank?
+        explicit_color.blank? && explicit_font_key.blank? &&
+          explicit_text_color.blank? && explicit_corner.blank?
       end
 
       def default_tab
@@ -58,6 +61,14 @@ module RecordingStudioPresskits
 
       def custom_color
         explicit_color || inherited_brand_color
+      end
+
+      def custom_text_color
+        explicit_text_color || inherited_text_color || BrandStyle.text_on(custom_color)
+      end
+
+      def custom_corner_style
+        explicit_corner || inherited_corner_style || "rounded"
       end
 
       def press_center_summary
@@ -86,6 +97,16 @@ module RecordingStudioPresskits
         kit_branding.inherited_brand_color
       end
 
+      def inherited_text_color
+        color = BrandStyle.normalize_color(kit_branding.inherited_text_color)
+        color.is_a?(String) ? color : nil
+      end
+
+      def inherited_corner_style
+        corner = CornerStyle.normalize(kit_branding.inherited_corner_style)
+        corner.is_a?(String) ? corner : nil
+      end
+
       def explicit_font_key
         key = BrandStyle.normalize_font(@font_family)
         key.is_a?(String) ? key : nil
@@ -94,6 +115,16 @@ module RecordingStudioPresskits
       def explicit_color
         color = BrandStyle.normalize_color(@brand_color)
         color.is_a?(String) ? color : nil
+      end
+
+      def explicit_text_color
+        color = BrandStyle.normalize_color(@text_color)
+        color.is_a?(String) ? color : nil
+      end
+
+      def explicit_corner
+        corner = CornerStyle.normalize(@corner_style)
+        corner.is_a?(String) ? corner : nil
       end
     end
   end

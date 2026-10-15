@@ -83,7 +83,8 @@ module RecordingStudioPresskits
       end
 
       def brand_text_color
-        Cover::Contrast.text_on(brand_color)
+        color = BrandStyle.normalize_color(kit_branding.text_color)
+        color.is_a?(String) ? color : Cover::Contrast.text_on(brand_color)
       end
 
       def font_style

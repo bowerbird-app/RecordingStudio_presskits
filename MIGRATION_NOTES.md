@@ -1,5 +1,25 @@
 # Upgrade notes
 
+## 0.64.0
+
+`0.63.0` already shipped. Bump to `0.64.0`.
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds nullable `text_color` and `corner_style` on `recording_studio_press_kits`. Nothing is copied. A kit that leaves both blank still inherits, then uses auto contrast and Flatpack's rounded radii.
+
+`text_color` is `#RRGGBB` or nil. `corner_style` is `square`, `rounded`, or nil. Nil means inherit, one field at a time, the same as `brand_color` and `font_family`. Saving **Press center** stores all four as nil. Saving **Custom** stores the swatch hex and the selected corner. An explicit `rounded` or `#333333` stays stored so a kit can force that choice over a branded center.
+
+`RecordingStudioPresskits.branding_style_for` passes the resolved values to `RecordingStudioPressCenters::Branding.new(brand_color:, font_family:, text_color:, corner_style:)` when that class is loaded. Without it, `BrandStyle` emits the same tokens. Square adds `--radius-sm: 0`, `--radius-md: 0`, `--radius-lg: 0`, `--radius-xl: 0`, and `--button-border-radius: 0` on the brand wrapper. Rounded and blank leave Flatpack's radii alone. An explicit text colour sets `--color-primary-text`. A blank one stays auto contrast.
+
+The cover uses that resolved text colour for the primary button. Auto contrast is only the fallback. The cover wrapper also sets the square radius tokens, so index cards follow the kit. **View** does not add `rounded-full`.
+
+The header brand row is the font circle, the brand swatch, and a button-text swatch (`press_kit[text_color]`). Under that, Corners is `FlatPack::RadioGroup` (`variant: :inline`) with Square (`stop`) and Rounded (`stop-circle`).
+
+API show and update include `text_color` and `corner_style`. Both are writable. Nil means inherit.
+
+Press kits does not depend on press centers. Hosts that load it need the release that includes RecordingStudio_press_centers PR #39, because `Branding.new` now takes `text_color:` and `corner_style:`. That release was not tagged in a repository this gem could read, so there is no pin to bump. Do not ship an older press centers beside `0.64.0`.
+
+Rebuild Tailwind so `rounded-[var(--radius-md)]` generates for the video duration chip and the quote and podcast thumbnails.
+
 ## 0.63.0
 
 `0.62.0` already shipped. Bump to `0.63.0`. There is no presskits migration.

@@ -56,14 +56,13 @@
                           required: true,
                           form: collection.form_id
                         ) %>
-                    <div>
-                      <label class="mb-2 block text-sm font-medium" for="file-description-<%= row.recording.id %>">Description</label>
-                      <%= text_area_tag collection.input_name(:description),
-                                        row.values[:description],
-                                        id: "file-description-#{row.recording.id}",
-                                        form: collection.form_id,
-                                        class: "min-h-24 w-full rounded-lg border border-[var(--surface-border-color)] bg-transparent px-3 py-2" %>
-                    </div>
+                    <%= render FlatPack::TextArea::Component.new(
+                          name: collection.input_name(:description),
+                          label: "Description",
+                          value: row.values[:description],
+                          rows: 3,
+                          id: "file-description-#{row.recording.id}"
+                        ) %>
                     <%= hidden_field_tag collection.input_name(:order),
                                           row.order,
                                           form: collection.form_id,

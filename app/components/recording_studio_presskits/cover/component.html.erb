@@ -1,5 +1,5 @@
 <% if card? %>
-  <div data-presskits-brand="true" style="display: contents; --color-primary: <%= brand_color %>; --color-primary-text: <%= brand_text_color %>; <%= button_state_style %>">
+  <div data-presskits-brand="true" style="<%= brand_wrapper_style %>">
   <%= render FlatPack::Card::Component.new(
     style: :default,
     hover: :none,

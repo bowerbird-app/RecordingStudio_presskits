@@ -14,7 +14,7 @@
     <% end %>
     <% if duration_label.present? %>
       <% preview.with_item(placement: :bottom_left, inset: :sm) do %>
-        <span class="inline-flex rounded-full bg-black/70 px-2.5 py-1.5 text-[13px] font-semibold leading-none text-white"><%= duration_label %></span>
+        <span class="inline-flex rounded-[var(--radius-md)] bg-black/70 px-2.5 py-1.5 text-[13px] font-semibold leading-none text-white"><%= duration_label %></span>
       <% end %>
     <% end %>
     <% preview.with_player do %>
@@ -45,7 +45,6 @@
             style: :default,
             size: :sm,
             type: "button",
-            class: "rounded-full",
             data: { action: "recording-studio-presskits--copy-link#copy" }
           ) %>
         <% end %>
@@ -57,7 +56,6 @@
           style: :default,
           size: :sm,
           type: "button",
-          class: "rounded-full",
           data: { action: "recording-studio-presskits--copy-link#copy" }
         ) %>
       </div>

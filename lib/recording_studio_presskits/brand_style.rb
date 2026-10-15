@@ -101,14 +101,18 @@ module RecordingStudioPresskits
       ].join("; ")
     end
 
-    def initialize(brand_color:, font_family:)
+    def initialize(brand_color:, font_family:, text_color: nil, corner_style: nil)
       @brand_color = brand_color.presence
       @font_family = font_family.presence
+      @text_color = text_color.presence
+      @corner_style = corner_style.presence
     end
 
-    attr_reader :brand_color, :font_family
+    attr_reader :brand_color, :font_family, :text_color, :corner_style
 
     def resolved_text_color
+      explicit = self.class.normalize_color(text_color)
+      return explicit if explicit.is_a?(String)
       return if brand_color.blank?
 
       self.class.text_on(brand_color)
@@ -120,6 +124,7 @@ module RecordingStudioPresskits
 
     def style_attribute
       parts = color_declarations
+      parts << CornerStyle.square_attribute if CornerStyle.square?(corner_style)
       parts << "font-family: #{font_css}" if font_css
       parts.join("; ").presence
     end

@@ -157,6 +157,8 @@ class PressKitMixinsTest < ActiveSupport::TestCase
       press_kit.description = "Doors at noon."
       press_kit.brand_color = "#059669"
       press_kit.font_family = "serif"
+      press_kit.text_color = "#F8FAFC"
+      press_kit.corner_style = "square"
     end
     kit.reload
     record_fake_block(kit, "Hero")
@@ -172,6 +174,8 @@ class PressKitMixinsTest < ActiveSupport::TestCase
     assert_equal "Doors at noon.", kit.reload.recordable.description
     assert_equal "#059669", duplicate.recordable.brand_color
     assert_equal "serif", duplicate.recordable.font_family
+    assert_equal "#F8FAFC", duplicate.recordable.text_color
+    assert_equal "square", duplicate.recordable.corner_style
     refute_equal kit.id, duplicate.id
     assert_equal 1, duplicate.events.where(action: "duplicated").count
 

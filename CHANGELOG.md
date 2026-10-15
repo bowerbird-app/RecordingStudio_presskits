@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.64.0] - 2026-10-15
+
+### Added
+- A press kit stores nullable `text_color` (`#RRGGBB`) and `corner_style` (`square` or `rounded`). Nil on either field means inherit, the same way `brand_color` and `font_family` do. A blank inherited text colour is auto contrast. A blank inherited corner style is Flatpack's rounded radii. An explicit `rounded` or hex is stored, so a kit can force that choice over the parent press center.
+- The header brand controls add a button-text colour swatch on the same line as the font circle and the brand swatch, and a Square / Rounded radio group (`FlatPack::RadioGroup`, `variant: :inline`) with the Heroicons `stop` and `stop-circle`.
+- Version `0.64.0`
+
+### Changed
+- `KitBranding#style_attribute` passes `text_color` and `corner_style` into `RecordingStudioPressCenters::Branding.new` when that class is loaded, using the kit value and then the center. Otherwise `BrandStyle` emits the same tokens. Square sets `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-xl`, and `--button-border-radius` to `0` on that style string.
+- `Cover::Component` paints `--color-primary-text` from the resolved text colour when one is set. Auto contrast remains the fallback. The cover wrapper also carries the square radius tokens, so an index card follows the kit. **View** stays a Flatpack primary button at `size: :lg` and does not set `rounded-full`.
+- Video and podcast buttons, the video duration chip, the file description, and the quote and podcast thumbnails use Flatpack's radius tokens. The file description is `FlatPack::TextArea`.
+- A press kit API show and update include `text_color` and `corner_style`. Nil means inherit.
+- RecordingStudio_press_centers PR #39 is the release that accepts `text_color` and `corner_style` on `Branding`. That repository's releases were not visible from this checkout, and no tag is pinned here. Press kits still does not depend on press centers.
+
+### Upgrade notes
+- `0.63.0` already shipped. This release is `0.64.0`. Bump to `0.64.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds nullable `text_color` and `corner_style` on `recording_studio_press_kits`. There is no backfill. Existing kits keep both blank and keep today's auto contrast and rounded corners.
+- Hosts that load press centers need the release that includes PR #39 (`Branding.new` takes `text_color:` and `corner_style:`). That release was not tagged in a place this gem could read. Do not pin an older press centers next to this version.
+- Hosts that replaced the header brand swatches should add the button-text `FlatPack::ColorSwatch` named `press_kit[text_color]` and the Square / Rounded `FlatPack::RadioGroup` named `press_kit[corner_style]`. Saving **Press center** stores both as nil.
+- Rebuild Tailwind so `rounded-[var(--radius-md)]` on the duration chip and the editor thumbnails is generated.
+
 ## [0.63.0] - 2026-10-15
 
 ### Changed

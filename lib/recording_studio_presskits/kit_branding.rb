@@ -25,6 +25,16 @@ module RecordingStudioPresskits
       own(:font_family) || from_center(:font_family) || BrandStyle::DEFAULT_FONT
     end
 
+    # Blank means inherit, then auto contrast. There is no stored default.
+    def text_color
+      own(:text_color) || from_center(:text_color)
+    end
+
+    # Blank means inherit, then Flatpack's rounded radii.
+    def corner_style
+      own(:corner_style) || from_center(:corner_style)
+    end
+
     def inherited_brand_color
       from_center(:brand_color) || BrandStyle::DEFAULT_COLOR
     end
@@ -33,12 +43,25 @@ module RecordingStudioPresskits
       from_center(:font_family) || BrandStyle::DEFAULT_FONT
     end
 
+    def inherited_text_color
+      from_center(:text_color)
+    end
+
+    def inherited_corner_style
+      from_center(:corner_style)
+    end
+
     def inherit_available?
       defined?(RecordingStudioPressCenters) && RecordingStudioPressCenters.respond_to?(:branding_for)
     end
 
     def style_attribute
-      painter.new(brand_color: brand_color, font_family: font_family).style_attribute
+      painter.new(
+        brand_color: brand_color,
+        font_family: font_family,
+        text_color: text_color,
+        corner_style: corner_style
+      ).style_attribute
     end
 
     private

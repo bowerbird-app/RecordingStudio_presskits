@@ -17,6 +17,14 @@ module RecordingStudioPresskits
         assign_brand(:font_family, BrandStyle.normalize_font(value), :@font_family_invalid)
       end
 
+      def text_color=(value)
+        assign_brand(:text_color, BrandStyle.normalize_color(value), :@text_color_invalid)
+      end
+
+      def corner_style=(value)
+        assign_brand(:corner_style, CornerStyle.normalize(value), :@corner_style_invalid)
+      end
+
       private
 
       def assign_brand(attribute, normalized, flag)
@@ -32,6 +40,8 @@ module RecordingStudioPresskits
       def branding_must_be_usable
         errors.add(:base, "Brand colour must be a hex colour.") if @brand_color_invalid
         errors.add(:base, "Font must be sans, serif, or mono.") if @font_family_invalid
+        errors.add(:base, "Button text must be a hex colour.") if @text_color_invalid
+        errors.add(:base, "Corners must be square or rounded.") if @corner_style_invalid
       end
     end
   end

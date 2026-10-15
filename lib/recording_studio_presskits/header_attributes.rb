@@ -18,20 +18,33 @@ module RecordingStudioPresskits
 
       def brand(submitted)
         return {} unless apply_brand?(submitted)
-        return { brand_color: nil, font_family: nil } if press_center?(submitted)
+        return cleared_brand if press_center?(submitted)
 
         {
           brand_color: submitted[:brand_color],
-          font_family: submitted[:font_family]
+          font_family: submitted[:font_family],
+          text_color: submitted[:text_color],
+          corner_style: submitted[:corner_style]
         }
       end
 
+      def cleared_brand
+        { brand_color: nil, font_family: nil, text_color: nil, corner_style: nil }
+      end
+
       def apply_brand?(submitted)
-        submitted.key?(:brand_color) || submitted.key?(:font_family) || submitted.key?(:brand_source)
+        submitted.key?(:brand_color) || submitted.key?(:font_family) ||
+          submitted.key?(:text_color) || submitted.key?(:corner_style) ||
+          submitted.key?(:brand_source)
       end
 
       def press_center?(submitted)
         submitted[:brand_source].to_s == "press_center"
+      end
+
+      def stored_source(recordable)
+        names = %i[brand_color font_family text_color corner_style]
+        names.any? { |name| recordable.public_send(name).present? } ? "custom" : "press_center"
       end
 
       def source(submitted)

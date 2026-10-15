@@ -25,7 +25,7 @@
 
     <% if cover_url.present? %>
       <div class="flex items-center gap-3">
-        <%= image_tag cover_url, alt: heading, class: "h-16 w-16 rounded object-cover" %>
+        <%= image_tag cover_url, alt: heading, class: "h-16 w-16 rounded-[var(--radius-md)] object-cover" %>
         <% if uploaded_cover? %>
           <%= render FlatPack::Button::Component.new(
             icon: "trash",
