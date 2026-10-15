@@ -8,7 +8,7 @@ gemspec
 # These gems are not published to RubyGems; resolve the gemspec pins from GitHub.
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.239"
 gem "recording_studio", "~> 4.2", github: "bowerbird-app/RecordingStudio", tag: "v4.5.0"
-gem "recording_studio_accessible", "~> 0.15", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"
+gem "recording_studio_accessible", "~> 0.18", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"
 gem "recording_studio_admin", "~> 2.0", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"
 gem "recording_studio_attachable", "~> 0.15", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
 gem "recording_studio_company", "~> 0.4", github: "bowerbird-app/RecordingStudio_company", tag: "v0.4.0"
@@ -24,7 +24,7 @@ gem "recording_studio_location", "~> 0.4", github: "bowerbird-app/RecordingStudi
 gem "recording_studio_metrics", "~> 0.3", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.3.1"
 gem "recording_studio_orderable", "~> 0.3", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"
 gem "recording_studio_publishable", "~> 0.8", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"
-gem "recording_studio_trashable", "~> 0.9", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.9.0"
+gem "recording_studio_trashable", "~> 0.10", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.1"
 gem "recording_studio_video", "~> 0.2.0", github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.0"
 
 gem "devise"

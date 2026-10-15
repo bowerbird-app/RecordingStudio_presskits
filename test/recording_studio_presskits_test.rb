@@ -93,10 +93,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_presskits.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.15"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.18"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.9"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.10"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.239"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
@@ -115,12 +115,12 @@ class RecordingStudioPresskitsTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.5.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.239"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.9.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.4.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"'
