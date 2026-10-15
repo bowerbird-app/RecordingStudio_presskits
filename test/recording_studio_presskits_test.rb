@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.66.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.67.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -101,10 +101,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.10"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.240"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.243"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_cache", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.9"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.18"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_lists", "~> 0.7"'
@@ -123,13 +123,13 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.19.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.3.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.240"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.243"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.18.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.4.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.7.0"'
@@ -445,7 +445,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "v0.19.0"
     assert_includes readme, "v0.18.0"
     assert_includes readme, "v0.3.1"
-    assert_includes readme, "v0.8.3"
+    assert_includes readme, "v0.9.0"
     assert_includes readme, "recording_studio_downloadable"
     assert_includes readme, "presskits.kit_download"
     assert_includes readme, "Download kit"
@@ -460,7 +460,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.6.1\""
     assert_includes readme, "v0.9.3"
     assert_includes readme, "tag: \"v0.5.3\""
-    assert_includes readme, "tag: \"v0.1.240\""
+    assert_includes readme, "tag: \"v0.1.243\""
     assert_includes readme, "tag: \"v0.2.4\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.3"'
     assert_includes readme, 'gem "recording_studio_lists", "~> 0.7"'
@@ -498,7 +498,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[430/368]"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.240"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.243"'
     assert_includes readme, "FlatPack::FontSwatch"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"

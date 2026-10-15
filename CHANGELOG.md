@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.67.0] - 2026-10-15
+
+### Changed
+- `recording_studio_publishable` is `~> 0.9` from GitHub tag `v0.9.0`.
+- A published kit's quick action is the default button labelled **Published**, with a solid success-green `check-circle`. Draft stays the secondary **Draft** button with outline `pencil-square`. The published control is not a success button.
+- Version `0.67.0`
+
+### Upgrade notes
+- `0.66.0` already shipped. This release is `0.67.0`. Bump to `0.67.0`. There is no presskits migration.
+- Pin Publishable to tag `v0.9.0`:
+
+```ruby
+gem "recording_studio_publishable", "~> 0.9", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.9.0"
+```
+
+- Flatpack is `v0.1.243` (`>= 0.1.243`). Publishable 0.9.0 passes `icon_variant: :solid` and `icon_style: :success` on the published control, and Flatpack `v0.1.243` declares those keywords on the dropdown. The published check is the solid success-green glyph on the same default button. Rebuild Tailwind so the icon colour utilities are generated.
+
 ## [0.66.0] - 2026-10-15
 
 ### Changed
@@ -1242,7 +1259,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.65.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.67.0...HEAD
+[0.67.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.0...v0.67.0
 [0.66.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.66.0
 [0.65.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.64.0...v0.65.0
 [0.64.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.63.0...v0.64.0

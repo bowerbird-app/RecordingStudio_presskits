@@ -142,10 +142,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_publishable.git
-  revision: b5faad20053fbc281835e3ec9001b9abf7d5da8a
-  tag: v0.8.3
+  revision: 19fd29dade96c2327ee3e76947832eb48831fd32
+  tag: v0.9.0
   specs:
-    recording_studio_publishable (0.8.0)
+    recording_studio_publishable (0.9.0)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
       view_component (>= 3.0, < 5.0)
@@ -174,10 +174,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/flatpack.git
-  revision: 616df3bc1dcce28bee4bec151e1f42e413bf6dba
-  tag: v0.1.240
+  revision: 84118f589656d1579ba10935edd6265ddf46f4f6
+  tag: v0.1.243
   specs:
-    flat_pack (0.1.240)
+    flat_pack (0.1.243)
       pagy (~> 9.0)
       rails (>= 7.1, < 9)
       tailwind_merge (~> 0.13)
@@ -186,8 +186,8 @@ GIT
 PATH
   remote: .
   specs:
-    recording_studio_presskits (0.66.0)
-      flat_pack (>= 0.1.240)
+    recording_studio_presskits (0.67.0)
+      flat_pack (>= 0.1.243)
       rails (~> 8.1.0)
       recording_studio (~> 4.7)
       recording_studio_accessible (~> 0.19)
@@ -203,7 +203,7 @@ PATH
       recording_studio_location (~> 0.6)
       recording_studio_metrics (~> 0.3)
       recording_studio_orderable (~> 0.3)
-      recording_studio_publishable (~> 0.8)
+      recording_studio_publishable (~> 0.9)
       recording_studio_trashable (~> 0.10)
       recording_studio_video (~> 0.2.1)
 
@@ -514,7 +514,7 @@ DEPENDENCIES
   recording_studio_metrics (~> 0.3)!
   recording_studio_orderable (~> 0.3)!
   recording_studio_presskits!
-  recording_studio_publishable (~> 0.8)!
+  recording_studio_publishable (~> 0.9)!
   recording_studio_trashable (~> 0.10)!
   recording_studio_video (~> 0.2.1)!
   rubocop
@@ -549,7 +549,7 @@ CHECKSUMS
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
   erubi (1.13.1) sha256=a082103b0885dbc5ecf1172fede897f9ebdb745a4b97a5e8dc63953db1ee4ad9
-  flat_pack (0.1.240)
+  flat_pack (0.1.243)
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   io-console (0.9.4) sha256=a403304f32928ee85e56d457b4612ca43f2703b561a3258844992bd24085fbb1
@@ -611,8 +611,8 @@ CHECKSUMS
   recording_studio_location (0.6.0)
   recording_studio_metrics (0.3.0)
   recording_studio_orderable (0.3.0)
-  recording_studio_presskits (0.66.0)
-  recording_studio_publishable (0.8.0)
+  recording_studio_presskits (0.67.0)
+  recording_studio_publishable (0.9.0)
   recording_studio_trashable (0.10.0)
   recording_studio_video (0.2.1)
   regexp_parser (2.13.1) sha256=5aedb6b7c35688f51e86eef17a15374dfd287c83f4ca644b2c5f3ec50a33b44b
