@@ -33,20 +33,9 @@ module RecordingStudioPresskits
 
     def reorder_by_ids
       @press_kit_recording.recording_studio_orderable_reorder!(
-        ordered_recording_ids: ordered_ids_with_cover_placements,
+        ordered_recording_ids: Array(ordered_recording_ids).map(&:to_s),
         actor: presskits_actor
       )
-    end
-
-    def ordered_ids_with_cover_placements
-      ids = Array(ordered_recording_ids).map(&:to_s)
-      ids + (cover_placement_ids - ids)
-    end
-
-    def cover_placement_ids
-      @press_kit_recording.recording_studio_orderable_children.filter_map do |recording|
-        recording.id.to_s if recording.recordable_type == "RecordingStudioAttachable::Placement"
-      end
     end
 
     def reorder_by_move(child)

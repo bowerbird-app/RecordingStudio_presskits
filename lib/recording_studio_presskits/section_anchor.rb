@@ -28,8 +28,8 @@ module RecordingStudioPresskits
 
     def assign_anchors(sections)
       taken = {}
-      sections.each_with_object({}) do |section, map|
-        map[section.id] = unique_anchor(anchor_base(section), taken)
+      sections.to_h do |section|
+        [section.id, unique_anchor(anchor_base(section), taken)]
       end
     end
 

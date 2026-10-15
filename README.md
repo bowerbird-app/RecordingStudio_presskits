@@ -6,24 +6,25 @@ Kits sit under your workspace, or under any recordable that includes Press kits.
 
 ## Install
 
-Add the gem next to Recording Studio 4.4, Accessible 0.14, Admin 2.0, Publishable 0.7, Downloadable 0.3, Company 0.3, Location 0.4, and the mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
+Add the gem next to Recording Studio 4.7, Accessible 0.19, Admin 2.3, Publishable 0.8, Downloadable 0.6, Company 0.4, Location 0.6, and the mixins PressKit already opts into. GitHub hosting is not a reason to skip the gemspec pins.
 
 ```ruby
 # Gemfile
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.5.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"
-gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"
-gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"
-gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.9.0"
-gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"
-gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"
-gem "recording_studio_downloadable", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.4.0"
-gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
-gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.4.0"
-gem "recording_studio_lists", github: "bowerbird-app/RecordingStudio_lists", tag: "v0.5.0"
-gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.0"
-gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.4"
-gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.7.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.19.0"
+gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.3.2"
+gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"
+gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.1"
+gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.3"
+gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.3"
+gem "recording_studio_downloadable", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.6.0"
+gem "recording_studio_cache", github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"
+gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.18.0"
+gem "recording_studio_company", github: "bowerbird-app/RecordingStudio_company", tag: "v0.4.3"
+gem "recording_studio_lists", github: "bowerbird-app/RecordingStudio_lists", tag: "v0.7.0"
+gem "recording_studio_location", github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.1"
+gem "recording_studio_external_embed", github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.7"
+gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.4"
 gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.3.1"
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.240"
 gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presskits"
@@ -31,20 +32,21 @@ gem "recording_studio_presskits", github: "bowerbird-app/RecordingStudio_presski
 
 ```ruby
 # gemspec / host Gemfile constraints
-gem "recording_studio", "~> 4.2"
-gem "recording_studio_accessible", "~> 0.15"
-gem "recording_studio_admin", "~> 2.0"
+gem "recording_studio", "~> 4.7"
+gem "recording_studio_accessible", "~> 0.19"
+gem "recording_studio_admin", "~> 2.3"
 gem "recording_studio_orderable", "~> 0.3"
-gem "recording_studio_trashable", "~> 0.9"
+gem "recording_studio_trashable", "~> 0.10"
 gem "recording_studio_duplicatable", "~> 0.5"
 gem "recording_studio_publishable", "~> 0.8"
-gem "recording_studio_downloadable", "~> 0.4"
-gem "recording_studio_attachable", "~> 0.15"
+gem "recording_studio_downloadable", "~> 0.6"
+gem "recording_studio_cache", "~> 0.5"
+gem "recording_studio_attachable", "~> 0.18"
 gem "recording_studio_company", "~> 0.4"
-gem "recording_studio_lists", "~> 0.5"
-gem "recording_studio_location", "~> 0.4"
+gem "recording_studio_lists", "~> 0.7"
+gem "recording_studio_location", "~> 0.6"
 gem "recording_studio_external_embed", "~> 0.1.1"
-gem "recording_studio_video", "~> 0.2.0"
+gem "recording_studio_video", "~> 0.2.1"
 gem "recording_studio_metrics", "~> 0.3"
 gem "flat_pack", ">= 0.1.240"
 ```
@@ -631,21 +633,22 @@ Dummy kit pins:
 
 | Gem | Pin |
 |-----|-----|
-| Recording Studio | `v4.5.0` |
-| Accessible | `v0.15.0` |
-| Admin | `v2.2.0` |
-| Root Switchable | `v0.8.0` |
+| Recording Studio | `v4.7.0` |
+| Accessible | `v0.19.0` |
+| Admin | `v2.3.2` |
+| Root Switchable | `v0.9.3` |
 | FlatPack | `v0.1.240` |
-| Attachable | `v0.15.0` |
-| Company | `v0.4.0` |
-| Location | `v0.6.0` |
-| Orderable | `v0.3.0` |
-| Trashable | `v0.9.0` |
-| Duplicatable | `v0.5.0` |
-| Publishable | `v0.8.0` |
-| Downloadable | `v0.4.0` |
-| External Embed | `v0.1.4` |
-| Video | `v0.2.0` |
+| Attachable | `v0.18.0` |
+| Cache | `v0.5.1` |
+| Company | `v0.4.3` |
+| Location | `v0.6.1` |
+| Orderable | `v0.3.1` |
+| Trashable | `v0.10.1` |
+| Duplicatable | `v0.5.3` |
+| Publishable | `v0.8.3` |
+| Downloadable | `v0.6.0` |
+| External Embed | `v0.1.7` |
+| Video | `v0.2.4` |
 | Metrics | `v0.3.1` |
 
 Authenticated dummy screens keep `RecordingStudio::UsesDefaultLayout`. Core 4.4 puts `data-theme` on `<body>`; dummy overrides `layouts/recording_studio/default_layout` so `<html data-theme="rounded">` wraps index, the kit editor, owner preview, and Admin. That is Flatpack's built-in rounded theme from `flat_pack/variables` — not a custom theme. The override also links `flat_pack/application`, which paints primary and default buttons. The sign-in layout and the public blank layout link that sheet too. The same override passes Flatpack `anchor_href` for the close X. The layout draws one back control. A screen that sets a back URL gets that link. A screen that does not gets PageNav's history button. Core still stores the close path in `page_nav_anchor_url` and the back path in `page_nav_back_url`. After sign-in, `/` redirects to the press kit index. Dummy Tailwind scans FlatPack, Recording Studio, Admin, Publishable, Downloadable, Attachable, Company, Location, the vendored embargo gem, and this gem so that layout is not an unstyled box.

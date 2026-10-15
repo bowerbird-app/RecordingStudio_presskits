@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.62.0] - 2026-10-15
+
+### Changed
+- Runtime floors now match the versions this gem is tested with. Recording Studio is `~> 4.7` (tag `v4.7.0`). Accessible is `~> 0.19` (`v0.19.0`). Admin is `~> 2.3` (`v2.3.2`). Attachable is `~> 0.18` (`v0.18.0`). Downloadable is `~> 0.6` (`v0.6.0`). Lists is `~> 0.7` (`v0.7.0`). Location is `~> 0.6` (`v0.6.1`). Trashable is `~> 0.10` (`v0.10.1`). Video is `~> 0.2.1` (`v0.2.4`).
+- Development tags moved with those gems: Company `v0.4.3`, Duplicatable `v0.5.3`, External Embed `v0.1.7`, Orderable `v0.3.1`, Publishable `v0.8.3`, Root Switchable `v0.9.3`.
+- `recording_studio_cache` `~> 0.5` (tag `v0.5.1`) is a direct dependency. Downloadable 0.6 and Root Switchable 0.9 need it, and it is not published on RubyGems.
+- Kit reorder no longer appends Attachable placement children. Attachable 0.18 removed `Library` and `Placement`.
+- Version `0.62.0`
+
+### Upgrade notes
+- `0.61.0` already shipped. This release is `0.62.0`. Bump to `0.62.0`. There is no presskits migration.
+- Add `recording_studio_cache` from GitHub tag `v0.5.1`. Drop `Library` and `Placement` from `config.recordable_types`.
+- Run `bin/rails generate recording_studio_lists:migrations` and `bin/rails generate recording_studio_downloadable:migrations`, then `bin/rails db:migrate`. Lists moves item order onto `recording_studio_orderable_position` and drops `recording_studio_list_items.position`. Downloadable adds `recording_studio_downloadable_download_logs`. Orderable's position column has to exist before the lists migration.
+- Flatpack stays `>= 0.1.240` (tag `v0.1.240`). Metrics stays `~> 0.3` (tag `v0.3.1`). Rails stays `~> 8.1`. Embargo stays the vendored `0.1.0` mirror.
+
 ## [0.61.0] - 2026-10-14
 
 ### Added
@@ -1154,7 +1169,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.61.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.62.0...HEAD
+[0.62.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.61.0...v0.62.0
 [0.61.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...v0.61.0
 [0.60.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.59.0...v0.60.0
 [0.59.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.58.0...v0.59.0

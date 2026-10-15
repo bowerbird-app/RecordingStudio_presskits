@@ -70,7 +70,7 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     refute_select "#presskits-kit-header #presskits-cover-image"
     assert_select "#presskits-kit-header [data-presskits-header-image-actions] a[aria-label='Edit image'][href='#{header_cover_path(kit)}']"
     refute_select "#presskits-kit-header [role='menuitem'][aria-label='Cover image']"
-    refute_includes response.body, recording_studio_attachable.recording_placements_path(kit)
+    refute_includes response.body, "/placements"
 
     get recording_studio_presskits.press_kits_path
     assert_response :success

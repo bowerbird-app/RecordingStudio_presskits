@@ -73,8 +73,8 @@ module RecordingStudioPresskits
       end
 
       def credit_catalog
-        Credits.active_for_root(@recording.root_recording).each_with_object({}) do |recording, catalog|
-          catalog[recording.id] = sanitized_credit_url(recording)
+        Credits.active_for_root(@recording.root_recording).to_h do |recording|
+          [recording.id, sanitized_credit_url(recording)]
         end
       end
 
