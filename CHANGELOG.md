@@ -19,10 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.65.0] - 2026-10-15
 
+### Added
+- `Cover::Component` has a public `after_location` slot (`renders_one :after_location`). Fill it with `with_after_location`. It renders under the location line (after the wide release/location row and the narrow stacked location), before the cover actions. An empty slot hides the row.
+
 ### Changed
 - `recording_studio_embargo` is `~> 0.3.0` from GitHub tag `v0.3.0`. The vendored tree at `vendor/gems/recording_studio_embargo` is gone.
 - The kit editor opens the embargo editor in `FlatPack::Modal` `embargo-editor-modal` (`size: :xl`). The host owns that modal and `turbo_frame_tag "embargo_editor"`, and calls `render_embargo_button(recording, turbo_frame: "embargo_editor")`. A Turbo-Frame request renders the editor without the page layout. Saving stays in the frame, shows "Embargo saved", and refreshes the button.
-- The limited preview, the owner preview, and the public kit call `render_embargo_notice(recording, size: :md)` under the location on the cover. The kit editor header calls `render_embargo_notice(recording, size: :sm)` in that same spot. Both calls are unconditional. The notice renders nothing when the embargo is off or the release time has passed. The homemade **Embargoed** badge is gone.
+- The limited preview, the owner preview, and the public kit fill `with_after_location` with `render_embargo_notice(recording, size: :md)`. The kit editor header fills that same slot with `render_embargo_notice(recording, size: :sm)`. Both calls are unconditional. The notice renders nothing when the embargo is off or the release time has passed. The homemade **Embargoed** badge is gone.
 - Fragment cache keys for an active embargo append `RecordingStudioEmbargo.cache_key`. Press Kits no longer builds `Embargo.cache_boundary` itself (one-time cache invalidation on deploy; building the key does a DB lookup).
 - Version `0.65.0`
 
