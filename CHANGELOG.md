@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.66.0] - 2026-10-15
+
+### Changed
+- Engine `ApplicationController` includes `RecordingStudioAccessible::ControllerAuth` and calls `recording_studio_auth` with `prefix: :presskits` after `protect_from_forgery`, so `:verify_authenticity_token` still runs before the auth and set-actor filters. The copied authenticate / actor / authorize / root helpers are gone; public names (`authenticate_presskits_actor!`, `presskits_actor`, `current_presskits_root`, `authorize_recording!`, `require_root!`) stay the same.
+- Version `0.66.0`
+
+### Upgrade notes
+- Bump to `0.66.0`. Accessible stays `~> 0.19` (tag `v0.19.0`) as on main; ControllerAuth needs Accessible `0.18` or newer. No presskits migration.
+- Host overrides of `authenticate_presskits_actor!`, `presskits_actor`, `set_presskits_current_actor`, and `current_presskits_root` keep working. Status codes and redirects match main (`head :unauthorized` / `head :forbidden`; Devise `authenticate_user!` still redirects to sign in).
+
 ## [0.65.0] - 2026-10-15
 
 ### Changed
@@ -1230,6 +1240,7 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Basic test suite with Minitest
 
 [Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.65.0...HEAD
+[0.66.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.66.0
 [0.65.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.64.0...v0.65.0
 [0.64.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.63.0...v0.64.0
 [0.63.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.62.0...v0.63.0
