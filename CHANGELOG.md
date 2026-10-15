@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.63.0] - 2026-10-15
+
+### Changed
+- Kit reorder still uses `recording_studio_orderable_move!` and `FlatPack::List` (`orderable: true`, `divider: true`). A save reloads turbo frame `presskits-editor-sections` and leaves the Reorder modal open. After that modal opens, its dialog scale is cleared so the drag row uses the viewport.
+- Section, header, downloads, visibility, and cover screens set the navigable frame to `loading="eager"` and assign `src` before the modal opens, so the screen is not left on the spinner.
+- The kit editor mounts one navigable modal per Flatpack size: `pk-editor-md`, `pk-editor` (`lg`), `pk-editor-xl`, and `pk-editor-2xl`. Credits uses `2xl`. List and Images use `xl`. Menu, Downloads, Visibility, and Cover image use `md`. The other section editors and the header use `lg`.
+- A Files section is a `FlatPack::List` with `divider: true`. The description sits above the extension and size.
+- Each stat is a `FlatPack::Card` with `style: :shaded` and `padding: :lg`.
+- A Location section is a `FlatPack::List` with `divider: true` (name, then address). It no longer calls `recording_studio_location_display`.
+- **Edit image** opens `edit_press_kit_cover_path` in `pk-editor-md`. That screen is the cover upload and remove. Downloads and Visibility keep the submit inside the form, with `mt-8` above a full-width button.
+- The kits index uses the engine layout `recording_studio_presskits/library`. That document is `FlatPack::SidebarLayout` and is not nested in `recording_studio/default_layout`.
+- Version `0.63.0`
+
+### Upgrade notes
+- `0.62.0` already shipped. This release is `0.63.0`. Bump to `0.63.0`. There is no presskits migration.
+- The index action no longer renders inside the default layout or PageNav. Override `recording_studio_presskits/library` to change the sidebar. Other engine screens stay on `recording_studio/default_layout`.
+- Hosts that styled only `#pk-editor` still get the header and the `lg` section screens. Menu, Downloads, Visibility, and Cover image use `#pk-editor-md`. Images and List use `#pk-editor-xl`. Credits uses `#pk-editor-2xl`.
+
 ## [0.62.0] - 2026-10-15
 
 ### Changed

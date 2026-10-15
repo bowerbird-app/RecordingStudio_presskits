@@ -120,6 +120,21 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
     assert_empty RecordingStudioPresskits::DirectImages.list(kit.reload)
   end
 
+  test "edit image opens the cover controls without the header form" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_cover_path(kit),
+        headers: { "Turbo-Frame" => "pk-editor-md-screen" }
+    assert_response :success
+    assert_select "turbo-frame#pk-editor-md-screen"
+    assert_select "#press_kit_cover_image button", text: "Upload"
+    refute_select "#presskits-header-brand"
+    refute_select "#presskits-header-location"
+    refute_select "input[name='press_kit[release_date]']"
+  end
+
   test "reordering sections leaves the cover attachment on the kit" do
     kit = record_kit("Spring launch")
     first = record_block(kit, "Hero")
@@ -171,7 +186,7 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
   end
 
   def header_cover_path(kit)
-    "#{recording_studio_presskits.edit_press_kit_header_path(kit)}#press_kit_cover_image"
+    recording_studio_presskits.edit_press_kit_cover_path(kit)
   end
 
   def publish_kit!(kit)

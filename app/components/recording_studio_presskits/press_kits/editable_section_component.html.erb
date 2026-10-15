@@ -24,7 +24,7 @@
             text: edit_label,
             icon: "pencil",
             href: @content_path,
-            data: helpers.presskits_editor_open_data
+            data: helpers.presskits_editor_open_data(size: editor_size)
           ) %>
         <% end %>
         <%= render RecordingStudioPresskits::PressKits::EditorActionButtonComponent.new(

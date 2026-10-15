@@ -1,5 +1,19 @@
 # Upgrade notes
 
+## 0.63.0
+
+`0.62.0` already shipped. Bump to `0.63.0`. There is no presskits migration.
+
+The kits index action renders layout `recording_studio_presskits/library`. That file is the document: rounded theme, the same stylesheets as the dummy default layout, and `FlatPack::SidebarLayout` as the body. It is not rendered inside `recording_studio/default_layout`, and it has no PageNav. The Library group and Credits item live in that layout. Override the layout to change the sidebar. The kit editor, credits, header, and the other engine screens stay on `recording_studio/default_layout`.
+
+`Edit image` goes to `edit_press_kit_cover_path` (`pk-editor-md`), which renders only the cover upload and remove. The header editor still includes that same block for a full-page header edit. Upload and remove return to the screen that rendered them.
+
+Kit reorder still posts to `press_kit_order_path` and calls `recording_studio_orderable_move!`. The preview behind the modal is turbo frame `presskits-editor-sections`.
+
+A Files list shows the description above the extension and size. A Location section renders `FlatPack::List` with a divider. Stats cards use `style: :shaded` and `padding: :lg`.
+
+Flatpack still has no gallery lightbox for a masonry of images, and the embargo gem's edit screen is still a full page. This release does not add either.
+
 ## 0.62.0
 
 `0.61.0` already shipped. Bump to `0.62.0`. There is no presskits migration.

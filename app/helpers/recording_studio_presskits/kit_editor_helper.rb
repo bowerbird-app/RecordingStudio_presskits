@@ -2,10 +2,36 @@
 
 module RecordingStudioPresskits
   module KitEditorHelper
+    # lg keeps the original id so existing screens and tests still address it.
     EDITOR_MODAL_ID = "pk-editor"
+    EDITOR_MODAL_SIZES = {
+      "md" => "pk-editor-md",
+      "lg" => EDITOR_MODAL_ID,
+      "xl" => "pk-editor-xl",
+      "2xl" => "pk-editor-2xl"
+    }.freeze
+    SECTION_MODAL_SIZES = {
+      "RecordingStudioPresskits::CreditsSection" => "2xl",
+      "RecordingStudioPresskits::ListSection" => "xl",
+      "RecordingStudioPresskits::Images" => "xl",
+      "RecordingStudioPresskits::MenuSection" => "md"
+    }.freeze
+
+    def presskits_editor_modal_ids
+      EDITOR_MODAL_SIZES.values
+    end
+
+    def presskits_editor_modal_id_for(size)
+      EDITOR_MODAL_SIZES.fetch(size.to_s)
+    end
+
+    def presskits_editor_size_for(type_name)
+      SECTION_MODAL_SIZES.fetch(type_name.to_s, "lg")
+    end
 
     def presskits_editor_modal_id
-      EDITOR_MODAL_ID
+      requested = presskits_editor_modal_ids.find { |modal_id| editor_frame_id == "#{modal_id}-screen" }
+      requested || EDITOR_MODAL_ID
     end
 
     # Navigable screens require a title. A zero-width space leaves the chrome
@@ -21,13 +47,14 @@ module RecordingStudioPresskits
     def presskits_editor_dialog?
       return false unless respond_to?(:request) && request
 
-      request.headers["Turbo-Frame"].to_s == presskits_editor_screen_id
+      presskits_editor_modal_ids.any? { |modal_id| editor_frame_id == "#{modal_id}-screen" }
     end
 
-    def presskits_editor_open_data
+    def presskits_editor_open_data(size: :lg)
+      modal_id = presskits_editor_modal_id_for(size)
       {
-        modal_id: presskits_editor_modal_id,
-        turbo_frame: presskits_editor_screen_id
+        modal_id: modal_id,
+        turbo_frame: "#{modal_id}-screen"
       }
     end
 
@@ -75,6 +102,12 @@ module RecordingStudioPresskits
         remove_path: press_kit_section_path(@press_kit_recording, recording),
         highlight: highlight
       )
+    end
+
+    def editor_frame_id
+      return "" unless respond_to?(:request) && request
+
+      request.headers["Turbo-Frame"].to_s
     end
 
     def sections_order_for

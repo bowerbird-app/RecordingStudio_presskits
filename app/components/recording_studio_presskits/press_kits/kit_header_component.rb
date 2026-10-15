@@ -32,7 +32,7 @@ module RecordingStudioPresskits
       def cover_image_path
         return unless CoverImage.enabled?(@press_kit_recording)
 
-        "#{@header_edit_path}#press_kit_cover_image"
+        helpers.edit_press_kit_cover_path(@press_kit_recording)
       end
     end
   end

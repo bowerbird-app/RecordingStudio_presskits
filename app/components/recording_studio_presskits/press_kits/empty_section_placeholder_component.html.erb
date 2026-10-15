@@ -9,7 +9,7 @@
       text: add_label,
       style: :default,
       href: @edit_path,
-      data: helpers.presskits_editor_open_data
+      data: helpers.presskits_editor_open_data(size: helpers.presskits_editor_size_for(@content_type))
     ) %>
   </div>
 </div>

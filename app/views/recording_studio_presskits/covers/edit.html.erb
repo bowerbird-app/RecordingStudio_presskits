@@ -1,0 +1,24 @@
+<% cover_controls = RecordingStudioPresskits::PressKits::HeaderCoverControls.new(
+  self,
+  @press_kit_recording,
+  return_to: edit_press_kit_cover_path(@press_kit_recording)
+) %>
+<% if presskits_editor_dialog? %>
+  <%= flat_pack_modal_screen(modal_id: presskits_editor_modal_id, title: I18n.t("recording_studio_presskits.editor.cover_image")) do %>
+    <%= render "recording_studio_presskits/press_kits/cover_image_fields", cover_controls: cover_controls %>
+  <% end %>
+<% else %>
+  <% presskits_page_nav(
+    title: I18n.t("recording_studio_presskits.editor.cover_image"),
+    back_url: edit_press_kit_path(@press_kit_recording),
+    back_label: "Back to kit",
+    close_url: edit_press_kit_path(@press_kit_recording)
+  ) %>
+
+  <%= render FlatPack::PageTitle::Component.new(
+    title: I18n.t("recording_studio_presskits.editor.cover_image"),
+    variant: :h1
+  ) %>
+
+  <%= render "recording_studio_presskits/press_kits/cover_image_fields", cover_controls: cover_controls %>
+<% end %>

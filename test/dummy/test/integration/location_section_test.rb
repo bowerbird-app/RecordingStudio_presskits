@@ -279,6 +279,9 @@ class LocationSectionTest < ActionDispatch::IntegrationTest
     assert_includes preview, "Two rooms"
     assert_includes preview, "The Pavilion"
     assert_includes preview, "Harbour Hall"
+    assert_select "#presskits-editor-preview [data-presskits-locations].flat-pack-list-divided"
+    assert_select "#presskits-editor-preview [data-presskits-location-name]", text: "The Pavilion"
+    refute_select "#presskits-editor-preview h3", text: "The Pavilion"
 
     publish_kit!(kit)
     get "/published/#{kit.publishable_child_recording.id}/spring-launch-places"
@@ -286,6 +289,8 @@ class LocationSectionTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Where to find us"
     assert_includes response.body, "The Pavilion"
     assert_includes response.body, "Harbour Hall"
+    assert_select "[data-presskits-locations].flat-pack-list-divided"
+    assert_select "[data-presskits-location-name]", text: "Harbour Hall"
     assert_select "[data-cover-location]", count: 0
   end
 

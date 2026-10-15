@@ -68,6 +68,10 @@ module RecordingStudioPresskits
         I18n.t("recording_studio_presskits.editor.edit")
       end
 
+      def editor_size
+        helpers.presskits_editor_size_for(frame.content_recording&.recordable_type)
+      end
+
       def inline_heading
         SectionInlineHeadingComponent.new(
           section_recording: @section_recording,

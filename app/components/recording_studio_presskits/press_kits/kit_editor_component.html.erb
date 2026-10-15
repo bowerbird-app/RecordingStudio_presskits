@@ -1,7 +1,7 @@
 <div
   class="flex flex-col gap-6"
   data-controller="recording-studio-presskits--editor-chrome"
-  data-action="pointerdown@window->recording-studio-presskits--editor-chrome#onPointerDown"
+  data-action="pointerdown@window->recording-studio-presskits--editor-chrome#onPointerDown keydown@window->recording-studio-presskits--editor-chrome#prepareEditorFrame"
 >
   <div id="presskits-editor-toolbar" class="flex flex-wrap items-center gap-3">
     <%= render FlatPack::Button::Component.new(
@@ -27,7 +27,7 @@
         style: :default,
         href: visibility_edit_path,
         id: "presskits-visibility",
-        data: helpers.presskits_editor_open_data
+        data: helpers.presskits_editor_open_data(size: :md)
       ) %>
     <% end %>
 
@@ -38,7 +38,7 @@
         style: :default,
         href: @download_edit_path,
         id: "presskits-downloads",
-        data: helpers.presskits_editor_open_data
+        data: helpers.presskits_editor_open_data(size: :md)
       ) %>
     <% end %>
 
@@ -60,7 +60,7 @@
       header_edit_path: @header_edit_path
     ) %>
 
-    <div id="presskits-editor-sections" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES %>">
+    <%= helpers.turbo_frame_tag "presskits-editor-sections", class: RecordingStudioPresskits::PressKits::EditorChrome::KIT_SECTIONS_CLASSES do %>
       <% if @section_recordings.any? %>
         <% @section_recordings.each do |recording| %>
           <%= render RecordingStudioPresskits::PressKits::EditableSectionComponent.new(
@@ -81,19 +81,21 @@
           </div>
         <% end %>
       <% end %>
-    </div>
+    <% end %>
   </div>
 
   <div id="presskits-toasts" class="pointer-events-none fixed right-4 bottom-4 z-[60] flex flex-col gap-3"></div>
   <%= render RecordingStudioPresskits::ToastsRegionComponent.new %>
 
-  <%= render FlatPack::Modal::Component.new(
-    id: helpers.presskits_editor_modal_id,
-    navigable: true,
-    src: @header_edit_path,
-    size: :lg,
-    scroll: :page
-  ) %>
+  <% [["md", :md], ["lg", :lg], ["xl", :xl], ["2xl", :"2xl"]].each do |size_name, size| %>
+    <%= render FlatPack::Modal::Component.new(
+      id: helpers.presskits_editor_modal_id_for(size_name),
+      navigable: true,
+      src: @header_edit_path,
+      size: size,
+      scroll: :page
+    ) %>
+  <% end %>
 
   <%= render FlatPack::Modal::Component.new(
     id: "presskits-section-picker-modal",

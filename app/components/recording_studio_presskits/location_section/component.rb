@@ -16,8 +16,18 @@ module RecordingStudioPresskits
         LocationSection.active_locations(@recording)
       end
 
-      def display_for(location_recording)
-        helpers.recording_studio_location_display(location_recording.recordable)
+      def place_icon(place)
+        return if defined?(RecordingStudioLocation) && RecordingStudioLocation.configuration.icon_mode_none?
+        return unless place.respond_to?(:resolved_icon)
+
+        place.resolved_icon.presence
+      end
+
+      def place_address(place)
+        address = place.full_address.to_s.strip
+        return if address.blank? || address == place.display_name
+
+        address
       end
     end
   end

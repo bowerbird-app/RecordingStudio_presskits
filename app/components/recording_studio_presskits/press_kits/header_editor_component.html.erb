@@ -62,27 +62,7 @@
     </div>
   <% end %>
 
-  <% if cover_controls.cover_image_enabled? %>
-    <div id="press_kit_cover_image" class="order-2 flex flex-col gap-3">
-      <%= render FlatPack::FormField::Component.new(
-        field_id: "press_kit_cover_image_control",
-        label: cover_controls.cover_image_label
-      ) do |field| %>
-        <% field.with_control do %>
-          <div class="flex flex-wrap items-center gap-3">
-            <%= helpers.render partial: "recording_studio_attachable/attachment_file_buttons/button",
-                  locals: cover_controls.cover_file_button_locals %>
-            <% if cover_controls.cover_attachment_recording %>
-              <%= render FlatPack::Button::Component.new(
-                text: I18n.t("recording_studio_presskits.editor.remove_cover_image"),
-                style: :secondary,
-                href: cover_controls.cover_remove_path,
-                data: cover_controls.cover_remove_data
-              ) %>
-            <% end %>
-          </div>
-        <% end %>
-      <% end %>
-    </div>
-  <% end %>
+  <div class="order-2">
+    <%= render "recording_studio_presskits/press_kits/cover_image_fields", cover_controls: cover_controls %>
+  </div>
 </div>
