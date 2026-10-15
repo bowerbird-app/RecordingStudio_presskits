@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `recording_studio_publishable` is `~> 0.9` from GitHub tag `v0.9.0`.
-- A published kit's quick action is the default button labelled **Published**, with the `check-circle` icon. Draft stays the secondary **Draft** button with `pencil-square`. The published control is not a success button.
+- A published kit's quick action is the default button labelled **Published**, with a solid success-green `check-circle`. Draft stays the secondary **Draft** button with outline `pencil-square`. The published control is not a success button.
 - Version `0.67.0`
 
 ### Upgrade notes
@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 gem "recording_studio_publishable", "~> 0.9", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.9.0"
 ```
 
-- Flatpack stays `v0.1.240` (`>= 0.1.240`). Publishable 0.9.0 passes `icon_variant: :solid` and `icon_style: :success` on the published control. Those arguments arrived in Flatpack `v0.1.243`. This gem stays on the Flatpack components it already uses. On a dropdown that does not declare those keywords, Press Kits drops them so they are not HTML attributes on the menu wrapper. The glyph stays the default outline in the button text colour. A host already on Flatpack `v0.1.243` or newer keeps those keywords, gets the solid success check on the same default button, and should rebuild Tailwind so the icon colour utilities are generated.
+- Flatpack is `v0.1.243` (`>= 0.1.243`). Publishable 0.9.0 passes `icon_variant: :solid` and `icon_style: :success` on the published control, and Flatpack `v0.1.243` declares those keywords on the dropdown. The published check is the solid success-green glyph on the same default button. Rebuild Tailwind so the icon colour utilities are generated.
 
 ## [0.66.0] - 2026-10-15
 

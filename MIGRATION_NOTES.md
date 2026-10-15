@@ -10,9 +10,15 @@ Publishable is `~> 0.9` (git tag `v0.9.0`):
 gem "recording_studio_publishable", "~> 0.9", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.9.0"
 ```
 
-The kit editor still calls `render_publishable_quick_actions`. A published kit shows **Published** on the default button with `check-circle`. A draft shows **Draft** on the secondary button with `pencil-square`. The published control is the default button.
+The kit editor still calls `render_publishable_quick_actions`. A published kit shows **Published** on the default button with a solid success-green `check-circle`. A draft shows **Draft** on the secondary button with outline `pencil-square`. The published control is the default button.
 
-Flatpack stays `v0.1.240` (`>= 0.1.240`). Publishable 0.9.0 passes `icon_variant: :solid` and `icon_style: :success` for the published check. Flatpack `v0.1.243` is the release that accepts those arguments. This gem does not take that release. `FlatpackDropdownIconArguments` drops the two keywords when `FlatPack::Button::Dropdown::Component` does not declare them, so they are not attributes on the menu wrapper. The glyph stays the default outline in the button text colour. A host already on Flatpack `v0.1.243` or newer keeps the keywords and gets the solid success check. Rebuild Tailwind there so the icon colour utilities are generated.
+Flatpack is `v0.1.243` (`>= 0.1.243`):
+
+```ruby
+gem "flat_pack", ">= 0.1.243", github: "bowerbird-app/flatpack", tag: "v0.1.243"
+```
+
+Publishable 0.9.0 passes `icon_variant: :solid` and `icon_style: :success` for the published check. Flatpack `v0.1.243` declares those keywords on the dropdown, so they reach the icon. Rebuild Tailwind so the icon colour utilities are generated.
 
 ## 0.66.0
 

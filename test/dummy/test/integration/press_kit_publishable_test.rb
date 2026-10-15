@@ -88,7 +88,9 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_publishable_quick_actions(kit, trigger: "Published", style: "default", icon: "check-circle")
+    assert_publishable_quick_actions(
+      kit, trigger: "Published", style: "default", icon: "check-circle", icon_variant: "solid", icon_style: "success"
+    )
     refute_includes response.body, "Go live"
     refute_includes response.body, "See it live"
     refute_includes response.body, "EditButtonComponent"
@@ -98,7 +100,9 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
     follow_redirect!
     assert_response :success
-    assert_publishable_quick_actions(kit, trigger: "Published", style: "default", icon: "check-circle")
+    assert_publishable_quick_actions(
+      kit, trigger: "Published", style: "default", icon: "check-circle", icon_variant: "solid", icon_style: "success"
+    )
     refute_includes response.body, "Go live"
     refute_includes response.body, "See it live"
   end
@@ -216,7 +220,9 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal "text/vnd.turbo-stream.html", response.media_type
     assert_select "turbo-stream[action=replace][target=?]", "publishable_quick_actions_#{kit.id}"
-    assert_publishable_quick_actions(kit, trigger: "Published", style: "default", icon: "check-circle")
+    assert_publishable_quick_actions(
+      kit, trigger: "Published", style: "default", icon: "check-circle", icon_variant: "solid", icon_style: "success"
+    )
     assert kit.reload.currently_published?
   end
 
@@ -235,14 +241,23 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
   private
 
-  def assert_publishable_quick_actions(kit, trigger:, style:, icon:)
-    assert_includes FlatPack::Button::Dropdown::Component.ancestors,
-      RecordingStudioPresskits::FlatpackDropdownIconArguments
-
+  def assert_publishable_quick_actions(kit, trigger:, style:, icon:, icon_variant: "outline", icon_style: nil)
     assert_select "#publishable_quick_actions_#{kit.id}" do
       assert_select "button[data-fp-style=?]", style, text: trigger
-      assert_select "button[data-fp-style=?] [data-flat-pack--icon-name-value=?][data-flat-pack--icon-variant-value=outline]",
-        style, icon
+      assert_select "button[data-fp-style=?] [data-flat-pack--icon-name-value=?][data-flat-pack--icon-variant-value=?]",
+        style, icon, icon_variant
+      if icon_style
+        assert_select "button[data-fp-style=?] [data-flat-pack--icon-name-value=?][data-icon-style=?]",
+          style, icon, icon_style do |icons|
+          assert_includes icons.first["class"], "fp-button-icon"
+          if icon_style == "success"
+            assert_includes icons.first["class"],
+              "text-[color-mix(in_oklab,var(--button-icon-success-color)_55%,var(--fp-button-text))]"
+          end
+        end
+      else
+        assert_select "[data-icon-style]", count: 0
+      end
       assert_select "[role=menu].publishable-quick-actions-menu"
       assert_select "button[data-fp-style=success]", count: 0
       assert_select "[icon_variant]", count: 0
