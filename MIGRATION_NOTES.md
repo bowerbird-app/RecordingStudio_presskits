@@ -1,5 +1,31 @@
 # Upgrade notes
 
+## 0.62.0
+
+`0.61.0` already shipped. Bump to `0.62.0`. There is no presskits migration.
+
+Pin the host Gemfile to the tags this release was tested with. Recording Studio `v4.7.0` (`~> 4.7`). Accessible `v0.19.0` (`~> 0.19`). Admin `v2.3.2` (`~> 2.3`). Attachable `v0.18.0` (`~> 0.18`). Downloadable `v0.6.0` (`~> 0.6`). Lists `v0.7.0` (`~> 0.7`). Location `v0.6.1` (`~> 0.6`). Trashable `v0.10.1` (`~> 0.10`). Video `v0.2.4` (`~> 0.2.1`). Company `v0.4.3`. Duplicatable `v0.5.3`. External Embed `v0.1.7`. Orderable `v0.3.1`. Publishable `v0.8.3`. Root Switchable `v0.9.3`. Flatpack stays `v0.1.240` (`>= 0.1.240`). Metrics stays `v0.3.1` (`~> 0.3`). Rails stays `~> 8.1`.
+
+Add cache. It is not on RubyGems:
+
+```ruby
+gem "recording_studio_cache", "~> 0.5", github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"
+```
+
+Downloadable 0.6 and Root Switchable 0.9 both require `~> 0.5`.
+
+Drop `RecordingStudioAttachable::Library` and `RecordingStudioAttachable::Placement` from `config.recordable_types`. Attachable 0.18 removed those classes. Press kits already attach cover and section images directly. Kit reorder no longer keeps placement children in the order list.
+
+Run the new dependency migrations after Orderable's position column exists:
+
+```bash
+bin/rails generate recording_studio_lists:migrations
+bin/rails generate recording_studio_downloadable:migrations
+bin/rails db:migrate
+```
+
+The lists migration copies `recording_studio_list_items.position` onto `recording_studio_orderable_position`, then drops that column and `recording_studio_list_items_position_check`. Downloadable creates `recording_studio_downloadable_download_logs`. Nothing is backfilled into the log. Embargo stays the vendored `0.1.0` mirror.
+
 ## 0.61.0
 
 `0.60.0` already shipped. Bump to `0.61.0`.

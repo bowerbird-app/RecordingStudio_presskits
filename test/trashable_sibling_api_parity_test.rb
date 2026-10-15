@@ -19,20 +19,21 @@ class TrashableSiblingApiParityTest < Minitest::Test
     "app/controllers/recording_studio_presskits/list_items_controller.rb"
   ].freeze
 
-  def test_pins_trashable_0_9_by_tag_and_gemspec
+  def test_pins_trashable_0_10_by_tag_and_gemspec
     gemspec = File.read(File.join(ROOT, "recording_studio_presskits.gemspec"))
     gemfile = File.read(File.join(ROOT, "Gemfile"))
     dummy = File.read(File.join(ROOT, "test/dummy/Gemfile"))
 
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.9"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.10"'
     assert_match(
-      /recording_studio_trashable", "~> 0\.9".*tag: "v0\.9\.0"/,
+      /recording_studio_trashable", "~> 0\.10".*tag: "v0\.10\.1"/,
       gemfile
     )
     assert_match(
-      /recording_studio_trashable".*tag: "v0\.9\.0"/,
+      /recording_studio_trashable".*tag: "v0\.10\.1"/,
       dummy
     )
+    refute_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.9"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.8"'
     refute_match(/recording_studio_trashable[^\n]*tag: "v0\.8\.0"/, gemfile)
     refute_match(/recording_studio_trashable[^\n]*tag: "v0\.8\.0"/, dummy)
@@ -114,7 +115,7 @@ class TrashableSiblingApiParityTest < Minitest::Test
     assert_includes notes, "Where main used `where(trashed_at: nil)`"
     assert_includes notes, "Where main already used `recording_studio_trashable_active`"
     refute_includes notes, "like main"
-    assert_includes readme, 'tag: "v0.9.0"'
-    assert_includes readme, 'gem "recording_studio_trashable", "~> 0.9"'
+    assert_includes readme, 'tag: "v0.10.1"'
+    assert_includes readme, 'gem "recording_studio_trashable", "~> 0.10"'
   end
 end

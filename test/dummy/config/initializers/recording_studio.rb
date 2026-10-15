@@ -31,8 +31,6 @@ RecordingStudio.configure do |config|
     "RecordingStudio::AccessConstraint",
     "RecordingStudio::AccessRule",
     "RecordingStudioAttachable::Attachment",
-    "RecordingStudioAttachable::Library",
-    "RecordingStudioAttachable::Placement",
     "RecordingStudioCompany::Company",
     "RecordingStudio::Lists::List",
     "RecordingStudio::Lists::ListItem",
