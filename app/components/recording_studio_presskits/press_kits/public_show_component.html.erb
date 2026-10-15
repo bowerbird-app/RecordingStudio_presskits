@@ -16,6 +16,9 @@
       id: "presskits-kit-cover",
       context: :header
     ) do |cover| %>
+      <% cover.with_after_location do %>
+        <%= helpers.render_embargo_notice(@press_kit_recording, size: :md, id: "presskits-kit-embargo") %>
+      <% end %>
       <%= render RecordingStudioPresskits::Cover::DefaultActionsComponent.new(
         cover: cover,
         recording: @press_kit_recording,

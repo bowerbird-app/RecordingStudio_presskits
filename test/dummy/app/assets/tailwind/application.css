@@ -48,7 +48,9 @@
 @source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_downloadable-*/app/helpers/**/*.rb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_downloadable-*/app/views/**/*.erb";
 @source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_downloadable-*/app/helpers/**/*.rb";
-
-/* Vendored recording_studio_embargo editor and button. */
-@source "../../../../../vendor/gems/recording_studio_embargo/app/views/**/*.erb";
-@source "../../../../../vendor/gems/recording_studio_embargo/app/components/**/*.{rb,erb}";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_embargo-*/app/views/**/*.erb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_embargo-*/app/components/**/*.rb";
+@source "../../../vendor/bundle/**/bundler/gems/RecordingStudio_embargo-*/app/components/**/*.erb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_embargo-*/app/views/**/*.erb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_embargo-*/app/components/**/*.rb";
+@source "../../../../../../usr/local/bundle/**/bundler/gems/RecordingStudio_embargo-*/app/components/**/*.erb";

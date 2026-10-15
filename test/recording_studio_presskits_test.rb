@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.64.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.65.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -112,6 +112,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_external_embed", "~> 0.1.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_video", "~> 0.2.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_metrics", "~> 0.3"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_embargo", "~> 0.3.0"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_api"'
   end
 
@@ -136,6 +137,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.3.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_embargo", tag: "v0.3.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.134"'
     refute_includes gemfile, 'tag: "0.3.1"'
@@ -799,6 +801,11 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "download_edit_path"
     assert_operator show.index('id: "presskits-visibility"'), :<, show.index('id: "presskits-downloads"')
     assert_includes show, "render_embargo_button"
+    assert_includes show, 'turbo_frame: "embargo_editor"'
+    assert_includes show, 'data-modal-id="embargo-editor-modal"'
+    assert_includes show, 'id: "embargo-editor-modal"'
+    assert_includes show, "size: :xl"
+    assert_includes show, 'turbo_frame_tag "embargo_editor"'
     refute_includes show, 'id: "presskits-embargo"'
     assert_operator show.index('id: "presskits-downloads"'), :<, show.index("render_embargo_button")
     assert_includes show, 'id="presskits-editor-preview"'
@@ -821,6 +828,10 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, 'name: "press_kit[description]"'
     refute_includes show, 'text: "Save"'
     assert_includes kit_header, 'id="presskits-kit-header"'
+    assert_includes kit_header, "with_after_location"
+    assert_includes kit_header, "render_embargo_notice("
+    assert_includes kit_header, "size: :sm"
+    assert_includes kit_header, 'id: "presskits-header-embargo"'
     assert_includes kit_header, "Cover::Component"
     assert_includes kit_header, "size: :card"
     assert_includes kit_header, "heading: :h1"
@@ -1029,6 +1040,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes preview_show, "context: :header"
     assert_includes preview_show, "SectionCardComponent"
     assert_includes preview_show, "EditorChrome::PREVIEW_CLASSES"
+    assert_includes preview_show, "with_after_location"
+    assert_includes preview_show, "render_embargo_notice("
+    assert_includes preview_show, "size: :md"
+    assert_includes preview_show, 'id: "presskits-preview-embargo"'
+    refute_includes preview_show, "presskits-embargo-marker"
+    assert_includes public_kit, "with_after_location"
+    assert_includes public_kit, "render_embargo_notice("
+    assert_includes public_kit, 'id: "presskits-kit-embargo"'
     kit_header_rb = File.read(File.expand_path("press_kits/kit_header_component.rb", components))
     assert_includes kit_header_rb, "header: true"
     assert_includes chrome, 'CONTROLLER = "recording-studio-presskits--editor-chrome"'
@@ -1087,6 +1106,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_operator cover.index("data-cover-description"), :<, cover.index("data-cover-wide-line")
     assert_operator cover.index("data-cover-release"), :<, cover.index("data-cover-wide-location")
     assert_operator cover.index("data-cover-wide-location"), :<, cover.index("data-cover-location")
+    assert_operator cover.index("data-cover-location"), :<, cover.index("data-cover-after-location")
+    assert_operator cover.index("data-cover-after-location"), :<, cover.index("data-cover-actions")
     assert_operator cover.index("HeaderInlineCopyComponent"), :<, cover.index("cover_title: true")
     refute_includes show, "EditButtonComponent"
     refute_includes show, "Go live"
@@ -1568,6 +1589,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer, '"RecordingStudioPresskits::ListItem"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.2.1"'
+    assert_includes gemfile, 'gem "recording_studio_embargo", "~> 0.3.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_embargo", tag: "v0.3.0"'
     assert_includes gemfile, 'gem "recording_studio_lists", "~> 0.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.7.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.4"'

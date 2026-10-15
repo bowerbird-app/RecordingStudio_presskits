@@ -14,6 +14,7 @@ namespace :tailwind do
       "recording_studio_publishable" => %w[app/views/**/*.erb app/components/**/*.{rb,erb}],
       "recording_studio_attachable" => %w[app/views/**/*.erb app/components/**/*.{rb,erb}],
       "recording_studio_downloadable" => %w[app/views/**/*.erb app/helpers/**/*.rb],
+      "recording_studio_embargo" => %w[app/views/**/*.erb app/components/**/*.{rb,erb}],
       "recording_studio_company" => %w[app/views/**/*.erb app/helpers/**/*.rb],
       "recording_studio_location" => %w[app/views/**/*.erb app/helpers/**/*.rb],
       "recording_studio_lists" => %w[app/views/**/*.erb app/helpers/**/*.rb],

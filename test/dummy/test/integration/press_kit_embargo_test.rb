@@ -35,7 +35,8 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-presskits-presentation='full']"
     assert_includes response.body, "Secret notes"
-    refute_select "#presskits-embargo-marker"
+    refute_select "#presskits-preview-embargo"
+    refute_select "#presskits-kit-embargo"
     refute_equal "private, no-store", response.headers["Cache-Control"]
   end
 
@@ -60,8 +61,11 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
     get kit.publishable_public_path
     assert_response :success
     assert_select "[data-presskits-presentation='preview']"
-    assert_select "#presskits-embargo-marker", text: /Embargoed/
-    assert_select "[data-presskits-embargo-until]", text: /Until/
+    assert_select "#presskits-kit-cover #presskits-preview-embargo p", text: /Embargoed until/
+    assert_select "#presskits-preview-embargo p", text: "Not for publication until embargo lifts."
+    refute_select "#presskits-preview-embargo p.text-xs"
+    assert_notice_under_location("#presskits-kit-cover", "presskits-preview-embargo")
+    refute_select "#presskits-embargo-marker"
     assert_includes response.body, "Spring launch"
     refute_includes response.body, "Secret notes"
     refute_includes response.body, "Doors at noon."
@@ -86,7 +90,8 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     refute_includes response.body, "Spring launch"
     refute_includes response.body, "Secret notes"
-    refute_select "#presskits-embargo-marker"
+    refute_select "#presskits-preview-embargo"
+    refute_select "#presskits-kit-embargo"
   end
 
   test "someone with early access sees the full kit and can download" do
@@ -101,6 +106,9 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-presskits-presentation='full']"
     assert_includes response.body, "Secret notes"
+    assert_select "#presskits-kit-cover #presskits-kit-embargo p", text: /Embargoed until/
+    assert_select "#presskits-kit-embargo p", text: "Not for publication until embargo lifts."
+    assert_notice_under_location("#presskits-kit-cover", "presskits-kit-embargo")
     assert_select "[data-cover-download]", count: 1
     assert_equal "private, no-store", response.headers["Cache-Control"]
 
@@ -166,7 +174,8 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
       get kit.publishable_public_path
       assert_response :success
       assert_select "[data-presskits-presentation='full']"
-      refute_select "#presskits-embargo-marker"
+      refute_select "#presskits-kit-embargo"
+      refute_select "#presskits-preview-embargo"
 
       get recording_studio_downloadable.recording_package_path(kit)
       assert_response :redirect
@@ -181,7 +190,11 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "#embargo_button_#{kit.id} a[href='#{edit_path}']", text: "+ Embargo"
+    assert_select "#embargo-editor-modal"
+    assert_select "turbo-frame#embargo_editor"
+    assert_select "[data-modal-id='embargo-editor-modal'] #embargo_button_#{kit.id} a[href='#{edit_path}'][data-turbo-frame='embargo_editor']",
+                  text: "+ Embargo"
+    refute_select "#presskits-header-embargo"
 
     get edit_path
     assert_response :success
@@ -215,6 +228,73 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
     assert_kind_of RecordingStudioEmbargo::Embargo, kit.current_embargo
     assert_equal :preview, RecordingStudioPresskits::Visibility.presentation_for(actor: nil, kit: kit)
     assert_equal :full, RecordingStudioPresskits::Visibility.presentation_for(actor: @user, kit: kit)
+  end
+
+  test "a turbo frame loads the editor without layout and a save stays in the frame" do
+    kit = publish_story("spring-embargo-frame")
+    sign_in @user
+    switch_to_root(@root)
+    edit_path = recording_studio_embargo.edit_recording_embargo_path(kit)
+    headers = { "Turbo-Frame" => "embargo_editor" }
+
+    get edit_path, headers: headers
+    assert_response :success
+    assert_select "turbo-frame#embargo_editor #embargo-form"
+    refute_match(/<html/i, response.body)
+
+    patch recording_studio_embargo.recording_embargo_path(kit),
+          params: {
+            embargo: {
+              enabled: "1",
+              lifts_at: "#{Date.yesterday}T09:00",
+              time_zone: "UTC",
+              early_access: "1"
+            }
+          },
+          headers: headers
+    assert_response :unprocessable_entity
+    assert_select "turbo-frame#embargo_editor"
+    refute kit.reload.embargo_active?
+
+    patch recording_studio_embargo.recording_embargo_path(kit),
+          params: {
+            embargo: {
+              enabled: "1",
+              lifts_at: "#{Date.tomorrow}T15:30",
+              time_zone: "UTC",
+              early_access: "1"
+            }
+          },
+          headers: headers.merge("Accept" => "text/vnd.turbo-stream.html")
+    assert_response :success
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_includes response.body, "Embargo saved"
+    assert_includes response.body, %(target="embargo_editor")
+    assert_includes response.body, %(id="embargo_button_#{kit.id}")
+    assert_includes response.body, "Embargoed"
+    assert kit.reload.embargo_active?
+  end
+
+  test "an active embargo shows the notice on the preview and the header" do
+    kit = publish_story("spring-embargo-notice")
+    hold_kit!(kit)
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.preview_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-kit-cover #presskits-kit-embargo p", text: /Embargoed until/
+    assert_select "#presskits-kit-embargo p", text: "Not for publication until embargo lifts."
+    refute_select "#presskits-kit-embargo p.text-xs"
+    assert_notice_under_location("#presskits-kit-cover", "presskits-kit-embargo")
+    assert_includes response.body, "Secret notes"
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-kit-header #presskits-kit-cover #presskits-header-embargo", text: /Embargoed until/
+    assert_select "#presskits-header-embargo p.text-xs", text: "Not for publication until embargo lifts."
+    assert_notice_under_location("#presskits-kit-header", "presskits-header-embargo")
+    assert_select "#presskits-kit-header [data-cover-title]", text: "Spring launch"
   end
 
   test "duplicating a kit clears the embargo window" do
@@ -284,6 +364,21 @@ class PressKitEmbargoTest < ActionDispatch::IntegrationTest
       actor: @user
     )
     kit.reload
+  end
+
+  def assert_notice_under_location(scope, notice_id)
+    cover = css_select(scope).first.to_html
+    assert_includes cover, %(id="#{notice_id}")
+    assert_operator cover.index("data-cover-title"), :<, cover.index(notice_id)
+    if cover.include?("data-cover-location")
+      assert_operator cover.index("data-cover-location"), :<, cover.index(notice_id)
+    end
+    if cover.include?("data-cover-wide-location")
+      assert_operator cover.index("data-cover-wide-location"), :<, cover.index(notice_id)
+    end
+    return unless cover.include?("data-cover-actions")
+
+    assert_operator cover.index(notice_id), :<, cover.index("data-cover-actions")
   end
 
   def switch_to_root(root)

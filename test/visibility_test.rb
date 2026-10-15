@@ -189,13 +189,15 @@ class VisibilityTest < Minitest::Test
   def test_fragment_cache_key_includes_the_embargo_boundary
     kit = FakeKit.new("kit-1", "PressKit", "rec-1", true)
 
+    boundary = ["recording_studio_embargo", "kit-1", "presskits.kit_view_full", "anonymous"]
+
     key = RecordingStudioPresskits::Embargo.stub(:active?, true) do
-      RecordingStudioPresskits::Embargo.stub(:cache_boundary, "2026-10-20T09:00:00Z") do
+      RecordingStudioEmbargo.stub(:cache_key, boundary) do
         RecordingStudioPresskits::Visibility.fragment_cache_key(kit, :full, actor: nil)
       end
     end
 
-    assert_equal ["presskits", "kit-1", :full, "rec-1", "embargo", "2026-10-20T09:00:00Z", "anonymous"], key
+    assert_equal ["presskits", "kit-1", :full, "rec-1", *boundary], key
   end
 
   def test_preview_reason_is_embargoed_when_the_embargo_denies_the_actor

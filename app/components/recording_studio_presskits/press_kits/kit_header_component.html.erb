@@ -12,6 +12,13 @@
     inline_path: helpers.press_kit_header_path(@press_kit_recording),
     context: :header
   ) do |cover| %>
+    <% cover.with_after_location do %>
+      <%= helpers.render_embargo_notice(
+        @press_kit_recording,
+        size: :sm,
+        id: "presskits-header-embargo"
+      ) %>
+    <% end %>
     <%= render RecordingStudioPresskits::Cover::DefaultActionsComponent.new(
       cover: cover,
       recording: @press_kit_recording,

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.65.0] - 2026-10-15
+
+### Changed
+- `recording_studio_embargo` is `~> 0.3.0` from GitHub tag `v0.3.0`. The vendored tree at `vendor/gems/recording_studio_embargo` is gone.
+- The kit editor opens the embargo editor in `FlatPack::Modal` `embargo-editor-modal` (`size: :xl`). The host owns that modal and `turbo_frame_tag "embargo_editor"`, and calls `render_embargo_button(recording, turbo_frame: "embargo_editor")`. A Turbo-Frame request renders the editor without the page layout. Saving stays in the frame, shows "Embargo saved", and refreshes the button.
+- The limited preview, the owner preview, and the public kit call `render_embargo_notice(recording, size: :md)` under the location on the cover. The kit editor header calls `render_embargo_notice(recording, size: :sm)` in that same spot. Both calls are unconditional. The notice renders nothing when the embargo is off or the release time has passed. The homemade **Embargoed** badge is gone.
+- Fragment cache keys for an active embargo append `RecordingStudioEmbargo.cache_key`. Press Kits no longer builds `Embargo.cache_boundary` itself (one-time cache invalidation on deploy; building the key does a DB lookup).
+- Version `0.65.0`
+
+### Upgrade notes
+- `0.64.0` already shipped. This release is `0.65.0`. Bump to `0.65.0`. There is no presskits migration.
+- Drop any `path:` pin to `vendor/gems/recording_studio_embargo`. Depend on the gem the same way as the other Recording Studio gems:
+
+```ruby
+gem "recording_studio_embargo", "~> 0.3.0", github: "bowerbird-app/RecordingStudio_embargo", tag: "v0.3.0"
+```
+
+- The notice card passes `border:` and `shadow:` to Flatpack, which needs Flatpack `v0.1.237` or newer. This gem already requires `flat_pack >= 0.1.240`.
+- Hosts that have not installed the embargo tables still run `bin/rails generate recording_studio_embargo:migrations` and `bin/rails db:migrate`.
+- Bundler clones embargo from the public GitHub tag `v0.3.0` the same way as the other Recording Studio gems. This repository's CI does not set `BUNDLE_GITHUB__COM` or use `BOWERBIRD_ORG_CI_TOKEN`.
+- Rebuild Tailwind. The dummy app scans the installed embargo gem instead of the vendored tree.
+
 ## [0.64.0] - 2026-10-15
 
 ### Added
@@ -1207,7 +1229,10 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.62.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.65.0...HEAD
+[0.65.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.64.0...v0.65.0
+[0.64.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.63.0...v0.64.0
+[0.63.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.62.0...v0.63.0
 [0.62.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.61.0...v0.62.0
 [0.61.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...v0.61.0
 [0.60.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.59.0...v0.60.0
