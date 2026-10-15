@@ -37,7 +37,8 @@ module RecordingStudioPresskits
           spacing: heading_action? ? :none : :md,
           level: :h2,
           anchor_link: true,
-          trailing: section_count_badge
+          anchor_id: RecordingStudioPresskits.section_anchor_id(@section_recording),
+          trailing: SectionCountBadge.for(@content_recording)
         )
       end
 
@@ -102,10 +103,6 @@ module RecordingStudioPresskits
         return helpers.recording_studio_presskits if helpers.respond_to?(:recording_studio_presskits)
 
         helpers
-      end
-
-      def section_count_badge
-        SectionCountBadge.for(@content_recording)
       end
 
       def heading_action?

@@ -13,7 +13,7 @@ module RecordingStudioPresskits
         apply_extensions(target, extensions_for(:controller, extension_keys_for(target)))
       end
 
-      def register_builtin_sections
+      BUILTIN_SECTION_REGISTRARS = %i[
         register_text_section
         register_images_section
         register_quote_section
@@ -24,6 +24,11 @@ module RecordingStudioPresskits
         register_location_section
         register_list_section
         register_files_section
+        register_menu_section
+      ].freeze
+
+      def register_builtin_sections
+        BUILTIN_SECTION_REGISTRARS.each { |registrar| send(registrar) }
       end
 
       private
@@ -143,6 +148,15 @@ module RecordingStudioPresskits
           "RecordingStudioPresskits::Files",
           component: "RecordingStudioPresskits::Files::Component",
           editor: "RecordingStudioPresskits::Files::EditComponent"
+        )
+      end
+
+      def register_menu_section
+        RecordingStudioPresskits.register_section(
+          "RecordingStudioPresskits::MenuSection",
+          component: "RecordingStudioPresskits::MenuSection::Component",
+          editor: "RecordingStudioPresskits::MenuSection::EditComponent",
+          prepare: ->(recordable, **) { recordable.prepare_defaults }
         )
       end
     end

@@ -110,13 +110,13 @@ module RecordingStudioPresskits
         title = RecordingStudioPresskits.section_heading(section).to_s.strip
         return unless title.match?(CONTACT_TITLE)
 
-        title.parameterize.presence
+        RecordingStudioPresskits.section_anchor_id(section)
       end
 
       def heading_slug(section)
         return if section.blank?
 
-        RecordingStudioPresskits.section_heading(section).to_s.parameterize.presence
+        RecordingStudioPresskits.section_anchor_id(section)
       end
 
       def sections

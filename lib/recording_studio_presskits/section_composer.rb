@@ -6,6 +6,8 @@ module RecordingStudioPresskits
       def create!(press_kit_recording:, content_type:, actor: nil, title: nil, subtitle: nil)
         type_name = content_type_name(content_type)
         assert_content_type!(type_name)
+        title = title.presence || type_default(type_name, :default_title)
+        subtitle = subtitle.presence || type_default(type_name, :default_subtitle)
 
         RecordingStudio::Recording.transaction do
           section = record_section(press_kit_recording, actor, title, subtitle)
@@ -29,6 +31,13 @@ module RecordingStudioPresskits
 
       def content_type_name(content_type)
         RecordingStudio.recordable_type_name(content_type).to_s
+      end
+
+      def type_default(type_name, method_name)
+        type = type_name.safe_constantize
+        return unless type.respond_to?(method_name)
+
+        type.public_send(method_name).presence
       end
 
       def assert_content_type!(type_name)

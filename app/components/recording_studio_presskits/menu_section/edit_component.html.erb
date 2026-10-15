@@ -1,0 +1,49 @@
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::RadioGroup::Component.new(
+    name: "menu_section[layout]",
+    label: "Layout",
+    value: @menu.layout,
+    options: layout_options,
+    help_text: "Grid wraps across the page. List keeps one column."
+  ) %>
+
+  <%= hidden_field_tag "menu_section[show_counts]", "0" %>
+  <%= render FlatPack::Switch::Component.new(
+    name: "menu_section[show_counts]",
+    label: "Show counts",
+    checked: @menu.show_counts?,
+    help_text: "A number on photos, videos, and files."
+  ) %>
+
+  <%= hidden_field_tag "menu_section[show_icons]", "0" %>
+  <%= render FlatPack::Switch::Component.new(
+    name: "menu_section[show_icons]",
+    label: "Show icons",
+    checked: @menu.show_icons?,
+    help_text: "The section icon beside the name."
+  ) %>
+
+  <% if section_rows.any? %>
+    <%= render FlatPack::Fieldset::Component.new(
+      title: "Sections",
+      description: "A short name, or hide one."
+    ) do %>
+      <% section_rows.each do |section| %>
+        <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-end">
+          <%= render FlatPack::TextInput::Component.new(
+            name: "menu_section[items][#{section.id}][label]",
+            label: "Short name",
+            value: short_label(section),
+            placeholder: heading_for(section)
+          ) %>
+          <%= hidden_field_tag "menu_section[items][#{section.id}][shown]", "0" %>
+          <%= render FlatPack::Switch::Component.new(
+            name: "menu_section[items][#{section.id}][shown]",
+            label: "Show",
+            checked: shown?(section)
+          ) %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

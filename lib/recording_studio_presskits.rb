@@ -48,6 +48,7 @@ require "recording_studio_presskits/visibility"
 require "recording_studio_presskits/kit_download"
 require "recording_studio_presskits/embargo"
 require "recording_studio_presskits/kit_query"
+require "recording_studio_presskits/section_anchor"
 require "recording_studio_presskits/section_composer"
 require "recording_studio_presskits/legacy_section_tree"
 require "recording_studio_presskits/api/press_kit_payload"
@@ -73,6 +74,7 @@ require "recording_studio_presskits/list_item_batch/sync"
 module RecordingStudioPresskits
   class << self
     include CenterBranding
+    include SectionAnchor
 
     def configuration
       @configuration ||= Configuration.new

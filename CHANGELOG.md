@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-10-14
+
+### Added
+- A Menu section. `RecordingStudioPresskits::MenuSection` is a Contents list of jump links to the other sections in the kit. The picker label is Menu (`queue-list`). A new menu saves the title Contents and the subtitle "Jump to any section of the press kit." The content row stores `layout` (`grid` or `list`, default `grid`), `show_counts` (default true), `show_icons` (default true), and `items` (json, default `{}`). `items` is keyed by kit section id: `{ "<id>": { "label": "Short name", "hidden": false } }`.
+- The public kit and the owner preview list sibling sections in kit order that already have something to show. The menu leaves itself out, leaves other menus out, and skips entries with `hidden: true`. A non-blank `label` replaces the heading on that link. The href is always `#` plus `section_anchor_id`, so a rename or reorder keeps the link on the heading that moved. Entries for sections that are gone are ignored, and a save drops them. Nothing to list keeps the section off the page. The links are a `FlatPack::Collection` (`as: :nav`, label is the menu heading). Grid is `layout: :grid` with `min_item_width: "14rem"`. List is `layout: :stack`. Each jump is a `FlatPack::Button` (`align: :start`, `lines: 2`) with that section's menu icon. The count badge sits in `with_trailing`.
+- `RecordingStudioPresskits.section_anchor_id` is the shared heading id. It is the parameterized heading, or `section-{id}` when that is blank. Within a kit, in kit order, the first section keeps that id and later collisions become `{id}-2`, `{id}-3`, skipping an id another section already took. Section titles pass it to `FlatPack::SectionTitle` as `anchor_id:`. A text heading keeps its own type and puts the same id on its wrapper. Cover Download kit and Contact use the helper.
+- Version `0.61.0`
+
+### Upgrade notes
+- `0.60.0` already shipped. This release is `0.61.0`. Bump to `0.61.0`. Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_menu_sections`. It does not change existing kit rows.
+- Add `"RecordingStudioPresskits::MenuSection"` to `config.recordable_types`.
+- Flatpack is `>= 0.1.240` (dummy tag `v0.1.240`). Rebuild Tailwind so Collection's grid track and the button's two-line clamp generate.
+- Heading fragments can change when two sections share a parameterized title. The first in kit order keeps the base id. A single Contact section stays `#contact`.
+- The menu is `FlatPack::Collection` (`as: :nav`). The nav's accessible name is the menu heading. Grid passes `min_item_width: "14rem"`. List uses `layout: :stack` and does not pass `min_item_width`. Each item is a `FlatPack::Button` with `align: :start`, `lines: 2`, and `title` set to the full heading. The count is a `FlatPack::Badge` in `with_trailing`. An overridden label still sets `aria-label` to that heading. Leave `current` unset: a jump link is not the current page. `FlatPack::SectionTitle` cannot restyle a text heading, so the text heading wrapper carries the anchor id.
+
 ## [0.60.0] - 2026-10-14
 
 ### Added
@@ -1139,7 +1154,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.61.0...HEAD
+[0.61.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.60.0...v0.61.0
 [0.60.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.59.0...v0.60.0
 [0.59.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.58.0...v0.59.0
 [0.58.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.57.0...v0.58.0

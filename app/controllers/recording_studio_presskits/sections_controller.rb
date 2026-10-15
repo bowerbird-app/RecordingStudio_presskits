@@ -101,7 +101,14 @@ module RecordingStudioPresskits
       return if editor.blank? || editor.permitted_attributes.blank?
       return unless params.key?(editor.param_key)
 
-      params.require(editor.param_key).permit(*editor.permitted_attributes).to_h
+      permit_content(editor).to_h
+    end
+
+    def permit_content(editor)
+      raw = params.require(editor.param_key)
+      return editor.permit(raw) if editor.respond_to?(:permit)
+
+      raw.permit(*editor.permitted_attributes)
     end
 
     def after_save_path
@@ -150,7 +157,7 @@ module RecordingStudioPresskits
         content_type: section_type_name,
         actor: presskits_actor,
         title: section_create_title,
-        subtitle: params[:subtitle]
+        subtitle: section_create_subtitle
       )
       @after_recording_id = params[:after_recording_id].presence
       position_section(recording)
@@ -158,7 +165,20 @@ module RecordingStudioPresskits
     end
 
     def section_create_title
-      params[:title].presence || RecordingStudio.recordable_type_label(section_type_name)
+      params[:title].presence ||
+        section_type_default(:default_title) ||
+        RecordingStudio.recordable_type_label(section_type_name)
+    end
+
+    def section_create_subtitle
+      params[:subtitle].presence || section_type_default(:default_subtitle)
+    end
+
+    def section_type_default(method_name)
+      type = section_type_name.to_s.safe_constantize
+      return unless type.respond_to?(method_name)
+
+      type.public_send(method_name).presence
     end
 
     def position_section(recording) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength

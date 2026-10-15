@@ -88,6 +88,7 @@ en:
         location: "Add a place"
         list: "Add a line"
         files: "Add a file"
+        menu: "Nothing to jump to yet."
         generic: "Add something here"
       picker_descriptions:
         text: "The story, in your own words."
@@ -100,6 +101,7 @@ en:
         location_section: "Where they can find you, or the work."
         list_section: "Labeled lines, in the order you want."
         files: "Sheets, decks, and zip files they can take with the kit."
+        menu_section: "Jump to any section of the kit."
         generic: "Another block for the kit."
     podcasts:
       previous: "Previous episodes"

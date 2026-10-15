@@ -46,6 +46,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::PodcastSection")
     assert_equal [ "RecordingStudioPresskits::PodcastSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Podcast")
     assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::Files")
+    assert_equal [ "RecordingStudioPresskits::KitSection" ], RecordingStudio.allowed_parent_types_for("RecordingStudioPresskits::MenuSection")
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::VideoSection"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::PodcastSection"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Podcast"
@@ -53,11 +54,13 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::StatsSection"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Stat"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Files"
+    assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::MenuSection"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudioVideo::Video"
     refute_includes RecordingStudioPresskits.picker_types, "RecordingStudio::Location::Location"
     assert_equal "Text", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Text)
     assert_equal "Images", RecordingStudio.recordable_type_label(RecordingStudioPresskits::Images)
     assert_equal "Press kit", RecordingStudio.recordable_type_label(RecordingStudioPresskits::PressKit)
+    assert_equal "Menu", RecordingStudio.recordable_type_label(RecordingStudioPresskits::MenuSection)
     refute_includes RecordingStudioPresskits.picker_types, "FakeBlock"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Text"
     assert_includes RecordingStudioPresskits.picker_types, "RecordingStudioPresskits::Images"
@@ -158,6 +161,14 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.table_exists?(:recording_studio_list_sections)
     assert connection.column_exists?(:recording_studio_list_sections, :created_at)
     refute connection.column_exists?(:recording_studio_list_sections, :updated_at)
+    assert connection.table_exists?(:recording_studio_menu_sections)
+    assert connection.column_exists?(:recording_studio_menu_sections, :layout)
+    assert connection.column_exists?(:recording_studio_menu_sections, :show_counts)
+    assert connection.column_exists?(:recording_studio_menu_sections, :show_icons)
+    assert connection.column_exists?(:recording_studio_menu_sections, :items)
+    refute connection.column_exists?(:recording_studio_menu_sections, :excluded_section_ids)
+    assert connection.column_exists?(:recording_studio_menu_sections, :created_at)
+    refute connection.column_exists?(:recording_studio_menu_sections, :updated_at)
     assert connection.table_exists?(:recording_studio_kit_list_items)
     assert connection.column_exists?(:recording_studio_kit_list_items, :icon)
     assert connection.column_exists?(:recording_studio_kit_list_items, :key)

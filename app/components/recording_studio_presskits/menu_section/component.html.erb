@@ -1,0 +1,13 @@
+<%= render FlatPack::Collection::Component.new(**collection_options) do |collection| %>
+  <% entries.each do |entry| %>
+    <% collection.with_item do %>
+      <%= render FlatPack::Button::Component.new(**entry.button_options) do |button| %>
+        <% if entry.badge %>
+          <% button.with_trailing do %>
+            <%= render entry.badge %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

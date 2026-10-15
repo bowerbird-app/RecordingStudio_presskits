@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.60.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.61.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -40,6 +40,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "db/migrate/20261010150000_create_recording_studio_location_sections.rb",
       "db/migrate/20261014230000_create_recording_studio_list_sections.rb",
+      "db/migrate/20261014233000_create_recording_studio_menu_sections.rb",
       "test/dummy/db/migrate/20261010000013_create_recording_studio_access_constraints.rb",
       "test/dummy/db/migrate/20261010000014_create_recording_studio_access_rules.rb",
       "test/dummy/db/migrate/20261005120000_add_description_to_recording_studio_press_kits.rb",
@@ -60,6 +61,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
       "test/dummy/db/migrate/20261010140000_create_recording_studio_presskits_kit_settings.rb",
       "test/dummy/db/migrate/20261010150000_create_recording_studio_location_sections.rb",
       "test/dummy/db/migrate/20261014230000_create_recording_studio_list_sections.rb",
+      "test/dummy/db/migrate/20261014233000_create_recording_studio_menu_sections.rb",
       "test/dummy/db/migrate/20261010120000_create_recording_studio_companies.rb",
       "test/dummy/db/migrate/20261010120100_create_recording_studio_locations.rb",
       "test/dummy/db/migrate/20261006143000_create_recording_studio_videos.rb",
@@ -83,6 +85,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes engine, "RecordingStudio::Location::Location.include RecordingStudio::Capabilities::Trashable.to"
     assert_includes engine, "register_location_section"
     assert_includes engine, "register_list_section"
+    assert_includes engine, "register_menu_section"
     assert_includes engine, "RecordingStudioPresskits::LocationSection"
     assert_includes engine, "recording_studio_presskits.action_audiences"
     assert_includes engine, "RecordingStudioPresskits::Visibility.register_action!"
@@ -98,7 +101,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.9"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.239"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.240"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.15"'
@@ -118,7 +121,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.239"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.240"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.0"'
@@ -453,7 +456,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.6.0\""
     assert_includes readme, "v0.8.0"
     assert_includes readme, "tag: \"v0.5.0\""
-    assert_includes readme, "tag: \"v0.1.239\""
+    assert_includes readme, "tag: \"v0.1.240\""
     assert_includes readme, "tag: \"v0.2.0\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.3"'
     assert_includes readme, 'gem "recording_studio_lists", "~> 0.5"'
@@ -468,6 +471,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "recording_studio_location_display"
     assert_includes readme, "LocationSection"
     assert_includes readme, "ListSection"
+    assert_includes readme, "MenuSection"
     assert_includes readme, "recording_studio_kit_list_items"
     assert_includes readme, "Cover::Company"
     assert_includes readme, "KitLocation"
@@ -489,7 +493,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[430/368]"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.239"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.240"'
     assert_includes readme, "FlatPack::FontSwatch"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
@@ -1186,6 +1190,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes heading_display, "FlatPack::SectionTitle::Component"
     assert_includes heading_display, "with_trailing"
     assert_includes heading_display, "anchor_link:"
+    assert_includes heading_display, "anchor_id: @anchor_id"
     assert_includes show, "FlatPack::Masonry::Component"
     assert_includes show, "with_item"
     assert_includes show, "FlatPack::Media::Component"
@@ -1280,6 +1285,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "def default_section_heading"
     assert_operator source.index("def section_heading"), :<, source.index("default_section_heading")
     assert_includes frame, "RecordingStudioPresskits.section_heading"
+    assert_includes frame, "section_anchor_id"
     assert_includes frame, "size: :lg"
     assert_includes frame, "def saved_title"
     assert_includes frame, "def content_visible?"
@@ -1514,6 +1520,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes initializer, '"RecordingStudioPresskits::Podcast"'
     assert_includes initializer, '"RecordingStudioPresskits::LocationSection"'
     assert_includes initializer, '"RecordingStudioPresskits::ListSection"'
+    assert_includes initializer, '"RecordingStudioPresskits::MenuSection"'
     assert_includes initializer, '"RecordingStudioPresskits::ListItem"'
     assert_includes initializer, '"RecordingStudioVideo::Video"'
     assert_includes gemfile, 'gem "recording_studio_video", "~> 0.2.0"'

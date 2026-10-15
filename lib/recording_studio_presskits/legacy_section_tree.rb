@@ -8,6 +8,7 @@ module RecordingStudioPresskits
       RecordingStudioPresskits::Text
       RecordingStudioPresskits::Images
       RecordingStudioPresskits::QuoteSection
+      RecordingStudioPresskits::MenuSection
     ].freeze
 
     class << self

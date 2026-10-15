@@ -1,5 +1,27 @@
 # Upgrade notes
 
+## 0.61.0
+
+`0.60.0` already shipped. Bump to `0.61.0`.
+
+A Menu section is a press kit section. The picker label is Menu. A new menu saves the title Contents and the subtitle "Jump to any section of the press kit."
+
+Run `bin/rails generate recording_studio_presskits:migrations`, then `bin/rails db:migrate`. The migration adds `recording_studio_menu_sections` and does not change existing kit rows. Columns are `layout` (`grid` or `list`, default `grid`), `show_counts` (default true), `show_icons` (default true), and `items` (json, default `{}`). There is no `updated_at`. `items` is keyed by kit section id. Each value is `{ "label": "Short name", "hidden": false }`. A blank label is omitted on save. `hidden: true` keeps the section out of the menu. Ids that are not kit sections are dropped on save.
+
+Add this to `config.recordable_types`:
+
+```ruby
+"RecordingStudioPresskits::MenuSection"
+```
+
+`MenuSection` allows a kit section. Trashable is on. Publishable, Duplicatable, Orderable, and Attachable stay off. Create it with `RecordingStudioPresskits.create_section!`. A blank title or subtitle uses `MenuSection.default_title` and `MenuSection.default_subtitle`.
+
+`RecordingStudioPresskits.section_anchor_id` is the heading fragment. It parameterizes `section_heading`, falls back to `section-{id}`, and de-duplicates in kit order (`-2`, `-3`, …). Section titles pass that id to `FlatPack::SectionTitle`. A text heading keeps `text-[2rem]` and `font-bold` and puts the id on its wrapper, because SectionTitle cannot restyle the heading. Cover Download kit and Contact use the same helper. A single section titled Contact stays `#contact`. Two sections that parameterize to the same id no longer share one fragment.
+
+The menu lists sibling sections in `KitQuery` order that `SectionFrameComponent#content_visible?` would show. It skips itself, other menus, and items marked `hidden`. An empty menu stays off the public page. The link text is `items[id].label` when that is not blank, otherwise `section_heading`. The href is always `#` plus `section_anchor_id` for that section. Renaming or reordering the section changes the fragment with the heading, and the short label stays. The links are `FlatPack::Collection` (`as: :nav`, `label` is the menu heading). Grid is `layout: :grid` with `min_item_width: "14rem"` and the default gap. List is `layout: :stack` with `gap: :sm`, and it does not pass `min_item_width`. Each link is a `FlatPack::Button` (`href: "#…"`, `style: :default`, `align: :start`, `lines: 2`). The icon is the content class's `section_menu_icon` when `show_icons` is on. The count is `SectionCountBadge` (`FlatPack::Badge`, `size: :sm`) in `with_trailing` for Images, Videos, and Files when `show_counts` is on. Its accessible name is the count and the noun, such as "2 images". `title` is the full heading. When the label is overridden, `aria-label` is that heading too. Leave `current` unset, because a jump link is not the current page. Flatpack is `>= 0.1.240` (dummy tag `v0.1.240`). Rebuild Tailwind so Collection's grid track and the button line clamp generate. The editor lists the other sections with a short-name field (placeholder is the heading) and a Show switch. `FlatPack::SectionTitle` cannot restyle a text heading, so the text heading wrapper still carries the anchor id.
+
+`kit.txt` prints the menu heading and subtitle. It does not print the jump list.
+
 ## 0.60.0
 
 `0.59.0` already shipped. Bump to `0.60.0`.
