@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.65.0] - 2026-10-15
+
+### Added
+- An Images section opens `FlatPack::Lightbox`. Each masonry photo is a `FlatPack::Lightbox::Trigger`. `group` is `images` plus that section's recording id, and `index` is the photo's place in the section. One lightbox per section lists every photo, including photos still behind **Show more images**, with `thumbs: true`. The clicked thumbnail is the slide that opens. The name under the photo stays outside the trigger.
+- Version `0.65.0`
+
+### Upgrade notes
+- `0.64.0` already shipped. This release is `0.65.0`. Bump to `0.65.0`. There is no presskits migration.
+- Flatpack is `>= 0.1.241` (tag `v0.1.241`). Rebuild Tailwind so the lightbox dialog and thumbnail strip classes generate. Reload Flatpack CSS and JavaScript so `flat-pack--lightbox` loads.
+
 ## [0.64.0] - 2026-10-15
 
 ### Added

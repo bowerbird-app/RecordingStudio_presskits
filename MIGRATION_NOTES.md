@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## 0.65.0
+
+`0.64.0` already shipped. Bump to `0.65.0`. There is no presskits migration.
+
+Flatpack is `>= 0.1.241` (tag `v0.1.241`). Rebuild Tailwind so the lightbox dialog and thumbnail strip classes generate. Reload Flatpack CSS and JavaScript so `flat-pack--lightbox` loads.
+
+An Images section on the public kit, the owner preview, and the kit editor opens `FlatPack::Lightbox`. Each masonry photo is a `FlatPack::Lightbox::Trigger`. `group` is `images` plus that section's recording id, so two images sections on one kit stay separate. `index` is the photo's place in the section. The lightbox lists every photo in that section, including photos still behind **Show more images**, with `thumbs: true`. The clicked thumbnail is the slide that opens. The name under the photo stays outside the trigger.
+
 ## 0.64.0
 
 `0.63.0` already shipped. Bump to `0.64.0`.

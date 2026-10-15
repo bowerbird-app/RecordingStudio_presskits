@@ -16,7 +16,15 @@ module RecordingStudioPresskits
       end
 
       def tiles
-        @tiles ||= DirectImages.list(@recording).filter_map { |item| tile_for(item) }
+        @tiles ||= numbered_tiles
+      end
+
+      def lightbox_collection
+        "images#{@recording.id}"
+      end
+
+      def lightbox_items
+        tiles.map { |tile| lightbox_item(tile) }
       end
 
       def visible_tiles
@@ -50,6 +58,12 @@ module RecordingStudioPresskits
         helpers.params[:images].to_s == @recording.id.to_s
       end
 
+      def numbered_tiles
+        DirectImages.list(@recording).filter_map { |item| tile_for(item) }.each_with_index.map do |tile, index|
+          tile.merge(index: index)
+        end
+      end
+
       def tile_for(item)
         url = DirectImages.url_for(item, helpers: helpers)
         facts = RecordingStudioPresskits::ImageFacts.new(item.recordable)
@@ -66,6 +80,16 @@ module RecordingStudioPresskits
           height: facts.height,
           name: facts.name,
           meta: facts.meta
+        }
+      end
+
+      def lightbox_item(tile)
+        {
+          type: :image,
+          src: tile.fetch(:src),
+          alt: tile.fetch(:alt),
+          caption: tile[:name].to_s,
+          thumb_src: tile.fetch(:src)
         }
       end
 
