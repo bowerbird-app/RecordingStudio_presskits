@@ -231,6 +231,9 @@ class PressKitSectionFilesTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h2", text: "Documents"
     assert_includes response.body, "Take the kit."
+    assert_select "[data-presskits-files].flat-pack-list-divided"
+    row = css_select("[data-presskits-file-id='#{file.id}']").first
+    assert_operator row.to_html.index("data-presskits-file-description"), :<, row.to_html.index("data-presskits-file-meta")
     assert_select "[data-presskits-file-name]", text: "One-sheet"
     assert_select "[data-presskits-file-description]", text: "The short version."
     assert_select "[data-presskits-file-meta]", text: /PDF/

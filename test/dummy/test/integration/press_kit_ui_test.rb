@@ -33,7 +33,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     assert_response :success
-    assert_rounded_default_layout
+    assert_presskits_library_layout
     assert_select "h1", text: "My presskits"
     assert_select "title", text: "My presskits"
     assert_page_nav_without_access
@@ -48,7 +48,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path
     assert_response :success
-    assert_rounded_default_layout
+    assert_presskits_library_layout
     assert_includes response.body, "Spring launch"
     assert_select "a[href='#{edit_href}']"
     assert_presskit_create_button
@@ -66,13 +66,11 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "a[aria-label='Table'] [data-flat-pack--icon-name-value='table-cells']", count: 1
     refute_includes response.body, ">Cards<"
     refute_includes response.body, ">Table<"
-    assert_page_nav_close
-    assert_layout_back_button(label: "Go back")
     assert_page_nav_without_access
 
     get recording_studio_presskits.press_kits_path(view: "table")
     assert_response :success
-    assert_rounded_default_layout
+    assert_presskits_library_layout
     assert_includes response.body, "Spring launch"
     assert_select "a[href='#{edit_href}']", text: "Spring launch"
     assert_includes response.body, "<table"
@@ -174,7 +172,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "md:grid-cols-2"
     header_path = recording_studio_presskits.edit_press_kit_header_path(kit)
     assert_select "#presskits-kit-header [data-presskits-header-actions] a[href='#{header_path}'][aria-label='Edit']"
-    assert_select "#presskits-kit-header [data-presskits-header-image-actions] a[href='#{header_path}#press_kit_cover_image'][aria-label='Edit image']"
+    cover_path = recording_studio_presskits.edit_press_kit_cover_path(kit)
+    assert_select "#presskits-kit-header [data-presskits-header-image-actions] a[href='#{cover_path}'][aria-label='Edit image'][data-modal-id='pk-editor-md'][data-turbo-frame='pk-editor-md-screen']"
     edit = css_select("#presskits-kit-header [data-presskits-header-actions] a[aria-label='Edit']").first
     assert_includes edit["class"], "px-[var(--button-padding-x-sm)]"
     assert_includes edit["class"], "text-xs"
@@ -255,6 +254,10 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "EditButtonComponent"
     assert_select "#pk-editor"
     assert_select "#pk-editor-screen"
+    assert_select "#pk-editor-md"
+    assert_select "#pk-editor-xl"
+    assert_select "#pk-editor-2xl"
+    assert_select "turbo-frame#presskits-editor-sections"
     refute_select "#presskits-editor-dialog"
     assert_select "#presskits-sections-modal"
     assert_select "#presskits-section-picker-modal"

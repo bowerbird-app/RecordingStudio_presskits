@@ -213,9 +213,9 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
     assert_operator image_actions.index(">Order<"), :<, image_actions.index("fp-trash-button")
     assert_select "#presskits-section-#{images.id}-actions a[href='#{recording_studio_presskits.edit_press_kit_section_path(kit, images)}']",
                   text: "Edit"
-    assert_select "#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor'][data-turbo-frame='pk-editor-screen']",
+    assert_select "#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor-xl'][data-turbo-frame='pk-editor-xl-screen']",
                   text: "Edit"
-    edit_link = css_select("#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor']").first
+    edit_link = css_select("#presskits-section-#{images.id}-actions a[data-modal-id='pk-editor-xl']").first
     assert_equal "Edit", edit_link["aria-label"]
     assert_includes edit_link["class"], "max-sm:[&>span]:sr-only"
     refute_includes edit_link["class"], "fp-hit-target"
@@ -449,6 +449,29 @@ class KitEditorPreviewTest < ActionDispatch::IntegrationTest
       }
     }
     follow_redirect! if response.redirect?
+  end
+
+  test "section edit links open the modal sized for that section" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::CreditsSection" }
+    credits = content_section(kit, RecordingStudioPresskits::CreditsSection)
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::MenuSection" }
+    menu = content_section(kit, RecordingStudioPresskits::MenuSection)
+    post recording_studio_presskits.press_kit_sections_path(kit),
+         params: { type: "RecordingStudioPresskits::StatsSection" }
+    stats = content_section(kit, RecordingStudioPresskits::StatsSection)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-section-#{credits.id}-actions a[data-modal-id='pk-editor-2xl'][data-turbo-frame='pk-editor-2xl-screen']"
+    assert_select "#presskits-section-#{menu.id}-actions a[data-modal-id='pk-editor-md'][data-turbo-frame='pk-editor-md-screen']"
+    assert_select "#presskits-section-#{stats.id}-actions a[data-modal-id='pk-editor'][data-turbo-frame='pk-editor-screen']"
+    assert_select "#presskits-visibility[data-modal-id='pk-editor-md']"
+    assert_select "#presskits-downloads[data-modal-id='pk-editor-md']"
   end
 
   def record_kit(title)

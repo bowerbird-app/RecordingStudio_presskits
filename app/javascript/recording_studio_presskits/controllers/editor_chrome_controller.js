@@ -49,7 +49,29 @@ export default class extends Controller {
     }
   }
 
+  // Flatpack navigable frames are loading="lazy" inside a hidden modal.
+  // showLoading then sets visibility:hidden, so the frame never intersects
+  // and the spinner stays. Eager plus an assigned src fetches before open.
+  prepareEditorFrame(event) {
+    if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") return
+
+    const node = event.target instanceof Element ? event.target : event.target?.parentElement
+    const trigger = node?.closest?.("[data-modal-id][data-turbo-frame]")
+    if (!trigger) return
+
+    const frame = document.getElementById(trigger.dataset.turboFrame)
+    if (!frame || frame.tagName !== "TURBO-FRAME") return
+
+    frame.loading = "eager"
+    const href = trigger.getAttribute("href")
+    if (!href || href.charAt(0) === "#") return
+    if (frame.hasAttribute("complete") && frame.getAttribute("src") === href) return
+
+    frame.src = href
+  }
+
   onPointerDown(event) {
+    this.prepareEditorFrame(event)
     if (!this.touch()) return
 
     const region = event.target.closest("[data-presskits-editor-region]")

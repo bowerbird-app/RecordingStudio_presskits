@@ -1,7 +1,13 @@
 <% if locations.any? %>
-  <div class="flex flex-col gap-6">
+  <%= render FlatPack::List::Component.new(divider: true, class: "w-full", data: { presskits_locations: true }) do %>
     <% locations.each do |location_recording| %>
-      <%= display_for(location_recording) %>
+      <% place = location_recording.recordable %>
+      <%= render FlatPack::List::Item.new(icon: place_icon(place)) do %>
+        <p class="text-base font-medium text-(--surface-content-color)" data-presskits-location-name><%= place.display_name %></p>
+        <% if (address = place_address(place)) %>
+          <p class="mt-1 text-sm text-(--surface-muted-content-color)" data-presskits-location-address><%= address %></p>
+        <% end %>
+      <% end %>
     <% end %>
-  </div>
+  <% end %>
 <% end %>

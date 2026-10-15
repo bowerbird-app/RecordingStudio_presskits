@@ -17,6 +17,7 @@ RecordingStudioPresskits::Engine.routes.draw do
       get :preview
     end
     resource :header, only: %i[edit update]
+    resource :cover, only: :edit, controller: "covers"
     resource :visibility, only: %i[edit update]
     resource :downloads, only: %i[edit update], controller: "kit_downloads"
     resources :sections, only: %i[create edit update destroy] do

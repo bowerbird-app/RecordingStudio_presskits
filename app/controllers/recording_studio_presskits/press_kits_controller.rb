@@ -2,6 +2,8 @@
 
 module RecordingStudioPresskits
   class PressKitsController < ApplicationController
+    layout :screen_layout
+
     before_action :require_root!
     before_action :set_press_kit, only: %i[show preview edit]
 
@@ -63,6 +65,12 @@ module RecordingStudioPresskits
       return if @press_kit_recording.present?
 
       head :not_found
+    end
+
+    def screen_layout
+      return "recording_studio_presskits/library" if action_name == "index"
+
+      "recording_studio/default_layout"
     end
 
     def table_view?

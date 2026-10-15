@@ -3,9 +3,10 @@
 module RecordingStudioPresskits
   module PressKits
     class HeaderCoverControls
-      def initialize(helpers, press_kit_recording)
+      def initialize(helpers, press_kit_recording, return_to: nil)
         @helpers = helpers
         @press_kit_recording = press_kit_recording
+        @return_to = return_to
       end
 
       def cover_image_enabled?
@@ -47,7 +48,7 @@ module RecordingStudioPresskits
       private
 
       def cover_image_path
-        @helpers.edit_press_kit_header_path(@press_kit_recording)
+        @return_to || @helpers.edit_press_kit_header_path(@press_kit_recording)
       end
 
       def cover_image_action

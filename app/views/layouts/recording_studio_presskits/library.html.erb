@@ -1,0 +1,65 @@
+<%# Kits index document. The body is SidebarLayout on its own, with no PageNav. %>
+<!DOCTYPE html>
+<html data-theme="rounded">
+  <head>
+    <title><%= content_for(:title).presence || "My presskits" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/variables", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "recording_studio_presskits/brand_buttons", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/inline_edit", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/rich_text", "data-turbo-track": "reload" %>
+    <%= yield :head %>
+    <%= javascript_importmap_tags if respond_to?(:javascript_importmap_tags) %>
+  </head>
+
+  <body class="bg-(--surface-page-background-color) text-(--surface-content-color)" data-theme="rounded" data-recording-studio-presskits-library-layout="true">
+    <%= render FlatPack::SidebarLayout::Component.new(side: :left, storage_key: "presskits-sidebar") do |layout| %>
+      <% layout.sidebar do %>
+        <%= render FlatPack::Sidebar::Component.new(side: :left) do |sidebar| %>
+          <% sidebar.items do %>
+            <%= render FlatPack::Sidebar::Group::Component.new(title: "Library", icon: "folder", open: true) do |group| %>
+              <% group.items do %>
+                <%= render FlatPack::Sidebar::Item::Component.new(
+                  text: "Credits",
+                  href: credits_path,
+                  icon: "user-group"
+                ) %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% layout.top_nav do %>
+        <%= render FlatPack::TopNav::Component.new(mobile_menu: false, class: "md:hidden") do |nav| %>
+          <% nav.left do %>
+            <%= render FlatPack::Button::Component.new(
+              icon: "menu",
+              icon_only: true,
+              style: :ghost,
+              aria: { label: "Open sidebar" },
+              data: {
+                "flat-pack--sidebar-layout-target": "mobileToggle",
+                action: "click->flat-pack--sidebar-layout#toggleMobile"
+              }
+            ) %>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% layout.main do %>
+        <% if flash[:notice].present? %>
+          <%= render FlatPack::Alert::Component.new(description: flash[:notice], style: :success, class: "m-6 mb-0") %>
+        <% end %>
+        <% if flash[:alert].present? %>
+          <%= render FlatPack::Alert::Component.new(description: flash[:alert], style: :danger, class: "m-6 mb-0") %>
+        <% end %>
+        <%= yield %>
+      <% end %>
+    <% end %>
+  </body>
+</html>

@@ -6,7 +6,7 @@ require "devise/test/integration_helpers"
 class HomePageTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
-  test "signed-in root is the press kit index with default layout" do
+  test "signed-in root is the press kit index with the library layout" do
     user = User.find_or_create_by!(email: "home-outline-test@example.com") do |record|
       record.password = "Password123!"
       record.password_confirmation = "Password123!"
@@ -46,7 +46,7 @@ class HomePageTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     assert_response :success
-    assert_rounded_default_layout
+    assert_presskits_library_layout
     assert_includes response.body, "Spring launch"
     refute_includes response.body, "Dummy host"
   ensure

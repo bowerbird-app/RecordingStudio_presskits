@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.62.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.63.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -920,10 +920,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_operator header.index("presskits-header-release"), :<, header.index("presskits-header-brand")
     assert_includes header, "fields_for :location"
     assert_includes header, "recording_studio_location_search_fields"
-    assert_includes header, 'id="press_kit_cover_image"'
-    assert_includes header, "cover_file_button_locals"
-    assert_includes header, "cover_image_label"
-    assert_includes header, "cover_remove_path"
+    assert_includes header, "cover_image_fields"
+    cover_fields = File.read(File.expand_path(
+                               "../app/views/recording_studio_presskits/press_kits/_cover_image_fields.html.erb",
+                               __dir__
+                             ))
+    assert_includes cover_fields, 'id="press_kit_cover_image"'
+    assert_includes cover_fields, "cover_file_button_locals"
+    assert_includes cover_fields, "cover_image_label"
+    assert_includes cover_fields, "cover_remove_path"
+    refute_includes cover_fields, "Choose from the library"
+    refute_includes cover_fields, "recording_placements_path"
     refute_includes header, "Choose from the library"
     refute_includes header, "recording_placements_path"
     assert_includes header, "brand_swatches"
@@ -1066,20 +1073,34 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes show, "Go live"
     refute_includes show, "FlatPack::Picker::Component"
     refute_includes index, "Dummy host"
-    assert_includes index, "FlatPack::SidebarLayout::Component"
-    assert_includes index, "FlatPack::Sidebar::Group::Component"
-    assert_includes index, 'title: "Library"'
-    assert_includes index, "open: true"
-    refute_includes index, 'text: "Images"'
-    refute_includes index, 'icon: "photo"'
+    refute_includes index, "FlatPack::SidebarLayout::Component"
+    library = File.read(File.expand_path(
+                          "../app/views/layouts/recording_studio_presskits/library.html.erb",
+                          __dir__
+                        ))
+    controller = File.read(File.expand_path(
+                             "../app/controllers/recording_studio_presskits/press_kits_controller.rb",
+                             __dir__
+                           ))
+    assert_includes controller, "layout :screen_layout"
+    assert_includes controller, '"recording_studio_presskits/library"'
+    assert_includes library, "FlatPack::SidebarLayout::Component"
+    assert_includes library, "FlatPack::Sidebar::Group::Component"
+    assert_includes library, 'title: "Library"'
+    assert_includes library, "open: true"
+    refute_includes library, 'text: "Images"'
+    refute_includes library, 'icon: "photo"'
     refute_includes index, "@images_path"
-    assert_includes index, 'text: "Credits"'
-    assert_includes index, 'icon: "user-group"'
-    assert_includes index, "@credits_path"
-    assert_includes index, 'aria: { label: "Open sidebar" }'
-    assert_includes index, "toggleMobile"
-    assert_includes index, 'class: "md:hidden"'
+    assert_includes library, 'text: "Credits"'
+    assert_includes library, 'icon: "user-group"'
+    assert_includes library, "credits_path"
+    assert_includes library, 'aria: { label: "Open sidebar" }'
+    assert_includes library, "toggleMobile"
+    assert_includes library, 'class: "md:hidden"'
+    assert_includes library, 'data-recording-studio-presskits-library-layout="true"'
+    refute_includes library, "recording_studio/default_layout"
     refute_match(/Button::Component\.new\(\s*text: "Credits"/m, index)
+    refute_match(/Button::Component\.new\(\s*text: "Credits"/m, library)
   end
 
   def test_credits_list_shows_the_name_and_save_sits_under_the_fields
@@ -1554,10 +1575,17 @@ class RecordingStudioPresskitsTest < Minitest::Test
     root = File.expand_path("..", __dir__)
     component = File.read(File.join(root, "app/components/recording_studio_presskits/locations/edit_component.rb"))
     template = File.read(File.join(root, "app/components/recording_studio_presskits/locations/edit_component.html.erb"))
-    show = File.read(File.join(root, "app/components/recording_studio_presskits/location_section/component.rb"))
+    show = File.read(presskits_path("app/components/recording_studio_presskits/location_section/component.rb"))
+    location_view = "app/components/recording_studio_presskits/location_section/component.html.erb"
+    show_template = File.read(presskits_path(location_view))
 
     assert_includes template, "recording_studio_location_search_fields"
-    assert_includes show, "recording_studio_location_display"
+    assert_includes show_template, "FlatPack::List::Component"
+    assert_includes show_template, "divider: true"
+    assert_includes show_template, "data-presskits-location-name"
+    assert_includes show, "def place_address"
+    refute_includes show, "recording_studio_location_display"
+    refute_includes show_template, "recording_studio_location_display"
     [component, template].each do |source|
       refute_includes source, "geocode!"
       refute_includes source, "PlaceSearch"
@@ -1604,7 +1632,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes locales, "See full press kit"
     assert_includes locales, "You must be signed in to"
     assert_includes editor, "max-w-xl"
-    assert_includes editor, "mt-4"
+    assert_includes editor, "mt-8"
+    assert_includes editor, 'class: "w-full"'
     assert_includes editor, 'id="presskits-visibility-actions"'
     assert_includes editor, "variant: :inline"
     assert_includes editor, 'name: "visibility[audience]"'
@@ -1644,6 +1673,33 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes editor_kit, 'icon: "eye"'
     refute_includes header, "visibility_edit_path"
     refute_includes header, "visibility_label"
+  end
+
+  def test_editor_modals_load_before_open_and_reorder_refreshes_the_preview
+    helper = File.read(presskits_path("app/helpers/recording_studio_presskits/kit_editor_helper.rb"))
+    chrome_js = "app/javascript/recording_studio_presskits/controllers/editor_chrome_controller.js"
+    chrome = File.read(presskits_path(chrome_js))
+    reload_js = "app/javascript/recording_studio_presskits/controllers/kit_preview_reload_controller.js"
+    reload = File.read(presskits_path(reload_js))
+    routes = File.read(presskits_path("config/routes.rb"))
+    editor_view = "app/components/recording_studio_presskits/press_kits/kit_editor_component.html.erb"
+    editor = File.read(presskits_path(editor_view))
+    images = File.read(presskits_path("app/components/recording_studio_presskits/images/component.html.erb"))
+
+    assert_includes helper, '"RecordingStudioPresskits::CreditsSection" => "2xl"'
+    assert_includes helper, '"RecordingStudioPresskits::Images" => "xl"'
+    assert_includes helper, '"RecordingStudioPresskits::MenuSection" => "md"'
+    assert_includes chrome, 'frame.loading = "eager"'
+    assert_includes chrome, "frame.src = href"
+    assert_includes reload, 'getElementById("presskits-editor-sections")'
+    assert_operator reload.index("frame.src = url.toString()"), :<, reload.index("turbo.visit")
+    assert_includes reload, 'dialog.style.scale = "none"'
+    assert_includes routes, 'resource :cover, only: :edit, controller: "covers"'
+    assert_includes editor, "navigable: true"
+    assert_includes editor, "presskits_editor_modal_id_for"
+    refute_includes images, "lightbox"
+    modal_js = "app/javascript/recording_studio_presskits/controllers/editor_modal_controller.js"
+    refute File.exist?(presskits_path(modal_js))
   end
 
   def test_presskits_source_does_not_register_embed_providers

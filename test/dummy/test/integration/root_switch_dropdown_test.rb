@@ -42,7 +42,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     follow_redirect! if response.redirect?
 
     assert_response :success
-    assert_rounded_default_layout
+    assert_presskits_library_layout
     assert_page_nav_without_access
   end
 

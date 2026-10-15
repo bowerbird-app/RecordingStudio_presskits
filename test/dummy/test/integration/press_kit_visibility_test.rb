@@ -252,8 +252,8 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     visibility_path = recording_studio_presskits.edit_press_kit_visibility_path(kit)
     downloads_path = recording_studio_presskits.edit_press_kit_downloads_path(kit)
     assert_select "#presskits-visibility[href='#{visibility_path}']", text: "Visibility"
-    assert_select "#presskits-visibility[data-modal-id='pk-editor']"
-    assert_select "#presskits-visibility[data-turbo-frame='pk-editor-screen']"
+    assert_select "#presskits-visibility[data-modal-id='pk-editor-md']"
+    assert_select "#presskits-visibility[data-turbo-frame='pk-editor-md-screen']"
     assert_select "#presskits-editor-toolbar [data-flat-pack--icon-name-value='eye']"
     assert_select "#presskits-downloads[href='#{downloads_path}']", text: "Downloads"
     assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
@@ -261,14 +261,15 @@ class PressKitVisibilityTest < ActionDispatch::IntegrationTest
     assert_operator toolbar_html.index("presskits-visibility"), :<, toolbar_html.index("presskits-downloads")
     refute_select "#presskits-kit-header [role='menuitem'][href='#{visibility_path}']"
 
-    get visibility_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
+    get visibility_path, headers: { "Turbo-Frame" => "pk-editor-md-screen" }
     assert_response :success
     assert_select "h1", text: "Visibility", count: 1
     assert_select "h2", text: "Visibility", count: 0
     assert_select "[data-fp-screen][data-title=?]", "\u200B"
     assert_includes response.body, "Who can view this press kit"
     assert_select "#presskits-visibility-form.max-w-xl"
-    assert_select "#presskits-visibility-actions.mt-4"
+    assert_select "#presskits-visibility-actions.mt-8"
+    assert_select "#presskits-visibility-actions button.w-full[type='submit'], #presskits-visibility-actions input.w-full[type='submit']"
     assert_select "#presskits-visibility-audience-label.sr-only", text: "Who can view the full press kit?"
     refute_select "legend", text: "Who can view the full press kit?"
     refute_select "label", text: "Who can view the full press kit?"

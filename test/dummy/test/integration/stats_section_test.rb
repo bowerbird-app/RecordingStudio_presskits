@@ -455,6 +455,9 @@ class StatsSectionTest < ActionDispatch::IntegrationTest
     fragment = Nokogiri::HTML.fragment(html)
     card = fragment.css(".text-center").find { |node| node.at_css(".text-4xl")&.text == value }
     assert card, "expected a centered stat card for #{value}"
+    shell = card.parent
+    assert_includes shell["class"], "[background:var(--card-style-shaded-background)]"
+    assert_includes shell["class"], "p-[var(--card-padding-lg)]"
     icon_node = card.at_css("[data-flat-pack--icon-name-value]")
     if icon
       assert_equal icon, icon_node["data-flat-pack--icon-name-value"]

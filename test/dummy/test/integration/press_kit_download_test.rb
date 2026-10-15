@@ -272,12 +272,12 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     visibility_path = recording_studio_presskits.edit_press_kit_visibility_path(kit)
     assert_select "#presskits-visibility[href='#{visibility_path}']", text: "Visibility"
     assert_select "#presskits-visibility [data-flat-pack--icon-name-value='eye']"
-    assert_select "#presskits-downloads[href='#{downloads_path}']", text: "Downloads"
+    assert_select "#presskits-downloads[href='#{downloads_path}'][data-modal-id='pk-editor-md'][data-turbo-frame='pk-editor-md-screen']", text: "Downloads"
     assert_select "#presskits-downloads [data-flat-pack--icon-name-value='arrow-down-tray']"
     toolbar_html = css_select("#presskits-editor-toolbar").to_html
     assert_operator toolbar_html.index("presskits-visibility"), :<, toolbar_html.index("presskits-downloads")
 
-    get downloads_path, headers: { "Turbo-Frame" => "pk-editor-screen" }
+    get downloads_path, headers: { "Turbo-Frame" => "pk-editor-md-screen" }
     assert_response :success
     assert_select "h1", text: "Downloads"
     assert_select "[data-fp-screen][data-title='\u200B']"
@@ -296,6 +296,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='lock-closed']"
     refute_select "#presskits-downloads-audience [data-flat-pack--icon-name-value='user-group']"
     refute_includes response.body, "Your workspace only allows some of these choices"
+    assert_select "#presskits-downloads-actions.mt-8 button.w-full"
   end
 
   test "downloads editor lists a test-only custom audience when the host registers one" do
