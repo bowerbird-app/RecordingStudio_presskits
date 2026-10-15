@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.66.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.67.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -104,7 +104,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.240"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_cache", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.9"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.18"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_lists", "~> 0.7"'
@@ -129,7 +129,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.6.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.18.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.4.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.7.0"'
@@ -445,7 +445,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "v0.19.0"
     assert_includes readme, "v0.18.0"
     assert_includes readme, "v0.3.1"
-    assert_includes readme, "v0.8.3"
+    assert_includes readme, "v0.9.0"
     assert_includes readme, "recording_studio_downloadable"
     assert_includes readme, "presskits.kit_download"
     assert_includes readme, "Download kit"

@@ -170,6 +170,15 @@ module RecordingStudioPresskits
       end
     end
 
+    initializer "recording_studio_presskits.flatpack_dropdown_icon_arguments" do
+      config.to_prepare do
+        component = FlatPack::Button::Dropdown::Component
+        next if component.ancestors.include?(RecordingStudioPresskits::FlatpackDropdownIconArguments)
+
+        component.prepend(RecordingStudioPresskits::FlatpackDropdownIconArguments)
+      end
+    end
+
     initializer "recording_studio_presskits.require_attachable",
                 before: "recording_studio_presskits.before_initialize" do
       require "recording_studio_attachable"

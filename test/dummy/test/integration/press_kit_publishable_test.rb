@@ -88,7 +88,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_publishable_quick_actions(kit, trigger: "Published")
+    assert_publishable_quick_actions(kit, trigger: "Published", style: "default", icon: "check-circle")
     refute_includes response.body, "Go live"
     refute_includes response.body, "See it live"
     refute_includes response.body, "EditButtonComponent"
@@ -98,7 +98,7 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_redirected_to recording_studio_presskits.edit_press_kit_path(kit)
     follow_redirect!
     assert_response :success
-    assert_publishable_quick_actions(kit, trigger: "Published")
+    assert_publishable_quick_actions(kit, trigger: "Published", style: "default", icon: "check-circle")
     refute_includes response.body, "Go live"
     refute_includes response.body, "See it live"
   end
@@ -191,6 +191,35 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
+  test "draft quick actions stay the secondary pencil button" do
+    kit = record_kit("Autumn recap")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_publishable_quick_actions(kit, trigger: "Draft", style: "secondary", icon: "pencil-square")
+  end
+
+  test "inline publish replaces the dropdown with the default published button" do
+    kit = record_kit("Spring launch")
+    sign_in @user
+    switch_to_root(@root)
+
+    path = RecordingStudioPublishable::Engine.routes.url_helpers.transition_recording_publishable_path(
+      recording_id: kit.id,
+      transition: "publish",
+      inline: 1
+    )
+    patch path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :success
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_select "turbo-stream[action=replace][target=?]", "publishable_quick_actions_#{kit.id}"
+    assert_publishable_quick_actions(kit, trigger: "Published", style: "default", icon: "check-circle")
+    assert kit.reload.currently_published?
+  end
+
   test "publishable engine is mounted and live children skip the publishable child" do
     kit = record_kit("Spring launch")
     record_block(kit, "Hero")
@@ -206,9 +235,18 @@ class PressKitPublishableTest < ActionDispatch::IntegrationTest
 
   private
 
-  def assert_publishable_quick_actions(kit, trigger:)
+  def assert_publishable_quick_actions(kit, trigger:, style:, icon:)
+    assert_includes FlatPack::Button::Dropdown::Component.ancestors,
+      RecordingStudioPresskits::FlatpackDropdownIconArguments
+
     assert_select "#publishable_quick_actions_#{kit.id}" do
-      assert_select "button", text: trigger
+      assert_select "button[data-fp-style=?]", style, text: trigger
+      assert_select "button[data-fp-style=?] [data-flat-pack--icon-name-value=?][data-flat-pack--icon-variant-value=outline]",
+        style, icon
+      assert_select "[role=menu].publishable-quick-actions-menu"
+      assert_select "button[data-fp-style=success]", count: 0
+      assert_select "[icon_variant]", count: 0
+      assert_select "[icon_style]", count: 0
     end
     assert_includes response.body, "/recordings/#{kit.id}/publishable/search"
     assert_includes response.body, "/recordings/#{kit.id}/publishable/social"

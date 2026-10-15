@@ -1,5 +1,19 @@
 # Upgrade notes
 
+## 0.67.0
+
+`0.66.0` already shipped. Bump to `0.67.0`. There is no presskits migration.
+
+Publishable is `~> 0.9` (git tag `v0.9.0`):
+
+```ruby
+gem "recording_studio_publishable", "~> 0.9", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.9.0"
+```
+
+The kit editor still calls `render_publishable_quick_actions`. A published kit shows **Published** on the default button with `check-circle`. A draft shows **Draft** on the secondary button with `pencil-square`. The published control is the default button.
+
+Flatpack stays `v0.1.240` (`>= 0.1.240`). Publishable 0.9.0 passes `icon_variant: :solid` and `icon_style: :success` for the published check. Flatpack `v0.1.243` is the release that accepts those arguments. This gem does not take that release. `FlatpackDropdownIconArguments` drops the two keywords when `FlatPack::Button::Dropdown::Component` does not declare them, so they are not attributes on the menu wrapper. The glyph stays the default outline in the button text colour. A host already on Flatpack `v0.1.243` or newer keeps the keywords and gets the solid success check. Rebuild Tailwind there so the icon colour utilities are generated.
+
 ## 0.66.0
 
 Bump to `0.66.0`. Accessible stays `~> 0.19` (git tag `v0.19.0`) as on main; ControllerAuth needs Accessible `0.18` or newer. There is no presskits migration.
