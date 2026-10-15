@@ -1,14 +1,13 @@
-<% if entries.any? %>
-  <nav aria-labelledby="<%= heading_anchor_id %>" data-presskits-menu>
-    <ul class="<%= list_classes %>">
-      <% entries.each do |entry| %>
-        <li class="<%= item_classes %>">
-          <%= render entry.button %>
-          <% if entry.badge %>
+<%= render FlatPack::Collection::Component.new(**collection_options) do |collection| %>
+  <% entries.each do |entry| %>
+    <% collection.with_item do %>
+      <%= render FlatPack::Button::Component.new(**entry.button_options) do |button| %>
+        <% if entry.badge %>
+          <% button.with_trailing do %>
             <%= render entry.badge %>
           <% end %>
-        </li>
+        <% end %>
       <% end %>
-    </ul>
-  </nav>
+    <% end %>
+  <% end %>
 <% end %>

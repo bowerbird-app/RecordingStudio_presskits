@@ -3,17 +3,9 @@
 module RecordingStudioPresskits
   class MenuSection
     class Component < ViewComponent::Base
-      # Tailwind scans these literals:
-      # "m-0" "grid" "list-none" "p-0" "gap-2" "gap-3" "grid-cols-1"
-      # "grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]"
-      # "flex" "min-w-0" "items-center" "w-full" "flex-1"
-      GRID_CLASSES = "m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3 p-0"
-      LIST_CLASSES = "m-0 grid list-none grid-cols-1 gap-2 p-0"
-      ITEM_CLASSES = "flex min-w-0 items-center gap-2"
-      # "line-clamp-2" "min-w-0" "text-left"
-      LINK_CLASSES = "w-full min-w-0 flex-1 [&>span]:line-clamp-2 [&>span]:min-w-0 [&>span]:text-left"
+      GRID_MIN_ITEM_WIDTH = "14rem"
 
-      Entry = Struct.new(:button, :badge, keyword_init: true)
+      Entry = Struct.new(:button_options, :badge, keyword_init: true)
 
       def initialize(recording:)
         super()
@@ -28,27 +20,23 @@ module RecordingStudioPresskits
         @entries ||= linked_sections.map { |section| entry_for(section) }
       end
 
-      def list_classes
-        menu.layout == "list" ? LIST_CLASSES : GRID_CLASSES
-      end
-
-      def item_classes
-        ITEM_CLASSES
-      end
-
-      def heading_anchor_id
-        RecordingStudioPresskits.section_anchor_id(kit_section)
+      def collection_options
+        options = {
+          as: :nav,
+          label: menu_heading,
+          layout: collection_layout,
+          data: { presskits_menu: true }
+        }
+        options[:gap] = :sm if list_layout?
+        options[:min_item_width] = GRID_MIN_ITEM_WIDTH unless list_layout?
+        options
       end
 
       private
 
       def entry_for(section)
-        Entry.new(button: link_button(section), badge: count_badge(section))
-      end
-
-      def link_button(section)
         heading = RecordingStudioPresskits.section_heading(section)
-        FlatPack::Button::Component.new(**link_options(section, heading))
+        Entry.new(button_options: link_options(section, heading), badge: count_badge(section))
       end
 
       def link_options(section, heading)
@@ -63,10 +51,23 @@ module RecordingStudioPresskits
           text: menu.link_label(section, heading),
           href: "##{RecordingStudioPresskits.section_anchor_id(section)}",
           style: :default,
-          class: LINK_CLASSES,
+          align: :start,
+          lines: 2,
           title: heading,
           aria: (menu.label_overridden?(section) ? { label: heading } : nil)
         }.compact
+      end
+
+      def collection_layout
+        list_layout? ? :stack : :grid
+      end
+
+      def list_layout?
+        menu.layout == "list"
+      end
+
+      def menu_heading
+        RecordingStudioPresskits.section_heading(kit_section)
       end
 
       def count_badge(section)

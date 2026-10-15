@@ -88,11 +88,13 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
     assert_section_title_id("Photos", "photos")
 
     long_link = menu_links(menus[0]).find { |link| link.text.include?(LONG_TITLE) }
-    assert_includes long_link["class"], "justify-center"
+    assert_includes long_link["class"], "justify-start"
     assert_includes long_link["class"], "inline-flex"
-    assert_includes long_link["class"], "line-clamp-2"
+    assert_includes long_link.at_css("span")["class"], "line-clamp-2"
     assert_equal LONG_TITLE, long_link["title"]
     refute_includes long_link["class"], "truncate"
+    refute_includes long_link["class"], "line-clamp-2"
+    refute_includes long_link["class"], "justify-center"
 
     refute_includes menus[0].text, "Empty lines"
     refute_includes menus[0].text, "Shelf"
@@ -159,8 +161,8 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.preview_press_kit_path(kit)
     nav = css_select("nav[data-presskits-menu]").first
-    assert_includes nav.at_css("ul")["class"], "grid-cols-1"
-    refute_includes nav.at_css("ul")["class"], "minmax"
+    assert_includes nav.at_css("ul")["class"], "flex-col"
+    refute_includes nav.at_css("ul")["class"], "grid"
     hrefs = menu_links(nav).map { |link| link["href"] }
     assert_equal ["#photos"], hrefs
     assert_select "nav[data-presskits-menu] svg", count: 0
@@ -177,7 +179,8 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
     }
     get recording_studio_presskits.preview_press_kit_path(kit)
     nav = css_select("nav[data-presskits-menu]").first
-    assert_includes nav.at_css("ul")["class"], "grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]"
+    assert_includes nav.at_css("ul")["class"], "minmax(var(--fp-collection-min-item-width),1fr)"
+    assert_includes nav.at_css("ul")["style"], "--fp-collection-min-item-width: 14rem"
     hrefs = menu_links(nav).map { |link| link["href"] }
     assert_equal ["#about-the-launch", "#photos"], hrefs
     assert_equal "photo", nav.at_css("a[href='#photos'] [data-flat-pack--icon-name-value]")["data-flat-pack--icon-name-value"]
@@ -300,25 +303,29 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
 
   private
 
-  def assert_menu(nav, labelledby, expected)
-    assert_equal labelledby, nav["aria-labelledby"]
-    assert css_select("[id='#{labelledby}']").any?
+  def assert_menu(nav, heading_id, expected)
+    assert_equal "Contents", nav["aria-label"]
+    assert_nil nav["aria-labelledby"]
+    assert css_select("[id='#{heading_id}']").any?
     assert_equal "navigation", nav["role"] unless nav["role"].nil?
     items = nav.css("ul > li")
     assert_equal expected.size, items.size
     expected.each_with_index do |(label, anchor, icon, count), index|
       link = items[index].at_css("a")
-      assert_equal label, link.text.squish
+      assert_equal label, link.at_css("span").text.squish
       assert_equal "##{anchor}", link["href"]
       assert_equal label, link["title"]
       assert_nil link["aria-label"]
+      assert_nil link["aria-current"]
       assert_equal "default", link["data-fp-style"]
       assert_includes link["class"], "fp-button"
+      assert_includes link["class"], "justify-start"
       icon_node = link.at_css("svg[data-flat-pack--icon-name-value='#{icon}']")
       assert icon_node
       assert_equal "true", icon_node["aria-hidden"]
-      badge = items[index].css("[aria-label]").find { |node| node.name != "a" }
+      badge = link.css("[aria-label]").find { |node| node.name != "a" }
       if count
+        assert_equal "span", badge.parent.name
         assert_equal count, badge["aria-label"]
         assert_equal count.to_i.to_s, badge.text.strip
       else
