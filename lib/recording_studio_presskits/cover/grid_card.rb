@@ -78,6 +78,17 @@ module RecordingStudioPresskits
         BrandStyle.button_state_attribute
       end
 
+      def brand_wrapper_style
+        radius = CornerStyle.square_attribute if CornerStyle.square?(kit_branding.corner_style)
+        [
+          "display: contents",
+          "--color-primary: #{brand_color}",
+          "--color-primary-text: #{brand_text_color}",
+          button_state_style,
+          radius
+        ].compact.join("; ")
+      end
+
       def view_label
         I18n.t("recording_studio_presskits.cover.view")
       end

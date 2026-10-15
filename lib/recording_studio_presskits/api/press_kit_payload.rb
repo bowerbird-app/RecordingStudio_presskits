@@ -8,8 +8,8 @@ module RecordingStudioPresskits
           title: recordable.title,
           subtitle: recordable.subtitle,
           description: recordable.description,
-          brand_color: recordable.brand_color,
-          font_family: recordable.font_family
+          brand_color: recordable.brand_color, font_family: recordable.font_family,
+          text_color: recordable.text_color, corner_style: recordable.corner_style
         }
         return payload unless Exposure.withhold?(context, recording_for(recordable, context))
 

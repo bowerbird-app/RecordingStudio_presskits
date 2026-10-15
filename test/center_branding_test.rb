@@ -32,9 +32,11 @@ class CenterBrandingTest < Minitest::Test
     mod = Module.new
     mod.define_singleton_method(:branding_for) { |_recording| center }
     spy = Class.new do
-      def initialize(brand_color:, font_family:)
+      def initialize(brand_color:, font_family:, text_color: nil, corner_style: nil)
         @brand_color = brand_color
         @font_family = font_family
+        @text_color = text_color
+        @corner_style = corner_style
       end
 
       def style_attribute

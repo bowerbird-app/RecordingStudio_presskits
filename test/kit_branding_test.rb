@@ -109,12 +109,72 @@ class KitBrandingTest < Minitest::Test
     assert_includes source, "RecordingStudioPressCenters::Branding"
     assert_includes source, "own(:brand_color) || from_center(:brand_color)"
     assert_includes source, "own(:font_family) || from_center(:font_family)"
+    assert_includes source, "own(:text_color) || from_center(:text_color)"
+    assert_includes source, "own(:corner_style) || from_center(:corner_style)"
+    assert_includes source, "text_color: text_color"
+    assert_includes source, "corner_style: corner_style"
+  end
+
+  def test_text_colour_and_corners_pass_through_with_the_same_fallback
+    install_center(brand_color: "#0F766E", font_family: "serif", text_color: "#F8FAFC", corner_style: "square")
+    branding = RecordingStudioPresskits::KitBranding.for(kit(nil, nil))
+
+    assert_equal "#F8FAFC", branding.text_color
+    assert_equal "square", branding.corner_style
+    assert_equal "color=#0F766E; font=serif; text=#F8FAFC; corners=square", branding.style_attribute
+  end
+
+  def test_a_kit_text_colour_and_corner_beat_the_center
+    install_center(brand_color: "#0F766E", font_family: "serif", text_color: "#F8FAFC", corner_style: "square")
+    branding = RecordingStudioPresskits::KitBranding.for(
+      kit("#DB2777", nil, text_color: "#111827", corner_style: "rounded")
+    )
+
+    assert_equal "#111827", branding.text_color
+    assert_equal "rounded", branding.corner_style
+    assert_includes branding.style_attribute, "text=#111827"
+    assert_includes branding.style_attribute, "corners=rounded"
+    refute_includes branding.style_attribute, "corners=square"
+  end
+
+  def test_a_blank_text_colour_uses_auto_contrast_and_rounded_skips_square_radii
+    style = RecordingStudioPresskits::BrandStyle.new(
+      brand_color: "#FDE68A",
+      font_family: "sans",
+      text_color: nil,
+      corner_style: "rounded"
+    ).style_attribute
+
+    assert_includes style, "--color-primary-text: #{RecordingStudioPresskits::Cover::Contrast::DARK}"
+    refute_includes style, "--radius-lg: 0"
+    refute_includes style, "--button-border-radius: 0"
+  end
+
+  def test_square_corners_zero_the_radius_tokens_and_an_explicit_text_colour_wins
+    style = RecordingStudioPresskits::BrandStyle.new(
+      brand_color: "#FDE68A",
+      font_family: "sans",
+      text_color: "#ffffff",
+      corner_style: "square"
+    ).style_attribute
+
+    assert_includes style, "--color-primary-text: #FFFFFF"
+    assert_includes style, "--radius-sm: 0"
+    assert_includes style, "--radius-md: 0"
+    assert_includes style, "--radius-lg: 0"
+    assert_includes style, "--radius-xl: 0"
+    assert_includes style, "--button-border-radius: 0"
+    assert_equal "square", RecordingStudioPresskits::CornerStyle.normalize("Square")
+    assert_nil RecordingStudioPresskits::CornerStyle.normalize(" ")
+    assert_equal :invalid, RecordingStudioPresskits::CornerStyle.normalize("pill")
   end
 
   private
 
-  def kit(brand_color, font_family)
-    recordable = Struct.new(:brand_color, :font_family).new(brand_color, font_family)
+  def kit(brand_color, font_family, text_color: nil, corner_style: nil)
+    recordable = Struct.new(:brand_color, :font_family, :text_color, :corner_style).new(
+      brand_color, font_family, text_color, corner_style
+    )
     Struct.new(:recordable).new(recordable)
   end
 
@@ -123,20 +183,27 @@ class KitBrandingTest < Minitest::Test
     assert_includes style, "font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
   end
 
-  def install_center(brand_color:, font_family:, painter: true)
+  def install_center(brand_color:, font_family:, text_color: nil, corner_style: nil, painter: true)
     remove_press_centers
-    center = Struct.new(:brand_color, :font_family).new(brand_color, font_family)
+    center = Struct.new(:brand_color, :font_family, :text_color, :corner_style).new(
+      brand_color, font_family, text_color, corner_style
+    )
     mod = Module.new
     mod.define_singleton_method(:branding_for) { |_recording| center }
     if painter
       spy = Class.new do
-        def initialize(brand_color:, font_family:)
+        def initialize(brand_color:, font_family:, text_color: nil, corner_style: nil)
           @brand_color = brand_color
           @font_family = font_family
+          @text_color = text_color
+          @corner_style = corner_style
         end
 
         def style_attribute
-          "color=#{@brand_color}; font=#{@font_family}"
+          parts = ["color=#{@brand_color}", "font=#{@font_family}"]
+          parts << "text=#{@text_color}" if @text_color
+          parts << "corners=#{@corner_style}" if @corner_style
+          parts.join("; ")
         end
       end
       mod.const_set(:Branding, spy)

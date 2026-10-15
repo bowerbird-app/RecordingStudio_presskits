@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.63.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.64.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -265,8 +265,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "capability_actions: %i[create_section reorder_sections]"
     assert_includes source, "capability_actions: %i[remove_section]"
     assert_includes source, "operations: %i[show update]"
-    assert_includes source, "output_keys: %i[title description brand_color font_family]"
-    assert_includes source, "writable_attributes: %i[brand_color font_family]"
+    assert_includes source, "output_keys: %i[title description brand_color font_family text_color corner_style]"
+    assert_includes source, "writable_attributes: %i[brand_color font_family text_color corner_style]"
     assert_includes source, "operations: %i[index show update]"
     assert_includes source, "register_section_actions"
     refute_includes source, "operations: %i[create"
@@ -946,8 +946,27 @@ class RecordingStudioPresskitsTest < Minitest::Test
                          ))
     assert_includes swatches, 'name: "press_kit[brand_color]"'
     assert_includes swatches, 'name: "press_kit[font_family]"'
+    assert_includes swatches, 'name: "press_kit[text_color]"'
+    assert_includes swatches, 'name: "press_kit[corner_style]"'
+    assert_includes swatches, 'text: "Button text"'
+    assert_includes swatches, 'label: "Corners"'
+    assert_includes swatches, 'label: "Square"'
+    assert_includes swatches, 'label: "Rounded"'
+    assert_includes swatches, 'icon: "stop"'
+    assert_includes swatches, 'icon: "stop-circle"'
+    assert_includes swatches, "variant: :inline"
     assert_includes swatches, "FlatPack::FontSwatch::Component"
     assert_includes swatches, "FlatPack::ColorSwatch::Component"
+    assert_includes swatches, "FlatPack::RadioGroup::Component"
+    video = File.read(File.expand_path("video_section/card_component.html.erb", components))
+    podcast = File.read(File.expand_path("podcast_section/card_component.html.erb", components))
+    files = File.read(File.expand_path("files/edit_component.html.erb", components))
+    refute_includes video, "rounded-full"
+    refute_includes video, "rounded-lg"
+    refute_includes podcast, "rounded-full"
+    refute_includes files, "rounded-lg"
+    assert_includes files, "FlatPack::TextArea::Component"
+    assert_includes video, "rounded-[var(--radius-md)]"
     header_rb = File.read(File.expand_path("press_kits/header_editor_component.rb", components))
     assert_includes header_rb, "def press_center_tab?"
     assert_includes header_rb, "brand_source"

@@ -44,6 +44,12 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_raises(ActiveRecord::RecordInvalid) do
       @root.revise(kit) { |press_kit| press_kit.font_family = "comic" }
     end
+    assert_raises(ActiveRecord::RecordInvalid) do
+      @root.revise(kit) { |press_kit| press_kit.text_color = "blue" }
+    end
+    assert_raises(ActiveRecord::RecordInvalid) do
+      @root.revise(kit) { |press_kit| press_kit.corner_style = "pill" }
+    end
 
     @root.revise(kit) do |press_kit|
       press_kit.brand_color = "#333333"
@@ -66,6 +72,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "input[name='press_kit[font_family]']"
     assert_select "input[name='press_kit[brand_color]'][type='color']"
+    assert_select "input[name='press_kit[text_color]'][type='color']"
+    assert_select "input[name='press_kit[corner_style]'][value='rounded'][checked]"
+    assert_select "legend", text: "Corners"
     refute_includes response.body, "Inherit from press center"
     refute_select "[role='tab']"
     refute_select "input[name='press_kit[brand_source]']"
@@ -184,7 +193,10 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     kit = record_kit("Spring launch")
 
     assert_equal(
-      { title: "Spring launch", subtitle: nil, description: nil, brand_color: nil, font_family: nil },
+      {
+        title: "Spring launch", subtitle: nil, description: nil,
+        brand_color: nil, font_family: nil, text_color: nil, corner_style: nil
+      },
       RecordingStudioPresskits::Api::PressKitPayload.for(kit.recordable)
     )
 
@@ -193,6 +205,8 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
       press_kit.description = "Doors at noon."
       press_kit.brand_color = "#BFDBFE"
       press_kit.font_family = "serif"
+      press_kit.text_color = "#111827"
+      press_kit.corner_style = "square"
     end
 
     assert_equal(
@@ -201,7 +215,9 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
         subtitle: "Collection released",
         description: "Doors at noon.",
         brand_color: "#BFDBFE",
-        font_family: "serif"
+        font_family: "serif",
+        text_color: "#111827",
+        corner_style: "square"
       },
       RecordingStudioPresskits::Api::PressKitPayload.for(kit.reload.recordable)
     )

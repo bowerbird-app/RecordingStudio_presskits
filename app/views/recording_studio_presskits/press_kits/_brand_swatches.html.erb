@@ -1,20 +1,42 @@
-<div class="flex flex-wrap items-center gap-3">
-  <%= render FlatPack::FontSwatch::Component.new(
-    font: editor.custom_font_swatch,
-    options: editor.font_options,
-    name: "press_kit[font_family]",
-    text: "Font",
-    selected: true,
-    size: :lg,
-    id: "press_kit_font_family"
-  ) %>
-  <%= render FlatPack::ColorSwatch::Component.new(
-    color: editor.custom_color,
-    name: "press_kit[brand_color]",
-    value: editor.custom_color,
-    text: "Brand colour",
-    selected: true,
-    size: :lg,
-    id: "press_kit_brand_color"
+<div class="flex flex-col gap-4">
+  <div class="flex flex-wrap items-center gap-3">
+    <%= render FlatPack::FontSwatch::Component.new(
+      font: editor.custom_font_swatch,
+      options: editor.font_options,
+      name: "press_kit[font_family]",
+      text: "Font",
+      selected: true,
+      size: :lg,
+      id: "press_kit_font_family"
+    ) %>
+    <%= render FlatPack::ColorSwatch::Component.new(
+      color: editor.custom_color,
+      name: "press_kit[brand_color]",
+      value: editor.custom_color,
+      text: "Brand colour",
+      selected: true,
+      size: :lg,
+      id: "press_kit_brand_color"
+    ) %>
+    <%= render FlatPack::ColorSwatch::Component.new(
+      color: editor.custom_text_color,
+      name: "press_kit[text_color]",
+      value: editor.custom_text_color,
+      text: "Button text",
+      selected: true,
+      size: :lg,
+      id: "press_kit_text_color"
+    ) %>
+  </div>
+  <%= render FlatPack::RadioGroup::Component.new(
+    name: "press_kit[corner_style]",
+    label: "Corners",
+    value: editor.custom_corner_style,
+    variant: :inline,
+    size: :md,
+    options: [
+      { label: "Square", value: "square", icon: "stop" },
+      { label: "Rounded", value: "rounded", icon: "stop-circle" }
+    ]
   ) %>
 </div>

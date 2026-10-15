@@ -205,6 +205,77 @@ class PressKitBrandingTest < ActionDispatch::IntegrationTest
     assert_nil @kit.recordable.font_family
   end
 
+  test "button text and corners inherit, then a kit value wins, and square zeroes the radii" do
+    install_center(brand_color: "#0F766E", font_family: "serif", text_color: "#111827", corner_style: "square")
+    auto = RecordingStudioPresskits::Cover::Contrast.text_on("#0F766E")
+
+    get @kit.publishable_public_path
+    assert_response :success
+    frame = css_select("#presskits-public-page").first
+    assert_includes frame["style"], "--color-primary-text: #111827"
+    assert_includes frame["style"], "--radius-sm: 0"
+    assert_includes frame["style"], "--radius-md: 0"
+    assert_includes frame["style"], "--radius-lg: 0"
+    assert_includes frame["style"], "--radius-xl: 0"
+    assert_includes frame["style"], "--button-border-radius: 0"
+    refute_includes frame["style"], auto
+    cover = css_select("[data-cover-card]").first.parent
+    assert_includes cover["style"], "--color-primary-text: #111827"
+    assert_includes cover["style"], "--button-border-radius: 0"
+    refute_includes cover["style"], auto
+
+    @root.revise(@kit) do |press_kit|
+      press_kit.text_color = "#111827"
+      press_kit.corner_style = "rounded"
+    end
+    get @kit.publishable_public_path
+    frame = css_select("#presskits-public-page").first
+    assert_includes frame["style"], "--color-primary-text: #111827"
+    refute_includes frame["style"], "--radius-lg: 0"
+    refute_includes frame["style"], "--button-border-radius: 0"
+  end
+
+  test "the header stores button text and corners, and press center clears them" do
+    install_center(brand_color: "#0F766E", font_family: "serif", text_color: "#F8FAFC", corner_style: "square")
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.edit_press_kit_header_path(@kit)
+    assert_response :success
+    assert_select "input[name='press_kit[text_color]'][type='color']"
+    assert_select "input[name='press_kit[corner_style]'][value='square'][checked]"
+    assert_select "input[name='press_kit[corner_style]'][value='rounded']"
+    assert_includes response.body, "stop-circle"
+    assert_equal "#F8FAFC", css_select("input[name='press_kit[text_color]']").first["value"].upcase
+
+    patch recording_studio_presskits.press_kit_header_path(@kit), params: {
+      press_kit: {
+        title: "Spring launch",
+        brand_source: "custom",
+        brand_color: "#DB2777",
+        font_family: RecordingStudioPresskits::BrandStyle::SWATCH_CSS.fetch("mono"),
+        text_color: "#111827",
+        corner_style: "rounded"
+      }
+    }
+    assert_equal "#111827", @kit.reload.recordable.text_color
+    assert_equal "rounded", @kit.recordable.corner_style
+
+    patch recording_studio_presskits.press_kit_header_path(@kit), params: {
+      press_kit: {
+        title: "Spring launch",
+        brand_source: "press_center",
+        brand_color: "#DB2777",
+        font_family: RecordingStudioPresskits::BrandStyle::SWATCH_CSS.fetch("mono"),
+        text_color: "#111827",
+        corner_style: "rounded"
+      }
+    }
+    assert_nil @kit.reload.recordable.text_color
+    assert_nil @kit.recordable.corner_style
+    assert_nil @kit.recordable.brand_color
+  end
+
   private
 
   def assert_branded_preview(id)
@@ -253,9 +324,11 @@ class PressKitBrandingTest < ActionDispatch::IntegrationTest
     assert_nil css_select("html").first["style"]
   end
 
-  def install_center(brand_color:, font_family:)
+  def install_center(brand_color:, font_family:, text_color: nil, corner_style: nil)
     remove_press_centers
-    center = Struct.new(:brand_color, :font_family).new(brand_color, font_family)
+    center = Struct.new(:brand_color, :font_family, :text_color, :corner_style).new(
+      brand_color, font_family, text_color, corner_style
+    )
     mod = Module.new
     mod.define_singleton_method(:branding_for) do |kit_recording|
       mod.instance_variable_set(:@kit_recording, kit_recording)

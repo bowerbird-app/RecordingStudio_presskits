@@ -32,6 +32,8 @@ class HeaderAttributesTest < Minitest::Test
 
     assert_nil fields[:brand_color]
     assert_nil fields[:font_family]
+    assert_nil fields[:text_color]
+    assert_nil fields[:corner_style]
     assert_equal "press_center", fields[:brand_source]
   end
 
@@ -45,6 +47,21 @@ class HeaderAttributesTest < Minitest::Test
 
     assert_equal "#333333", fields[:brand_color]
     assert_equal "sans", fields[:font_family]
+    assert_nil fields[:text_color]
+    assert_nil fields[:corner_style]
+  end
+
+  def test_custom_stores_button_text_and_corners_with_the_swatches
+    fields = RecordingStudioPresskits::HeaderAttributes.from(
+      brand_source: "custom",
+      brand_color: "#333333",
+      font_family: "sans",
+      text_color: "#F8FAFC",
+      corner_style: "square"
+    )
+
+    assert_equal "#F8FAFC", fields[:text_color]
+    assert_equal "square", fields[:corner_style]
   end
 
   def test_a_title_only_save_does_not_touch_brand_fields
