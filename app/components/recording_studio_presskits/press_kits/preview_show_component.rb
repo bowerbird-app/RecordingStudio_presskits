@@ -26,8 +26,6 @@ module RecordingStudioPresskits
       end
 
       def explanation
-        return embargo_until if embargoed?
-
         if signed_in_reason?
           I18n.t(
             "recording_studio_presskits.visibility.preview.sign_in",
@@ -38,19 +36,8 @@ module RecordingStudioPresskits
         end
       end
 
-      def embargo_badge
-        I18n.t("recording_studio_presskits.embargo.badge")
-      end
-
-      def embargo_until
-        moment = Embargo.lifts_at(@press_kit_recording)
-        return if moment.blank?
-
-        zone_name = Embargo.time_zone(@press_kit_recording).presence
-        local = zone_name ? moment.in_time_zone(zone_name) : moment.in_time_zone
-        I18n.t("recording_studio_presskits.embargo.until", when: I18n.l(local, format: :long))
-      rescue StandardError
-        nil
+      def show_preview_details?
+        !embargoed?
       end
 
       def heading

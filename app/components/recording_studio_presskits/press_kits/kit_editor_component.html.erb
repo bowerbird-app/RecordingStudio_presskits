@@ -43,7 +43,9 @@
     <% end %>
 
     <% if helpers.respond_to?(:render_embargo_button) %>
-      <%= helpers.render_embargo_button(@press_kit_recording) %>
+      <div class="inline-flex" data-modal-id="embargo-editor-modal">
+        <%= helpers.render_embargo_button(@press_kit_recording, turbo_frame: "embargo_editor") %>
+      </div>
     <% end %>
 
     <%= helpers.render_publishable_quick_actions(@press_kit_recording) %>
@@ -124,6 +126,16 @@
         edit_path: @edit_path,
         reorder_path: @reorder_path
       ) %>
+    <% end %>
+  <% end %>
+
+  <%= render FlatPack::Modal::Component.new(
+    id: "embargo-editor-modal",
+    size: :xl,
+    scroll: :page
+  ) do |modal| %>
+    <% modal.body do %>
+      <%= helpers.turbo_frame_tag "embargo_editor" %>
     <% end %>
   <% end %>
 </div>

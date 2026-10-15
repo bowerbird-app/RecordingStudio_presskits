@@ -18,8 +18,9 @@ module RecordingStudioPresskits
         recording = recording_for(kit)
         key = ["presskits", recording&.id, normalize_presentation(presentation), recording&.recordable_id]
         return key unless Embargo.active?(recording)
+        return key unless defined?(RecordingStudioEmbargo)
 
-        key + ["embargo", Embargo.cache_boundary(recording), actor_cache_token(actor)]
+        key + RecordingStudioEmbargo.cache_key(recording, actor, ACTION)
       end
 
       private
@@ -28,13 +29,6 @@ module RecordingStudioPresskits
         return true unless presentation == :full
 
         Embargo.active?(recording_for(kit))
-      end
-
-      def actor_cache_token(actor)
-        return "anonymous" if actor.blank?
-        return actor.id.to_s if actor.respond_to?(:id) && actor.id.present?
-
-        actor.object_id.to_s
       end
     end
   end

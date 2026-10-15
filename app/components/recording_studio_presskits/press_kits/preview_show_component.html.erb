@@ -12,20 +12,16 @@
       id: "presskits-kit-cover",
       show_image: !embargoed?,
       context: :header
-    ) %>
+    ) do |cover| %>
+      <% cover.with_after_location do %>
+        <%= helpers.render_embargo_notice(@press_kit_recording, size: :md, id: "presskits-preview-embargo") %>
+      <% end %>
+    <% end %>
   <% end %>
 
+  <% if show_preview_details? %>
   <%= render RecordingStudioPresskits::PressKits::SectionCardComponent.new do %>
     <div id="presskits-preview-details" class="<%= RecordingStudioPresskits::PressKits::EditorChrome::SECTION_PAD_CLASSES %> flex flex-col gap-6">
-      <% if embargoed? %>
-        <div id="presskits-embargo-marker" class="flex flex-col gap-3" data-presskits-embargo="true">
-          <%= render FlatPack::Badge::Component.new(text: embargo_badge, style: :warning, size: :sm) %>
-          <% if embargo_until.present? %>
-            <p data-presskits-embargo-until><%= embargo_until %></p>
-          <% end %>
-        </div>
-      <% end %>
-
       <% if show_access_heading? %>
         <%= render heading_component %>
         <p data-presskits-preview-explanation><%= explanation %></p>
@@ -48,5 +44,6 @@
         </div>
       <% end %>
     </div>
+  <% end %>
   <% end %>
 </div>

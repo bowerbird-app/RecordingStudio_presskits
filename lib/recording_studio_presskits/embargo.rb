@@ -46,13 +46,6 @@ module RecordingStudioPresskits
         current(recording)&.time_zone
       end
 
-      def cache_boundary(recording)
-        moment = lifts_at(recording)
-        return "active" if moment.blank?
-
-        moment.respond_to?(:utc) ? moment.utc.iso8601 : moment.to_s
-      end
-
       def restricted_presentation(recording)
         choice = KitSettings.fallback_for(recording)
         choice.to_s == "hidden" ? :hidden : :preview

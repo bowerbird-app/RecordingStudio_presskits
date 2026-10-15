@@ -1,5 +1,25 @@
 # Upgrade notes
 
+## 0.65.0
+
+`0.64.0` already shipped. Bump to `0.65.0`. There is no presskits migration.
+
+Embargo is no longer vendored. Delete `vendor/gems/recording_studio_embargo` if a host copied that tree. Depend on the public GitHub tag `v0.3.0` (`~> 0.3.0`):
+
+```ruby
+gem "recording_studio_embargo", "~> 0.3.0", github: "bowerbird-app/RecordingStudio_embargo", tag: "v0.3.0"
+```
+
+Hosts that have not created `recording_studio_embargo_embargoes` still run `bin/rails generate recording_studio_embargo:migrations` and `bin/rails db:migrate`. Mount `RecordingStudioEmbargo::Engine`.
+
+The kit editor hosts `FlatPack::Modal` `embargo-editor-modal` (`size: :xl`) and `turbo_frame_tag "embargo_editor"` in `kit_editor_component.html.erb`. The button is `render_embargo_button(recording, turbo_frame: "embargo_editor")`. Embargo 0.2.0 added that `turbo_frame:` option, frame rendering without the page layout, turbo stream saves in the frame (including 422 validation re-renders), and a full-page redirect when there is no frame. The embargo gem does not render the modal.
+
+Embargo 0.3.0 adds `render_embargo_notice`. The limited preview, the owner preview, and the public kit call `render_embargo_notice(recording, size: :md)` under the location on the cover. The kit editor header calls `render_embargo_notice(recording, size: :sm)` in that same spot. Call both unconditionally. The notice renders nothing when the embargo is off or the release time has passed. Flatpack must be `v0.1.237` or newer so the card accepts `border:` and `shadow:`. This gem already requires `>= 0.1.240`. Override `recording_studio_embargo.notice.title`, `.subtitle`, and `.time_format` for different words. The homemade **Embargoed** badge is gone.
+
+Fragment caches for an active embargo append `RecordingStudioEmbargo.cache_key(recording, actor, :"presskits.kit_view_full")`. Press Kits no longer builds `Embargo.cache_boundary` or an actor token itself. Deploying replaces those keys once (one-time cache invalidation). Building the key does a DB lookup for the active embargo.
+
+Bundler clones embargo from the public GitHub tag like the other Recording Studio gems. This repository's CI does not set `BUNDLE_GITHUB__COM` or use `BOWERBIRD_ORG_CI_TOKEN`.
+
 ## 0.64.0
 
 `0.63.0` already shipped. Bump to `0.64.0`.

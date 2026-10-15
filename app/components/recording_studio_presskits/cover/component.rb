@@ -14,6 +14,8 @@ module RecordingStudioPresskits
       # Editor chrome. Index, public, and preview cards leave both empty.
       renders_one :body_actions
       renders_one :image_actions
+      # Optional row under the location line. An empty slot hides it.
+      renders_one :after_location
       # Caller-supplied card actions. An empty collection hides the row.
       renders_many :actions
 

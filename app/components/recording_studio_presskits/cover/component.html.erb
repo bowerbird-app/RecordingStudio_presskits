@@ -98,6 +98,12 @@
               </div>
             <% end %>
 
+            <% if after_location? %>
+              <div data-cover-after-location>
+                <%= after_location %>
+              </div>
+            <% end %>
+
             <% if actions.any? %>
               <div class="flex w-full flex-col gap-3 pb-8 @min-[640px]:flex-row @min-[640px]:flex-wrap @min-[640px]:items-center" data-cover-actions>
                 <% actions.each do |action| %>
