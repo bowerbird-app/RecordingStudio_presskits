@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.64.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.65.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -101,7 +101,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.10"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_duplicatable", "~> 0.5"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.240"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.241"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.6"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_cache", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
@@ -122,7 +122,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.19.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.3.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.240"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.241"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.3"'
@@ -458,7 +458,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "tag: \"v0.6.1\""
     assert_includes readme, "v0.9.3"
     assert_includes readme, "tag: \"v0.5.3\""
-    assert_includes readme, "tag: \"v0.1.240\""
+    assert_includes readme, "tag: \"v0.1.241\""
     assert_includes readme, "tag: \"v0.2.4\""
     assert_includes readme, 'gem "recording_studio_metrics", "~> 0.3"'
     assert_includes readme, 'gem "recording_studio_lists", "~> 0.7"'
@@ -496,7 +496,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "CoverImage"
     assert_includes readme, "Cover::Image"
     assert_includes readme, "aspect-[430/368]"
-    assert_includes readme, 'gem "flat_pack", ">= 0.1.240"'
+    assert_includes readme, 'gem "flat_pack", ">= 0.1.241"'
     assert_includes readme, "FlatPack::FontSwatch"
     assert_includes readme, "FlatPack::Modal::Component"
     assert_includes readme, "navigable: true"
@@ -1212,6 +1212,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     editor = File.read(presskits_path("app/components/recording_studio_presskits/images/edit_component.html.erb"))
     component = File.read(presskits_path("app/components/recording_studio_presskits/images/edit_component.rb"))
     show = File.read(presskits_path("app/components/recording_studio_presskits/images/component.html.erb"))
+    gallery = File.read(presskits_path("app/components/recording_studio_presskits/images/component.rb"))
 
     editor_path = "press_kits/section_editor_component.html.erb"
     section_editor = File.read(presskits_path("app/components/recording_studio_presskits/#{editor_path}"))
@@ -1238,6 +1239,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes show, "FlatPack::Masonry::Component"
     assert_includes show, "with_item"
     assert_includes show, "FlatPack::Media::Component"
+    assert_includes show, "FlatPack::Lightbox::Component"
+    assert_includes show, "FlatPack::Lightbox::Trigger"
+    assert_includes show, "thumbs: true"
+    assert_includes show, "lightbox_collection"
+    assert_includes show, "tile.fetch(:index)"
+    assert_includes gallery, "def lightbox_collection"
+    assert_includes gallery, "\"images\#{@recording.id}\""
+    assert_includes gallery, "def lightbox_items"
     refute_includes show, "with_image"
     refute_includes show, "Masonry::Image"
     assert_includes show, "placement: :bottom_left"
@@ -1716,7 +1725,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes routes, 'resource :cover, only: :edit, controller: "covers"'
     assert_includes editor, "navigable: true"
     assert_includes editor, "presskits_editor_modal_id_for"
-    refute_includes images, "lightbox"
+    assert_includes images, "FlatPack::Lightbox::Component"
     modal_js = "app/javascript/recording_studio_presskits/controllers/editor_modal_controller.js"
     refute File.exist?(presskits_path(modal_js))
   end

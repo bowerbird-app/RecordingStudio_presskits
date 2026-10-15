@@ -181,7 +181,7 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert_includes masonry["class"], "md:columns-2"
     assert_includes masonry["class"], "lg:columns-4"
     assert_includes masonry["class"], "fp-masonry--columns"
-    assert_select "#{frame} img", count: 12
+    assert_select "#{frame} .fp-masonry img", count: 12
     assert_select "a", text: "Download all images"
     assert_select "a", text: "Show more images (13)"
     heading = css_select("h2").find { |node| node.text == "Images" }
@@ -206,7 +206,7 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path, params: { images: content.id }
     assert_response :success
-    assert_select "#{frame} img", count: 13
+    assert_select "#{frame} .fp-masonry img", count: 13
     assert_select "a", text: "Show more images (13)", count: 0
 
     sign_in @user
@@ -221,6 +221,40 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     end
     assert images_section
     assert_select images_section, "span", text: "13", count: 0
+  end
+
+  test "each images section opens its own lightbox on the clicked photo" do
+    kit = record_kit("Spring launch")
+    section = add_images_section(kit, title: "Press photos")
+    other = add_images_section(kit, title: "Extra")
+    content = section_content(section)
+    extra = section_content(other)
+    13.times { |index| attach_image!(content, "shot-#{index}.jpg", alt: "Shot #{index}") }
+    attach_image!(extra, "extra.jpg", alt: "Extra photo")
+
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.preview_press_kit_path(kit)
+    assert_response :success
+    assert_section_lightbox(content, visible: 12, total: 13)
+    assert_section_lightbox(extra, visible: 1, total: 1)
+
+    get recording_studio_presskits.edit_press_kit_path(kit)
+    assert_response :success
+    assert_select "#presskits-editor-preview turbo-frame[id='presskits-images-#{content.id}'] button[data-flat-pack-lightbox-index='2']"
+    assert_section_lightbox(content, visible: 12, total: 13)
+
+    publish_kit!(kit)
+    get kit.publishable_public_path
+    assert_response :success
+    assert_section_lightbox(content, visible: 12, total: 13)
+    assert_select "turbo-frame[id='presskits-images-#{content.id}'] [data-flat-pack-lightbox-stage='true'] img[alt='Shot 12']"
+    assert_select "turbo-frame[id='presskits-images-#{content.id}'] .fp-masonry img[alt='Shot 12']", count: 0
+
+    get kit.publishable_public_path, params: { images: content.id }
+    assert_response :success
+    assert_section_lightbox(content, visible: 13, total: 13)
   end
 
   test "download all images zips this section only" do
@@ -284,6 +318,27 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_section_lightbox(content, visible:, total:)
+    frame = "turbo-frame[id='presskits-images-#{content.id}']"
+    group = "images#{content.id}"
+    dialog = css_select("#{frame} dialog[data-controller='flat-pack--lightbox']").first
+    assert dialog, "expected a lightbox for images #{content.id}"
+    assert_equal group, dialog["data-flat-pack--lightbox-group-value"]
+    assert_select "#{frame} .fp-masonry button[data-flat-pack-lightbox-group='#{group}']", count: visible
+    visible.times do |index|
+      button = css_select("#{frame} .fp-masonry button[data-flat-pack-lightbox-index='#{index}']").first
+      assert button, "expected thumbnail #{index}"
+      assert_equal "button", button["type"]
+      assert_equal group, button["data-flat-pack-lightbox-group"]
+    end
+    assert_select "#{frame} .fp-masonry img", count: visible
+    if total > 1
+      assert_select "#{frame} [data-flat-pack--carousel-target='thumb']", count: total
+    else
+      assert_select "#{frame} [data-flat-pack--carousel-target='thumb']", count: 0
+    end
+  end
 
   def record_kit(title)
     @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = title }
