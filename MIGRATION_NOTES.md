@@ -1,5 +1,11 @@
 # Upgrade notes
 
+## 0.67.0
+
+Bump to `0.67.0`. There is no presskits migration.
+
+List section API index and show declare `items` on `output_keys` and serialize the same item payloads as the kit section show. Quote and Credits section types register index and show as operations-only: no serializer and no `output_keys` key (not `output_keys: []`). They have no section-level payload. Recording Studio API rejects a serializer with empty `output_keys`; hosts do not need a `PresskitsEmptyApiOutput` (or similar) prepend.
+
 ## 0.66.1
 
 Bump to `0.66.1`. There is no presskits migration.

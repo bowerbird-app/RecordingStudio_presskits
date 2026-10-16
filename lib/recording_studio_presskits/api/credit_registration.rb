@@ -44,7 +44,7 @@ module RecordingStudioPresskits
       def register_credits_section
         register_type(
           "RecordingStudioPresskits::CreditsSection",
-          **empty_section_options,
+          **operations_only_section_options,
           capability_actions: %i[add_credit reorder_credits]
         )
       end
