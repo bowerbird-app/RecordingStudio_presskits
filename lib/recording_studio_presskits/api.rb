@@ -113,7 +113,7 @@ module RecordingStudioPresskits
       end
 
       def register_quote_section
-        register_type("RecordingStudioPresskits::QuoteSection", **empty_section_options)
+        register_type("RecordingStudioPresskits::QuoteSection", **operations_only_section_options)
       end
 
       def register_video_section
@@ -134,7 +134,9 @@ module RecordingStudioPresskits
         ::RecordingStudioApi.register_recordable_type_api(type_name, **)
       end
 
-      def empty_section_options
+      # Quote/Credits have no section-level payload. Do not pass serializer or
+      # output_keys: [] — Recording Studio API rejects a serializer with no keys.
+      def operations_only_section_options
         { operations: %i[index show] }
       end
     end

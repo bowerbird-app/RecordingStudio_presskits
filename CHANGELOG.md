@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - List section API index and show register `items` on `output_keys`, with a serializer that returns the same item payloads as the kit section show. Recording Studio API rejects a serializer with empty `output_keys`; hosts no longer need a patch that allows empty API output for presskits.
-- Quote and Credits section types still register index and show with no serializer and no `output_keys`. Those types have no section-level payload keys; children stay on `Quote`, `Credit`, and `CreditLine`.
+- Quote and Credits section types register index and show as operations-only: they omit both `serializer` and `output_keys` (they do not pass `output_keys: []`). Those types have no section-level payload keys; children stay on `Quote`, `Credit`, and `CreditLine`. `test/api_registration_test.rb` boots the full presskits registration against real Recording Studio API validation with no host `PresskitsEmptyApiOutput` prepend.
 
 ### Changed
 - Version `0.67.0`

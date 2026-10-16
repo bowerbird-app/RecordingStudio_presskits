@@ -8,21 +8,48 @@ require "rails/test_help"
 require "recording_studio_api"
 
 class ApiRegistrationTest < ActiveSupport::TestCase
+  PRESSKITS_TYPES = %w[
+    RecordingStudioPresskits::PressKit
+    RecordingStudioPresskits::KitSection
+    RecordingStudioPresskits::Text
+    RecordingStudioPresskits::Quote
+    RecordingStudioPresskits::QuoteSection
+    RecordingStudioPresskits::Stat
+    RecordingStudioPresskits::StatsSection
+    RecordingStudioPresskits::Credit
+    RecordingStudioPresskits::CreditLine
+    RecordingStudioPresskits::CreditsSection
+    RecordingStudioPresskits::VideoSection
+    RecordingStudioPresskits::Podcast
+    RecordingStudioPresskits::PodcastSection
+    RecordingStudioPresskits::LocationSection
+    RecordingStudioPresskits::ListItem
+    RecordingStudioPresskits::ListSection
+    RecordingStudioPresskits::Files
+  ].freeze
+
   def setup
-    self.class.register_api!
+    refute defined?(PresskitsEmptyApiOutput),
+           "host PresskitsEmptyApiOutput patch must not be loaded for this test"
+    ancestors = RecordingStudioApi::RecordableRegistration.ancestors.map(&:name)
+    refute_includes ancestors, "PresskitsEmptyApiOutput"
+
+    self.class.boot_presskits_api!
   end
 
-  def self.register_api!
-    return if @api_registered
+  def self.boot_presskits_api!
+    return if @api_booted
 
+    RecordingStudioApi.prepare_recordable_registries_for_reload!
     RecordingStudioPresskits::Api.register!
-    @api_registered = true
+    RecordingStudioApi.configuration.fetch_api(:public).recordable_registry.validate!
+    @api_booted = true
   end
 
   test "empty output_keys with a serializer are rejected by RecordingStudioApi" do
     error = assert_raises(RecordingStudioApi::ConfigurationError) do
       RecordingStudioApi::RecordableRegistration.new(
-        recordable_type: "RecordingStudioPresskits::ListSection",
+        recordable_type: "RecordingStudioPresskits::QuoteSection",
         operations: %i[index show],
         serializer: ->(*) { {} },
         output_keys: []
@@ -31,7 +58,31 @@ class ApiRegistrationTest < ActiveSupport::TestCase
     assert_match(/Output keys are required when serializer is configured/, error.message)
   end
 
-  test "presskits registration passes RecordingStudioApi validation without a host patch" do
+  test "operations-only registration without output_keys passes RecordingStudioApi validation" do
+    registration = RecordingStudioApi::RecordableRegistration.new(
+      recordable_type: "RecordingStudioPresskits::QuoteSection",
+      operations: %i[index show]
+    )
+
+    assert_nil registration.serializer
+    assert_empty registration.output_keys
+    assert registration.validate!
+  end
+
+  test "whole presskits API registration boots against RecordingStudioApi with no host patch" do
+    registry = RecordingStudioApi.configuration.fetch_api(:public).recordable_registry
+
+    assert_nothing_raised { registry.validate! }
+
+    PRESSKITS_TYPES.each do |type_name|
+      registration = RecordingStudioApi.recordable_registration_for(type_name)
+      assert registration, "#{type_name} was not registered"
+      assert_nothing_raised { registration.validate! }
+      if registration.serializer
+        refute_empty registration.output_keys, "#{type_name} has a serializer but no output_keys"
+      end
+    end
+
     list = RecordingStudioApi.recordable_registration_for("RecordingStudioPresskits::ListSection")
     quote = RecordingStudioApi.recordable_registration_for("RecordingStudioPresskits::QuoteSection")
     credits = RecordingStudioApi.recordable_registration_for("RecordingStudioPresskits::CreditsSection")
@@ -40,12 +91,15 @@ class ApiRegistrationTest < ActiveSupport::TestCase
     assert_respond_to list.serializer, :call
     assert_equal %i[index show], list.operations
 
-    assert_empty quote.output_keys
     assert_nil quote.serializer
+    assert_empty quote.output_keys
     assert_equal %i[index show], quote.operations
+    refute_includes operations_only_source, "output_keys"
+    refute_includes operations_only_source, "serializer"
+    refute_includes operations_only_source, "[]"
 
-    assert_empty credits.output_keys
     assert_nil credits.serializer
+    assert_empty credits.output_keys
     assert_equal %i[index show], credits.operations
     assert_includes credits.capability_actions, "add_credit"
     assert_includes credits.capability_actions, "reorder_credits"
@@ -76,6 +130,13 @@ class ApiRegistrationTest < ActiveSupport::TestCase
   end
 
   private
+
+  def operations_only_source
+    api = File.read(File.expand_path("../lib/recording_studio_presskits/api.rb", __dir__))
+    start = api.index("def operations_only_section_options")
+    finish = api.index("\n      end\n", start)
+    api[start..finish]
+  end
 
   def kit_tree
     root = RecordingStudio.root_recording_for(Workspace.create!(name: "API registration #{SecureRandom.hex(4)}"))
