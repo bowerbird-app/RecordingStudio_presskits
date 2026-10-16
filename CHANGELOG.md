@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version `0.66.1`
 
 ### Upgrade notes
-- Bump to `0.66.1`. No presskits migration. Hosts that already load Recording Studio API get `subtitle` on press kit show and update. It is not writable. Title and description stay read-only on that type, same as `0.66.0`.
+- Bump to `0.66.1`. No presskits migration. Hosts that already load Recording Studio API get `subtitle` on press kit show and update.
 
 ## [0.66.0] - 2026-10-15
 
