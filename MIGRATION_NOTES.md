@@ -4,7 +4,9 @@
 
 Bump to `0.67.0`. There is no presskits migration.
 
-List section API index and show declare `items` on `output_keys` and serialize the same item payloads as the kit section show. Quote and Credits section types register index and show as operations-only: no serializer and no `output_keys` key (not `output_keys: []`). They have no section-level payload. Recording Studio API rejects a serializer with empty `output_keys`; hosts do not need a `PresskitsEmptyApiOutput` (or similar) prepend.
+List section API index and show declare `items` on `output_keys` and serialize the same item payloads as the kit section show. List index/show responses now include an `items` key (API client-visible). Quote and Credits were already operations-only on `0.66.1`; this release only renames `empty_section_options` to `operations_only_section_options`.
+
+Host upgrade order when removing a `PresskitsEmptyApiOutput` workaround: bump presskits to `0.67.0` first, boot with eager load while the workaround is still present, then remove `PresskitsEmptyApiOutput` and its prepend. Removing the workaround on `<= 0.66` raises `ConfigurationError`.
 
 ## 0.66.1
 

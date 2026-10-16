@@ -10,14 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.67.0] - 2026-10-16
 
 ### Fixed
-- List section API index and show register `items` on `output_keys`, with a serializer that returns the same item payloads as the kit section show. Recording Studio API rejects a serializer with empty `output_keys`; hosts no longer need a patch that allows empty API output for presskits.
-- Quote and Credits section types register index and show as operations-only: they omit both `serializer` and `output_keys` (they do not pass `output_keys: []`). Those types have no section-level payload keys; children stay on `Quote`, `Credit`, and `CreditLine`. `test/api_registration_test.rb` boots the full presskits registration against real Recording Studio API validation with no host `PresskitsEmptyApiOutput` prepend.
+- List section API index and show register `items` on `output_keys`, with a serializer that returns the same item payloads as the kit section show. List index/show responses now include an `items` key (API client-visible). Hosts that load Recording Studio API no longer need a `PresskitsEmptyApiOutput` (or similar) patch for empty presskits `output_keys`.
 
 ### Changed
+- Rename `empty_section_options` to `operations_only_section_options` (Quote and Credits were already operations-only on `0.66.1`; no registration behavior change for those types).
+- `test/api_registration_test.rb` boots the full presskits registration against real Recording Studio API validation with no host `PresskitsEmptyApiOutput` prepend.
 - Version `0.67.0`
 
 ### Upgrade notes
-- Bump to `0.67.0`. No presskits migration. Hosts that load Recording Studio API can drop any `PresskitsEmptyApiOutput` (or similar) workaround that allowed empty `output_keys`. List section show includes `items`.
+- Bump to `0.67.0`. No presskits migration. List section index/show includes `items`.
+- Host upgrade order when removing a `PresskitsEmptyApiOutput` workaround: (1) bump presskits to `0.67.0` first, (2) boot with eager load while the workaround is still present, (3) then remove `PresskitsEmptyApiOutput` and its prepend. Removing the workaround on `<= 0.66` raises `ConfigurationError`.
 
 ## [0.66.1] - 2026-10-16
 
