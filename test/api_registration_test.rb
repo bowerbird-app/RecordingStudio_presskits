@@ -78,11 +78,13 @@ class ApiRegistrationTest < ActiveSupport::TestCase
       registration = RecordingStudioApi.recordable_registration_for(type_name)
       assert registration, "#{type_name} was not registered"
       assert_nothing_raised { registration.validate! }
-      if registration.serializer
-        refute_empty registration.output_keys, "#{type_name} has a serializer but no output_keys"
-      end
-    end
+      next unless registration.serializer
 
+      refute_empty registration.output_keys, "#{type_name} has a serializer but no output_keys"
+    end
+  end
+
+  test "list declares items and quote credits stay operations-only" do
     list = RecordingStudioApi.recordable_registration_for("RecordingStudioPresskits::ListSection")
     quote = RecordingStudioApi.recordable_registration_for("RecordingStudioPresskits::QuoteSection")
     credits = RecordingStudioApi.recordable_registration_for("RecordingStudioPresskits::CreditsSection")
