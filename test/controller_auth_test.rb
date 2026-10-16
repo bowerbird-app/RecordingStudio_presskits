@@ -34,10 +34,10 @@ class ControllerAuthTest < Minitest::Test
     gemspec = File.read(File.join(root, "recording_studio_presskits.gemspec"))
 
     assert_includes gemfile, 'tag: "v0.19.0"'
-    assert_includes gemfile, 'tag: "v0.10.1"'
+    assert_includes gemfile, 'tag: "v0.11.0"'
     assert_includes gemfile, 'tag: "v0.4.3"'
     assert_includes dummy, 'tag: "v0.19.0"'
-    assert_includes dummy, 'tag: "v0.10.1"'
+    assert_includes dummy, 'tag: "v0.11.0"'
     assert_includes dummy, 'tag: "v0.4.3"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.19"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.10"'

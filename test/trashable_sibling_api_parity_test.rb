@@ -26,11 +26,11 @@ class TrashableSiblingApiParityTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.10"'
     assert_match(
-      /recording_studio_trashable", "~> 0\.10".*tag: "v0\.10\.1"/,
+      /recording_studio_trashable", "~> 0\.10".*tag: "v0\.11\.0"/,
       gemfile
     )
     assert_match(
-      /recording_studio_trashable".*tag: "v0\.10\.1"/,
+      /recording_studio_trashable".*tag: "v0\.11\.0"/,
       dummy
     )
     refute_includes gemspec, 'spec.add_dependency "recording_studio_trashable", "~> 0.9"'
