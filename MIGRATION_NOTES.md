@@ -8,7 +8,7 @@ The kits index no longer switches between cards and a table. `?view=cards` and `
 
 The heading is **My press kits**. The create button is **Press kit**.
 
-**All**, **Draft**, and **Published** are `FlatPack::SegmentedButtons`. **Published** is `PressKit.published` (live now). **Draft** is every other kit except `PressKit.scheduled`, including a kit with no publishable child and a kit that was unpublished. A scheduled kit appears on **All** only. Search is a GET form. `q` matches the kit title, ignoring case. Filter links keep `q`. The search form keeps `status`. An unknown `status` is **All**.
+**All**, **Draft**, and **Published** are `FlatPack::SegmentedButtons` with `style: :default`, so the selected segment is grey. **Published** is `PressKit.published` (live now). **Draft** is every other kit except `PressKit.scheduled`, including a kit with no publishable child and a kit that was unpublished. A scheduled kit appears on **All** only. Search is a GET form. `q` matches the kit title, ignoring case. Filter links keep `q`. The search form keeps `status`. An unknown `status` is **All**.
 
 `RecordingStudioPresskits::PressKits::IndexComponent.new` takes `press_kit_recordings:`, `status:`, `query:`, `new_path:`, and `show_path:`. It no longer takes `view:`, `cards_path:`, or `table_path:`. `presskits_index_path(status:, query:)` builds the index URL and omits `status` when it is all and omits a blank `q`.
 

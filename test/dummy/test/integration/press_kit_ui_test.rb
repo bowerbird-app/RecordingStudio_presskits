@@ -66,9 +66,9 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_includes row["class"], "@min-[640px]:flex-row"
     frame = css_select("[data-cover-card] [data-cover-frame]").first
     refute_includes frame["class"], "@min-[640px]:w-1/2"
-    assert_select "a", text: "All"
-    assert_select "a", text: "Draft"
-    assert_select "a", text: "Published"
+    assert_select "a[data-fp-style='default']", text: "All"
+    assert_select "a[data-fp-style='secondary']", text: "Draft"
+    assert_select "a[data-fp-style='secondary']", text: "Published"
     assert_select "input[name='q'][placeholder='Search by title']"
     refute_select "a[aria-label='Cards']"
     refute_select "a[aria-label='Table']"
@@ -108,6 +108,8 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.press_kits_path(status: "draft")
     assert_response :success
+    assert_select "a[data-fp-style='default']", text: "Draft"
+    assert_select "a[data-fp-style='secondary']", text: "All"
     assert_select "[data-cover-title]", text: "Autumn recap"
     assert_select "[data-cover-title]", text: "Spring launch", count: 0
     assert_select "[data-cover-title]", text: "Winter premiere", count: 0

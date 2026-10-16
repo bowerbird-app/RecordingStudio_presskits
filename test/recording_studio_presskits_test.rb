@@ -682,7 +682,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes index, 'I18n.t("recording_studio_presskits.index.title")'
     assert_includes index, 'I18n.t("recording_studio_presskits.index.new")'
     assert_includes index, 'icon: "plus"'
-    assert_includes index, "FlatPack::SegmentedButtons::Component"
+    assert_includes index, "FlatPack::SegmentedButtons::Component.new(style: :default)"
     assert_includes index, "FlatPack::Search::Component"
     assert_includes index, 'name: "q"'
     assert_includes index, "filter_path(status: \"all\")"

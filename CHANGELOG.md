@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - The kits index is always a grid of stacked preview cards (`Cover::Component` `context: :grid`, `FlatPack::Grid` `cols: 3`). The cards/table switch, the table, and `?view=` are gone. `context: :header` (the kit editor and the public kit) still goes wide from 640px of the card.
 - The heading is **My press kits**. The create button is **Press kit**.
-- **All**, **Draft**, and **Published** filter that grid. **Published** is `PressKit.published` (live now). **Draft** is every other kit except one scheduled for later, including a kit that has never been published. A scheduled kit (`PressKit.scheduled`) shows on **All** only.
+- **All**, **Draft**, and **Published** filter that grid. The selected segment is `FlatPack::SegmentedButtons` `style: :default` (grey). **Published** is `PressKit.published` (live now). **Draft** is every other kit except one scheduled for later, including a kit that has never been published. A scheduled kit (`PressKit.scheduled`) shows on **All** only.
 - Search (`q`) matches the kit title. Filter links keep the search. The search keeps the filter.
 - `PressKits::IndexComponent` takes `status:` and `query:` instead of `view:`, `cards_path:`, and `table_path:`. `presskits_index_path` takes `status:` and `query:`.
 - Version `0.68.0`

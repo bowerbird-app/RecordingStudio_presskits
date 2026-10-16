@@ -13,7 +13,7 @@
       href: @new_path
     ) %>
 
-    <%= render FlatPack::SegmentedButtons::Component.new do |group| %>
+    <%= render FlatPack::SegmentedButtons::Component.new(style: :default) do |group| %>
       <% group.button(text: I18n.t("recording_studio_presskits.index.status.all"), href: filter_path(status: "all"), selected: status_selected?("all")) %>
       <% group.button(text: I18n.t("recording_studio_presskits.index.status.draft"), href: filter_path(status: "draft"), selected: status_selected?("draft")) %>
       <% group.button(text: I18n.t("recording_studio_presskits.index.status.published"), href: filter_path(status: "published"), selected: status_selected?("published")) %>
