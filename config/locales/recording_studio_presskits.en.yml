@@ -1,5 +1,18 @@
 en:
   recording_studio_presskits:
+    index:
+      title: "My press kits"
+      subtitle: "The folders you fill. Sections drop in later."
+      new: "Press kit"
+      search_placeholder: "Search by title"
+      empty_title: "Nothing here yet"
+      empty_description: "Make a press kit and start filling it."
+      no_matches_title: "No press kits match"
+      no_matches_description: "Try another word, or show every kit."
+      status:
+        all: "All"
+        draft: "Draft"
+        published: "Published"
     cover:
       eyebrow: "Press kit"
       view: "View"

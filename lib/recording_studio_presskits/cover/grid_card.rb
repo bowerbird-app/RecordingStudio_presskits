@@ -22,9 +22,12 @@ module RecordingStudioPresskits
         "@container h-full w-full shadow-[0px_12px_40px_0px_rgba(26,20,10,0.08)]"
       end
 
-      # Wide layout keys off the card's own width. Tailwind scans these literals:
-      # "@min-[640px]:min-h-[50cqw]" "@min-[640px]:flex-row"
+      # The index passes context :grid and stays the stacked preview at every width.
+      # The header still goes wide from 640px of the card. Tailwind scans these
+      # literals: "@min-[640px]:min-h-[50cqw]" "@min-[640px]:flex-row"
       def grid_card_row_classes
+        return "flex h-full w-full flex-1 flex-col" if grid?
+
         "flex h-full w-full flex-1 flex-col @min-[640px]:min-h-[50cqw] @min-[640px]:flex-row"
       end
 
@@ -33,8 +36,11 @@ module RecordingStudioPresskits
       # "@min-[640px]:min-h-[50cqw]" "@min-[640px]:rounded-tr-none"
       # "@min-[640px]:rounded-bl-[var(--radius-lg)]" "@min-[640px]:min-w-0"
       def grid_card_frame_classes
+        stacked = "relative aspect-[430/368] w-full overflow-hidden rounded-t-[var(--radius-lg)]"
+        return stacked if grid?
+
         [
-          "relative aspect-[430/368] w-full overflow-hidden rounded-t-[var(--radius-lg)]",
+          stacked,
           "@min-[640px]:aspect-auto @min-[640px]:w-1/2 @min-[640px]:shrink-0",
           "@min-[640px]:min-h-[50cqw] @min-[640px]:self-stretch",
           "@min-[640px]:rounded-tr-none @min-[640px]:rounded-bl-[var(--radius-lg)]"
@@ -42,14 +48,19 @@ module RecordingStudioPresskits
       end
 
       def grid_card_body_classes
+        return "flex flex-1 flex-col px-8 pt-7" if grid?
+
         "flex flex-1 flex-col px-8 pt-7 @min-[640px]:min-w-0"
       end
 
       # pt-16 on the wide copy, on top of the body's pt-7, so the company name
       # starts about 6rem from the card top. A narrower card, editor included,
-      # keeps only that body padding. The heart is an overlay item, not a
-      # column in this row. Tailwind scans this literal: "@min-[640px]:pt-16"
+      # keeps only that body padding. The index stays stacked, so it skips that
+      # extra padding. The heart is an overlay item, not a column in this row.
+      # Tailwind scans this literal: "@min-[640px]:pt-16"
       def grid_card_copy_classes
+        return "min-w-0" if grid?
+
         "min-w-0 @min-[640px]:pt-16"
       end
 

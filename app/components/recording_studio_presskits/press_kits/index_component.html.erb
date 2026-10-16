@@ -1,49 +1,42 @@
 <div class="flex w-full flex-col gap-6 p-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "My presskits",
-    subtitle: "The folders you fill. Sections drop in later.",
+    title: I18n.t("recording_studio_presskits.index.title"),
+    subtitle: I18n.t("recording_studio_presskits.index.subtitle"),
     variant: :h1
   ) %>
 
   <div class="flex flex-wrap items-center gap-3">
     <%= render FlatPack::Button::Component.new(
-      text: "Presskit",
+      text: I18n.t("recording_studio_presskits.index.new"),
       icon: "plus",
       style: :primary,
       href: @new_path
     ) %>
 
-    <%= render FlatPack::ButtonGroup::Component.new do |group| %>
-      <% group.button(FlatPack::Button::Component.new(
-        icon: "squares-2x2",
-        icon_only: true,
-        style: table_view? ? :secondary : :primary,
-        href: @cards_path,
-        aria: { label: "Cards", pressed: !table_view? }
-      )) %>
-      <% group.button(FlatPack::Button::Component.new(
-        icon: "table-cells",
-        icon_only: true,
-        style: table_view? ? :primary : :secondary,
-        href: @table_path,
-        aria: { label: "Table", pressed: table_view? }
-      )) %>
+    <%= render FlatPack::SegmentedButtons::Component.new(style: :default) do |group| %>
+      <% group.button(text: I18n.t("recording_studio_presskits.index.status.all"), href: filter_path(status: "all"), selected: status_selected?("all")) %>
+      <% group.button(text: I18n.t("recording_studio_presskits.index.status.draft"), href: filter_path(status: "draft"), selected: status_selected?("draft")) %>
+      <% group.button(text: I18n.t("recording_studio_presskits.index.status.published"), href: filter_path(status: "published"), selected: status_selected?("published")) %>
+    <% end %>
+
+    <%= form_with url: search_path, method: :get, local: true, data: { turbo: false } do %>
+      <%= render FlatPack::Search::Component.new(
+        name: "q",
+        value: @query.presence,
+        placeholder: I18n.t("recording_studio_presskits.index.search_placeholder"),
+        max_width: :md
+      ) %>
     <% end %>
   </div>
 
   <% if @press_kit_recordings.empty? %>
     <%= render FlatPack::EmptyState::Component.new(
-      title: "Nothing here yet",
-      description: "Make a press kit and start filling it.",
+      title: I18n.t(filtered? ? "recording_studio_presskits.index.no_matches_title" : "recording_studio_presskits.index.empty_title"),
+      description: I18n.t(filtered? ? "recording_studio_presskits.index.no_matches_description" : "recording_studio_presskits.index.empty_description"),
       icon: :inbox
     ) %>
-  <% elsif table_view? %>
-    <%= render FlatPack::Table::Component.new(data: @press_kit_recordings) do |table| %>
-      <% table.column(title: "Name", html: ->(recording) { helpers.link_to(helpers.presskits_title_for(recording), @show_path.call(recording)) }) %>
-      <% table.column(title: "Added", html: ->(recording) { recording.created_at&.to_fs(:long) }) %>
-    <% end %>
   <% else %>
-    <%= render FlatPack::Grid::Component.new(cols: 2, gap: :lg, align: :stretch) do %>
+    <%= render FlatPack::Grid::Component.new(cols: 3, gap: :lg, align: :stretch) do %>
       <% @press_kit_recordings.each do |recording| %>
         <%= render RecordingStudioPresskits::Cover::Component.new(
           recording: recording,

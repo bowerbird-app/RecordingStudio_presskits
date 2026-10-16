@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.66.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.68.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -679,18 +679,22 @@ class RecordingStudioPresskitsTest < Minitest::Test
     components = File.expand_path("../app/components/recording_studio_presskits", __dir__)
     show = File.read(File.expand_path("press_kits/kit_editor_component.html.erb", components))
 
-    assert_includes index, 'title: "My presskits"'
-    assert_includes index, 'text: "Presskit"'
+    assert_includes index, 'I18n.t("recording_studio_presskits.index.title")'
+    assert_includes index, 'I18n.t("recording_studio_presskits.index.new")'
     assert_includes index, 'icon: "plus"'
-    assert_match(/Presskit.*FlatPack::ButtonGroup::Component/m, index)
-    assert_includes index, "FlatPack::ButtonGroup::Component"
-    assert_includes index, "icon_only: true"
-    assert_includes index, "squares-2x2"
-    assert_includes index, "table-cells"
-    refute_includes index, "FlatPack::SegmentedButtons::Component"
+    assert_includes index, "FlatPack::SegmentedButtons::Component.new(style: :default)"
+    assert_includes index, "FlatPack::Search::Component"
+    assert_includes index, 'name: "q"'
+    assert_includes index, "filter_path(status: \"all\")"
+    assert_includes index, "filter_path(status: \"draft\")"
+    assert_includes index, "filter_path(status: \"published\")"
+    refute_includes index, "FlatPack::ButtonGroup::Component"
+    refute_includes index, "squares-2x2"
+    refute_includes index, "table-cells"
     refute_includes index, "justify-between"
     refute_includes index, 'text: "Cards"'
     refute_includes index, 'text: "Table"'
+    refute_includes index, "FlatPack::Table::Component"
     assert_includes index, "RecordingStudioPresskits::Cover::Component"
     assert_includes index, "size: :card"
     assert_includes index, "context: :grid"
@@ -726,6 +730,8 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes grid_card, "@min-[640px]:min-h-[50cqw]"
     assert_includes grid_card, "aspect-[430/368]"
     assert_includes grid_card, "flex flex-1 flex-col px-8 pt-7"
+    assert_includes grid_card, 'return "flex h-full w-full flex-1 flex-col" if grid?'
+    assert_includes grid_card, 'return "min-w-0" if grid?'
     assert_includes grid_card, "def grid_card_copy_classes"
     assert_includes grid_card, "min-w-0 @min-[640px]:pt-16"
     assert_includes grid_card, "def company_heart_clearance_classes"
@@ -773,19 +779,38 @@ class RecordingStudioPresskitsTest < Minitest::Test
     refute_includes index, "featured_card?"
     refute_includes index, "data-cover-feature"
     refute_includes index, "featured_recording"
+    assert_includes index, "cols: 3"
     assert_includes index, "align: :stretch"
     refute_includes index, "align: :start"
+    refute_includes index, "cols: 2"
     locales = File.read(File.expand_path("../config/locales/recording_studio_presskits.en.yml", __dir__))
     assert_includes locales, "cover:"
     assert_includes locales, 'eyebrow: "Press kit"'
     assert_includes locales, 'view: "View"'
     assert_includes locales, 'contact: "Contact"'
+    assert_includes locales, 'title: "My press kits"'
+    assert_includes locales, 'new: "Press kit"'
+    assert_includes locales, 'search_placeholder: "Search by title"'
+    assert_includes locales, 'all: "All"'
+    assert_includes locales, 'draft: "Draft"'
+    assert_includes locales, 'published: "Published"'
     refute_includes index, "card.media"
     refute_includes index, 'name: "photo"'
     refute_includes index, "presskits_cover_url_for"
-    assert_includes index, "FlatPack::Table::Component"
     assert_includes index, "FlatPack::Grid::Component"
     assert_includes index, "FlatPack::EmptyState::Component"
+    controller = File.read(File.expand_path(
+                             "../app/controllers/recording_studio_presskits/press_kits_controller.rb",
+                             __dir__
+                           ))
+    assert_includes controller, "KitIndex.records"
+    refute_includes controller, "table_view?"
+    helper = File.read(File.expand_path(
+                         "../app/helpers/recording_studio_presskits/application_helper.rb",
+                         __dir__
+                       ))
+    assert_includes helper, "def presskits_index_path(status: nil, query: nil)"
+    refute_includes helper, "view:"
     header = File.read(File.expand_path("press_kits/header_editor_component.html.erb", components))
     kit_header = File.read(File.expand_path("press_kits/kit_header_component.html.erb", components))
 

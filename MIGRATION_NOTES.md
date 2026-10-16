@@ -1,5 +1,19 @@
 # Upgrade notes
 
+## 0.68.0
+
+`0.67.0` is already claimed on an open branch. Bump to `0.68.0`. There is no presskits migration.
+
+The kits index no longer switches between cards and a table. `?view=cards` and `?view=table` are ignored. The page is a `FlatPack::Grid` (`cols: 3`) of `Cover::Component` at `:card` with `context: :grid`. That context stays stacked (cover on top, body underneath) at every width. The kit editor and the public kit still pass `context: :header` and still go wide from 640px of the card.
+
+The heading is **My press kits**. The create button is **Press kit**.
+
+**All**, **Draft**, and **Published** are `FlatPack::SegmentedButtons` with `style: :default`, so the selected segment is grey. **Published** is `PressKit.published` (live now). **Draft** is every other kit except `PressKit.scheduled`, including a kit with no publishable child and a kit that was unpublished. A scheduled kit appears on **All** only. Search is a GET form. `q` matches the kit title, ignoring case. Filter links keep `q`. The search form keeps `status`. An unknown `status` is **All**.
+
+`RecordingStudioPresskits::PressKits::IndexComponent.new` takes `press_kit_recordings:`, `status:`, `query:`, `new_path:`, and `show_path:`. It no longer takes `view:`, `cards_path:`, or `table_path:`. `presskits_index_path(status:, query:)` builds the index URL and omits `status` when it is all and omits a blank `q`.
+
+Rebuild Tailwind so `lg:grid-cols-3` from the grid is generated.
+
 ## 0.66.0
 
 Bump to `0.66.0`. Accessible stays `~> 0.19` (git tag `v0.19.0`) as on main; ControllerAuth needs Accessible `0.18` or newer. There is no presskits migration.
