@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.67.0] - 2026-10-16
+
+### Fixed
+- List section API index and show register `items` on `output_keys`, with a serializer that returns the same item payloads as the kit section show. Recording Studio API rejects a serializer with empty `output_keys`; hosts no longer need a patch that allows empty API output for presskits.
+- Quote and Credits section types still register index and show with no serializer and no `output_keys`. Those types have no section-level payload keys; children stay on `Quote`, `Credit`, and `CreditLine`.
+
+### Changed
+- Version `0.67.0`
+
+### Upgrade notes
+- Bump to `0.67.0`. No presskits migration. Hosts that load Recording Studio API can drop any `PresskitsEmptyApiOutput` (or similar) workaround that allowed empty `output_keys`. List section show includes `items`.
+
 ## [0.66.1] - 2026-10-16
 
 ### Fixed
@@ -1254,7 +1266,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.67.0...HEAD
+[0.67.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...v0.67.0
 [0.66.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.0...v0.66.1
 [0.66.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.66.0
 [0.65.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.64.0...v0.65.0
