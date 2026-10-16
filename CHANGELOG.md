@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.69.0] - 2026-10-16
+
+### Changed
+- `recording_studio_downloadable` is `~> 0.7` from GitHub tag `v0.7.0`.
+- Kit downloads and images-section downloads pause on `RecordingStudioPresskits::KitDownloadGate` until the visitor picks a purpose. The engine registers that gate for `:"presskits.kit_download"` and `:"presskits.images_download"`. **Download kit** and **Download all images** use `recording_studio_downloadable_button`. While the gate is open, Downloadable renders `DownloadGateComponent` (existing Flatpack button and modal) instead of the package poller. After a choice, that modal shows the existing progress (section title, progress, and empty state).
+- The choice step asks **What do you want to use this content for?** with a Flatpack PageTitle inside the download gate frame. The modal has no title, so the question leaves when that frame swaps to progress. The close button stays. The continuation page uses the same frame. The step is a required Flatpack RadioGroup (`variant: :inline`) with icons: **Editorial consideration** (`newspaper`, `editorial`) and **Publish immediately** (`bolt`, `publish`). **Continue** sits under the choices with `mt-8`. One choice is stored on the session for the press kit. It covers the kit zip and every images-section zip. A modal already on the page still shows the choices until that modal is submitted or the page loads again. A started download logs `{ "purpose" => "editorial" }` or `{ "purpose" => "publish" }` in `metadata`.
+- Images sections opt into Downloadable (`source: :manifest`, action `:"presskits.images_download"`). The section zip is that recording's package. `ImageArchivesController` and `GET /recording_studio_presskits/image_archives/:id` are gone. The zip name is the section heading.
+- Version `0.69.0`. `0.67.0` and `0.68.0` are already claimed by open pull requests.
+
+### Upgrade notes
+- Bump to `0.69.0`. Pin Downloadable `~> 0.7` at tag `v0.7.0`.
+- Run `bin/rails generate recording_studio_downloadable:migrations` and migrate. That adds `metadata` (`jsonb`, default `{}`) on `recording_studio_downloadable_download_logs`. There is no presskits table migration.
+- The engine registers the gate and copies the session onto `Current.download_gate` when that attribute is missing. Host `Current` classes can declare `attribute :download_gate` themselves.
+- Public pages that render a kit still include Downloadable's helpers. Drop links to `image_archives`. One confirmation per kit per session. People who cannot download still see no button.
+
 ## [0.66.1] - 2026-10-16
 
 ### Fixed
@@ -1254,7 +1269,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.69.0...HEAD
+[0.69.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...v0.69.0
 [0.66.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.0...v0.66.1
 [0.66.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.66.0
 [0.65.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.64.0...v0.65.0

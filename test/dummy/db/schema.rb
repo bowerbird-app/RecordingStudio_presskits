@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -176,6 +176,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
     t.uuid "impersonator_id"
     t.string "ip_address"
     t.string "user_agent"
+    t.jsonb "metadata", default: {}, null: false
     t.datetime "occurred_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.datetime "created_at", null: false
     t.index ["action", "occurred_at"], name: "index_rs_download_logs_on_action_and_occurred_at"

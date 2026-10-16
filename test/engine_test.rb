@@ -203,16 +203,25 @@ class EngineTest < Minitest::Test
       block.call
     end
 
+    images_configured = []
+    registered = []
+
     RecordingStudioPresskits::Engine.stub(:config, config_stub) do
       RecordingStudioPresskits::KitDownload.stub(:configure_audience!, -> { configured << true }) do
         RecordingStudioPresskits::KitDownload.stub(:subscribe!, -> { subscribed << true }) do
-          find_initializer("recording_studio_presskits.kit_download").block.call
+          RecordingStudioPresskits::ImagesDownload.stub(:configure_audience!, -> { images_configured << true }) do
+            RecordingStudioPresskits::KitDownloadGate.stub(:register!, -> { registered << true }) do
+              find_initializer("recording_studio_presskits.kit_download").block.call
+            end
+          end
         end
       end
     end
 
     assert_equal [true], configured
     assert_equal [true], subscribed
+    assert_equal [true], images_configured
+    assert_equal [true], registered
   end
 
   def test_publishable_views_initializer_appends_engine_views

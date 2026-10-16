@@ -568,11 +568,11 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:trashable, for: "Page")
   end
 
-  test "downloadable is enabled on press kit only" do
+  test "downloadable is enabled on press kits and images sections" do
     assert RecordingStudio.capability_enabled?(:downloadable, for: "RecordingStudioPresskits::PressKit")
+    assert RecordingStudio.capability_enabled?(:downloadable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:downloadable, for: "FakeBlock")
     refute RecordingStudio.capability_enabled?(:downloadable, for: "RecordingStudioPresskits::KitSection")
-    refute RecordingStudio.capability_enabled?(:downloadable, for: "RecordingStudioPresskits::Images")
     refute RecordingStudio.capability_enabled?(:downloadable, for: "Workspace")
 
     options = RecordingStudio.capability_options(:downloadable, for: "RecordingStudioPresskits::PressKit").to_h
@@ -580,6 +580,12 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal :zip, options[:format]
     assert_equal :"presskits.kit_download", options[:action]
     assert_equal :public, options[:export_scope]
+
+    images = RecordingStudio.capability_options(:downloadable, for: "RecordingStudioPresskits::Images").to_h
+    assert_equal :manifest, images[:source]
+    assert_equal :zip, images[:format]
+    assert_equal :"presskits.images_download", images[:action]
+    assert_equal :public, images[:export_scope]
   end
 
   test "publishable is enabled on press kit only" do

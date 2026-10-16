@@ -7,10 +7,13 @@ module RecordingStudioPresskits
     end
 
     def self.filename_for(content_recording)
+      "#{stem_for(content_recording)}.zip"
+    end
+
+    def self.stem_for(content_recording)
       section = content_recording&.parent_recording
       heading = section.present? ? RecordingStudioPresskits.section_heading(section) : nil
-      stem = heading.to_s.parameterize.presence || "images"
-      "#{stem}.zip"
+      heading.to_s.parameterize.presence || "images"
     end
 
     def initialize(content_recording)

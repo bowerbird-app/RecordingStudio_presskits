@@ -98,6 +98,12 @@ class PressKitDownloadAudienceTest < ActionDispatch::IntegrationTest
     visit_as(nil)
 
     get recording_studio_downloadable.recording_package_path(kit)
+    assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
+    patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, purpose: "editorial" }
+
+    assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
+      get recording_studio_downloadable.recording_package_path(kit)
+    end
     assert_response :redirect
     signed_url = response.redirect_url
     assert_predicate signed_url, :present?
@@ -211,8 +217,7 @@ class PressKitDownloadAudienceTest < ActionDispatch::IntegrationTest
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
       get recording_studio_downloadable.recording_package_path(kit)
     end
-    assert_response :redirect
-    refute_equal 403, response.status
+    assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
     refute_package_path(response.redirect_url)
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do

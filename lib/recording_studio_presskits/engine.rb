@@ -376,6 +376,30 @@ module RecordingStudioPresskits
       config.after_initialize do
         RecordingStudioPresskits::KitDownload.configure_audience!
         RecordingStudioPresskits::KitDownload.subscribe!
+        RecordingStudioPresskits::ImagesDownload.configure_audience!
+        RecordingStudioPresskits::KitDownloadGate.register!
+      end
+    end
+
+    initializer "recording_studio_presskits.download_gate" do
+      config.to_prepare do
+        RecordingStudioPresskits::ImagesDownload.configure_audience!
+        RecordingStudioPresskits::KitDownloadGate.register!
+        current = "Current".safe_constantize
+        next unless current
+        next if current.respond_to?(:download_gate)
+
+        current.attribute :download_gate
+      end
+    end
+
+    initializer "recording_studio_presskits.download_gate_session" do
+      ActiveSupport.on_load(:action_controller_base) do
+        next if method_defined?(:remember_presskits_download_gate)
+
+        include RecordingStudioPresskits::DownloadGateSession
+
+        before_action :remember_presskits_download_gate
       end
     end
 

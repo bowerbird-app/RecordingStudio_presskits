@@ -19,6 +19,14 @@ en:
         credit: "Credit"
         alt: "Alt"
         stat: "Stat"
+    download_gate:
+      title: "What do you want to use this content for?"
+      editorial: "Editorial consideration"
+      publish: "Publish immediately"
+      continue: "Continue"
+      missing: "Pick one to continue."
+      fetching: "Fetching your files…"
+      started: "Download started"
     images:
       download_all: "Download all images"
       show_more: "Show more images (%{count})"

@@ -576,9 +576,10 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    download = css_select("a[data-cover-download]").first
+    download = css_select("[data-cover-download]").first
     assert download
-    assert_equal recording_studio_downloadable.recording_package_path(kit), download["href"]
+    assert_equal "download-gate-modal-#{kit.id}", download["data-modal-id"]
+    assert_includes download["class"], "w-full"
     refute_select "[data-cover-contact]"
     refute_select "[data-cover-view]"
 
@@ -594,7 +595,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_equal "#contact", contact["href"]
     assert_equal "secondary", contact["data-fp-style"]
     assert_includes contact["class"], "w-full"
-    assert_select "a[data-cover-download]", count: 1
+    assert_select "[data-cover-download]", count: 1
     refute_select "[data-cover-view]"
 
     credit = RecordingStudioPresskits::Credits.create!(

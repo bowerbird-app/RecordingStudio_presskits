@@ -10,7 +10,7 @@ RecordingStudioPresskits::Engine.routes.draw do
     end
   end
 
-  resources :image_archives, only: :show
+  resource :download_gate, only: %i[show update], controller: "download_gates"
 
   resources :press_kits, only: %i[index show new create edit] do
     member do

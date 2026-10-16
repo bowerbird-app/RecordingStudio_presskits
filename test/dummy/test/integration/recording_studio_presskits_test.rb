@@ -181,6 +181,7 @@ class RecordingStudioPresskitsTest < ActiveSupport::TestCase
     assert connection.table_exists?(:recording_studio_downloadable_download_logs)
     assert connection.column_exists?(:recording_studio_downloadable_download_logs, :occurred_at)
     assert connection.column_exists?(:recording_studio_downloadable_download_logs, :action)
+    assert connection.column_exists?(:recording_studio_downloadable_download_logs, :metadata)
     assert connection.table_exists?(:recording_studio_locations)
     assert connection.column_exists?(:recording_studio_locations, :title)
     assert connection.column_exists?(:recording_studio_locations, :location_type)
