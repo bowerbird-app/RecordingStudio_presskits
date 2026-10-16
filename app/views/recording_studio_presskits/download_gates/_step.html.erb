@@ -69,12 +69,14 @@
         required: true,
         size: :md
       ) %>
-      <%= render FlatPack::Button::Component.new(
-        text: I18n.t("recording_studio_presskits.download_gate.continue"),
-        style: :primary,
-        size: :md,
-        type: "submit"
-      ) %>
+      <div class="mt-8">
+        <%= render FlatPack::Button::Component.new(
+          text: I18n.t("recording_studio_presskits.download_gate.continue"),
+          style: :primary,
+          size: :md,
+          type: "submit"
+        ) %>
+      </div>
     <% end %>
   <% end %>
 <% end %>

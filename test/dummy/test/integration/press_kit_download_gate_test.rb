@@ -57,7 +57,7 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_select "[data-flat-pack--icon-name-value=newspaper]"
     assert_select "[data-flat-pack--icon-name-value=bolt]"
     refute_includes response.body, "Send me the files"
-    assert_includes response.body, "Continue"
+    assert_select "form .mt-8 button[type=submit]", text: "Continue"
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
       get recording_studio_downloadable.recording_package_path(kit), as: :json
@@ -128,6 +128,7 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_select "#download-gate-modal-#{kit.id} input[name=purpose][value=editorial]"
     assert_select "#download-gate-modal-#{content.id} input[name=purpose][value=publish]"
     assert_select "#download-gate-modal-#{kit.id} h2", text: "What do you want to use this content for?"
+    assert_select "#download-gate-modal-#{kit.id} .mt-8 button[type=submit]", text: "Continue"
     assert_select "#download-gate-modal-#{kit.id} button[aria-label='Close']"
     refute_select "#download-gate-modal-#{kit.id} [role=dialog][aria-labelledby]"
     refute_select "#download-gate-modal-#{kit.id} .fp-section-title"
