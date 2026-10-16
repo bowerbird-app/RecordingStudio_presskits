@@ -95,16 +95,6 @@ module RecordingStudioPresskits
 
       private
 
-      def image_archive_href(content)
-        presskits_routes.image_archive_path(content)
-      end
-
-      def presskits_routes
-        return helpers.recording_studio_presskits if helpers.respond_to?(:recording_studio_presskits)
-
-        helpers
-      end
-
       def heading_action?
         images_download_button.present? ||
           credits_copy_button.present? ||
@@ -113,17 +103,7 @@ module RecordingStudioPresskits
       end
 
       def build_images_download_button
-        content = @content_recording
-        return unless content&.recordable.is_a?(Images)
-        return if DirectImages.list(content).empty?
-
-        FlatPack::Button::Component.new(
-          text: I18n.t("recording_studio_presskits.images.download_all"),
-          style: :default,
-          icon: "arrow-down-tray",
-          href: image_archive_href(content),
-          data: { turbo: false }
-        )
+        ImagesDownloadButton.for(@content_recording, helpers: helpers)
       end
 
       def build_credits_copy_button

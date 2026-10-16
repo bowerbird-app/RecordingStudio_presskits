@@ -1,0 +1,64 @@
+<% kit = RecordingStudioPresskits::KitDownloadGate.kit_for(recording) %>
+<% store = defined?(Current) && Current.respond_to?(:download_gate) ? Current.download_gate : nil %>
+<% entry = RecordingStudioPresskits::KitDownloadGate.entry_for(kit, store) %>
+<% if RecordingStudioPresskits::KitDownloadGate.confirmed?(entry) %>
+  <%= recording_studio_downloadable_button(recording, autostart: true) do %>
+    <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg, align: :start) do %>
+      <div data-downloadable-progress>
+        <%= render FlatPack::Grid::Component.new(cols: 1, gap: :sm, align: :start) do %>
+          <%= render FlatPack::SectionTitle::Component.new(
+            title: I18n.t("recording_studio_presskits.download_gate.fetching"),
+            size: :md,
+            spacing: :none,
+            level: :h3,
+            data: { downloadable_progress_label: true }
+          ) %>
+          <%= render FlatPack::Progress::Component.new(
+            value: 20,
+            max: 100,
+            size: :lg,
+            label: I18n.t("recording_studio_presskits.download_gate.fetching"),
+            label_visible: false
+          ) %>
+        <% end %>
+      </div>
+      <div data-downloadable-started hidden>
+        <%= render FlatPack::EmptyState::Component.new(
+          title: I18n.t("recording_studio_presskits.download_gate.started"),
+          icon: false,
+          size: :sm
+        ) do |empty| %>
+          <% empty.graphic do %>
+            <%= render FlatPack::Shared::IconComponent.new(
+              name: "check-circle",
+              variant: :solid,
+              size: :xl,
+              class: "text-[var(--color-success-background-color)]"
+            ) %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+<% else %>
+  <%= form_with url: RecordingStudioPresskits::KitDownloadGate.form_path, method: :patch do %>
+    <%= hidden_field_tag :recording_id, recording.id %>
+    <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg, align: :start) do %>
+      <% if flash[:alert].present? %>
+        <%= render FlatPack::Alert::Component.new(title: flash[:alert], style: :warning) %>
+      <% end %>
+      <%= render FlatPack::Checkbox::Component.new(
+        name: "confirmed",
+        label: I18n.t("recording_studio_presskits.download_gate.send_files"),
+        help_text: I18n.t("recording_studio_presskits.download_gate.help"),
+        required: true
+      ) %>
+      <%= render FlatPack::Button::Component.new(
+        text: I18n.t("recording_studio_presskits.download_gate.continue"),
+        style: :primary,
+        size: :md,
+        type: "submit"
+      ) %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,5 +1,23 @@
 # Upgrade notes
 
+## 0.69.0
+
+Bump to `0.69.0`. Pin Downloadable `~> 0.7` (git tag `v0.7.0`):
+
+```ruby
+gem "recording_studio_downloadable", "~> 0.7", github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.7.0"
+```
+
+Run `bin/rails generate recording_studio_downloadable:migrations`, then `bin/rails db:migrate`. The new migration adds `metadata` (`jsonb`, null false, default `{}`) on `recording_studio_downloadable_download_logs`. There is no presskits migration.
+
+The engine registers `RecordingStudioPresskits::KitDownloadGate` for `:"presskits.kit_download"` and `:"presskits.images_download"`. **Download kit** and **Download all images** go through `recording_studio_downloadable_button`. The gate is one checkbox in a Flatpack modal. One yes covers that kit's zip and every images-section zip for the session. A modal already painted on the page still shows its checkbox until that modal is submitted or the page loads again. A download that starts stores `{ "confirmed" => true }` on the log.
+
+`GET /recording_studio_presskits/image_archives/:id` is gone. Section zips are Downloadable packages on the images recording. Drop any host link to `image_archive_path`.
+
+If the host `Current` class does not already have `download_gate`, the engine adds `attribute :download_gate` and copies the session onto it before Downloadable writes the log. Declaring the attribute on `Current` is optional.
+
+`0.67.0` and `0.68.0` are claimed by other open pull requests. This release is `0.69.0`.
+
 ## 0.66.1
 
 Bump to `0.66.1`. There is no presskits migration.

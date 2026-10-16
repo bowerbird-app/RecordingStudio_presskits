@@ -35,12 +35,9 @@ module RecordingStudioPresskits
         return if grid? || @preview
         return unless downloadable?
 
-        button(
-          text: I18n.t("recording_studio_presskits.download.button"),
-          icon: "arrow-down-tray",
-          href: links.download_href,
-          data: { cover_download: true }
-        )
+        helpers.recording_studio_downloadable_button(@recording, **download_options) do
+          helpers.render(satisfied_download_button)
+        end
       end
 
       def contact_button
@@ -59,24 +56,44 @@ module RecordingStudioPresskits
 
       def downloadable?
         return false if @recording.blank?
+        return false unless helpers.respond_to?(:recording_studio_downloadable_button)
 
-        KitDownload.allowed?(@recording, actor: links.actor) && links.download_href.present?
+        KitDownload.allowed?(@recording, actor: links.actor)
+      end
+
+      def download_label
+        I18n.t("recording_studio_presskits.download.button")
+      end
+
+      def download_options
+        {
+          style: :primary,
+          size: :lg,
+          ready_text: download_label,
+          generate_text: download_label,
+          preparing_text: I18n.t("recording_studio_presskits.download.preparing"),
+          retry_text: I18n.t("recording_studio_presskits.download.retry")
+        }
+      end
+
+      def satisfied_download_button
+        button(
+          text: download_label,
+          icon: "arrow-down-tray",
+          type: "button",
+          data: { cover_download: true }
+        )
       end
 
       def links
         @links ||= ActionLinks.new(recording: @recording, helpers: helpers)
       end
 
-      def button(text:, href:, data:, icon: nil, style: :primary)
-        FlatPack::Button::Component.new(
-          text: text,
-          icon: icon,
-          style: style,
-          size: :lg,
-          href: href,
-          class: BUTTON_WIDTH,
-          data: data
-        )
+      def button(text:, data:, icon: nil, style: :primary, **extras)
+        options = { text: text, icon: icon, style: style, size: :lg, class: BUTTON_WIDTH, data: data }
+        options[:href] = extras[:href] if extras[:href].present?
+        options[:type] = extras[:type] if extras[:type].present?
+        FlatPack::Button::Component.new(**options)
       end
     end
   end

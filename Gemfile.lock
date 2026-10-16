@@ -62,10 +62,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_downloadable.git
-  revision: 2e84e1cdfb7a1305326caffdd2e04996cd077203
-  tag: v0.6.0
+  revision: f5516b1274fbd4ae8f1f564c797408e693535530
+  tag: v0.7.0
   specs:
-    recording_studio_downloadable (0.6.0)
+    recording_studio_downloadable (0.7.0)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
       recording_studio_accessible
@@ -186,7 +186,7 @@ GIT
 PATH
   remote: .
   specs:
-    recording_studio_presskits (0.66.1)
+    recording_studio_presskits (0.69.0)
       flat_pack (>= 0.1.240)
       rails (~> 8.1.0)
       recording_studio (~> 4.7)
@@ -195,7 +195,7 @@ PATH
       recording_studio_attachable (~> 0.18)
       recording_studio_cache (~> 0.5)
       recording_studio_company (~> 0.4)
-      recording_studio_downloadable (~> 0.6)
+      recording_studio_downloadable (~> 0.7)
       recording_studio_duplicatable (~> 0.5)
       recording_studio_embargo (~> 0.3.0)
       recording_studio_external_embed (~> 0.1.1)
@@ -505,7 +505,7 @@ DEPENDENCIES
   recording_studio_attachable (~> 0.18)!
   recording_studio_cache (~> 0.5)!
   recording_studio_company (~> 0.4)!
-  recording_studio_downloadable (~> 0.6)!
+  recording_studio_downloadable (~> 0.7)!
   recording_studio_duplicatable (~> 0.5)!
   recording_studio_embargo (~> 0.3.0)!
   recording_studio_external_embed (~> 0.1.1)!
@@ -603,7 +603,7 @@ CHECKSUMS
   recording_studio_attachable (0.18.0)
   recording_studio_cache (0.5.0)
   recording_studio_company (0.4.0)
-  recording_studio_downloadable (0.6.0)
+  recording_studio_downloadable (0.7.0)
   recording_studio_duplicatable (0.5.0)
   recording_studio_embargo (0.3.0)
   recording_studio_external_embed (0.1.1)
@@ -611,7 +611,7 @@ CHECKSUMS
   recording_studio_location (0.6.0)
   recording_studio_metrics (0.3.0)
   recording_studio_orderable (0.3.0)
-  recording_studio_presskits (0.66.1)
+  recording_studio_presskits (0.69.0)
   recording_studio_publishable (0.8.0)
   recording_studio_trashable (0.10.0)
   recording_studio_video (0.2.1)

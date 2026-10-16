@@ -133,9 +133,10 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
     get kit.publishable_public_path
     assert_response :success
-    link = css_select("a[data-cover-download]").first
+    link = css_select("[data-cover-download]").first
     assert link
-    assert_equal recording_studio_downloadable.recording_package_path(kit), link["href"]
+    assert_equal "download-gate-modal-#{kit.id}", link["data-modal-id"]
+    assert_nil link["href"]
     assert_includes response.body, "Download kit"
     refute_select "[data-cover-view]"
   end
@@ -154,8 +155,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Download kit"
 
     get recording_studio_downloadable.recording_package_path(kit)
-    assert_response :redirect
-    refute_equal 403, response.status
+    assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
   end
 
   test "download stays off the owner preview and shows on the editor card" do
@@ -173,7 +173,7 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
 
     get recording_studio_presskits.edit_press_kit_path(kit)
     assert_response :success
-    assert_select "#presskits-editor-preview a[data-cover-download]", count: 1
+    assert_select "#presskits-editor-preview [data-cover-download]", count: 1
     assert_select "#presskits-kit-header a[data-cover-view]", count: 0
     assert_select "[data-presskits-header-actions] a[aria-label='Edit']"
     assert_select "#presskits-downloads", text: "Downloads"

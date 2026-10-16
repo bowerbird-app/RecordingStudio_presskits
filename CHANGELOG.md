@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.69.0] - 2026-10-16
+
+### Changed
+- `recording_studio_downloadable` is `~> 0.7` from GitHub tag `v0.7.0`.
+- Kit downloads and images-section downloads pause on `RecordingStudioPresskits::KitDownloadGate` until the visitor checks **Send me the files**. The engine registers that gate for `:"presskits.kit_download"` and `:"presskits.images_download"`. **Download kit** and **Download all images** use `recording_studio_downloadable_button`. While the gate is open, Downloadable renders `DownloadGateComponent` (existing Flatpack button, modal, checkbox, alert, and progress) instead of the package poller.
+- One confirmation is stored on the session for the press kit. It covers the kit zip and every images-section zip. A modal already on the page still shows its own checkbox until that modal is submitted or the page loads again. A started download logs `{ "confirmed" => true }` in `metadata`.
+- Images sections opt into Downloadable (`source: :manifest`, action `:"presskits.images_download"`). The section zip is that recording's package. `ImageArchivesController` and `GET /recording_studio_presskits/image_archives/:id` are gone. The zip name is the section heading.
+- Version `0.69.0`. `0.67.0` and `0.68.0` are already claimed by open pull requests.
+
+### Upgrade notes
+- Bump to `0.69.0`. Pin Downloadable `~> 0.7` at tag `v0.7.0`.
+- Run `bin/rails generate recording_studio_downloadable:migrations` and migrate. That adds `metadata` (`jsonb`, default `{}`) on `recording_studio_downloadable_download_logs`. There is no presskits table migration.
+- The engine registers the gate and copies the session onto `Current.download_gate` when that attribute is missing. Host `Current` classes can declare `attribute :download_gate` themselves.
+- Public pages that render a kit still include Downloadable's helpers. Drop links to `image_archives`. One confirmation per kit per session. People who cannot download still see no button.
+
 ## [0.66.1] - 2026-10-16
 
 ### Fixed

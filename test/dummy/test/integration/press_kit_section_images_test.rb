@@ -5,6 +5,7 @@ require "devise/test/integration_helpers"
 
 class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
 
   setup do
     @previous_actor = Current.actor
@@ -182,7 +183,7 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     assert_includes masonry["class"], "lg:columns-4"
     assert_includes masonry["class"], "fp-masonry--columns"
     assert_select "#{frame} img", count: 12
-    assert_select "a", text: "Download all images"
+    assert_select "[data-images-download]", text: "Download all images"
     assert_select "a", text: "Show more images (13)"
     heading = css_select("h2").find { |node| node.text == "Images" }
     assert_equal "Images", heading.text
@@ -230,9 +231,24 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     attach_image!(content, "section-only.jpg", alt: "Section only")
     attach_image!(kit, "cover-only.jpg", alt: "Cover only")
     publish_kit!(kit)
+    assert_equal "images", content.recordable.name
 
-    get recording_studio_presskits.image_archive_path(content)
+    get kit.publishable_public_path
     assert_response :success
+    assert_select "[data-images-download]", text: "Download all images"
+    assert_select "#download-gate-modal-#{content.id}"
+
+    get recording_studio_downloadable.recording_package_path(content)
+    assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: content.id)
+
+    patch recording_studio_presskits.download_gate_path, params: { recording_id: content.id, confirmed: "1" }
+    assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: content.id)
+
+    perform_enqueued_jobs do
+      get recording_studio_downloadable.recording_package_path(content)
+    end
+    assert_response :redirect
+    follow_redirect!
     assert_equal "application/zip", response.media_type
     assert_includes response.headers["Content-Disposition"], "images.zip"
     names = Zip::File.open_buffer(response.body).map(&:name)
@@ -245,8 +261,8 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     content = section_content(section)
     attach_image!(content, "draft.jpg", alt: "Draft")
 
-    get recording_studio_presskits.image_archive_path(content)
-    assert_response :not_found
+    get recording_studio_downloadable.recording_package_path(content)
+    assert_response :forbidden
   end
 
   test "a duplicated kit gets independent image copies" do

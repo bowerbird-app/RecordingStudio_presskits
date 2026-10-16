@@ -206,7 +206,7 @@ class PodcastSectionTest < ActionDispatch::IntegrationTest
     assert_select "[role=dialog] .sr-only", text: "Apple cut"
     assert_select "[role=dialog] h2", count: 0
     assert_select "[role=dialog] .flat-pack-modal__footer", count: 0
-    assert_select "[role=dialog] button[aria-label='Close']", count: 2
+    assert_select "[role=dialog][aria-labelledby] button[aria-label='Close']", count: 2
     dialogs = css_select("[role=dialog]").to_html
     refute_includes dialogs, "Listen on"
     refute_includes dialogs, "Launch notes"

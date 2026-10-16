@@ -13,10 +13,6 @@ module RecordingStudioPresskits
         @helpers = helpers
       end
 
-      def download_href
-        package_path.presence || assets_anchor
-      end
-
       def contact_href
         press_contact_url.presence || contact_section_anchor
       end
@@ -34,28 +30,6 @@ module RecordingStudioPresskits
         return unless Current.respond_to?(:actor)
 
         Current.actor
-      end
-
-      def package_path
-        return unless @helpers.respond_to?(:recording_studio_downloadable)
-
-        @helpers.recording_studio_downloadable.recording_package_path(@recording)
-      rescue StandardError
-        nil
-      end
-
-      def assets_anchor
-        slug = heading_slug(image_sections.first)
-        "##{slug}" if slug
-      end
-
-      def image_sections
-        @image_sections ||= sections.select { |section| image_section?(section) }
-      end
-
-      def image_section?(section)
-        content = KitQuery.section_content(section)
-        content&.recordable.is_a?(Images) && DirectImages.list(content).any?
       end
 
       def press_contact_url
@@ -109,12 +83,6 @@ module RecordingStudioPresskits
       def contact_slug(section)
         title = RecordingStudioPresskits.section_heading(section).to_s.strip
         return unless title.match?(CONTACT_TITLE)
-
-        RecordingStudioPresskits.section_anchor_id(section)
-      end
-
-      def heading_slug(section)
-        return if section.blank?
 
         RecordingStudioPresskits.section_anchor_id(section)
       end

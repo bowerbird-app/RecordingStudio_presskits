@@ -63,6 +63,8 @@ class KitDownloadTest < Minitest::Test
     assert_includes engine, "recording_studio_presskits.kit_download"
     assert_includes engine, "KitDownload.configure_audience!"
     assert_includes engine, "KitDownload.subscribe!"
+    assert_includes engine, "ImagesDownload.configure_audience!"
+    assert_includes engine, "KitDownloadGate.register!"
   end
 
   def test_public_kit_renders_downloadable_button_helper
@@ -81,7 +83,7 @@ class KitDownloadTest < Minitest::Test
     assert_includes actions, "return if grid? || @preview"
     assert_includes actions, "KitDownload.allowed?"
     assert_includes actions, "helpers.current_user"
-    assert_includes actions, "recording_package_path"
+    assert_includes actions, "recording_studio_downloadable_button"
     assert_includes actions, "data: { cover_download: true }"
     controller = File.read(
       File.expand_path("../app/controllers/recording_studio_presskits/public_press_kits_controller.rb", __dir__)

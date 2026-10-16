@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html data-theme="rounded">
+  <head>
+    <title><%= I18n.t("recording_studio_presskits.download_gate.title") %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/variables", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "recording_studio_presskits/brand_buttons", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/rich_text", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags if respond_to?(:javascript_importmap_tags) %>
+  </head>
+
+  <body class="bg-(--surface-page-background-color) text-(--surface-content-color)" data-theme="rounded">
+    <main class="mx-auto min-h-screen w-full max-w-6xl p-6">
+      <%= yield %>
+    </main>
+  </body>
+</html>

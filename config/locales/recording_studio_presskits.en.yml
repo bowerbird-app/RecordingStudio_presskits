@@ -19,6 +19,15 @@ en:
         credit: "Credit"
         alt: "Alt"
         stat: "Stat"
+    download_gate:
+      send_files: "Send me the files"
+      help: "One check, then the zip."
+      continue: "Continue"
+      unchecked: "Check the box to continue."
+      title: "Download"
+      subtitle: "Confirm, then the files start."
+      fetching: "Fetching your files…"
+      started: "Download started"
     images:
       download_all: "Download all images"
       show_more: "Show more images (%{count})"
