@@ -44,19 +44,25 @@ module RecordingStudioPresskits
     end
 
     def modal
-      helpers.render(FlatPack::Modal::Component.new(
+      helpers.render(modal_component) do |modal|
+        modal.body { modal_body }
+      end
+    end
+
+    def modal_component
+      FlatPack::Modal::Component.new(
         id: KitDownloadGate.modal_id(@recording),
         size: :md,
         title: I18n.t("recording_studio_presskits.download_gate.title")
-      )) do |modal|
-        modal.body do
-          helpers.render(FlatPack::Card::Body::Component.new(padding: :lg)) do
-            helpers.render(
-              partial: "recording_studio_presskits/download_gates/frame",
-              locals: { recording: @recording }
-            )
-          end
-        end
+      )
+    end
+
+    def modal_body
+      helpers.render(FlatPack::Card::Body::Component.new(padding: :lg)) do
+        helpers.render(
+          partial: "recording_studio_presskits/download_gates/frame",
+          locals: { recording: @recording }
+        )
       end
     end
 
