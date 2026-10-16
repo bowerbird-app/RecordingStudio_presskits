@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.66.1] - 2026-10-16
+
+### Fixed
+- Press kit API show and update declare `subtitle` on `output_keys`, matching `PressKitPayload` and the header field. MCP and the JSON API no longer raise `Serializer emitted undeclared keys: subtitle`. Brand updates still `revise` before serialize. After this fix the serialize step succeeds, so a saved brand change is not hidden behind a 500.
+- Empty section types (Quote, List, Credits) register index and show without an empty serializer. Recording Studio API rejects a serializer with no output keys.
+
+### Changed
+- Version `0.66.1`
+
+### Upgrade notes
+- Bump to `0.66.1`. No presskits migration. Hosts that already load Recording Studio API get `subtitle` on press kit show and update.
+
 ## [0.66.0] - 2026-10-15
 
 ### Changed
@@ -1242,7 +1254,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.65.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...HEAD
+[0.66.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.0...v0.66.1
 [0.66.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.66.0
 [0.65.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.64.0...v0.65.0
 [0.64.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.63.0...v0.64.0

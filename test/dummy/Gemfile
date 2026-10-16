@@ -19,6 +19,7 @@ gem "recording_studio_lists", github: "bowerbird-app/RecordingStudio_lists", tag
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.1"
 gem "recording_studio_video", github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.4"
 gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.3.1"
+gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.11.1", require: false
 gem "recording_studio_duplicatable", github: "bowerbird-app/RecordingStudio_duplicatable", tag: "v0.5.3"
 gem "recording_studio_embargo", "~> 0.3.0", github: "bowerbird-app/RecordingStudio_embargo", tag: "v0.3.0"
 

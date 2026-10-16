@@ -67,12 +67,10 @@ class ListItemPayloadTest < ActiveSupport::TestCase
     payload = RecordingStudioPresskits::Api::SectionPayload.for(built.fetch(:section).recordable, built.fetch(:section))
     registry = fake_api_registry
     with_recording_studio_api(registry) { RecordingStudioPresskits::Api.register! }
-    serializer = registry.types.fetch("RecordingStudioPresskits::ListSection").fetch(:serializer)
     item_registration = registry.types.fetch("RecordingStudioPresskits::ListItem")
     item = built.fetch(:first)
     withheld = { icon: nil, key: nil, value: nil }
 
-    assert_equal({}, serializer.call(content.recordable))
     assert_equal payload.fetch(:items), RecordingStudioPresskits::Api::ListPayload.for_recording(content)
     assert_equal %i[icon key value], item_registration.fetch(:output_keys)
     RecordingStudioPresskits::Embargo.stub(:withhold_protected?, true) do
@@ -80,7 +78,8 @@ class ListItemPayloadTest < ActiveSupport::TestCase
       assert_equal withheld, RecordingStudioPresskits::Api::ListPayload.for(item.recordable, context: Object.new)
     end
     assert_equal %i[index show create update destroy], item_registration.fetch(:operations)
-    assert_equal [], registry.types.fetch("RecordingStudioPresskits::ListSection").fetch(:output_keys)
+    refute registry.types.fetch("RecordingStudioPresskits::ListSection").key?(:output_keys)
+    refute registry.types.fetch("RecordingStudioPresskits::ListSection").key?(:serializer)
   end
 
   test "an empty list section serializes items as an empty array" do

@@ -3,14 +3,10 @@
 module RecordingStudioPresskits
   module Api
     class PressKitPayload
+      KEYS = %i[title subtitle description brand_color font_family text_color corner_style].freeze
+
       def self.for(recordable, context: nil)
-        payload = {
-          title: recordable.title,
-          subtitle: recordable.subtitle,
-          description: recordable.description,
-          brand_color: recordable.brand_color, font_family: recordable.font_family,
-          text_color: recordable.text_color, corner_style: recordable.corner_style
-        }
+        payload = KEYS.index_with { |name| recordable.public_send(name) }
         return payload unless Exposure.withhold?(context, recording_for(recordable, context))
 
         payload.merge(description: nil)
