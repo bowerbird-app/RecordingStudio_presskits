@@ -6,7 +6,11 @@ require_relative "dummy/config/environment"
 
 require "rails/test_help"
 
+require_relative "support/presskits_api_mirror"
+
 class VideoPayloadTest < ActiveSupport::TestCase
+  include PresskitsApiMirror
+
   ZOO_URL = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
   RICK_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   ZOO_PAYLOAD = {
@@ -151,15 +155,6 @@ class VideoPayloadTest < ActiveSupport::TestCase
       video.description = description
       yield video if block_given?
     end
-  end
-
-  def with_recording_studio_api(registry)
-    raise "Recording Studio API is already loaded" if defined?(::RecordingStudioApi)
-
-    Object.const_set(:RecordingStudioApi, registry)
-    yield
-  ensure
-    Object.send(:remove_const, :RecordingStudioApi) if defined?(::RecordingStudioApi)
   end
 
   def fake_api_registry

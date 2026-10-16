@@ -15,8 +15,8 @@ module RecordingStudioPresskits
       def register_credit
         register_type(
           "RecordingStudioPresskits::Credit",
-          operations: %i[index show create update],
-          serializer: ->(recordable, **) { CreditPayload.for(recordable) },
+          operations: %i[index show create update destroy],
+          serializer: CreditPayload.method(:for),
           output_keys: %i[name url usual_role],
           writable_attributes: %i[name url usual_role]
         )
@@ -25,27 +25,30 @@ module RecordingStudioPresskits
       def register_credit_line
         register_type(
           "RecordingStudioPresskits::CreditLine",
-          operations: %i[index show update],
-          serializer: credit_line_serializer,
+          operations: %i[index show create update destroy],
+          serializer: CreditLinePayload.method(:for_api),
           output_keys: %i[role name url credit_id icon],
           writable_attributes: %i[role icon],
           capability_actions: %i[remove_credit]
         )
       end
 
-      def credit_line_serializer
-        lambda { |recordable, recording: nil, context: nil, **|
-          source = Exposure.named_recording(recording: recording, context: context)
-          source ||= RecordingStudio::Recording.find_by(recordable: recordable)
-          CreditLinePayload.for(source, context: context)
-        }
-      end
-
       def register_credits_section
         register_type(
           "RecordingStudioPresskits::CreditsSection",
           **empty_section_options,
-          capability_actions: %i[add_credit reorder_credits]
+          capability_actions: %i[add_credit reorder_credits],
+          relationships: { credit_lines: credit_lines_relationship }
+        )
+      end
+
+      def credit_lines_relationship
+        child_collection(
+          "RecordingStudioPresskits::CreditLine",
+          serializer: CreditLinePayload.method(:for_api),
+          output_keys: %i[role name url credit_id icon],
+          endpoints: %i[index show create update destroy],
+          description: "Credit lines in this section"
         )
       end
 
@@ -78,7 +81,8 @@ module RecordingStudioPresskits
           capability: :trashable,
           handler: RemoveCredit,
           input_contract: empty_action_input,
-          summary: "Remove a credit from this section"
+          summary: "Remove a credit from this section",
+          required_role: :admin
         )
       end
 

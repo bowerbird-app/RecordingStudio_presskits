@@ -6,6 +6,7 @@ require "recording_studio_presskits/api/podcast_payload"
 require "recording_studio_presskits/api/location_payload"
 require "recording_studio_presskits/api/list_payload"
 require "recording_studio_presskits/api/file_payload"
+require "recording_studio_presskits/api/image_payload"
 
 module RecordingStudioPresskits
   module Api
@@ -36,7 +37,8 @@ module RecordingStudioPresskits
         "RecordingStudioPresskits::PodcastSection" => lambda { |content|
           { podcasts: PodcastPayload.for_recording(content) }
         },
-        "RecordingStudioPresskits::Files" => ->(content) { { files: FilePayload.for_recording(content) } }
+        "RecordingStudioPresskits::Files" => ->(content) { { files: FilePayload.for_recording(content) } },
+        "RecordingStudioPresskits::Images" => ->(content) { { images: ImagePayload.for_recording(content) } }
       }.freeze
       private_constant :EXTRA_FOR
 

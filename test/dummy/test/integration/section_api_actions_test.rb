@@ -64,7 +64,7 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     user = owner_for(root)
     add_text(kit, user, "First")
 
-    error = assert_raises(ArgumentError) do
+    error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
       RecordingStudioPresskits::Api::ReorderSections.call(action_context(kit, user, params: { ordered_recording_ids: [] }))
     end
 
@@ -115,8 +115,12 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     end
 
     video = registry.types.fetch("RecordingStudioVideo::Video")
-    assert_equal :video_gem, video[:marker]
-    assert_equal %i[title url description provider canonical_url content_type], video[:output_keys]
+    if video[:marker]
+      assert_equal :video_gem, video[:marker]
+      assert_equal %i[title url description provider canonical_url content_type], video[:output_keys]
+    else
+      refute_includes Array(video[:output_keys]).map(&:to_s), "duration_seconds"
+    end
 
     registered = registry.types.fetch("RecordingStudioPresskits::VideoSection")
     assert_equal %i[index show], registered[:operations]
@@ -134,17 +138,19 @@ class SectionApiActionsTest < ActiveSupport::TestCase
 
     registered_stats = registry.types.fetch("RecordingStudioPresskits::StatsSection")
     assert_equal %i[index show], registered_stats[:operations]
-    assert_equal %i[stats], registered_stats[:output_keys]
-    assert_nil registered_stats[:writable_attributes]
+    assert_empty Array(registered_stats[:output_keys])
+    assert_empty Array(registered_stats[:writable_attributes])
+    assert_equal %i[create destroy index show update], registered_stats[:relationships].fetch(:stats)[:endpoints].sort
     registered_stat = registry.types.fetch("RecordingStudioPresskits::Stat")
-    assert_equal %i[index show create update destroy], registered_stat[:operations]
+    assert_equal %i[create destroy index show update], registered_stat[:operations].sort
 
     registered_podcasts = registry.types.fetch("RecordingStudioPresskits::PodcastSection")
     assert_equal %i[index show], registered_podcasts[:operations]
-    assert_equal %i[podcasts], registered_podcasts[:output_keys]
+    assert_empty Array(registered_podcasts[:output_keys])
+    assert_equal %i[create destroy index show update], registered_podcasts[:relationships].fetch(:podcasts)[:endpoints].sort
     podcast = registry.types.fetch("RecordingStudioPresskits::Podcast")
-    assert_equal %i[show update], podcast[:operations]
-    assert_equal %i[url title show_name aired_on duration], podcast[:writable_attributes]
+    assert_equal %i[create destroy index show update], podcast[:operations].sort
+    assert_equal %w[aired_on duration show_name title url], podcast[:writable_attributes].map(&:to_s).sort
     assert_includes kit_section[:output_keys], :files
     registered_files = registry.types.fetch("RecordingStudioPresskits::Files")
     assert_equal %i[index show], registered_files[:operations]
@@ -167,14 +173,18 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     assert_equal RecordingStudioPresskits::Api::CreateSection, registry.actions[:create_section][:handler]
     assert_equal :orderable, registry.actions[:reorder_sections][:capability]
     assert_equal :trashable, registry.actions[:remove_section][:capability]
-    assert_equal %i[create_section reorder_sections], registry.types.fetch("RecordingStudioPresskits::PressKit")[:capability_actions]
+    press_kit = registry.types.fetch("RecordingStudioPresskits::PressKit")
+    assert_equal %w[create_section publish reorder_sections unpublish update_publishable],
+                 press_kit[:capability_actions].map(&:to_s).sort
     assert_equal %i[remove_section], registry.types.fetch("RecordingStudioPresskits::KitSection")[:capability_actions]
-    assert_equal %i[show update], registry.types.fetch("RecordingStudioPresskits::PressKit")[:operations]
-    assert_equal RecordingStudioPresskits::Api::PressKitPayload::KEYS,
-                 registry.types.fetch("RecordingStudioPresskits::PressKit")[:output_keys]
-    assert_equal %i[brand_color font_family text_color corner_style],
-                 registry.types.fetch("RecordingStudioPresskits::PressKit")[:writable_attributes]
-    assert_equal %i[index show update], registry.types.fetch("RecordingStudioPresskits::KitSection")[:operations]
+    assert_equal %i[create destroy index show update], press_kit[:operations].sort
+    assert_equal RecordingStudioPresskits::Api::PressKitPayload::KEYS.map(&:to_s),
+                 press_kit[:output_keys].map(&:to_s)
+    assert_equal RecordingStudioPresskits::Api::PressKitPayload::WRITABLE.map(&:to_s).sort,
+                 press_kit[:writable_attributes].map(&:to_s).sort
+    assert_equal %i[destroy index show update], registry.types.fetch("RecordingStudioPresskits::KitSection")[:operations].sort
+    assert_equal %i[destroy index show update],
+                 press_kit[:relationships].fetch(:kit_sections)[:endpoints].sort
   end
 
   test "remove section refuses an actor without edit" do
@@ -237,12 +247,41 @@ class SectionApiActionsTest < ActiveSupport::TestCase
   end
 
   def with_recording_studio_api(registry)
-    raise "Recording Studio API is already loaded" if defined?(::RecordingStudioApi)
+    if real_recording_studio_api?
+      yield
+      mirror_real_api(registry)
+      return
+    end
 
     Object.const_set(:RecordingStudioApi, registry)
     yield
   ensure
-    Object.send(:remove_const, :RecordingStudioApi) if defined?(::RecordingStudioApi)
+    Object.send(:remove_const, :RecordingStudioApi) if defined?(::RecordingStudioApi) && !real_recording_studio_api?
+  end
+
+  def real_recording_studio_api?
+    defined?(::RecordingStudioApi) && ::RecordingStudioApi.respond_to?(:recordable_registration_for)
+  end
+
+  def mirror_real_api(registry)
+    RecordingStudioApi.configuration.recordable_registry.to_h.each do |type_name, registration|
+      registry.types[type_name] = {
+        operations: registration[:operations],
+        output_keys: Array(registration[:output_keys]).map(&:to_sym),
+        writable_attributes: Array(registration[:writable_attributes]).map(&:to_sym),
+        capability_actions: Array(registration[:capability_actions]).map(&:to_sym),
+        serializer: registration[:serializer],
+        relationships: Array(registration[:relationships]).to_h do |name, relationship|
+          [name.to_sym, { endpoints: relationship[:endpoints], output_keys: Array(relationship[:output_keys]).map(&:to_sym) }]
+        end
+      }
+    end
+    %i[create_section reorder_sections remove_section].each do |name|
+      action = RecordingStudioApi.capability_action(name)
+      next if action.nil?
+
+      registry.actions[name] = { capability: action.capability, handler: action.handler }
+    end
   end
 
   def fake_api_registry
@@ -272,7 +311,7 @@ class SectionApiActionsTest < ActiveSupport::TestCase
   def assert_no_section_change(kit)
     error = nil
     assert_no_difference -> { RecordingStudioPresskits::KitSection.count } do
-      error = assert_raises(ArgumentError) { yield }
+      error = assert_raises(ArgumentError, RecordingStudioApi::InvalidActionInputError) { yield }
     end
     assert_empty RecordingStudioPresskits::KitQuery.sections_for(kit)
     error

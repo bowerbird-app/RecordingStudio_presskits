@@ -6,7 +6,11 @@ require_relative "dummy/config/environment"
 
 require "rails/test_help"
 
+require_relative "support/presskits_api_mirror"
+
 class LocationPayloadTest < ActiveSupport::TestCase
+  include PresskitsApiMirror
+
   test "a saved location payload is Location's api_payload" do
     root, kit = kit_tree
     user = owner_for(root)
@@ -141,15 +145,6 @@ class LocationPayloadTest < ActiveSupport::TestCase
       location.locality = locality
       location.country_code = country_code
     end
-  end
-
-  def with_recording_studio_api(registry)
-    raise "Recording Studio API is already loaded" if defined?(::RecordingStudioApi)
-
-    Object.const_set(:RecordingStudioApi, registry)
-    yield
-  ensure
-    Object.send(:remove_const, :RecordingStudioApi) if defined?(::RecordingStudioApi)
   end
 
   def fake_api_registry

@@ -40,18 +40,19 @@ module RecordingStudioPresskits
           capability: :trashable,
           handler: RemoveSection,
           input_contract: empty_action_input,
-          summary: "Remove a kit section"
+          summary: "Remove a kit section",
+          required_role: :admin
         )
       end
 
-      def action_registration(capability:, handler:, input_contract:, summary:)
+      def action_registration(capability:, handler:, input_contract:, summary:, required_role: :edit)
         {
           capability: capability,
           http_verb: :post,
-          required_role: :edit,
+          required_role: required_role,
           version: "1.0.0",
           handler: handler,
-          input_contract: input_contract,
+          input_contract: route_contract(input_contract),
           openapi: { summary: summary }
         }
       end
@@ -78,6 +79,32 @@ module RecordingStudioPresskits
 
       def empty_action_input
         { reject_unknown: true, fields: {} }
+      end
+
+      def route_contract(definition)
+        return definition unless defined?(::RecordingStudioApi::ActionInputContract)
+
+        RouteContracts.for(definition)
+      end
+    end
+
+    # Member actions leave route defaults in the params hash. Recording Studio
+    # API does not strip them before reject_unknown contracts.
+    module RouteContracts
+      ROUTE_KEYS = %i[api_key api_version member_action action action_name controller format id resource].freeze
+
+      def self.for(definition)
+        contract_class.new(definition)
+      end
+
+      def self.contract_class
+        @contract_class ||= Class.new(::RecordingStudioApi::ActionInputContract) do
+          def call(raw_params)
+            params = raw_params.respond_to?(:to_unsafe_h) ? raw_params.to_unsafe_h : raw_params.to_h
+            params = params.deep_symbolize_keys if params.respond_to?(:deep_symbolize_keys)
+            super(params.except(*RouteContracts::ROUTE_KEYS))
+          end
+        end
       end
     end
   end

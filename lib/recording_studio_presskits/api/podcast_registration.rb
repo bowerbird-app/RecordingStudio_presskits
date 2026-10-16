@@ -14,26 +14,28 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::PodcastSection",
           operations: %i[index show],
-          serializer: podcast_section_serializer,
-          output_keys: %i[podcasts]
+          relationships: { podcasts: podcasts_relationship }
+        )
+      end
+
+      def podcasts_relationship
+        child_collection(
+          "RecordingStudioPresskits::Podcast",
+          serializer: PodcastPayload.method(:for),
+          output_keys: PodcastPayload::KEYS,
+          endpoints: %i[index show create update destroy],
+          description: "Episodes in this section"
         )
       end
 
       def register_podcast
         register_type(
           "RecordingStudioPresskits::Podcast",
-          operations: %i[show update],
-          serializer: ->(recordable, context: nil, **) { PodcastPayload.for(recordable, context: context) },
+          operations: %i[index show create update destroy],
+          serializer: PodcastPayload.method(:for),
           output_keys: PodcastPayload::KEYS,
           writable_attributes: %i[url title show_name aired_on duration]
         )
-      end
-
-      def podcast_section_serializer
-        lambda { |_recordable, recording: nil, context: nil, **|
-          source = Exposure.named_recording(recording: recording, context: context)
-          { podcasts: PodcastPayload.for_recording(source, context: context) }
-        }
       end
     end
   end

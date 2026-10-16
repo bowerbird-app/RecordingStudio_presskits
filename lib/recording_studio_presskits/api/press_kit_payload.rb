@@ -4,6 +4,7 @@ module RecordingStudioPresskits
   module Api
     class PressKitPayload
       KEYS = %i[title subtitle description brand_color font_family text_color corner_style].freeze
+      WRITABLE = %i[title subtitle description brand_color font_family text_color corner_style].freeze
 
       def self.for(recordable, context: nil)
         payload = KEYS.index_with { |name| recordable.public_send(name) }

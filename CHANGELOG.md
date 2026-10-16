@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.70.0] - 2026-10-16
+
+### Added
+- Press kits, kit sections, and every section type this gem owns register with Recording Studio API `v0.11.4` (`register_recordable_type_api`, `register_capability_action`, `register_resource_handler`). Press kits are index, show, create, update, and destroy. Destroy trashes the recording and requires admin. Writable fields are `title`, `subtitle`, `description`, `brand_color`, `font_family`, `text_color`, and `corner_style`. `q` matches the title only. Publishable's `publish`, `unpublish`, and `update_publishable` stay listed. `create_section` and `reorder_sections` stay.
+- Kit sections are index, show, update, and destroy, nested at `/press_kits/{id}/kit_sections`. Create stays `create_section`. `remove_section` still trashes the section.
+- Text, quotes, stats, credit lines, list items, and podcasts are nested under their content recording, with reorder where the section is Orderable. Stats are writable. Credits and credit lines can be trashed. Credits are still created on the workspace root.
+- Video sections add, update, remove, and reorder videos through `RecordingStudioVideo::Video`. Location sections set, update, and clear places through `RecordingStudio::Location::Location`. Press Kits does not register those types.
+- Image and file sections list, update caption/credit/alt or name/description, reorder, and remove. Menu sections are index, show, and update.
+- Reads require view and a kit presentation of `:full` or `:preview`. Hidden, unavailable, and embargoed-hidden kits are 404. Preview withholds protected fields. Writes require edit.
+
+### Changed
+- Version `0.70.0`. `0.67.0` and `0.68.0` are claimed by open pull requests #109 and #110. `0.69.0` is main.
+
+### Upgrade notes
+- Bump to `0.70.0`. There is no presskits migration. This gem still does not depend on `recording_studio_api`.
+- Hosts that want the HTTP API pin `recording_studio_api` at tag `v0.11.4`, run `bin/rails generate recording_studio_api:migrations`, and migrate. Mount `RecordingStudioApi::Engine` and the Scalar docs routes. Allow `"RecordingStudioApi::ApiClient"` in `access_actor_types`. Enable `:api_access_point` on the workspace root.
+- When routes or an initializer load the API gem during boot, require `RecordingStudioVideo::Video` before the video engine's `after_initialize` hook. That gem's `Api.register!` looks up `Video` from inside `RecordingStudioVideo::Api` and raises if the model is not loaded yet. Call `RecordingStudio::RecordableDeclarations.install_active_record_macro!` first if that require runs before the macro exists.
+- Attachable `v0.18.0` has no upload API, so images and files cannot be added over this API. Podcast sections and location sections are not Orderable, so they have no reorder. Nested index order is `created_at` and `id`.
+
 ## [0.69.0] - 2026-10-16
 
 ### Changed
@@ -1269,7 +1288,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.69.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.70.0...HEAD
+[0.70.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.69.0...v0.70.0
 [0.69.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...v0.69.0
 [0.66.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.0...v0.66.1
 [0.66.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.66.0

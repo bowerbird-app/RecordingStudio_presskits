@@ -6,7 +6,11 @@ require_relative "dummy/config/environment"
 
 require "rails/test_help"
 
+require_relative "support/presskits_api_mirror"
+
 class FilePayloadTest < ActiveSupport::TestCase
+  include PresskitsApiMirror
+
   test "section payload lists active files in order and leaves out urls" do
     built = section_with_files
     section = built.fetch(:section)
@@ -108,15 +112,6 @@ class FilePayloadTest < ActiveSupport::TestCase
     user
   ensure
     Current.actor = previous
-  end
-
-  def with_recording_studio_api(registry)
-    raise "Recording Studio API is already loaded" if defined?(::RecordingStudioApi)
-
-    Object.const_set(:RecordingStudioApi, registry)
-    yield
-  ensure
-    Object.send(:remove_const, :RecordingStudioApi) if defined?(::RecordingStudioApi)
   end
 
   def fake_api_registry

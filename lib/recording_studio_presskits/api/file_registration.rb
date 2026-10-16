@@ -7,18 +7,17 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::Files",
           operations: %i[index show],
-          serializer: files_serializer,
-          output_keys: %i[files]
+          serializer: method(:files_serializer),
+          output_keys: %i[files],
+          capability_actions: %i[update_file reorder_files remove_file]
         )
       end
 
       private
 
-      def files_serializer
-        lambda { |_recordable, recording: nil, context: nil, **|
-          source = Exposure.named_recording(recording: recording, context: context)
-          { files: FilePayload.for_recording(source, context: context) }
-        }
+      def files_serializer(recordable, recording: nil, context: nil, **)
+        source = Exposure.named_recording(recording: recording, context: context, recordable: recordable)
+        { files: FilePayload.for_recording(source, context: context) }
       end
     end
   end
