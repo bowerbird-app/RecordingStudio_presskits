@@ -47,7 +47,8 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
     follow_redirect!
     assert_response :success
-    assert_includes response.body, "What do you want to use this content for?"
+    assert_select "h1", text: "What do you want to use this content for?"
+    refute_select ".fp-section-title"
     assert_includes response.body, "Editorial consideration"
     assert_includes response.body, "Publish immediately"
     assert_select "input[type=radio][name=purpose][value=editorial][required]"
@@ -111,7 +112,9 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_select "#download-gate-modal-#{content.id}"
     assert_select "#download-gate-modal-#{kit.id} input[name=purpose][value=editorial]"
     assert_select "#download-gate-modal-#{content.id} input[name=purpose][value=publish]"
-    assert_includes response.body, "What do you want to use this content for?"
+    assert_select "#download-gate-modal-#{kit.id} [role=dialog] h2", text: "What do you want to use this content for?"
+    assert_select "#download-gate-modal-#{kit.id} [role=dialog][aria-labelledby]"
+    refute_select "#download-gate-modal-#{kit.id} .fp-section-title"
     refute_includes response.body, "Send me the files"
 
     patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, purpose: "editorial" }

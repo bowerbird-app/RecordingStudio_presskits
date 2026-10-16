@@ -201,12 +201,12 @@ class PodcastSectionTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "video-preview"
     assert_includes response.body, "h-[352px]"
     assert_includes response.body, "h-[175px]"
-    assert_select "[role=dialog][aria-modal=true][aria-labelledby]", count: 2
+    assert_equal 2, podcast_dialogs("[role=dialog][aria-modal=true][aria-labelledby]").size
     assert_select "[role=dialog] .sr-only", text: "Fetched title"
     assert_select "[role=dialog] .sr-only", text: "Apple cut"
-    assert_select "[role=dialog] h2", count: 0
+    assert_empty podcast_dialogs("[role=dialog] h2")
     assert_select "[role=dialog] .flat-pack-modal__footer", count: 0
-    assert_select "[role=dialog][aria-labelledby] button[aria-label='Close']", count: 2
+    assert_equal 2, podcast_dialogs("[role=dialog][aria-labelledby] button[aria-label='Close']").size
     dialogs = css_select("[role=dialog]").to_html
     refute_includes dialogs, "Listen on"
     refute_includes dialogs, "Launch notes"
@@ -308,6 +308,16 @@ class PodcastSectionTest < ActionDispatch::IntegrationTest
       }
     }
     follow_redirect! if response.redirect?
+  end
+
+  def podcast_dialogs(selector)
+    css_select(selector).reject { |node| download_gate_node?(node) }
+  end
+
+  def download_gate_node?(node)
+    [node, *node.ancestors].any? do |ancestor|
+      ancestor["id"].to_s.start_with?("download-gate-modal")
+    end
   end
 
   def offline_http

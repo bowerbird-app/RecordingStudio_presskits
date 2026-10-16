@@ -47,12 +47,6 @@
       <% if flash[:alert].present? %>
         <%= render FlatPack::Alert::Component.new(title: flash[:alert], style: :warning) %>
       <% end %>
-      <%= render FlatPack::SectionTitle::Component.new(
-        title: I18n.t("recording_studio_presskits.download_gate.title"),
-        size: :lg,
-        spacing: :none,
-        level: :h3
-      ) %>
       <%= render FlatPack::RadioGroup::Component.new(
         name: "purpose",
         options: [
