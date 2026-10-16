@@ -135,11 +135,7 @@ module RecordingStudioPresskits
       end
 
       def empty_section_options
-        { operations: %i[index show], serializer: empty_serializer, output_keys: [] }
-      end
-
-      def empty_serializer
-        ->(_recordable) { {} }
+        { operations: %i[index show] }
       end
     end
   end

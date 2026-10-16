@@ -80,7 +80,8 @@ class ListItemPayloadTest < ActiveSupport::TestCase
       assert_equal withheld, RecordingStudioPresskits::Api::ListPayload.for(item.recordable, context: Object.new)
     end
     assert_equal %i[index show create update destroy], item_registration.fetch(:operations)
-    assert_equal [], registry.types.fetch("RecordingStudioPresskits::ListSection").fetch(:output_keys)
+    refute registry.types.fetch("RecordingStudioPresskits::ListSection").key?(:output_keys)
+    refute registry.types.fetch("RecordingStudioPresskits::ListSection").key?(:serializer)
   end
 
   test "an empty list section serializes items as an empty array" do
