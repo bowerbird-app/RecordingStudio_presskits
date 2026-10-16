@@ -45,23 +45,11 @@ class PressKitPayloadTest < ActiveSupport::TestCase
   test "other press kit recordable serializers pass the API serializer check" do
     built = kit_with_sections
 
-    serialize(built.fetch(:kit))
-    serialize(built.fetch(:text_section))
-    serialize(built.fetch(:text))
-    serialize(built.fetch(:quote))
-    serialize(built.fetch(:stat))
-    serialize(built.fetch(:item))
-    serialize(built.fetch(:podcast))
-    serialize(built.fetch(:credit))
-    serialize(built.fetch(:credit_line))
-    serialize(built.fetch(:files_section))
-    serialize(built.fetch(:video_section))
-    serialize(built.fetch(:stats_section))
-    serialize(built.fetch(:list_section))
-    serialize(built.fetch(:podcast_section))
-    serialize(built.fetch(:location_section))
-    serialize(built.fetch(:credits_section))
-    serialize(built.fetch(:quote_section))
+    built.each do |name, recording|
+      payload = serialize(recording)
+      assert payload[:id], "#{name} is missing id"
+      assert_equal recording.id, payload[:id]
+    end
   end
 
   private

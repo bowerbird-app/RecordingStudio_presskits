@@ -1,5 +1,13 @@
 # Upgrade notes
 
+## 0.66.1
+
+Bump to `0.66.1`. There is no presskits migration.
+
+Press kit API show and update include `subtitle` next to `title` and `description`. The field was already on the model, the header form, and `PressKitPayload`. It was missing from `output_keys`, so MCP and JSON show and update raised `Serializer emitted undeclared keys: subtitle`. `subtitle` is not writable on the API. Title and description stay read-only there.
+
+Empty Quote, List, and Credits section types no longer pass a serializer with empty `output_keys`. Recording Studio API requires keys when a serializer is set.
+
 ## 0.66.0
 
 Bump to `0.66.0`. Accessible stays `~> 0.19` (git tag `v0.19.0`) as on main; ControllerAuth needs Accessible `0.18` or newer. There is no presskits migration.

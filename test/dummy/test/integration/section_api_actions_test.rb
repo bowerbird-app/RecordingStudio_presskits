@@ -170,7 +170,7 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     assert_equal %i[create_section reorder_sections], registry.types.fetch("RecordingStudioPresskits::PressKit")[:capability_actions]
     assert_equal %i[remove_section], registry.types.fetch("RecordingStudioPresskits::KitSection")[:capability_actions]
     assert_equal %i[show update], registry.types.fetch("RecordingStudioPresskits::PressKit")[:operations]
-    assert_equal %i[title description brand_color font_family text_color corner_style],
+    assert_equal RecordingStudioPresskits::Api::PressKitPayload::KEYS,
                  registry.types.fetch("RecordingStudioPresskits::PressKit")[:output_keys]
     assert_equal %i[brand_color font_family text_color corner_style],
                  registry.types.fetch("RecordingStudioPresskits::PressKit")[:writable_attributes]

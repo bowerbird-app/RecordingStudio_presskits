@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.66.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.66.1", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -268,7 +268,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes source, "capability_actions: %i[create_section reorder_sections]"
     assert_includes source, "capability_actions: %i[remove_section]"
     assert_includes source, "operations: %i[show update]"
-    assert_includes source, "output_keys: %i[title description brand_color font_family text_color corner_style]"
+    assert_includes source, "output_keys: PressKitPayload::KEYS"
     assert_includes source, "writable_attributes: %i[brand_color font_family text_color corner_style]"
     assert_includes source, "operations: %i[index show update]"
     assert_includes source, "register_section_actions"
