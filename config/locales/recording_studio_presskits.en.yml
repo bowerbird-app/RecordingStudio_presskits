@@ -20,12 +20,11 @@ en:
         alt: "Alt"
         stat: "Stat"
     download_gate:
-      send_files: "Send me the files"
-      help: "One check, then the zip."
+      title: "What do you want to use this content for?"
+      editorial: "Editorial consideration"
+      publish: "Publish immediately"
       continue: "Continue"
-      unchecked: "Check the box to continue."
-      title: "Download"
-      subtitle: "Confirm, then the files start."
+      missing: "Pick one to continue."
       fetching: "Fetching your files…"
       started: "Download started"
     images:

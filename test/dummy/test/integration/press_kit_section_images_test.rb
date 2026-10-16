@@ -241,7 +241,7 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     get recording_studio_downloadable.recording_package_path(content)
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: content.id)
 
-    patch recording_studio_presskits.download_gate_path, params: { recording_id: content.id, confirmed: "1" }
+    patch recording_studio_presskits.download_gate_path, params: { recording_id: content.id, purpose: "editorial" }
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: content.id)
 
     perform_enqueued_jobs do

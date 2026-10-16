@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  # Public confirmation step. Anonymous visitors can reach it, so this stays
+  # Public purpose step. Anonymous visitors can reach it, so this stays
   # off the signed-in engine ApplicationController.
   class DownloadGatesController < ActionController::Base
     include Devise::Controllers::Helpers if defined?(Devise::Controllers::Helpers)
@@ -23,7 +23,7 @@ module RecordingStudioPresskits
       recording = gated_recording
       return if performed?
 
-      remember_confirmation(recording)
+      remember_purpose(recording)
       @recording = recording
       return render_step(recording) if turbo_frame_request?
 
@@ -68,21 +68,22 @@ module RecordingStudioPresskits
       false
     end
 
-    def remember_confirmation(recording)
+    def remember_purpose(recording)
       kit = KitDownloadGate.kit_for(recording)
       entries = KitDownloadGate.entries(session[KitDownloadGate::SESSION_KEY])
-      entries[kit.id.to_s] = confirmation_entry(recording, entries[kit.id.to_s] || {})
+      entries[kit.id.to_s] = purpose_entry(recording, entries[kit.id.to_s] || {})
       session[KitDownloadGate::SESSION_KEY] = entries
       assign_current_gate(entries)
     end
 
-    def confirmation_entry(recording, entry)
-      if params[:confirmed].to_s == "1"
-        entry["confirmed"] = true
+    def purpose_entry(recording, entry)
+      purpose = KitDownloadGate.purpose_for({ "purpose" => params[:purpose] })
+      if purpose
+        entry["purpose"] = purpose
         session[:recording_studio_downloadable_autostart] = recording.id
       else
-        entry["confirmed"] = false
-        flash[:alert] = I18n.t("recording_studio_presskits.download_gate.unchecked")
+        entry.delete("purpose")
+        flash[:alert] = I18n.t("recording_studio_presskits.download_gate.missing")
       end
       entry
     end

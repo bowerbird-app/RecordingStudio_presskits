@@ -99,7 +99,7 @@ class PressKitDownloadAudienceTest < ActionDispatch::IntegrationTest
 
     get recording_studio_downloadable.recording_package_path(kit)
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
-    patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, confirmed: "1" }
+    patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, purpose: "editorial" }
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
       get recording_studio_downloadable.recording_package_path(kit)

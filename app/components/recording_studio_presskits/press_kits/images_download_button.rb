@@ -3,7 +3,7 @@
 module RecordingStudioPresskits
   module PressKits
     # Heading action for an images section. Downloadable renders the gate
-    # component until the kit is confirmed, then this button inside the poller.
+    # component until a purpose is chosen, then this button inside the poller.
     class ImagesDownloadButton
       def self.for(content, helpers:)
         new(content, helpers).render

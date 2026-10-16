@@ -1,7 +1,7 @@
 <% kit = RecordingStudioPresskits::KitDownloadGate.kit_for(recording) %>
 <% store = defined?(Current) && Current.respond_to?(:download_gate) ? Current.download_gate : nil %>
 <% entry = RecordingStudioPresskits::KitDownloadGate.entry_for(kit, store) %>
-<% if RecordingStudioPresskits::KitDownloadGate.confirmed?(entry) %>
+<% if RecordingStudioPresskits::KitDownloadGate.purpose_for(entry) %>
   <%= recording_studio_downloadable_button(recording, autostart: true) do %>
     <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg, align: :start) do %>
       <div data-downloadable-progress>
@@ -47,11 +47,29 @@
       <% if flash[:alert].present? %>
         <%= render FlatPack::Alert::Component.new(title: flash[:alert], style: :warning) %>
       <% end %>
-      <%= render FlatPack::Checkbox::Component.new(
-        name: "confirmed",
-        label: I18n.t("recording_studio_presskits.download_gate.send_files"),
-        help_text: I18n.t("recording_studio_presskits.download_gate.help"),
-        required: true
+      <%= render FlatPack::SectionTitle::Component.new(
+        title: I18n.t("recording_studio_presskits.download_gate.title"),
+        size: :lg,
+        spacing: :none,
+        level: :h3
+      ) %>
+      <%= render FlatPack::RadioGroup::Component.new(
+        name: "purpose",
+        options: [
+          {
+            label: I18n.t("recording_studio_presskits.download_gate.editorial"),
+            value: "editorial",
+            icon: "newspaper"
+          },
+          {
+            label: I18n.t("recording_studio_presskits.download_gate.publish"),
+            value: "publish",
+            icon: "bolt"
+          }
+        ],
+        variant: :inline,
+        required: true,
+        size: :md
       ) %>
       <%= render FlatPack::Button::Component.new(
         text: I18n.t("recording_studio_presskits.download_gate.continue"),

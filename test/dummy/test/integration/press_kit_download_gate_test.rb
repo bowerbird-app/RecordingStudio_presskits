@@ -47,8 +47,14 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
     follow_redirect!
     assert_response :success
-    assert_includes response.body, "Send me the files"
-    assert_includes response.body, "One check, then the zip."
+    assert_includes response.body, "What do you want to use this content for?"
+    assert_includes response.body, "Editorial consideration"
+    assert_includes response.body, "Publish immediately"
+    assert_select "input[type=radio][name=purpose][value=editorial][required]"
+    assert_select "input[type=radio][name=purpose][value=publish][required]"
+    assert_select "[data-flat-pack--icon-name-value=newspaper]"
+    assert_select "[data-flat-pack--icon-name-value=bolt]"
+    refute_includes response.body, "Send me the files"
     assert_includes response.body, "Continue"
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
@@ -62,19 +68,19 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_empty RecordingStudioDownloadable::DownloadLog.where(recording_id: kit.id)
   end
 
-  test "checking the box starts the kit zip and logs the confirmation" do
+  test "choosing a purpose starts the kit zip and logs that purpose" do
     kit = publish_downloadable_kit!("spring-gate-yes")
     Current.actor = nil
 
     patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id }
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
     follow_redirect!
-    assert_includes response.body, "Check the box to continue."
+    assert_includes response.body, "Pick one to continue."
 
     get recording_studio_downloadable.recording_package_path(kit)
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
 
-    patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, confirmed: "1" }
+    patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, purpose: "publish" }
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
@@ -84,11 +90,11 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     refute_match(%r{/download_gate}, response.redirect_url)
 
     log = RecordingStudioDownloadable::DownloadLog.where(recording_id: kit.id).last
-    assert_equal({ "confirmed" => true }, log.metadata)
+    assert_equal({ "purpose" => "publish" }, log.metadata)
     assert_equal "presskits.kit_download", log.action
   end
 
-  test "one confirmation unlocks the images zip too" do
+  test "one purpose unlocks the images zip too" do
     kit = record_kit("Spring launch")
     section = add_images_section(kit, title: "Press photos")
     content = section_content(section)
@@ -103,8 +109,12 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_select "[data-images-download]", text: "Download all images"
     assert_select "#download-gate-modal-#{kit.id}"
     assert_select "#download-gate-modal-#{content.id}"
+    assert_select "#download-gate-modal-#{kit.id} input[name=purpose][value=editorial]"
+    assert_select "#download-gate-modal-#{content.id} input[name=purpose][value=publish]"
+    assert_includes response.body, "What do you want to use this content for?"
+    refute_includes response.body, "Send me the files"
 
-    patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, confirmed: "1" }
+    patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, purpose: "editorial" }
 
     get recording_studio_downloadable.recording_package_path(content)
     assert_response :redirect

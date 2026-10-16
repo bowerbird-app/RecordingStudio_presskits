@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 module RecordingStudioPresskits
-  # One confirmation per press kit, shared by the kit zip and every images
+  # One purpose per press kit, shared by the kit zip and every images
   # section zip. Downloadable calls these methods; this class does not decide
   # who is allowed to download.
   class KitDownloadGate
     SESSION_KEY = :presskits_download_gate
+    PURPOSES = %w[editorial publish].freeze
 
     class << self
       def register!
@@ -21,7 +22,7 @@ module RecordingStudioPresskits
         kit = kit_for(recording)
         return false if kit.nil?
 
-        confirmed?(entry_for(kit, entries(request&.session&.[](SESSION_KEY))))
+        purpose_for(entry_for(kit, entries(request&.session&.[](SESSION_KEY)))).present?
       end
 
       def continuation_url(recording:, actor:, request:) # rubocop:disable Lint/UnusedMethodArgument
@@ -37,9 +38,10 @@ module RecordingStudioPresskits
         return {} if kit.nil?
         return {} unless defined?(Current) && Current.respond_to?(:download_gate)
 
-        return {} unless confirmed?(entry_for(kit, entries(Current.download_gate)))
+        purpose = purpose_for(entry_for(kit, entries(Current.download_gate)))
+        return {} if purpose.nil?
 
-        { "confirmed" => true }
+        { "purpose" => purpose }
       end
 
       def form_path
@@ -78,8 +80,11 @@ module RecordingStudioPresskits
         entries(store)[recording.id.to_s] || {}
       end
 
-      def confirmed?(entry)
-        entry.is_a?(Hash) && entry["confirmed"] == true
+      def purpose_for(entry)
+        purpose = entry.is_a?(Hash) ? entry["purpose"].to_s : ""
+        return purpose if PURPOSES.include?(purpose)
+
+        nil
       end
 
       def modal_id(recording)

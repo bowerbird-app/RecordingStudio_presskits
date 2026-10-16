@@ -37,18 +37,18 @@ class KitDownloadGateTest < Minitest::Test
     assert_equal RecordingStudioPresskits::KitDownloadGate, gates[:"presskits.images_download"]
   end
 
-  def test_one_confirmation_covers_the_kit_and_its_images
+  def test_one_purpose_covers_the_kit_and_its_images
     with_recordable_types do
-      confirm_gate_covers_kit_and_images
+      purpose_covers_kit_and_images
     end
   end
 
-  def confirm_gate_covers_kit_and_images
+  def purpose_covers_kit_and_images
     kit = recording("kit-1", press_kit)
     images = recording("images-1", images_recordable, parent: recording("section-1", Object.new, parent: kit))
     session = {
       presskits_download_gate: {
-        "kit-1" => { "confirmed" => true }
+        "kit-1" => { "purpose" => "editorial" }
       }
     }
     request = Struct.new(:session).new(session)
@@ -61,27 +61,32 @@ class KitDownloadGateTest < Minitest::Test
     refute RecordingStudioPresskits::KitDownloadGate.satisfied?(
       recording: kit,
       actor: nil,
+      request: Struct.new(:session).new({ presskits_download_gate: { "kit-1" => { "purpose" => "newsletter" } } })
+    )
+    refute RecordingStudioPresskits::KitDownloadGate.satisfied?(
+      recording: kit,
+      actor: nil,
       request: Struct.new(:session).new({})
     )
   end
 
-  def test_metadata_copies_a_confirmed_gate
+  def test_metadata_copies_the_chosen_purpose
     with_recordable_types do
-      copy_confirmed_metadata
+      copy_purpose_metadata
     end
   end
 
-  def copy_confirmed_metadata
+  def copy_purpose_metadata
     kit = recording("kit-1", press_kit)
     install_current!
 
-    Current.download_gate = { "kit-1" => { "confirmed" => true } }
+    Current.download_gate = { "kit-1" => { "purpose" => "publish" } }
     assert_equal(
-      { "confirmed" => true },
+      { "purpose" => "publish" },
       RecordingStudioPresskits::KitDownloadGate.metadata_for(recording: kit, actor: nil)
     )
 
-    Current.download_gate = { "kit-1" => { "confirmed" => "true" } }
+    Current.download_gate = { "kit-1" => { "purpose" => "true" } }
     assert_equal({}, RecordingStudioPresskits::KitDownloadGate.metadata_for(recording: kit, actor: nil))
   ensure
     remove_current!
