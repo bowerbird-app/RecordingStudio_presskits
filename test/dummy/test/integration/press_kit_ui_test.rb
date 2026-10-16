@@ -34,13 +34,13 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_presskits_library_layout
-    assert_select "h1", text: "My presskits"
-    assert_select "title", text: "My presskits"
+    assert_select "h1", text: "My press kits"
+    assert_select "title", text: "My press kits"
     assert_page_nav_without_access
     refute_includes response.body, "Dummy host"
   end
 
-  test "index cards and table show the same kits" do
+  test "index shows a grid of stacked cards and ignores the old table view" do
     kit = record_kit("Spring launch")
     edit_href = recording_studio_presskits.edit_press_kit_path(kit)
     sign_in @user
@@ -53,7 +53,6 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{edit_href}']"
     assert_presskit_create_button
     assert_library_sidebar
-    assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
     assert_select "[data-cover-card]", count: 1
     assert_select "[data-cover-feature]", count: 0
     assert_select "[data-brand-color='#333333']", count: 1
@@ -62,25 +61,78 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     assert_select "[data-cover-card] h2[data-cover-title]", text: "Spring launch"
     assert_includes response.body, "aspect-[430/368]"
     refute_includes response.body, "data-flat-pack--icon-name-value='photo'"
-    assert_select "a[aria-label='Cards'] [data-flat-pack--icon-name-value='squares-2x2']", count: 1
-    assert_select "a[aria-label='Table'] [data-flat-pack--icon-name-value='table-cells']", count: 1
-    refute_includes response.body, ">Cards<"
-    refute_includes response.body, ">Table<"
+    row = css_select("[data-cover-card] [data-cover-row]").first
+    assert_includes row["class"], "flex-col"
+    refute_includes row["class"], "@min-[640px]:flex-row"
+    frame = css_select("[data-cover-card] [data-cover-frame]").first
+    refute_includes frame["class"], "@min-[640px]:w-1/2"
+    assert_select "a", text: "All"
+    assert_select "a", text: "Draft"
+    assert_select "a", text: "Published"
+    assert_select "input[name='q'][placeholder='Search by title']"
+    refute_select "a[aria-label='Cards']"
+    refute_select "a[aria-label='Table']"
+    assert_select "table", count: 0
     assert_page_nav_without_access
 
     get recording_studio_presskits.press_kits_path(view: "table")
     assert_response :success
     assert_presskits_library_layout
     assert_includes response.body, "Spring launch"
-    assert_select "a[href='#{edit_href}']", text: "Spring launch"
-    assert_includes response.body, "<table"
+    assert_select "[data-cover-card]", count: 1
+    assert_select "table", count: 0
     assert_presskit_create_button
-    assert_library_sidebar
-    assert_match(/Presskit.*squares-2x2.*table-cells/m, response.body)
-    assert_select "[data-cover-card]", count: 0
-    assert_select "[data-brand-color]", count: 0
-    refute_includes response.body, ">Cards<"
-    refute_includes response.body, ">Table<"
+    refute_select "a[aria-label='Table']"
+  end
+
+  test "index filters by publishable state and searches the title" do
+    live = record_kit("Spring launch")
+    record_kit("Autumn recap")
+    later = record_kit("Winter premiere")
+    publish_index_kit!(live, slug: "spring-launch-index")
+    publish_index_kit!(later, slug: "winter-premiere-index", publish_at: 3.days.from_now)
+    sign_in @user
+    switch_to_root(@root)
+
+    get recording_studio_presskits.press_kits_path
+    assert_response :success
+    assert_select "[data-cover-title]", text: "Spring launch"
+    assert_select "[data-cover-title]", text: "Autumn recap"
+    assert_select "[data-cover-title]", text: "Winter premiere"
+
+    get recording_studio_presskits.press_kits_path(status: "published")
+    assert_response :success
+    assert_select "[data-cover-title]", text: "Spring launch"
+    assert_select "[data-cover-title]", text: "Autumn recap", count: 0
+    assert_select "[data-cover-title]", text: "Winter premiere", count: 0
+
+    get recording_studio_presskits.press_kits_path(status: "draft")
+    assert_response :success
+    assert_select "[data-cover-title]", text: "Autumn recap"
+    assert_select "[data-cover-title]", text: "Spring launch", count: 0
+    assert_select "[data-cover-title]", text: "Winter premiere", count: 0
+
+    get recording_studio_presskits.press_kits_path(status: "nope")
+    assert_select "[data-cover-title]", text: "Spring launch"
+    assert_select "[data-cover-title]", text: "Autumn recap"
+    assert_select "[data-cover-title]", text: "Winter premiere"
+
+    get recording_studio_presskits.press_kits_path(q: "LAUNCH")
+    assert_select "[data-cover-title]", text: "Spring launch"
+    assert_select "[data-cover-title]", text: "Autumn recap", count: 0
+    assert_select "input[name='q'][value='LAUNCH']"
+
+    get recording_studio_presskits.press_kits_path(status: "draft", q: "autumn")
+    assert_select "[data-cover-title]", text: "Autumn recap"
+    assert_select "[data-cover-title]", text: "Spring launch", count: 0
+    assert_select "a[href*='status=published'][href*='q=autumn']", text: "Published"
+    assert_select "form[action*='status=draft'] input[name='q']"
+
+    get recording_studio_presskits.press_kits_path(status: "published", q: "autumn")
+    assert_select "[data-cover-title]", count: 0
+    assert_includes response.body, "No press kits match"
+    assert_includes response.body, "Try another word, or show every kit."
+    refute_includes response.body, "Nothing here yet"
   end
 
   test "card view paints the kit brand on the view button and keeps a default badge" do
@@ -1819,7 +1871,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
   def assert_presskit_create_button
     assert_select "a[href='#{recording_studio_presskits.new_press_kit_path}']" do
       assert_select "[data-flat-pack--icon-name-value='plus']", count: 1
-      assert_select "span", text: "Presskit"
+      assert_select "span", text: "Press kit"
     end
     refute_includes response.body, "New press kit"
   end
@@ -1837,6 +1889,19 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
   def record_kit(title)
     @root.record(RecordingStudioPresskits::PressKit) { |press_kit| press_kit.title = title }
+  end
+
+  def publish_index_kit!(kit, slug:, publish_at: nil)
+    result = RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: kit,
+      actor: @user,
+      attributes: { slug: slug, status: "published", meta_robots: "index,follow" }
+    )
+    raise result.error if result.failure?
+
+    return if publish_at.blank?
+
+    RecordingStudioPublishable::Publishable.where(id: result.value.recordable_id).update_all(publish_at: publish_at)
   end
 
   def record_block(kit, title)

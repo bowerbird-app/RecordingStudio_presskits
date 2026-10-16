@@ -11,8 +11,13 @@ module RecordingStudioPresskits
       authorize_recording!(current_presskits_root, role: :view)
       return if performed?
 
-      @press_kit_recordings = KitQuery.for_root(current_presskits_root)
-      @view = table_view? ? "table" : "cards"
+      @status = KitIndex.status_from(params[:status])
+      @query = params[:q].to_s
+      @press_kit_recordings = KitIndex.records(
+        KitQuery.for_root(current_presskits_root),
+        status: @status,
+        query: @query
+      )
     end
 
     def show
@@ -71,10 +76,6 @@ module RecordingStudioPresskits
       return "recording_studio_presskits/library" if action_name == "index"
 
       "recording_studio/default_layout"
-    end
-
-    def table_view?
-      params[:view].to_s == "table"
     end
 
     def press_kit_params

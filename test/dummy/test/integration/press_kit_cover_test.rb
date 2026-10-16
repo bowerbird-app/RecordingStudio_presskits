@@ -284,7 +284,8 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     refute_select "[data-cover-download]"
     refute_select "[data-cover-contact]"
     copy = css_select("[data-cover-copy]").first
-    assert_equal "min-w-0 @min-[640px]:pt-16", copy["class"]
+    assert_equal "min-w-0", copy["class"]
+    refute_includes copy["class"], "@min-[640px]:pt-16"
     refute_includes copy["class"], "gap-3"
     refute_includes copy["class"], "pt-12"
     body = css_select("[data-cover-row] > div").last
@@ -311,7 +312,7 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     assert_operator harbour.index("gap-[14px]"), :<, harbour.index("data-cover-title")
   end
 
-  test "the kit editor header is the wide card and the grid keeps the same markup" do
+  test "the kit editor header is the wide card and the index grid stays stacked" do
     first = record_kit("Spring launch")
     @root.revise(first) do |press_kit|
       press_kit.subtitle = "Collection released"
@@ -333,7 +334,11 @@ class PressKitCoverTest < ActionDispatch::IntegrationTest
     grid_card = css_select("[data-cover-card]").first
     assert_includes grid_card["class"], "@container"
     assert_includes grid_card.to_html, "aspect-[430/368]"
-    assert_includes grid_card.to_html, "@min-[640px]:flex-row"
+    grid_row = css_select("[data-cover-row]").first
+    assert_includes grid_row["class"], "flex-col"
+    refute_includes grid_row["class"], "@min-[640px]:flex-row"
+    grid_frame = css_select("[data-cover-frame]").first
+    refute_includes grid_frame["class"], "@min-[640px]:w-1/2"
 
     get recording_studio_presskits.edit_press_kit_path(first)
     assert_response :success

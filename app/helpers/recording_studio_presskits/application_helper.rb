@@ -49,8 +49,11 @@ module RecordingStudioPresskits
       FlatPack::AttributeSanitizer.sanitize_url(recordable.cover_image_url)
     end
 
-    def presskits_index_path(view: nil)
-      view.present? ? press_kits_path(view: view) : press_kits_path
+    def presskits_index_path(status: nil, query: nil)
+      options = {}
+      options[:status] = status if status.present? && status.to_s != "all"
+      options[:q] = query.to_s.strip.presence if query.present?
+      press_kits_path(options)
     end
 
     def presskits_public_path_for(recording)

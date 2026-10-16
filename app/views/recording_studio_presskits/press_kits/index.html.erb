@@ -1,10 +1,9 @@
-<% content_for :title, "My presskits" %>
+<% content_for :title, t("recording_studio_presskits.index.title") %>
 
 <%= render RecordingStudioPresskits::PressKits::IndexComponent.new(
   press_kit_recordings: @press_kit_recordings,
-  view: @view,
-  cards_path: press_kits_path(view: "cards"),
-  table_path: press_kits_path(view: "table"),
+  status: @status,
+  query: @query,
   new_path: new_press_kit_path,
   show_path: ->(recording) { edit_press_kit_path(recording) }
 ) %>
