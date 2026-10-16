@@ -13,16 +13,22 @@ module RecordingStudioPresskits
       private
 
       def register_reorder_actions
+        reorder_summaries.each do |name, summary|
+          register_section_action(name, reorder_action(summary))
+        end
+      end
+
+      def reorder_summaries
         {
           reorder_quotes: "Reorder quotes in this section",
           reorder_stats: "Reorder stats in this section",
           reorder_items: "Reorder rows in this list",
           reorder_images: "Reorder images in this section",
           reorder_files: "Reorder files in this section",
-          reorder_videos: "Reorder videos in this section"
-        }.each do |name, summary|
-          register_section_action(name, reorder_action(summary))
-        end
+          reorder_videos: "Reorder videos in this section",
+          reorder_podcasts: "Reorder episodes in this section",
+          reorder_locations: "Reorder places in this section"
+        }
       end
 
       def reorder_action(summary)

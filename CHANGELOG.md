@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Press kits, kit sections, and every section type this gem owns register with Recording Studio API `v0.11.4` (`register_recordable_type_api`, `register_capability_action`, `register_resource_handler`). Press kits are index, show, create, update, and destroy. Destroy trashes the recording and requires admin. Writable fields are `title`, `subtitle`, `description`, `brand_color`, `font_family`, `text_color`, and `corner_style`. `q` matches the title only. Publishable's `publish`, `unpublish`, and `update_publishable` stay listed. `create_section` and `reorder_sections` stay.
 - Kit sections are index, show, update, and destroy, nested at `/press_kits/{id}/kit_sections`. Create stays `create_section`. `remove_section` still trashes the section.
-- Text, quotes, stats, credit lines, list items, and podcasts are nested under their content recording, with reorder where the section is Orderable. Stats are writable. Credits and credit lines can be trashed. Credits are still created on the workspace root.
-- Video sections add, update, remove, and reorder videos through `RecordingStudioVideo::Video`. Location sections set, update, and clear places through `RecordingStudio::Location::Location`. Press Kits does not register those types.
+- Text, quotes, stats, credit lines, list items, and podcasts are nested under their content recording, with reorder where the section is Orderable. Podcast sections order their episodes. Stats are writable. Credits and credit lines can be trashed. Credits are still created on the workspace root.
+- Video sections add, update, remove, and reorder videos through `RecordingStudioVideo::Video`. Location sections set, update, clear, and reorder places through `RecordingStudio::Location::Location`. Press Kits does not register those types.
 - Image and file sections list, update caption/credit/alt or name/description, reorder, and remove. Menu sections are index, show, and update.
 - Reads require view and a kit presentation of `:full` or `:preview`. Hidden, unavailable, and embargoed-hidden kits are 404. Preview withholds protected fields. Writes require edit.
 
@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump to `0.70.0`. There is no presskits migration. This gem still does not depend on `recording_studio_api`.
 - Hosts that want the HTTP API pin `recording_studio_api` at tag `v0.11.4`, run `bin/rails generate recording_studio_api:migrations`, and migrate. Mount `RecordingStudioApi::Engine` and the Scalar docs routes. Allow `"RecordingStudioApi::ApiClient"` in `access_actor_types`. Enable `:api_access_point` on the workspace root.
 - When routes or an initializer load the API gem during boot, require `RecordingStudioVideo::Video` before the video engine's `after_initialize` hook. That gem's `Api.register!` looks up `Video` from inside `RecordingStudioVideo::Api` and raises if the model is not loaded yet. Call `RecordingStudio::RecordableDeclarations.install_active_record_macro!` first if that require runs before the macro exists.
-- Attachable `v0.18.0` has no upload API, so images and files cannot be added over this API. Podcast sections and location sections are not Orderable, so they have no reorder. Nested index order is `created_at` and `id`.
+- Attachable `v0.18.0` has no upload API, so images and files cannot be added over this API. `reorder_podcasts` and `reorder_locations` take `ordered_recording_ids` and need `edit`. Nested index order is `created_at` and `id`. A child with no position yet sorts after positioned ones.
 
 ## [0.69.0] - 2026-10-16
 

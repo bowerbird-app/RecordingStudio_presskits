@@ -151,6 +151,7 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     podcast = registry.types.fetch("RecordingStudioPresskits::Podcast")
     assert_equal %i[create destroy index show update], podcast[:operations].sort
     assert_equal %w[aired_on duration show_name title url], podcast[:writable_attributes].map(&:to_s).sort
+    assert_equal %i[reorder_podcasts], Array(registered_podcasts[:capability_actions]).sort
     assert_includes kit_section[:output_keys], :files
     registered_files = registry.types.fetch("RecordingStudioPresskits::Files")
     assert_equal %i[index show], registered_files[:operations]
@@ -159,6 +160,8 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     registered_location = registry.types.fetch("RecordingStudioPresskits::LocationSection")
     assert_equal %i[index show], registered_location[:operations]
     assert_equal %i[locations], registered_location[:output_keys]
+    assert_equal %i[clear_location reorder_locations set_location update_location],
+                 Array(registered_location[:capability_actions]).sort
     refute registry.types.key?("RecordingStudio::Location::Location")
   end
 

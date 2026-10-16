@@ -18,7 +18,7 @@ module RecordingStudioPresskits
           operations: %i[index show],
           serializer: method(:location_section_serializer),
           output_keys: %i[locations],
-          capability_actions: %i[set_location update_location clear_location]
+          capability_actions: %i[set_location update_location clear_location reorder_locations]
         )
       end
 

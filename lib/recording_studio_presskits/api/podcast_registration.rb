@@ -14,6 +14,7 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::PodcastSection",
           operations: %i[index show],
+          capability_actions: %i[reorder_podcasts],
           relationships: { podcasts: podcasts_relationship }
         )
       end

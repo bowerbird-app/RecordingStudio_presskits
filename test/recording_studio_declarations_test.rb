@@ -517,7 +517,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::StatsSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Stat")
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::VideoSection")
-    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::LocationSection")
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::LocationSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Folder")
     refute RecordingStudio.capability_enabled?(:orderable, for: "Page")
 
@@ -538,9 +538,19 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert_equal ["RecordingStudioPresskits::PressKit"], Array(workspace_options[:allows]).map(&:to_s)
   end
 
-  test "podcasts are not orderable" do
-    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PodcastSection")
+  test "location sections order their places" do
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::LocationSection")
+
+    options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::LocationSection").to_h
+    assert_equal ["RecordingStudio::Location::Location"], Array(options[:allows]).map(&:to_s)
+  end
+
+  test "podcast sections order their episodes" do
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PodcastSection")
     refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::Podcast")
+
+    options = RecordingStudio.capability_options(:orderable, for: "RecordingStudioPresskits::PodcastSection").to_h
+    assert_equal ["RecordingStudioPresskits::Podcast"], Array(options[:allows]).map(&:to_s)
   end
 
   test "trashable is enabled on press kit and dummy fake block" do

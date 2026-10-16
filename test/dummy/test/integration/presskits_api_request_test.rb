@@ -303,6 +303,31 @@ class PresskitsApiRequestTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "reorder podcasts and locations" do
+    kit = publish_kit(record_kit("Listen kit", "Copy"))
+    podcasts = section(kit, "RecordingStudioPresskits::PodcastSection", "Shows")
+    places = section(kit, "RecordingStudioPresskits::LocationSection", "Places")
+    first = call(:post, "/podcast_sections/#{podcasts.fetch("content_id")}/podcasts", @editor_token, url: PODCAST_URL, title: "Pilot")
+    second = call(:post, "/podcast_sections/#{podcasts.fetch("content_id")}/podcasts", @editor_token, url: "#{PODCAST_URL}/encore", title: "Encore")
+    episode_ids = [second.fetch("id"), first.fetch("id")]
+    call(:post, "/podcast_sections/#{podcasts.fetch("content_id")}/reorder_podcasts", @viewer_token, ordered_recording_ids: episode_ids)
+    assert_response :forbidden
+    call(:post, "/podcast_sections/#{podcasts.fetch("content_id")}/reorder_podcasts", @editor_token, ordered_recording_ids: episode_ids)
+    assert_response :success
+    shown = call(:get, "/kit_sections/#{podcasts.fetch("id")}", @editor_token)
+    assert_equal %w[Encore Pilot], shown.fetch("podcasts").map { |row| row.fetch("title") }
+
+    hall = call(:post, "/location_sections/#{places.fetch("content_id")}/set_location", @editor_token, title: "Hall", name: "Town Hall", locality: "London")
+    room = call(:post, "/location_sections/#{places.fetch("content_id")}/set_location", @editor_token, title: "Room", name: "Side Room", locality: "Paris")
+    place_ids = [room.fetch("id"), hall.fetch("id")]
+    call(:post, "/location_sections/#{places.fetch("content_id")}/reorder_locations", @viewer_token, ordered_recording_ids: place_ids)
+    assert_response :forbidden
+    call(:post, "/location_sections/#{places.fetch("content_id")}/reorder_locations", @editor_token, ordered_recording_ids: place_ids)
+    assert_response :success
+    placed = call(:get, "/location_sections/#{places.fetch("content_id")}", @editor_token)
+    assert_equal %w[Room Hall], placed.fetch("locations").map { |row| row.fetch("title") }
+  end
+
   test "scalar docs and openapi render the press kit surface" do
     get "/APIdocs/v1/openapi.json"
     assert_response :success, response.body
@@ -312,6 +337,8 @@ class PresskitsApiRequestTest < ActionDispatch::IntegrationTest
     assert paths.any? { |path| path.include?("/kit_sections") }
     assert paths.any? { |path| path.include?("create_section") }
     assert paths.any? { |path| path.include?("/video_sections/") }
+    assert paths.any? { |path| path.include?("reorder_podcasts") }
+    assert paths.any? { |path| path.include?("reorder_locations") }
     refute paths.any? { |path| path.include?("/kit_sections/") && path.include?("/videos") }
 
     get "/APIdocs/v1"
