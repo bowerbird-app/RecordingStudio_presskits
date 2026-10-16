@@ -25,7 +25,19 @@ module RecordingStudioPresskits
       end
 
       def register_list_section
-        register_type("RecordingStudioPresskits::ListSection", **empty_section_options)
+        register_type(
+          "RecordingStudioPresskits::ListSection",
+          operations: %i[index show],
+          serializer: list_section_serializer,
+          output_keys: %i[items]
+        )
+      end
+
+      def list_section_serializer
+        lambda { |_recordable, recording: nil, context: nil, **|
+          source = Exposure.named_recording(recording: recording, context: context)
+          { items: ListPayload.for_recording(source, context: context) }
+        }
       end
     end
   end
