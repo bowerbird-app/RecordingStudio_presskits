@@ -41,6 +41,10 @@
     <% end %>
   <% end %>
 <% else %>
+  <%= render FlatPack::PageTitle::Component.new(
+    title: I18n.t("recording_studio_presskits.download_gate.title"),
+    variant: :h2
+  ) %>
   <%= form_with url: RecordingStudioPresskits::KitDownloadGate.form_path, method: :patch do %>
     <%= hidden_field_tag :recording_id, recording.id %>
     <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg, align: :start) do %>

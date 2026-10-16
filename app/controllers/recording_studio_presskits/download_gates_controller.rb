@@ -17,6 +17,7 @@ module RecordingStudioPresskits
       return if performed?
 
       @recording = recording
+      @page_title = page_title_for(recording)
     end
 
     def update
@@ -92,6 +93,13 @@ module RecordingStudioPresskits
       return unless defined?(Current) && Current.respond_to?(:download_gate=)
 
       Current.download_gate = entries
+    end
+
+    def page_title_for(recording)
+      kit = KitDownloadGate.kit_for(recording)
+      entry = KitDownloadGate.entry_for(kit, session[KitDownloadGate::SESSION_KEY])
+      key = KitDownloadGate.purpose_for(entry) ? "fetching" : "title"
+      I18n.t("recording_studio_presskits.download_gate.#{key}")
     end
 
     def render_step(recording)

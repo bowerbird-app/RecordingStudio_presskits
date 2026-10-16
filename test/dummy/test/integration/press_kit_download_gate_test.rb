@@ -47,7 +47,8 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
     follow_redirect!
     assert_response :success
-    assert_select "h1", text: "What do you want to use this content for?"
+    assert_select "turbo-frame##{RecordingStudioPresskits::KitDownloadGate.frame_id(kit)} h2", text: "What do you want to use this content for?"
+    assert_select "title", text: "What do you want to use this content for?"
     refute_select ".fp-section-title"
     assert_includes response.body, "Editorial consideration"
     assert_includes response.body, "Publish immediately"
@@ -77,12 +78,26 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
     follow_redirect!
     assert_includes response.body, "Pick one to continue."
+    assert_select "h2", text: "What do you want to use this content for?"
 
     get recording_studio_downloadable.recording_package_path(kit)
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
 
     patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, purpose: "publish" }
     assert_redirected_to recording_studio_presskits.download_gate_path(recording_id: kit.id)
+    follow_redirect!
+    refute_includes response.body, "What do you want to use this content for?"
+    assert_select "title", text: "Fetching your files…"
+    assert_select "h3", text: "Fetching your files…"
+    assert_includes response.body, "Download started"
+
+    frame = RecordingStudioPresskits::KitDownloadGate.frame_id(kit)
+    patch recording_studio_presskits.download_gate_path,
+          params: { recording_id: kit.id, purpose: "publish" },
+          headers: { "Turbo-Frame" => frame }
+    assert_response :success
+    refute_includes response.body, "What do you want to use this content for?"
+    assert_select "turbo-frame##{frame} h3", text: "Fetching your files…"
 
     assert_no_enqueued_jobs only: RecordingStudioDownloadable::GeneratePackageJob do
       get recording_studio_downloadable.recording_package_path(kit)
@@ -112,12 +127,20 @@ class PressKitDownloadGateTest < ActionDispatch::IntegrationTest
     assert_select "#download-gate-modal-#{content.id}"
     assert_select "#download-gate-modal-#{kit.id} input[name=purpose][value=editorial]"
     assert_select "#download-gate-modal-#{content.id} input[name=purpose][value=publish]"
-    assert_select "#download-gate-modal-#{kit.id} [role=dialog] h2", text: "What do you want to use this content for?"
-    assert_select "#download-gate-modal-#{kit.id} [role=dialog][aria-labelledby]"
+    assert_select "#download-gate-modal-#{kit.id} h2", text: "What do you want to use this content for?"
+    assert_select "#download-gate-modal-#{kit.id} button[aria-label='Close']"
+    refute_select "#download-gate-modal-#{kit.id} [role=dialog][aria-labelledby]"
     refute_select "#download-gate-modal-#{kit.id} .fp-section-title"
     refute_includes response.body, "Send me the files"
 
     patch recording_studio_presskits.download_gate_path, params: { recording_id: kit.id, purpose: "editorial" }
+
+    get kit.publishable_public_path
+    assert_response :success
+    refute_includes response.body, "What do you want to use this content for?"
+    refute_select "#download-gate-modal-#{kit.id}"
+    refute_select "#download-gate-modal-#{content.id}"
+    assert_select "[data-cover-download]", count: 1
 
     get recording_studio_downloadable.recording_package_path(content)
     assert_response :redirect

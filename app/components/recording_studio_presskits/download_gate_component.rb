@@ -52,8 +52,7 @@ module RecordingStudioPresskits
     def modal_component
       FlatPack::Modal::Component.new(
         id: KitDownloadGate.modal_id(@recording),
-        size: :md,
-        title: I18n.t("recording_studio_presskits.download_gate.title")
+        size: :md
       )
     end
 
