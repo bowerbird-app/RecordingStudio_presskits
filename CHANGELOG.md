@@ -1269,7 +1269,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.69.0...HEAD
+[0.69.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...v0.69.0
 [0.66.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.0...v0.66.1
 [0.66.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.66.0
 [0.65.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.64.0...v0.65.0
