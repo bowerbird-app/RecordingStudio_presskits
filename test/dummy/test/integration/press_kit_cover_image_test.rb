@@ -171,12 +171,13 @@ class PressKitCoverImageTest < ActionDispatch::IntegrationTest
   end
 
   def attach_cover!(kit)
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      kit, @user,
       io: File.open(cover_fixture_path),
       filename: "harbour-gallery.jpg",
       content_type: "image/jpeg"
     )
-    photo = kit.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user, name: "Harbour Gallery")
+    photo = kit.record_attachment_upload(signed_blob_id: attachment_signed_id(blob), actor: @user, name: "Harbour Gallery")
     photo.revise_attachment_metadata(actor: @user, alt_text: "A white gallery hall")
     photo
   end

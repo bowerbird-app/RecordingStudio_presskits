@@ -153,9 +153,14 @@ class SectionApiActionsTest < ActiveSupport::TestCase
     assert_equal %w[aired_on duration show_name title url], podcast[:writable_attributes].map(&:to_s).sort
     assert_equal %i[reorder_podcasts], Array(registered_podcasts[:capability_actions]).sort
     assert_includes kit_section[:output_keys], :files
+    registered_images = registry.types.fetch("RecordingStudioPresskits::Images")
+    assert_equal %i[attach create_upload import_attachment remove_image reorder_images update_image],
+                 Array(registered_images[:capability_actions]).sort
     registered_files = registry.types.fetch("RecordingStudioPresskits::Files")
     assert_equal %i[index show], registered_files[:operations]
     assert_equal %i[files], registered_files[:output_keys]
+    assert_equal %i[attach create_upload import_attachment remove_file reorder_files update_file],
+                 Array(registered_files[:capability_actions]).sort
 
     registered_location = registry.types.fetch("RecordingStudioPresskits::LocationSection")
     assert_equal %i[index show], registered_location[:operations]

@@ -1110,7 +1110,7 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
     refute_select "a", text: "Add from library"
     assert_select "[data-controller='recording-studio-attachable--attachment-revision-upload']", count: 1
     assert_select "[data-controller='recording-studio-attachable--attachment-revision-upload'] button[type='button']", text: "Upload"
-    assert_select "input[type=file][accept='image/*']"
+    assert_select "input[type=file][accept='image/*,image/svg+xml']"
     refute_select "[data-controller='recording-studio-presskits--image-upload']"
     refute_select "[data-controller='recording-studio-attachable--upload']"
     refute_includes response.body, "Drag images here"
@@ -1785,12 +1785,17 @@ class PressKitUiTest < ActionDispatch::IntegrationTest
 
   def attach_image(section, filename)
     content = section_content(section)
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      content, @user,
       io: File.open(RecordingStudioPresskits::Engine.root.join("test/fixtures/files/cover.jpg")),
       filename: filename,
       content_type: "image/jpeg"
     )
-    photo = content.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user, name: File.basename(filename, ".*"))
+    photo = content.record_attachment_upload(
+      signed_blob_id: attachment_signed_id(blob),
+      actor: @user,
+      name: File.basename(filename, ".*")
+    )
     photo.revise_attachment_metadata(actor: @user, alt_text: File.basename(filename, ".*"))
     photo
   end

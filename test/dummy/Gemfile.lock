@@ -42,14 +42,14 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
-  revision: a206bfbcf7f5987ad9f191345e9fba4dedeb6d16
-  tag: v0.18.0
+  revision: a63cd3ab6fda6019fa0b700ce27abfd1b095b8ef
+  tag: v0.20.0
   specs:
-    recording_studio_attachable (0.18.0)
+    recording_studio_attachable (0.20.0)
       flat_pack (>= 0.1.213)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
-      recording_studio_metrics (~> 0.2)
+      recording_studio_metrics (>= 0.3.0, < 0.4)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_cache.git
@@ -218,7 +218,7 @@ PATH
       recording_studio (~> 4.7)
       recording_studio_accessible (~> 0.19)
       recording_studio_admin (~> 2.3)
-      recording_studio_attachable (~> 0.18)
+      recording_studio_attachable (~> 0.20)
       recording_studio_cache (~> 0.5)
       recording_studio_company (~> 0.4)
       recording_studio_downloadable (~> 0.7)
@@ -781,7 +781,7 @@ CHECKSUMS
   recording_studio_accessible (0.19.0)
   recording_studio_admin (2.3.0)
   recording_studio_api (0.11.3)
-  recording_studio_attachable (0.18.0)
+  recording_studio_attachable (0.20.0)
   recording_studio_cache (0.5.0)
   recording_studio_company (0.4.0)
   recording_studio_downloadable (0.7.0)

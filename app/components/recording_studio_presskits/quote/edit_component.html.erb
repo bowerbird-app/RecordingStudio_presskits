@@ -60,7 +60,7 @@
     <div class="hidden" data-recording-studio-attachable--upload-target="dropzone"></div>
     <input
       type="file"
-      accept="image/*"
+      accept="<%= RecordingStudioPresskits::IMAGE_CONTENT_TYPES.join(",") %>"
       class="hidden"
       data-recording-studio-attachable--upload-target="input"
       data-action="change->recording-studio-attachable--upload#filesSelected">

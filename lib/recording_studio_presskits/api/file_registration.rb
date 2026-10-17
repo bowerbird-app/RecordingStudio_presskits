@@ -9,7 +9,7 @@ module RecordingStudioPresskits
           operations: %i[index show],
           serializer: method(:files_serializer),
           output_keys: %i[files],
-          capability_actions: %i[update_file reorder_files remove_file]
+          capability_actions: %i[create_upload attach import_attachment update_file reorder_files remove_file]
         )
       end
 

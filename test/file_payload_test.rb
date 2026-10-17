@@ -7,9 +7,11 @@ require_relative "dummy/config/environment"
 require "rails/test_help"
 
 require_relative "support/presskits_api_mirror"
+require_relative "support/attachable_blobs"
 
 class FilePayloadTest < ActiveSupport::TestCase
   include PresskitsApiMirror
+  include AttachableBlobs
 
   test "section payload lists active files in order and leaves out urls" do
     built = section_with_files
@@ -84,12 +86,13 @@ class FilePayloadTest < ActiveSupport::TestCase
 
   def attach_file!(parent, actor, filename, name)
     pdf = filename.end_with?(".pdf")
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      parent, actor,
       io: StringIO.new(pdf ? "%PDF-1.1\n%%EOF\n" : "#{name}\n"),
       filename: filename,
       content_type: pdf ? "application/pdf" : "text/plain"
     )
-    parent.record_attachment_upload(signed_blob_id: blob.signed_id, actor: actor, name: name)
+    parent.record_attachment_upload(signed_blob_id: attachment_signed_id(blob), actor: actor, name: name)
   end
 
   def kit_tree

@@ -16,7 +16,23 @@ That tag's `VERSION` constant is `0.11.3`. Run `bin/rails generate recording_stu
 
 Reads need Accessible `view` and a kit presentation of `:full` or `:preview`. Writes need `edit`. `DELETE` trashes (`deleted_via: "trashed"`) and needs `admin`. It does not delete the row. `q` on press kits matches the title only. Preview and an active embargo withhold description, section headings, body, quotes, stats, lines, items, podcasts, videos, places, images, files, and menu items. Hidden and unavailable kits are 404. Editors still see the full kit.
 
-`create_section` is still how a section and its content are created together. There is no kit-section create. Image and file add is not registered: Attachable `v0.18.0` has no Recording Studio API upload. Podcast sections order episodes with `reorder_podcasts`. Location sections order places with `reorder_locations`. Both take `ordered_recording_ids` and need `edit`. Nested collection index order is `created_at` and `id`. Show payloads that use the section helpers stay in Orderable order. A child with no position yet sorts after positioned ones, then by `created_at`.
+`create_section` is still how a section and its content are created together. There is no kit-section create. Podcast sections order episodes with `reorder_podcasts`. Location sections order places with `reorder_locations`. Both take `ordered_recording_ids` and need `edit`. Nested collection index order is `created_at` and `id`. Show payloads that use the section helpers stay in Orderable order. A child with no position yet sorts after positioned ones, then by `created_at`.
+
+Pin Attachable `~> 0.20` at tag `v0.20.0`. There is no Attachable migration.
+
+```ruby
+gem "recording_studio_attachable", "~> 0.20", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.20.0"
+```
+
+After Recording Studio API is loaded, register the upload actions. Pass a named admin API when those clients should upload too.
+
+```ruby
+RecordingStudioAttachable::Api.register!(apis: [:public])
+```
+
+Image sections and file sections list `create_upload`, `attach`, and `import_attachment`. A ticket from `create_upload` is bound to that recording and the access-grant actor. A client-credentials token uses the API client as that actor. It expires after 5 minutes (`config.direct_upload_expires_in`). `attach` takes `signed_blob_id`, or an `attachments` list. `import_attachment` needs `config.import_allowed_hosts`. An empty list rejects every URL.
+
+`image/*` does not allow `image/svg+xml`. Images, the kit cover, quotes, and podcast covers list `image/svg+xml` beside `image/*`. Files still refuse SVG, HTML, and images. Browser uploads post to `recording_direct_uploads_path(recording)`. A signed id from `/rails/active_storage/direct_uploads` will not attach. An S3 bucket needs a CORS rule that allows PUT and the headers `Content-Type`, `Content-MD5`, and `Content-Disposition`. Google Drive and Dropbox tokens stay in the Rails session, so use the encrypted cookie store. Set `config.purge_unattached_blobs = true` and schedule `RecordingStudioAttachable::PurgeUnattachedBlobsJob`. That job deletes unattached blobs this gem tagged, older than `config.unattached_blob_ttl` (default 24 hours). `config.pending_upload_limit` defaults to 20.
 
 Video and Location stay registered by those gems. Press Kits calls their models from `add_video`, `update_video`, `remove_video`, `set_location`, `update_location`, and `clear_location`. Do not register `RecordingStudioVideo::Video` or `RecordingStudio::Location::Location` again.
 

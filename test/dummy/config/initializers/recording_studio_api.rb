@@ -28,3 +28,5 @@ RecordingStudioApi.configure do |config|
 end
 
 RecordingStudio.enable_capability(:api_access_point, on: "Workspace")
+
+RecordingStudioAttachable::Api.register!(apis: [:public])

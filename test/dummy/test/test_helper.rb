@@ -4,6 +4,7 @@ ENV["RAILS_ENV"] ||= "test"
 
 require_relative "../config/environment"
 require "rails/test_help"
+require_relative "../../support/attachable_blobs"
 
 module RoundedDefaultLayoutAssertions
   def assert_presskits_library_layout
@@ -82,4 +83,9 @@ end
 
 class ActionDispatch::IntegrationTest
   include RoundedDefaultLayoutAssertions
+  include AttachableBlobs
+end
+
+class ActiveSupport::TestCase
+  include AttachableBlobs
 end

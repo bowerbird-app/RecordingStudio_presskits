@@ -303,6 +303,68 @@ class PresskitsApiRequestTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "image and file uploads bind the ticket to the recording and actor" do
+    kit = publish_kit(record_kit("Photo kit", "Copy"))
+    images = section(kit, "RecordingStudioPresskits::Images", "Stills")
+    files = section(kit, "RecordingStudioPresskits::Files", "Documents")
+    image_id = images.fetch("content_id")
+    file_id = files.fetch("content_id")
+    bytes = File.binread(cover_path)
+
+    call(:post, "/images/#{image_id}/actions/create_upload", @viewer_token, upload_params("stage.jpg", "image/jpeg", bytes))
+    assert_response :forbidden
+    call(:post, "/images/#{image_id}/actions/attach", @viewer_token, signed_blob_id: "nope")
+    assert_response :forbidden
+    call(:post, "/images/#{image_id}/actions/import_attachment", @viewer_token, url: "https://example.com/cover.jpg")
+    assert_response :forbidden
+
+    ticket = call(:post, "/images/#{image_id}/actions/create_upload", @editor_token, upload_params("stage.jpg", "image/jpeg", bytes))
+    assert_response :success, response.body
+    assert ticket.dig("upload", "url").present?
+    assert_in_delta 5.minutes.from_now.to_i, Time.iso8601(ticket.fetch("expires_at")).to_i, 60
+    blob = ActiveStorage::Blob.find_signed!(
+      ticket.fetch("signed_blob_id"),
+      purpose: RecordingStudioAttachable::DirectUpload::PURPOSE
+    )
+    assert_equal image_id.to_s, blob.metadata["parent_recording_id"].to_s
+    assert_equal "RecordingStudioApi::ApiClient", blob.metadata["actor_type"]
+    assert blob.metadata["actor_id"].present?
+    admin_ticket = call(:post, "/images/#{image_id}/actions/create_upload", @admin_token, upload_params("other.jpg", "image/jpeg", bytes))
+    admin_blob = ActiveStorage::Blob.find_signed!(
+      admin_ticket.fetch("signed_blob_id"),
+      purpose: RecordingStudioAttachable::DirectUpload::PURPOSE
+    )
+    refute_equal blob.metadata["actor_id"], admin_blob.metadata["actor_id"]
+    blob.upload(StringIO.new(bytes))
+
+    attached = call(:post, "/images/#{image_id}/actions/attach", @editor_token, signed_blob_id: ticket.fetch("signed_blob_id"), caption: "Stage")
+    assert_response :success, response.body
+    assert_equal "Stage", RecordingStudio::Recording.find(attached.fetch("id")).recordable.caption
+
+    svg = "<svg xmlns=\"http://www.w3.org/2000/svg\"/>"
+    svg_ticket = call(:post, "/images/#{image_id}/actions/create_upload", @editor_token, upload_params("mark.svg", "image/svg+xml", svg))
+    assert_response :success, response.body
+    assert svg_ticket.fetch("signed_blob_id").present?
+    call(:post, "/files/#{file_id}/actions/create_upload", @editor_token, upload_params("mark.svg", "image/svg+xml", svg))
+    assert_response :unprocessable_entity
+    assert_includes response.body, "not allowed"
+
+    notes = "hello\n"
+    file_ticket = call(:post, "/files/#{file_id}/actions/create_upload", @editor_token, upload_params("notes.txt", "text/plain", notes))
+    assert_response :success, response.body
+    file_blob = ActiveStorage::Blob.find_signed!(
+      file_ticket.fetch("signed_blob_id"),
+      purpose: RecordingStudioAttachable::DirectUpload::PURPOSE
+    )
+    file_blob.upload(StringIO.new(notes))
+    call(:post, "/files/#{file_id}/actions/attach", @editor_token, signed_blob_id: file_ticket.fetch("signed_blob_id"), name: "Notes")
+    assert_response :success, response.body
+
+    call(:post, "/images/#{image_id}/actions/import_attachment", @editor_token, url: "https://example.com/cover.jpg")
+    assert_response :unprocessable_entity
+    assert_includes response.body, "not allowed"
+  end
+
   test "reorder podcasts and locations" do
     kit = publish_kit(record_kit("Listen kit", "Copy"))
     podcasts = section(kit, "RecordingStudioPresskits::PodcastSection", "Shows")
@@ -339,6 +401,15 @@ class PresskitsApiRequestTest < ActionDispatch::IntegrationTest
     assert paths.any? { |path| path.include?("/video_sections/") }
     assert paths.any? { |path| path.include?("reorder_podcasts") }
     assert paths.any? { |path| path.include?("reorder_locations") }
+    assert paths.any? { |path| path.include?("/images/") && path.include?("create_upload") }
+    assert paths.any? { |path| path.include?("/images/") && path.include?("actions/attach") }
+    assert paths.any? { |path| path.include?("/images/") && path.include?("import_attachment") }
+    assert paths.any? { |path| path.include?("/files/") && path.include?("create_upload") }
+    assert paths.any? { |path| path.include?("/files/") && path.include?("actions/attach") }
+    assert paths.any? { |path| path.include?("/files/") && path.include?("import_attachment") }
+    refute paths.any? { |path| path.include?("/quotes/") && path.include?("create_upload") }
+    refute paths.any? { |path| path.include?("/podcasts/") && path.include?("create_upload") }
+    refute paths.any? { |path| path.include?("/press_kits/") && path.include?("create_upload") }
     refute paths.any? { |path| path.include?("/kit_sections/") && path.include?("/videos") }
 
     get "/APIdocs/v1"
@@ -438,14 +509,23 @@ class PresskitsApiRequestTest < ActionDispatch::IntegrationTest
     payload
   end
 
+  def upload_params(filename, content_type, bytes)
+    {
+      filename: filename,
+      byte_size: bytes.bytesize,
+      checksum: Digest::MD5.base64digest(bytes),
+      content_type: content_type
+    }
+  end
+
   def attach!(parent_id, filename, content_type, bytes)
     parent = RecordingStudio::Recording.find(parent_id)
-    blob = ActiveStorage::Blob.create_and_upload!(
-      io: StringIO.new(bytes),
-      filename: filename,
-      content_type: content_type
+    blob = issued_attachment_blob!(parent, @owner, io: StringIO.new(bytes), filename: filename, content_type: content_type)
+    parent.record_attachment_upload(
+      signed_blob_id: attachment_signed_id(blob),
+      actor: @owner,
+      name: File.basename(filename, ".*")
     )
-    parent.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @owner, name: File.basename(filename, ".*"))
   end
 
   def cover_path

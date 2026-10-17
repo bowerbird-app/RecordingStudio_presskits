@@ -871,9 +871,16 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
   test "quote attachable allows one image" do
     options = RecordingStudio.capability_options(:attachable, for: "RecordingStudioPresskits::Quote").to_h
 
-    assert_equal ["image/*"], options[:allowed_content_types]
+    assert_equal ["image/*", "image/svg+xml"], options[:allowed_content_types]
     assert_equal [:image], options[:enabled_attachment_kinds]
     assert_equal :edit, options[:auth_roles][:remove]
+  end
+
+  test "image parents list svg next to the image wildcard" do
+    %w[Images PressKit Podcast Quote].each do |name|
+      options = RecordingStudio.capability_options(:attachable, for: "RecordingStudioPresskits::#{name}").to_h
+      assert_equal RecordingStudioPresskits::IMAGE_CONTENT_TYPES, options[:allowed_content_types]
+    end
   end
 
   test "recording a quote stores the words on that recordable" do

@@ -54,7 +54,8 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     content = section_content(section)
     sign_in @user
     switch_to_root(@root)
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      content, @user,
       io: File.open(cover_fixture_path),
       filename: "signed.jpg",
       content_type: "image/jpeg"
@@ -63,7 +64,7 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
     post recording_studio_attachable.recording_attachment_imports_path(content), params: {
       redirect_mode: "return_to",
       return_to: recording_studio_presskits.edit_press_kit_section_path(kit, section),
-      attachment_import: { attachments: [{ signed_blob_id: blob.signed_id }] }
+      attachment_import: { attachments: [{ signed_blob_id: attachment_signed_id(blob) }] }
     }
     assert_redirected_to recording_studio_presskits.edit_press_kit_section_path(kit, section)
 
@@ -320,13 +321,14 @@ class PressKitSectionImagesTest < ActionDispatch::IntegrationTest
   end
 
   def attach_image!(parent, filename, alt: nil, caption: nil, credit: nil)
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      parent, @user,
       io: File.open(cover_fixture_path),
       filename: filename,
       content_type: "image/jpeg"
     )
     photo = parent.record_attachment_upload(
-      signed_blob_id: blob.signed_id,
+      signed_blob_id: attachment_signed_id(blob),
       actor: @user,
       name: File.basename(filename, ".*")
     )

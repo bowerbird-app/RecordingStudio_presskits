@@ -105,7 +105,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_cache", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.18"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.20"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_lists", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_location", "~> 0.6"'
@@ -130,7 +130,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.7.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.18.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.20.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.4.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.7.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.1"'
@@ -447,7 +447,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.7.0"
     assert_includes readme, "v0.19.0"
-    assert_includes readme, "v0.18.0"
+    assert_includes readme, "v0.20.0"
     assert_includes readme, "v0.3.1"
     assert_includes readme, "v0.8.3"
     assert_includes readme, "recording_studio_downloadable"

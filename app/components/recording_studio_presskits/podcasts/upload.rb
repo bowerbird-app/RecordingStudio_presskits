@@ -32,7 +32,7 @@ module RecordingStudioPresskits
       end
 
       def direct_upload_url
-        view.main_app.rails_direct_uploads_path
+        view.recording_studio_attachable.recording_direct_uploads_path(podcast_recording)
       end
 
       def finalize_url

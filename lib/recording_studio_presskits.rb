@@ -75,6 +75,9 @@ require "recording_studio_presskits/list_item_batch"
 require "recording_studio_presskits/list_item_batch/sync"
 
 module RecordingStudioPresskits
+  # Attachable's image/* pattern does not allow SVG. Name the type to keep it.
+  IMAGE_CONTENT_TYPES = ["image/*", "image/svg+xml"].freeze
+
   class << self
     include CenterBranding
     include SectionAnchor
