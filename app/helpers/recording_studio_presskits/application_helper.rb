@@ -31,6 +31,11 @@ module RecordingStudioPresskits
       nil
     end
 
+    # Attachable's file button calls this from the host view. The route lives on the engine.
+    def recording_direct_uploads_path(recording)
+      recording_studio_attachable.recording_direct_uploads_path(recording)
+    end
+
     def presskits_title_for(recording)
       recordable = recording.recordable
       return kit_section_title(recording) if recordable.is_a?(KitSection)

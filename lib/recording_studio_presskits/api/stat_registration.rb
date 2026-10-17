@@ -14,7 +14,7 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::Stat",
           operations: %i[index show create update destroy],
-          serializer: ->(recordable, context: nil, **) { StatPayload.for(recordable, context: context) },
+          serializer: StatPayload.method(:for),
           output_keys: stat_keys,
           writable_attributes: stat_keys
         )
@@ -28,17 +28,19 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::StatsSection",
           operations: %i[index show],
-          serializer: stats_section_serializer,
-          output_keys: %i[stats]
+          capability_actions: %i[reorder_stats],
+          relationships: { stats: stats_relationship }
         )
       end
 
-      def stats_section_serializer
-        lambda { |recordable, recording: nil, context: nil, **|
-          source = Exposure.named_recording(recording: recording, context: context)
-          source ||= RecordingStudio::Recording.find_by(recordable: recordable)
-          StatPayload.for_recording(source, context: context)
-        }
+      def stats_relationship
+        child_collection(
+          "RecordingStudioPresskits::Stat",
+          serializer: StatPayload.method(:for),
+          output_keys: stat_keys,
+          endpoints: %i[index show create update destroy],
+          description: "Stats in this section"
+        )
       end
     end
   end

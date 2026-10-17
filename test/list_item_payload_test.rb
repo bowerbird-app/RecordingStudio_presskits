@@ -6,7 +6,11 @@ require_relative "dummy/config/environment"
 
 require "rails/test_help"
 
+require_relative "support/presskits_api_mirror"
+
 class ListItemPayloadTest < ActiveSupport::TestCase
+  include PresskitsApiMirror
+
   test "includes icon key and value and keeps a blank icon as nil" do
     item = RecordingStudioPresskits::ListItem.new(icon: "  ", key: "Capacity", value: "120 seats")
 
@@ -77,7 +81,7 @@ class ListItemPayloadTest < ActiveSupport::TestCase
       assert_equal withheld, item_registration.fetch(:serializer).call(item.recordable, context: Object.new)
       assert_equal withheld, RecordingStudioPresskits::Api::ListPayload.for(item.recordable, context: Object.new)
     end
-    assert_equal %i[index show create update destroy], item_registration.fetch(:operations)
+    assert_equal %i[create destroy index show update], item_registration.fetch(:operations).sort
     refute registry.types.fetch("RecordingStudioPresskits::ListSection").key?(:output_keys)
     refute registry.types.fetch("RecordingStudioPresskits::ListSection").key?(:serializer)
   end
@@ -144,15 +148,6 @@ class ListItemPayloadTest < ActiveSupport::TestCase
       item.key = key
       item.value = value
     end
-  end
-
-  def with_recording_studio_api(registry)
-    raise "Recording Studio API is already loaded" if defined?(::RecordingStudioApi)
-
-    Object.const_set(:RecordingStudioApi, registry)
-    yield
-  ensure
-    Object.send(:remove_const, :RecordingStudioApi) if defined?(::RecordingStudioApi)
   end
 
   def fake_api_registry

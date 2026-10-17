@@ -489,12 +489,17 @@ class PressKitDownloadTest < ActionDispatch::IntegrationTest
   end
 
   def attach_image!(parent, filename, alt: nil, caption: nil, credit: nil)
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      parent, @user,
       io: File.open(cover_fixture_path),
       filename: filename,
       content_type: "image/jpeg"
     )
-    photo = parent.record_attachment_upload(signed_blob_id: blob.signed_id, actor: @user, name: File.basename(filename, ".*"))
+    photo = parent.record_attachment_upload(
+      signed_blob_id: attachment_signed_id(blob),
+      actor: @user,
+      name: File.basename(filename, ".*")
+    )
     attrs = { alt_text: alt, caption: caption, credit: credit }.compact
     photo.revise_attachment_metadata(actor: @user, **attrs) if attrs.any?
     photo

@@ -11,6 +11,11 @@ Rails.application.routes.draw do
   mount RecordingStudioDuplicatable::Engine, at: "/recording_studio_duplicatable"
   mount RecordingStudioPublishable::Engine, at: "/"
   mount RecordingStudioPresskits::Engine, at: "/recording_studio_presskits"
+  mount RecordingStudioApi::Engine, at: "/recording_studio_api"
+  get "APIdocs", to: "recording_studio_api/scalar_docs#redirect_to_default", defaults: { api_key: "public", engine_mount_path: "/recording_studio_api" }, as: :api_docs_root
+  get "APIdocs/:version/openapi.json", to: "recording_studio_api/scalar_docs#openapi", defaults: { api_key: "public", engine_mount_path: "/recording_studio_api" }, as: :api_docs_openapi
+  get "APIdocs/:version/fullscreen", to: "recording_studio_api/scalar_docs#fullscreen", defaults: { api_key: "public", engine_mount_path: "/recording_studio_api" }, as: :api_docs_fullscreen
+  get "APIdocs/:version", to: "recording_studio_api/scalar_docs#show", defaults: { api_key: "public", engine_mount_path: "/recording_studio_api" }, as: :api_docs
   mount RecordingStudioAccessible::Engine, at: "/admin/access"
   mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
   mount RecordingStudioDownloadable::Engine, at: "/recording_studio_downloadable"

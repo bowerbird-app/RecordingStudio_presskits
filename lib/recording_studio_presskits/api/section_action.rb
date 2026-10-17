@@ -7,6 +7,10 @@ module RecordingStudioPresskits
         context.access_grant.authorize!(recording: context.recording, role: :edit)
       end
 
+      def self.authorize_admin!(context)
+        context.access_grant.authorize!(recording: context.recording, role: :admin)
+      end
+
       def self.require_recording!(recording, kind, message)
         return if recording&.recordable.is_a?(kind)
 

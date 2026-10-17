@@ -74,7 +74,7 @@ class PodcastSectionTest < ActionDispatch::IntegrationTest
     snapshot_id = first.recordable_id
 
     assert_equal [first.id], RecordingStudioPresskits::PodcastSection.active_podcasts(content).map(&:id)
-    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PodcastSection")
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::PodcastSection")
 
     assert_difference -> { RecordingStudioPresskits::Podcast.count }, 1 do
       @root.revise(first, actor: @user) { |episode| episode.title = "Renamed" }
@@ -83,6 +83,18 @@ class PodcastSectionTest < ActionDispatch::IntegrationTest
     assert_equal "Pilot", RecordingStudioPresskits::Podcast.find(snapshot_id).title
     assert_equal "Renamed", first.reload.recordable.title
     refute_equal snapshot_id, first.recordable_id
+  end
+
+  test "episodes reorder inside the podcast section" do
+    content = section_content(add_podcast_section(record_kit("Spring launch")))
+    first = record_podcast(content, url: SPOTIFY, title: "Pilot")
+    second = record_podcast(content, url: APPLE, title: "Notes")
+
+    assert_equal [first.id, second.id], RecordingStudioPresskits::PodcastSection.active_podcasts(content).map(&:id)
+
+    content.recording_studio_orderable_move!(second, to_index: 0, actor: @user)
+
+    assert_equal [second.id, first.id], RecordingStudioPresskits::PodcastSection.active_podcasts(content.reload).map(&:id)
   end
 
   test "a link that is not http fails validation" do

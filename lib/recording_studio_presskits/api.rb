@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "recording_studio_presskits/api/exposure"
+require "recording_studio_presskits/api/gate"
+require "recording_studio_presskits/api/gate_listing"
 require "recording_studio_presskits/api/quote_payload"
 require "recording_studio_presskits/api/stat_payload"
 require "recording_studio_presskits/api/credit_payload"
@@ -10,6 +12,9 @@ require "recording_studio_presskits/api/podcast_payload"
 require "recording_studio_presskits/api/location_payload"
 require "recording_studio_presskits/api/list_payload"
 require "recording_studio_presskits/api/file_payload"
+require "recording_studio_presskits/api/image_payload"
+require "recording_studio_presskits/api/menu_payload"
+require "recording_studio_presskits/api/container_payload"
 require "recording_studio_presskits/api/section_payload"
 require "recording_studio_presskits/api/section_action"
 require "recording_studio_presskits/api/create_section"
@@ -25,6 +30,20 @@ require "recording_studio_presskits/api/file_registration"
 require "recording_studio_presskits/api/location_registration"
 require "recording_studio_presskits/api/list_registration"
 require "recording_studio_presskits/api/podcast_registration"
+require "recording_studio_presskits/api/image_registration"
+require "recording_studio_presskits/api/menu_registration"
+require "recording_studio_presskits/api/resource_io"
+require "recording_studio_presskits/api/reorder_children"
+require "recording_studio_presskits/api/video_actions"
+require "recording_studio_presskits/api/location_actions"
+require "recording_studio_presskits/api/attachment_actions"
+require "recording_studio_presskits/api/item_action_registration"
+require "recording_studio_presskits/api/video_action_registration"
+require "recording_studio_presskits/api/place_action_registration"
+require "recording_studio_presskits/api/attachment_action_registration"
+require "recording_studio_presskits/api/handler_registration"
+require "recording_studio_presskits/api/tree_registration"
+require "recording_studio_presskits/api/content_registration"
 
 module RecordingStudioPresskits
   module Api
@@ -34,6 +53,12 @@ module RecordingStudioPresskits
     extend LocationRegistration
     extend ListRegistration
     extend PodcastRegistration
+    extend ImageRegistration
+    extend MenuRegistration
+    extend ItemActionRegistration
+    extend HandlerRegistration
+    extend TreeRegistration
+    extend ContentRegistration
 
     class << self
       def register!
@@ -42,92 +67,56 @@ module RecordingStudioPresskits
         register_recordable_types
         register_lists!
         register_section_actions
+        register_item_actions
+        register_resource_handlers!
       end
 
+      private
+
       def register_recordable_types
+        register_kit_types
+        register_content_types
+      end
+
+      def register_kit_types
         register_press_kit
         register_kit_section
         register_text
         register_quote
         register_quote_section
+      end
+
+      def register_content_types
         register_stats!
         register_credits!
         register_video_section
         register_podcasts!
         register_location_section
+        register_images!
+        register_menu!
       end
 
-      private
-
-      def register_press_kit
-        register_type(
-          "RecordingStudioPresskits::PressKit",
-          operations: %i[show update],
-          serializer: ->(recordable, context: nil, **) { PressKitPayload.for(recordable, context: context) },
-          output_keys: PressKitPayload::KEYS,
-          writable_attributes: %i[brand_color font_family text_color corner_style],
-          capability_actions: %i[create_section reorder_sections]
+      def content_relationship(child_type, serializer, output_keys, endpoints, description)
+        child_collection(
+          child_type,
+          serializer: serializer,
+          output_keys: output_keys,
+          endpoints: endpoints,
+          description: description
         )
       end
 
-      def register_kit_section
-        register_type(
-          "RecordingStudioPresskits::KitSection",
-          operations: %i[index show update],
-          serializer: method(:kit_section_serializer),
-          output_keys: %i[title subtitle content_type content_id videos stats locations podcasts files items],
-          writable_attributes: %i[title subtitle],
-          capability_actions: %i[remove_section]
-        )
-      end
-
-      def kit_section_serializer(recordable, recording: nil, context: nil, **)
-        source = Exposure.named_recording(recording: recording, context: context)
-        SectionPayload.for(recordable, source, context: context)
-      end
-
-      def register_text
-        register_type(
-          "RecordingStudioPresskits::Text",
-          operations: %i[show update],
-          serializer: method(:text_serializer),
-          output_keys: %i[body],
-          writable_attributes: %i[body]
-        )
-      end
-
-      def text_serializer(recordable, recording: nil, context: nil, **)
-        source = Exposure.named_recording(recording: recording, context: context)
-        body = Exposure.withhold?(context, source) ? nil : recordable.body
-        { body: body }
-      end
-
-      def register_quote
-        register_type(
-          "RecordingStudioPresskits::Quote",
-          operations: %i[index show create update destroy],
-          serializer: ->(recordable, context: nil, **) { QuotePayload.for(recordable, context: context) },
-          output_keys: %i[body name role organisation],
-          writable_attributes: %i[body name role organisation]
-        )
-      end
-
-      def register_quote_section
-        register_type("RecordingStudioPresskits::QuoteSection", **empty_section_options)
-      end
-
-      def register_video_section
-        register_type(
-          "RecordingStudioPresskits::VideoSection",
-          operations: %i[index show],
-          serializer: method(:video_section_serializer),
-          output_keys: %i[videos]
-        )
-      end
-
-      def video_section_serializer(_recordable, recording: nil, context: nil, **)
-        source = Exposure.named_recording(recording: recording, context: context)
-        { videos: VideoPayload.for_recording(source, context: context) }
+      def child_collection(child_type, serializer:, output_keys:, endpoints:, description:)
+        {
+          source: :children,
+          child_type: child_type,
+          many: true,
+          limit: 500,
+          endpoints: endpoints,
+          serializer: serializer,
+          output_keys: output_keys,
+          description: description
+        }
       end
 
       def register_type(type_name, **)

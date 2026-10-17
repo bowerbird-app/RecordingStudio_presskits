@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioPresskitsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.69.0", ::RecordingStudioPresskits::VERSION
+    assert_equal "0.70.0", ::RecordingStudioPresskits::VERSION
   end
 
   def test_release_date_migration_adds_a_nullable_date
@@ -105,7 +105,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_downloadable", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_cache", "~> 0.5"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_publishable", "~> 0.8"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.18"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.20"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_company", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_lists", "~> 0.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_location", "~> 0.6"'
@@ -130,14 +130,14 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_downloadable", tag: "v0.7.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.18.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.20.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_company", tag: "v0.4.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_lists", tag: "v0.7.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_location", tag: "v0.6.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_external_embed", tag: "v0.1.7"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_video", tag: "v0.2.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.3.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.11.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.11.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_embargo", tag: "v0.3.0"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.134"'
@@ -263,13 +263,16 @@ class RecordingStudioPresskitsTest < Minitest::Test
   end
 
   def test_api_registers_section_actions_without_a_bare_create
-    source = File.read(File.expand_path("../lib/recording_studio_presskits/api.rb", __dir__))
+    api_root = File.expand_path("../lib/recording_studio_presskits", __dir__)
+    paths = [File.join(api_root, "api.rb"), *Dir[File.join(api_root, "api", "**", "*.rb")]]
+    source = paths.map { |path| File.read(path) }.join
 
-    assert_includes source, "capability_actions: %i[create_section reorder_sections]"
+    assert_includes source, "publish unpublish update_publishable create_section reorder_sections"
     assert_includes source, "capability_actions: %i[remove_section]"
-    assert_includes source, "operations: %i[show update]"
+    assert_includes source, "operations: %i[index show create update destroy]"
     assert_includes source, "output_keys: PressKitPayload::KEYS"
-    assert_includes source, "writable_attributes: %i[brand_color font_family text_color corner_style]"
+    assert_includes source, "writable_attributes: PressKitPayload::WRITABLE"
+    assert_includes source, "operations: %i[index show update destroy]"
     assert_includes source, "operations: %i[index show update]"
     assert_includes source, "register_section_actions"
     refute_includes source, "operations: %i[create"
@@ -444,7 +447,7 @@ class RecordingStudioPresskitsTest < Minitest::Test
     assert_includes readme, "Recording Studio Press Kits"
     assert_includes readme, "v4.7.0"
     assert_includes readme, "v0.19.0"
-    assert_includes readme, "v0.18.0"
+    assert_includes readme, "v0.20.0"
     assert_includes readme, "v0.3.1"
     assert_includes readme, "v0.8.3"
     assert_includes readme, "recording_studio_downloadable"

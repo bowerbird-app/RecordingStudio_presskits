@@ -3,6 +3,12 @@
 module RecordingStudioPresskits
   module Api
     class CreditLinePayload
+      def self.for_api(recordable, context: nil, **)
+        source = Exposure.named_recording(context: context, recordable: recordable)
+        source ||= RecordingStudio::Recording.find_by(recordable: recordable) if defined?(RecordingStudio::Recording)
+        self.for(source, context: context)
+      end
+
       def self.for(recording, context: nil)
         return {} if recording.blank? || Exposure.withhold?(context, recording)
 

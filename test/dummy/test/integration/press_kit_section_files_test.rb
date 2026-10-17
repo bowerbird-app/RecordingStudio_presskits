@@ -153,20 +153,22 @@ class PressKitSectionFilesTest < ActionDispatch::IntegrationTest
     kit = record_kit("Spring launch")
     section = add_files_section(kit)
     content = section_content(section)
-    image = ActiveStorage::Blob.create_and_upload!(
+    image = declared_attachment_blob!(
+      content, @user,
       io: StringIO.new("not-an-image"),
       filename: "photo.jpg",
       content_type: "image/jpeg"
     )
     image_result = RecordingStudioAttachable::Services::RecordAttachmentUpload.call(
       parent_recording: content,
-      signed_blob_id: image.signed_id,
+      signed_blob_id: attachment_signed_id(image),
       actor: @user
     )
     assert image_result.failure?
     assert_includes image_result.error, "is not allowed"
 
-    huge = ActiveStorage::Blob.create_and_upload!(
+    huge = declared_attachment_blob!(
+      content, @user,
       io: StringIO.new("x"),
       filename: "huge.pdf",
       content_type: "application/pdf"
@@ -174,21 +176,22 @@ class PressKitSectionFilesTest < ActionDispatch::IntegrationTest
     huge.update!(byte_size: 26.megabytes)
     huge_result = RecordingStudioAttachable::Services::RecordAttachmentUpload.call(
       parent_recording: content,
-      signed_blob_id: huge.signed_id,
+      signed_blob_id: attachment_signed_id(huge),
       actor: @user
     )
     assert huge_result.failure?
     assert_equal "Blob exceeds maximum file size", huge_result.error
 
     10.times { |index| attach_file!(content, "note-#{index}.txt") }
-    extra = ActiveStorage::Blob.create_and_upload!(
+    extra = declared_attachment_blob!(
+      content, @user,
       io: StringIO.new("nope"),
       filename: "extra.txt",
       content_type: "text/plain"
     )
     extra_result = RecordingStudioAttachable::Services::RecordAttachmentUpload.call(
       parent_recording: content,
-      signed_blob_id: extra.signed_id,
+      signed_blob_id: attachment_signed_id(extra),
       actor: @user
     )
     assert extra_result.failure?
@@ -201,7 +204,8 @@ class PressKitSectionFilesTest < ActionDispatch::IntegrationTest
     content = section_content(add_files_section(kit))
     9.times { |index| attach_file!(content, "note-#{index}.txt") }
     blobs = Array.new(2) do |index|
-      ActiveStorage::Blob.create_and_upload!(
+      declared_attachment_blob!(
+        content, @user,
         io: StringIO.new("batch"),
         filename: "batch-#{index}.txt",
         content_type: "text/plain"
@@ -211,7 +215,7 @@ class PressKitSectionFilesTest < ActionDispatch::IntegrationTest
     result = RecordingStudioAttachable::Services::RecordAttachmentUploads.call(
       parent_recording: content,
       actor: @user,
-      attachments: blobs.map { |blob| { signed_blob_id: blob.signed_id } }
+      attachments: blobs.map { |blob| { signed_blob_id: attachment_signed_id(blob) } }
     )
 
     assert result.failure?
@@ -402,13 +406,14 @@ class PressKitSectionFilesTest < ActionDispatch::IntegrationTest
   end
 
   def attach_file!(parent, filename, content_type = "text/plain", body = "hello", name = nil)
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      parent, @user,
       io: StringIO.new(body),
       filename: filename,
       content_type: content_type
     )
     parent.record_attachment_upload(
-      signed_blob_id: blob.signed_id,
+      signed_blob_id: attachment_signed_id(blob),
       actor: @user,
       name: name || File.basename(filename, ".*")
     )

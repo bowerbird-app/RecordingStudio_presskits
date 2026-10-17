@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RecordingStudioAccessible.configure do |config|
-  config.access_actor_types = [ "User" ]
+  config.access_actor_types = [ "User", "RecordingStudioApi::ApiClient" ]
 
   # Presskits sets a default for :"presskits.kit_download" after initialize
   # (public, plus any registered custom audiences). Hosts overwrite that hash

@@ -16,16 +16,15 @@ module RecordingStudioPresskits
         register_type(
           "RecordingStudioPresskits::LocationSection",
           operations: %i[index show],
-          serializer: location_section_serializer,
-          output_keys: %i[locations]
+          serializer: method(:location_section_serializer),
+          output_keys: %i[locations],
+          capability_actions: %i[set_location update_location clear_location reorder_locations]
         )
       end
 
-      def location_section_serializer
-        lambda { |_recordable, recording: nil, context: nil, **|
-          source = Exposure.named_recording(recording: recording, context: context)
-          { locations: LocationPayload.for_recording(source, context: context) }
-        }
+      def location_section_serializer(recordable, recording: nil, context: nil, **)
+        source = Exposure.named_recording(recording: recording, context: context, recordable: recordable)
+        { locations: LocationPayload.for_recording(source, context: context) }
       end
     end
   end

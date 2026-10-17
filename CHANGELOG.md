@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.70.0] - 2026-10-16
+
+### Added
+- Press kits, kit sections, and every section type this gem owns register with Recording Studio API `v0.11.4` (`register_recordable_type_api`, `register_capability_action`, `register_resource_handler`). Press kits are index, show, create, update, and destroy. Destroy trashes the recording and requires admin. Writable fields are `title`, `subtitle`, `description`, `brand_color`, `font_family`, `text_color`, and `corner_style`. `q` matches the title only. Publishable's `publish`, `unpublish`, and `update_publishable` stay listed. `create_section` and `reorder_sections` stay.
+- Kit sections are index, show, update, and destroy, nested at `/press_kits/{id}/kit_sections`. Create stays `create_section`. `remove_section` still trashes the section.
+- Text, quotes, stats, credit lines, list items, and podcasts are nested under their content recording, with reorder where the section is Orderable. Podcast sections order their episodes. Stats are writable. Credits and credit lines can be trashed. Credits are still created on the workspace root.
+- Video sections add, update, remove, and reorder videos through `RecordingStudioVideo::Video`. Location sections set, update, clear, and reorder places through `RecordingStudio::Location::Location`. Press Kits does not register those types.
+- Image and file sections list, update caption/credit/alt or name/description, reorder, and remove. They also list `create_upload`, `attach`, and `import_attachment` from Attachable `v0.20.0`. Menu sections are index, show, and update.
+- Reads require view and a kit presentation of `:full` or `:preview`. Hidden, unavailable, and embargoed-hidden kits are 404. Preview withholds protected fields. Writes require edit.
+
+### Changed
+- Version `0.70.0`. `0.67.0` and `0.68.0` are claimed by open pull requests #109 and #110. `0.69.0` is main.
+
+### Upgrade notes
+- Bump to `0.70.0`. There is no presskits migration. This gem still does not depend on `recording_studio_api`.
+- Hosts that want the HTTP API pin `recording_studio_api` at tag `v0.11.4`, run `bin/rails generate recording_studio_api:migrations`, and migrate. Mount `RecordingStudioApi::Engine` and the Scalar docs routes. Allow `"RecordingStudioApi::ApiClient"` in `access_actor_types`. Enable `:api_access_point` on the workspace root.
+- When routes or an initializer load the API gem during boot, require `RecordingStudioVideo::Video` before the video engine's `after_initialize` hook. That gem's `Api.register!` looks up `Video` from inside `RecordingStudioVideo::Api` and raises if the model is not loaded yet. Call `RecordingStudio::RecordableDeclarations.install_active_record_macro!` first if that require runs before the macro exists.
+- Pin Attachable `~> 0.20` at tag `v0.20.0`. There is no Attachable migration and no presskits migration. Call `RecordingStudioAttachable::Api.register!(apis: [:public])` when the API gem is loaded. Pass a named admin API when those clients should upload too.
+- `create_upload`, `attach`, and `import_attachment` are on image sections and file sections. A ticket is bound to that recording and the access-grant actor. A client-credentials token uses the API client as that actor. The ticket expires after 5 minutes. Set `config.import_allowed_hosts` before `import_attachment`. An empty list rejects every URL.
+- `image/*` does not include `image/svg+xml`. Images, the kit cover, quotes, and podcast covers list that type. Files still refuse it. Browser uploads use `recording_direct_uploads_path(recording)`. A signed id from `/rails/active_storage/direct_uploads` will not attach. An S3 bucket needs a CORS rule that allows PUT and the headers `Content-Type`, `Content-MD5`, and `Content-Disposition`. Set `config.purge_unattached_blobs = true` and schedule `RecordingStudioAttachable::PurgeUnattachedBlobsJob` to drop unattached blobs this gem tagged, older than `unattached_blob_ttl` (default 24 hours).
+- `reorder_podcasts` and `reorder_locations` take `ordered_recording_ids` and need `edit`. Nested index order is `created_at` and `id`. A child with no position yet sorts after positioned ones.
+
 ## [0.69.0] - 2026-10-16
 
 ### Changed
@@ -1269,7 +1291,8 @@ Addon starting point on Recording Studio 4.x, before this repo became Press Kits
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.69.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.70.0...HEAD
+[0.70.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.69.0...v0.70.0
 [0.69.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.1...v0.69.0
 [0.66.1]: https://github.com/bowerbird-app/RecordingStudio_presskits/compare/v0.66.0...v0.66.1
 [0.66.0]: https://github.com/bowerbird-app/RecordingStudio_presskits/releases/tag/v0.66.0

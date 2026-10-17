@@ -12,7 +12,7 @@ module RecordingStudioPresskits
       allows: ["RecordingStudioPresskits::KitSection"]
     )
     include RecordingStudio::Capabilities::Attachable.to(
-      allowed_content_types: ["image/*"],
+      allowed_content_types: IMAGE_CONTENT_TYPES,
       enabled_attachment_kinds: [:image],
       max_file_size: 10.megabytes,
       max_file_count: 1,

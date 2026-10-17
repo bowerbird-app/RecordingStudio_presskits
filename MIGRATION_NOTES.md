@@ -1,5 +1,43 @@
 # Upgrade notes
 
+## 0.70.0
+
+Bump to `0.70.0`. There is no presskits migration. `0.67.0` and `0.68.0` are claimed by open pull requests #109 and #110. `0.69.0` is already on main. This release is `0.70.0`.
+
+Press Kits still does not list `recording_studio_api` in the gemspec. A host that wants the HTTP API pins the gem the dummy app pins:
+
+```ruby
+gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.11.4"
+```
+
+That tag's `VERSION` constant is `0.11.3`. Run `bin/rails generate recording_studio_api:migrations`, then `bin/rails db:migrate`. Mount `RecordingStudioApi::Engine` at `/recording_studio_api`. Scalar is `GET /APIdocs`, `GET /APIdocs/:version`, and `GET /APIdocs/:version/openapi.json`, with `api_key` `public` and `engine_mount_path` `/recording_studio_api`. Turn `documentation_enabled` on to serve those pages.
+
+`access_actor_types` must include `"RecordingStudioApi::ApiClient"`, or provisioning a client fails with "Actor type is not allowed for access". Enable `:api_access_point` on the workspace (or whichever root issues clients). If `api_management_authorization_required` stays at its default, only an actor with admin on an admin root can provision clients. A workspace that is not an admin root needs that setting off, or an admin root in front of it.
+
+Reads need Accessible `view` and a kit presentation of `:full` or `:preview`. Writes need `edit`. `DELETE` trashes (`deleted_via: "trashed"`) and needs `admin`. It does not delete the row. `q` on press kits matches the title only. Preview and an active embargo withhold description, section headings, body, quotes, stats, lines, items, podcasts, videos, places, images, files, and menu items. Hidden and unavailable kits are 404. Editors still see the full kit.
+
+`create_section` is still how a section and its content are created together. There is no kit-section create. Podcast sections order episodes with `reorder_podcasts`. Location sections order places with `reorder_locations`. Both take `ordered_recording_ids` and need `edit`. Nested collection index order is `created_at` and `id`. Show payloads that use the section helpers stay in Orderable order. A child with no position yet sorts after positioned ones, then by `created_at`.
+
+Pin Attachable `~> 0.20` at tag `v0.20.0`. There is no Attachable migration.
+
+```ruby
+gem "recording_studio_attachable", "~> 0.20", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.20.0"
+```
+
+After Recording Studio API is loaded, register the upload actions. Pass a named admin API when those clients should upload too.
+
+```ruby
+RecordingStudioAttachable::Api.register!(apis: [:public])
+```
+
+Image sections and file sections list `create_upload`, `attach`, and `import_attachment`. A ticket from `create_upload` is bound to that recording and the access-grant actor. A client-credentials token uses the API client as that actor. It expires after 5 minutes (`config.direct_upload_expires_in`). `attach` takes `signed_blob_id`, or an `attachments` list. `import_attachment` needs `config.import_allowed_hosts`. An empty list rejects every URL.
+
+`image/*` does not allow `image/svg+xml`. Images, the kit cover, quotes, and podcast covers list `image/svg+xml` beside `image/*`. Files still refuse SVG, HTML, and images. Browser uploads post to `recording_direct_uploads_path(recording)`. A signed id from `/rails/active_storage/direct_uploads` will not attach. An S3 bucket needs a CORS rule that allows PUT and the headers `Content-Type`, `Content-MD5`, and `Content-Disposition`. Google Drive and Dropbox tokens stay in the Rails session, so use the encrypted cookie store. Set `config.purge_unattached_blobs = true` and schedule `RecordingStudioAttachable::PurgeUnattachedBlobsJob`. That job deletes unattached blobs this gem tagged, older than `config.unattached_blob_ttl` (default 24 hours). `config.pending_upload_limit` defaults to 20.
+
+Video and Location stay registered by those gems. Press Kits calls their models from `add_video`, `update_video`, `remove_video`, `set_location`, `update_location`, and `clear_location`. Do not register `RecordingStudioVideo::Video` or `RecordingStudio::Location::Location` again.
+
+Loading the API gem from routes or an initializer makes the video engine's `after_initialize` call `RecordingStudioVideo::Api.register!` before Zeitwerk has loaded `Video`. Require `app/models/recording_studio_video/application_record.rb` and `video.rb` from that engine first. If that require runs before Recording Studio has installed its model macro, call `RecordingStudio::RecordableDeclarations.install_active_record_macro!` first. Press Kits does not patch the video gem.
+
 ## 0.69.0
 
 Bump to `0.69.0`. Pin Downloadable `~> 0.7` (git tag `v0.7.0`):

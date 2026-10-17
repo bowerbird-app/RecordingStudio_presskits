@@ -86,10 +86,7 @@ class StatPayloadTest < ActiveSupport::TestCase
     built = sections_with_stats
     content = built.fetch(:content)
     payload = RecordingStudioPresskits::Api::SectionPayload.for(built.fetch(:section).recordable, built.fetch(:section))
-    registry = fake_api_registry
-    with_recording_studio_api(registry) { RecordingStudioPresskits::Api.register! }
-    serializer = registry.types.fetch("RecordingStudioPresskits::StatsSection").fetch(:serializer)
-    serialized = serializer.call(content.recordable, recording: content)
+    serialized = RecordingStudioPresskits::Api::StatPayload.for_recording(content)
 
     assert_equal payload.fetch(:stats), serialized.fetch(:stats)
     refute serialized.key?(:columns)
@@ -282,15 +279,6 @@ class StatPayloadTest < ActiveSupport::TestCase
       stat.value = value
       stat.unit = unit
     end
-  end
-
-  def with_recording_studio_api(registry)
-    raise "Recording Studio API is already loaded" if defined?(::RecordingStudioApi)
-
-    Object.const_set(:RecordingStudioApi, registry)
-    yield
-  ensure
-    Object.send(:remove_const, :RecordingStudioApi) if defined?(::RecordingStudioApi)
   end
 
   def fake_api_registry

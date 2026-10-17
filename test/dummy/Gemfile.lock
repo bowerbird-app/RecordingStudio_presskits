@@ -29,10 +29,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_api.git
-  revision: 24b228b1c00c58771303a85fe23164ebf09f65a7
-  tag: v0.11.1
+  revision: 1e0ef343e6b23bd9f6f7bde7ea1dedbc1256bde2
+  tag: v0.11.4
   specs:
-    recording_studio_api (0.11.1)
+    recording_studio_api (0.11.3)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
       recording_studio_accessible (~> 0.11)
@@ -42,14 +42,14 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
-  revision: a206bfbcf7f5987ad9f191345e9fba4dedeb6d16
-  tag: v0.18.0
+  revision: a63cd3ab6fda6019fa0b700ce27abfd1b095b8ef
+  tag: v0.20.0
   specs:
-    recording_studio_attachable (0.18.0)
+    recording_studio_attachable (0.20.0)
       flat_pack (>= 0.1.213)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
-      recording_studio_metrics (~> 0.2)
+      recording_studio_metrics (>= 0.3.0, < 0.4)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_cache.git
@@ -212,13 +212,13 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_presskits (0.69.0)
+    recording_studio_presskits (0.70.0)
       flat_pack (>= 0.1.240)
       rails (~> 8.1.0)
       recording_studio (~> 4.7)
       recording_studio_accessible (~> 0.19)
       recording_studio_admin (~> 2.3)
-      recording_studio_attachable (~> 0.18)
+      recording_studio_attachable (~> 0.20)
       recording_studio_cache (~> 0.5)
       recording_studio_company (~> 0.4)
       recording_studio_downloadable (~> 0.7)
@@ -780,8 +780,8 @@ CHECKSUMS
   recording_studio (4.7.0)
   recording_studio_accessible (0.19.0)
   recording_studio_admin (2.3.0)
-  recording_studio_api (0.11.1)
-  recording_studio_attachable (0.18.0)
+  recording_studio_api (0.11.3)
+  recording_studio_attachable (0.20.0)
   recording_studio_cache (0.5.0)
   recording_studio_company (0.4.0)
   recording_studio_downloadable (0.7.0)
@@ -792,7 +792,7 @@ CHECKSUMS
   recording_studio_location (0.6.0)
   recording_studio_metrics (0.3.0)
   recording_studio_orderable (0.3.0)
-  recording_studio_presskits (0.69.0)
+  recording_studio_presskits (0.70.0)
   recording_studio_publishable (0.8.0)
   recording_studio_root_switchable (0.9.0)
   recording_studio_trashable (0.11.0)

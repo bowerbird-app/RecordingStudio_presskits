@@ -108,7 +108,7 @@ class LocationSectionTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Nope"
   end
 
-  test "kit section order leaves places in place and locations are not orderable" do
+  test "kit section order leaves places in place and places reorder inside the section" do
     kit = record_kit("Spring launch")
     text = RecordingStudioPresskits.create_section!(
       press_kit_recording: kit,
@@ -118,7 +118,8 @@ class LocationSectionTest < ActionDispatch::IntegrationTest
     )
     places = add_location_section(kit, title: "Where to find us")
     content = section_content(places)
-    child = record_location(content, title: "The Pavilion", locality: "Melbourne")
+    first = record_location(content, title: "The Pavilion", locality: "Melbourne")
+    second = record_location(content, title: "Harbour Hall", locality: "Sydney")
 
     kit.recording_studio_orderable_reorder!(
       ordered_recording_ids: [places.id, text.id],
@@ -126,8 +127,13 @@ class LocationSectionTest < ActionDispatch::IntegrationTest
     )
 
     assert_equal [places.id, text.id], RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id)
-    refute_includes RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id), child.id
-    refute RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::LocationSection")
+    refute_includes RecordingStudioPresskits::KitQuery.sections_for(kit).map(&:id), first.id
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudioPresskits::LocationSection")
+    assert_equal [first.id, second.id], RecordingStudioPresskits::LocationSection.active_locations(content).map(&:id)
+
+    content.recording_studio_orderable_move!(second, to_index: 0, actor: @user)
+
+    assert_equal [second.id, first.id], RecordingStudioPresskits::LocationSection.active_locations(content.reload).map(&:id)
 
     names = RecordingStudioPresskits::Engine.routes.named_routes.names.map(&:to_s)
     refute names.any? { |name| name.include?("location_order") }

@@ -187,13 +187,14 @@ class TrashableSiblingApiParityIntegrationTest < ActiveSupport::TestCase
       recordable.body = "Kept quote"
       recordable.name = "Voice"
     end
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      quote, @user,
       io: File.open(RecordingStudioPresskits::Engine.root.join("test/fixtures/files/cover.jpg")),
       filename: "quote.jpg",
       content_type: "image/jpeg"
     )
     attachment = quote.record_attachment_upload(
-      signed_blob_id: blob.signed_id,
+      signed_blob_id: attachment_signed_id(blob),
       actor: @user,
       name: "quote"
     )

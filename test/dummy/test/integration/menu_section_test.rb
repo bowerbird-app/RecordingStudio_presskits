@@ -413,13 +413,14 @@ class MenuSectionTest < ActionDispatch::IntegrationTest
   end
 
   def attach_image!(parent, filename)
-    blob = ActiveStorage::Blob.create_and_upload!(
+    blob = issued_attachment_blob!(
+      parent, @user,
       io: File.open(cover_fixture_path),
       filename: filename,
       content_type: "image/jpeg"
     )
     parent.record_attachment_upload(
-      signed_blob_id: blob.signed_id,
+      signed_blob_id: attachment_signed_id(blob),
       actor: @user,
       name: File.basename(filename, ".*")
     )
